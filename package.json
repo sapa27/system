@@ -1,0 +1,18 @@
+{
+  "name": "commission-system-vercel-proxy-single-owner-single-gate",
+  "private": true,
+  "version": "1.1.0-phase-q",
+  "description": "Vercel frontend and GAS backend with proxy-only transport, single owner registry, one release gate, and runtime size gate.",
+  "scripts": {
+    "generate:vercel-env": "python3 tools/generate_vercel_env.py",
+    "sync:check": "python3 tools/sync_frontend_partials.py --check",
+    "gate": "python3 tools/release_gate.py",
+    "check:api": "node --check api/_gasProxyCommon.js && node --check api/gas.js && node --check api/login.js && node --check api/public-config.js",
+    "build": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --check && python3 tools/release_gate.py"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}
