@@ -1,0 +1,3979 @@
+var __APP_GLOBAL__ = function() {
+try {
+if("undefined" != typeof globalThis && globalThis)return globalThis
+}
+catch(_e) {
+_appIgnore_(_e, "c.s")
+}
+return {
+}
+}
+();
+var APP_DEPLOY_RELEASE = Object.freeze({ stamp: "commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1", channel: "vercel-api-proxy-only-gas-backend", buildName: "V1.1 Phase Q Runtime Slim Size Gate", releaseDate: "2026-07-02", assetStamp: "asset-manifest-commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1", sourceFingerprint: "commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1", contractStamp: "contract-commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1", transportMode: "phaseQ-vercel-proxy-only-runtime-slim-single-gate", description: "Phase Q: Browser runtime uses Vercel API proxy only; owner and release gate remain single-source with size checks." });
+function _appIsFn_(value) {
+return"function" == typeof value
+}
+function _appIsFnName_(name, root) {
+try {
+root = root || ("undefined" != typeof globalThis ? globalThis: this);
+for(var parts = String(name || "").split(".").filter(Boolean), cur = root, i = 0;
+i < parts.length;
+i ++ ) {
+if(null == cur ||! Object.prototype.hasOwnProperty.call(cur, parts[i]))return ! 1;
+cur = cur[parts[i]]
+}
+return"function" == typeof cur
+}
+catch(e) {
+return ! 1
+}
+}
+function _appWarn_(code, err, detail) {
+try {
+if(_appIsFnName_("_recordWarning_"))return _recordWarning_(String(code || "app.warn"), err, detail || {
+});
+"undefined" != typeof Logger && Logger && Logger.log && Logger.log("[WARN] " + String(code || "app.warn") + " " + String(err && err.message || err || ""))
+}
+catch(_appWarnErr) {
+try {
+"undefined" != typeof Logger && Logger && Logger.log && Logger.log("[WARN] appWarn.failed " + String(_appWarnErr && _appWarnErr.message || _appWarnErr))
+}
+catch(_ignore) {
+"undefined" != typeof console && console.warn && console.warn("AppDataService warning backup failed", _ignore)
+}
+}
+return ! 1
+}
+function _appFail_(code, err, detail) {
+var msg = String(err && err.message ? err.message: err || code || "APP_ERROR");
+try {
+if(_appIsFnName_("err_"))return err_(msg, Object.assign({
+errorCode: String(code || "APP_ERROR")
+}, detail || {
+}))
+}
+catch(_appFailErr) {
+_appWarn_("app.fail.wrapper", _appFailErr, {
+code: code
+})
+}
+return {
+ok: ! 1, error: String(code || "APP_ERROR"), msg: msg, detail: detail || {
+}, generatedAt: (new Date).toISOString()
+}
+}
+function _appIgnore_(e, l) {
+try {
+if(_appIsFnName_("_recordWarning_"))return _recordWarning_(l || "c.s", e);
+"undefined" != typeof Logger && Logger && Logger.log && Logger.log("[WARN] " + String(l || "c.s") + " " + String(e && e.message || e || ""))
+}
+catch(x) {
+try {
+"undefined" != typeof Logger && Logger && Logger.log && Logger.log("[WARN] appIgnore.failed " + String(x && x.message || x))
+}
+catch(y) {
+return _appIsFnName_("_recordWarning_") && _recordWarning_("observed.catch", y, {
+file: "C00"
+}), ! 1
+}
+}
+return ! 1
+}
+var AppDomain = __APP_GLOBAL__.AppDomain = __APP_GLOBAL__.AppDomain || {
+}, AppInfra = __APP_GLOBAL__.AppInfra = __APP_GLOBAL__.AppInfra || {
+}, AppSecurity = __APP_GLOBAL__.AppSecurity = __APP_GLOBAL__.AppSecurity || {
+}, AppRepositories = AppDomain.Repositories = AppDomain.Repositories || {
+}, EnterpriseRepositories = AppRepositories;
+function _domainRouterAuthAlreadyOk_(p, route) {
+p = p || {
+};
+try {
+var r;
+if(!! ("undefined" == typeof globalThis ||! 0 !== globalThis.__APP_API_ROUTER_CONTEXT__) ||! 0 !== p.__routerAuthOk)return ! 1;
+if(! route)return ! 0;
+var s = p._securityContext || {
+}, m;
+return String(p.__routerAuthorizedMethod || s.method || p.method || "") === String(route || "")
+}
+catch(e) {
+try {
+_appIsFnName_("_recordWarning_") && _recordWarning_("domain.routerAuth.contextCheck", e, {
+route: String(route || "")
+})
+}
+catch(_w) {
+var _domainRouterAuthWarnSuppressed = _w
+}
+return ! 1
+}
+}
+function requireDomainRequest_(payload, role) {
+payload = payload || {
+};
+if(_domainRouterAuthAlreadyOk_(payload))return payload;
+requireAuth_(payload, role || "viewer");
+return payload
+}
+function safeDomainRequest_(payload, role, route, errorFactory) {
+try {
+return {
+ok: ! 0, payload: requireDomainRequest_(payload, role)
+}
+}
+catch(e) {
+if("function" == typeof errorFactory)return {
+ok: ! 1, result: errorFactory(e, route)
+};
+var message = String(e && e.message ? e.message: e || "ไม่พบ token การใช้งาน");
+return {
+ok: ! 1, result: "function" == typeof err_ ? err_(message, {
+authRequired: ! 0, route: String(route || "")
+}): {
+ok: ! 1, error: message, authRequired: ! 0, route: String(route || "")
+}
+}
+}
+}
+var AppBackendCore = __APP_GLOBAL__.AppBackendCore = __APP_GLOBAL__.AppBackendCore || {
+};
+AppBackendCore.CASE_STATUS = Object.freeze(["เรื่องเข้าใหม่", "ไม่รับเรื่อง", "อนุฯ พิจารณา", "รอพิจารณา", "กมธ. พิจารณา", "ยุติเรื่อง", "ส่งหน่วยงาน", "จัดทำรายงาน"]);
+AppBackendCore.CASE_STATUS_TERMINAL = Object.freeze(["ไม่รับเรื่อง", "ยุติเรื่อง", "จัดทำรายงาน"]);
+AppBackendCore.CASE_STATUS_ALIASES = Object.freeze({
+"ได้รับเรื่อง": "เรื่องเข้าใหม่",
+"เรื่องใหม่": "เรื่องเข้าใหม่",
+"รับใหม่": "เรื่องเข้าใหม่",
+"รับเรื่อง": "เรื่องเข้าใหม่",
+"รับเรื่องแล้ว": "เรื่องเข้าใหม่",
+"รับเข้า": "เรื่องเข้าใหม่",
+"รับ": "เรื่องเข้าใหม่",
+"ไม่รับ": "ไม่รับเรื่อง",
+"ไม่รับไว้พิจารณา": "ไม่รับเรื่อง",
+"อยู่ระหว่างดำเนินการ": "รอพิจารณา",
+"กำลังดำเนินการ": "รอพิจารณา",
+"อยู่ระหว่างพิจารณา": "รอพิจารณา",
+"รอการพิจารณา": "รอพิจารณา",
+"รอติดตาม": "รอพิจารณา",
+"ติดตาม": "รอพิจารณา",
+"ค้างพิจารณา": "รอพิจารณา",
+"รอบรรจุ": "รอพิจารณา",
+"ส่งหน่วยงานที่เกี่ยวข้อง": "ส่งหน่วยงาน",
+"อนุกรรมาธิการพิจารณา": "อนุฯ พิจารณา",
+"คณะอนุกรรมาธิการพิจารณา": "อนุฯ พิจารณา",
+"คณะกรรมาธิการพิจารณา": "กมธ. พิจารณา",
+"ปิดเรื่อง": "ยุติเรื่อง",
+"เสร็จสิ้น": "ยุติเรื่อง"
+});
+AppBackendCore.normalizeCaseStatus = function(value, options) {
+options = options || {};
+var raw = String(null == value ? "": value).replace(/\s+/g, " ").trim(), defaultStatus = String(options.defaultStatus || "เรื่องเข้าใหม่").trim();
+AppBackendCore.CASE_STATUS.indexOf(defaultStatus) < 0 && (defaultStatus = "เรื่องเข้าใหม่");
+if(! raw)return defaultStatus;
+if(AppBackendCore.CASE_STATUS.indexOf(raw) >= 0)return raw;
+var compact = raw.replace(/\s+/g, ""), aliases = AppBackendCore.CASE_STATUS_ALIASES || {}, exact = aliases[raw] || aliases[compact];
+if(exact)return exact;
+var normalized = /ไม่รับ/.test(raw) ? "ไม่รับเรื่อง":
+/อนุฯ|อนุกรรมาธิการ|คณะอนุกรรมาธิการ/.test(raw) ? "อนุฯ พิจารณา":
+/จัดทำรายงาน|ทำรายงาน|รายงานผล/.test(raw) ? "จัดทำรายงาน":
+/ยุติ|ปิดเรื่อง|เสร็จสิ้น/.test(raw) ? "ยุติเรื่อง":
+/ส่ง.*หน่วยงาน|หน่วยงาน.*เกี่ยวข้อง/.test(raw) ? "ส่งหน่วยงาน":
+/กมธ|กรรมาธิการ|คณะกรรมาธิการ/.test(raw) ? "กมธ. พิจารณา":
+/รอ|ติดตาม|ค้าง|อยู่ระหว่างดำเนินการ|กำลังดำเนินการ/.test(raw) ? "รอพิจารณา":
+/ได้รับเรื่อง|เรื่องใหม่|รับเรื่อง|รับเข้า|^รับ$/.test(raw) ? "เรื่องเข้าใหม่": "";
+if(normalized)return normalized;
+if(true === options.strict) {
+var error = new Error("CASE_STATUS_NOT_CANONICAL: " + raw);
+error.errorCode = "CASE_STATUS_NOT_CANONICAL";
+error.statusRaw = raw;
+throw error
+}
+return true === options.preserveUnknown ? raw: defaultStatus
+};
+AppBackendCore.isCanonicalCaseStatus = function(value) {
+return AppBackendCore.CASE_STATUS.indexOf(String(value || "").trim()) >= 0
+};
+AppBackendCore.isTerminalCaseStatus = function(value) {
+return AppBackendCore.CASE_STATUS_TERMINAL.indexOf(AppBackendCore.normalizeCaseStatus(value)) >= 0
+};
+AppBackendCore.isOpenCaseStatus = function(value) {
+return ! AppBackendCore.isTerminalCaseStatus(value)
+};
+AppBackendCore.PHASE1_SINGLE_SOURCE_STAMP = "phase1-single-source-contract-2026-06-30";
+AppBackendCore.RELEASE_STAMP = APP_DEPLOY_RELEASE.stamp;
+AppBackendCore.ASSET_STAMP = APP_DEPLOY_RELEASE.assetStamp;
+AppBackendCore.DEPLOY_CONTRACT_STAMP = APP_DEPLOY_RELEASE.contractStamp;
+AppBackendCore.CASE_STATUS_FIELD_RULES = Object.freeze({
+"เรื่องเข้าใหม่": { reasonField: "", visibleReasonDomId: "" },
+"ไม่รับเรื่อง": { reasonField: "rejectionReason", visibleReasonDomId: "meeting-div-rejectionReason" },
+"อนุฯ พิจารณา": { reasonField: "", visibleReasonDomId: "" },
+"รอพิจารณา": { reasonField: "pendingRemark", visibleReasonDomId: "meeting-div-pendingRemark" },
+"กมธ. พิจารณา": { reasonField: "", visibleReasonDomId: "" },
+"ยุติเรื่อง": { reasonField: "closedReason", visibleReasonDomId: "meeting-div-closedReason" },
+"ส่งหน่วยงาน": { reasonField: "agencyName", visibleReasonDomId: "meeting-div-agencyName" },
+"จัดทำรายงาน": { reasonField: "", visibleReasonDomId: "" }
+});
+AppBackendCore.FIELD_MAP = Object.freeze({
+stamp: AppBackendCore.PHASE1_SINGLE_SOURCE_STAMP,
+owner: "Code_00_PlatformCore.AppBackendCore.FIELD_MAP",
+domains: {
+cases: {
+sourceOfTruth: "MainData",
+identity: ["caseId", "caseNum", "recNo", "title"],
+fields: {
+caseId: { label: "รหัสเรื่อง", aliases: ["caseId", "id"] },
+caseNum: { label: "ลำดับเรื่อง", aliases: ["caseNum", "caseNo", "runningNo", "orderNo", "seq", "no", "ลำดับเรื่อง", "ลำดับ", "ลำดับที่"] },
+recNo: { label: "เลขรับเรื่อง", aliases: ["recNo", "receiveNo", "receivedNo", "เลขรับเรื่อง", "เลขที่รับเรื่อง", "รับเรื่องเลขที่"] },
+offerDate: { label: "วันที่เสนอ", aliases: ["offerDate", "submitDate", "proposeDate", "วันที่เสนอ", "วันที่ยื่น"] },
+recDate: { label: "วันที่รับเรื่อง", aliases: ["recDate", "receiveDate", "receivedDate", "วันที่รับเรื่อง"] },
+cat: { label: "ประเภทเรื่อง", aliases: ["cat", "caseType", "type", "category", "ประเภทเรื่อง", "ประเภท"] },
+subCat: { label: "ประเด็น", aliases: ["subCat", "subCategory", "issue", "topic", "ประเด็นพิจารณา", "ประเด็น"] },
+title: { label: "ชื่อเรื่อง", aliases: ["title", "subject", "เรื่อง", "ชื่อเรื่อง"] },
+caseTitle: { label: "ชื่อเรื่องพิจารณา", aliases: ["caseTitle", "considerationTitle", "ชื่อเรื่องพิจารณา (ถ้ามี)", "ชื่อเรื่องพิจารณา"] },
+petitioners: { label: "ผู้เสนอญัตติ/ผู้ร้อง", aliases: ["petitioners", "petitioner", "petitionerName", "ผู้ร้อง", "ผู้เสนอญัตติ", "ผู้เสนอญัตติ/ผู้ร้อง"] },
+petitionerPhone: { label: "เบอร์โทรศัพท์", aliases: ["petitionerPhone", "petitionerTel", "petitionerTelephone", "petitionerMobile", "phone", "tel", "telephone", "mobile", "เบอร์โทรศัพท์ผู้เสนอญัตติ/ผู้ร้อง", "เบอร์โทรศัพท์ผู้ร้อง", "เบอร์โทร", "โทรศัพท์", "มือถือ"] },
+respondent: { label: "ผู้ถูกร้อง", aliases: ["respondent", "accused", "ผู้ถูกร้อง"] },
+assignees: { label: "คณะกรรมาธิการ", aliases: ["assignees", "owner", "responsibleCommissioners", "responsibleComm", "committeeOwner", "responsibleCommittee", "คณะกรรมาธิการ"] },
+coAssignees: { label: "คณะอนุกรรมาธิการ", aliases: ["coAssignees", "coAssignee", "coOwners", "coResponsible", "subcommittee", "คณะอนุกรรมาธิการ"] },
+staffs: { label: "เจ้าหน้าที่", aliases: ["staffs", "staff", "officer", "secretariatOfficer", "operationOfficer", "opStaff", "operator", "responsibleOfficer", "operationStaff", "เจ้าหน้าที่", "เจ้าหน้าที่ฝ่ายเลขานุการ"] },
+status: { label: "สถานะ", aliases: ["status", "caseStatus", "processStatus", "resultStatus", "currentStatus", "statusText", "caseState", "workflowStatus", "meetingStatus", "สถานะเรื่อง", "สถานะเรื่องพิจารณา", "สถานะ", "สถานะพิจารณา", "สถานะปัจจุบัน", "ผลการพิจารณา", "สถานะการพิจารณา"] },
+pendingRemark: { label: "เหตุผลรอการพิจารณา", aliases: ["pendingRemark", "pendingReason", "waitReason", "waitingReason", "statusReason", "decisionReason", "reason", "เหตุผล", "เหตุผลรอพิจารณา", "เหตุผลรอการพิจารณา", "หมายเหตุรอพิจารณา", "หมายเหตุรอการพิจารณา"] },
+rejectionReason: { label: "เหตุผลไม่รับเรื่อง", aliases: ["rejectionReason", "rejectReason", "notAcceptedReason", "เหตุผล (ไม่รับเรื่อง)", "เหตุผลไม่รับเรื่อง"] },
+closedReason: { label: "เหตุผลยุติเรื่อง", aliases: ["closedReason", "closeReason", "terminateReason", "เหตุผลยุติเรื่อง", "เหตุผล (ยุติเรื่อง)"] },
+agencyName: { label: "หน่วยงาน", aliases: ["agencyName", "agency", "accusedAgency", "หน่วยงาน", "หน่วยงานที่ส่ง"] },
+keySummary: { label: "สรุปสาระสำคัญ", aliases: ["keySummary", "summary", "สรุปสาระสำคัญของเรื่อง", "สรุปสาระสำคัญ", "สาระสำคัญ"] },
+remark: { label: "หมายเหตุ", aliases: ["remark", "note", "หมายเหตุ"] }
+}
+},
+meetingLogs: {
+sourceOfTruth: "MeetingLogs",
+identity: ["logId", "caseId", "caseNum", "recNo", "title", "round", "date"],
+fields: {
+logId: { label: "รหัสประวัติ", aliases: ["logId", "id"] },
+caseId: { label: "รหัสเรื่อง", aliases: ["caseId", "id"] },
+caseNum: { label: "ลำดับเรื่อง", aliases: ["caseNum", "caseNo", "runningNo", "ลำดับเรื่อง"] },
+recNo: { label: "เลขรับเรื่อง", aliases: ["recNo", "receiveNo", "เลขรับเรื่อง"] },
+title: { label: "ชื่อเรื่อง", aliases: ["title", "caseTitle", "considerationTitle", "subject", "ชื่อเรื่อง", "เรื่อง"] },
+round: { label: "ครั้งที่", aliases: ["round", "meetingRound", "meetingNo", "ครั้งที่", "ครั้งประชุม", "การประชุมครั้งที่"] },
+date: { label: "วันที่ประชุม", aliases: ["date", "meetingDate", "meetingDateText", "วันที่ประชุม", "วันประชุม"] },
+committee: { label: "คณะกรรมาธิการ", aliases: ["committee", "comm", "assignees", "คณะกรรมาธิการ"] },
+subcommittee: { label: "คณะอนุกรรมาธิการ", aliases: ["subcommittee", "subcomm", "coAssignees", "คณะอนุกรรมาธิการ"] },
+result: { label: "ผลการพิจารณา", aliases: ["result", "decision", "summary", "note", "มติ", "ผลการพิจารณา"] },
+note: { label: "หมายเหตุ", aliases: ["note", "remark", "summary", "หมายเหตุ"] }
+}
+}
+}
+});
+AppBackendCore.STATUS_MAP = Object.freeze({
+stamp: AppBackendCore.PHASE1_SINGLE_SOURCE_STAMP,
+owner: "Code_00_PlatformCore.AppBackendCore.STATUS_MAP",
+canonical: AppBackendCore.CASE_STATUS.slice(),
+terminal: AppBackendCore.CASE_STATUS_TERMINAL.slice(),
+aliases: AppBackendCore.CASE_STATUS_ALIASES,
+fieldRules: AppBackendCore.CASE_STATUS_FIELD_RULES,
+normalizeOwner: "AppBackendCore.normalizeCaseStatus"
+});
+AppBackendCore.getFieldAliases = function(domain, field) {
+var domains = AppBackendCore.FIELD_MAP && AppBackendCore.FIELD_MAP.domains || {}, spec = domains[String(domain || "")] || {}, fields = spec.fields || {}, item = fields[String(field || "")] || {};
+return Array.isArray(item.aliases) ? item.aliases.slice(): []
+};
+AppBackendCore.getCaseStatusReasonField = function(status) {
+var normalized = AppBackendCore.normalizeCaseStatus(status, { defaultStatus: "เรื่องเข้าใหม่" }), rule = AppBackendCore.CASE_STATUS_FIELD_RULES[normalized] || {};
+return String(rule.reasonField || "")
+};
+AppBackendCore.phase1SingleSourceContract = function(options) {
+options = options || {};
+var routeContract = _appIsFnName_("_apiRouteContract_") ? _apiRouteContract_({ compact: !0 }): null;
+return {
+ok: true,
+stamp: AppBackendCore.PHASE1_SINGLE_SOURCE_STAMP,
+owner: "Code_00_PlatformCore.AppBackendCore.phase1SingleSourceContract",
+generatedAt: (new Date).toISOString(),
+routeOwner: "Code_20_Router._apiRouteContract_",
+fieldOwner: "Code_00_PlatformCore.AppBackendCore.FIELD_MAP",
+statusOwner: "Code_00_PlatformCore.AppBackendCore.STATUS_MAP",
+routeContract: routeContract,
+fieldMap: AppBackendCore.FIELD_MAP,
+statusMap: AppBackendCore.STATUS_MAP,
+rules: {
+uiDomChanged: false,
+businessLogicChanged: false,
+routeWhitelistMustUseApiGetRouteContract: true,
+fieldAliasesMustUseFieldMap: true,
+statusNormalizeMustUseAppBackendCoreNormalizeCaseStatus: true,
+noParallelRouteWhitelist: true,
+noParallelStatusAliasMap: true
+}
+}
+};
+function _phase1SingleSourceContract_(options) {
+return AppBackendCore.phase1SingleSourceContract(options || {})
+}
+function apiGetPhase1Contract(payload) {
+var contract = _phase1SingleSourceContract_(payload || {});
+contract.phase1DataLoadingPerformance = AppBackendCore.phase1DataLoadingPerformanceContract ? AppBackendCore.phase1DataLoadingPerformanceContract(payload || {}) : { ok: true, stamp: "commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1" };
+contract.stamp = "commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1";
+return ok_(contract, "โหลด Phase 1 data-loading performance contract สำเร็จ")
+}
+AppBackendCore.phase1DataLoadingPerformanceContract = function(payload) {
+payload = payload || {};
+return {
+ok: true,
+stamp: "commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1",
+owner: "Code_00_PlatformCore.AppBackendCore.phase1DataLoadingPerformanceContract",
+generatedAt: (new Date).toISOString(),
+uiDomChanged: false,
+businessLogicChanged: false,
+dashboard: {
+firstPaintApi: "apiGetDashboardBundle",
+firstPaintPayload: { includeBudget: false, includeCases: false, includeMeetingRows: false, hotPathMode: "phase1-dashboard-first-paint-summary" },
+lazyHydrationPayload: { includeBudget: true, includeCases: true, includeMeetingRows: false, hotPathMode: "phase1-dashboard-lazy-hydration" },
+targetMs: { firstPaint: 1800, lazyHydration: 6500 },
+cacheTtlSeconds: { firstPaint: 90, lazyHydration: 180 }
+},
+apiCache: { clientTtl: true, inFlightDedupe: true, authenticatedReadBridge: true },
+observability: { frontendTiming: true, serverHotApiTelemetry: typeof _withHotApiTelemetry_ === "function" }
+}
+};
+
+AppBackendCore.phase2SingleSourceContract = function(payload) {
+payload = payload || {};
+var partialNames = ["Scripts_Critical_Login_Runtime", "Scripts_Core_Runtime", "Scripts_Page_Dashboard", "Scripts_Page_Meeting", "Scripts_Page_ReportTrack", "Scripts_Page_Petitioner", "Scripts_Page_People", "Scripts_Page_Budget", "Scripts_Page_Admin"];
+return {
+ok: true,
+stamp: "commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1",
+owner: "Code_00_PlatformCore.AppBackendCore.phase2SingleSourceContract",
+generatedAt: (new Date).toISOString(),
+uiDomChanged: false,
+businessLogicChanged: false,
+singleSourcePolicy: "gas-backend/Scripts_*.html เป็น canonical editable source; github-pages/partials เป็น generated deployment mirror ที่ห้ามแก้มือ",
+canonicalRoot: "gas-backend",
+generatedMirrors: ["github-pages/partials"],
+partialCount: partialNames.length,
+partialNames: partialNames,
+syncTool: "tools/sync_frontend_partials.py",
+releaseGate: "tools/release_gate.py",
+securityGate: "tools/release_gate.py",
+phaseIContractFinalCleanup: true, phaseJRuntimeSlimming: true, phaseKWriteSchemaUnification: true,
+apiRouteAllowlistOwner: "Code_20_Router._apiRouteRegistry_",
+apiDtoContractOwner: "AppBackendCore.API_DTO_CONTRACT_BY_METHOD",
+staticApiContractAllowlistDisabled: true,
+generatedPartialPolicy: "do-not-edit-generated-mirrors",
+previousPhase: "Phase E Dashboard/Budget Loading",
+phase1DataLoadingPerformance: AppBackendCore.phase1DataLoadingPerformanceContract ? AppBackendCore.phase1DataLoadingPerformanceContract(payload || {}) : { ok: true }
+}
+};
+function apiGetPhase2Contract(payload) {
+return ok_(AppBackendCore.phase2SingleSourceContract(payload || {}), "โหลด Phase 2 single-source refactor contract สำเร็จ")
+}
+
+AppBackendCore.VERSION = "backend-contract-current", AppBackendCore.CASE_SEARCH_HEADERS = ["ลำดับเรื่อง", "เลขรับเรื่อง", "วันที่รับเรื่อง", "ชื่อเรื่อง", "ชื่อเรื่องพิจารณา (ถ้ามี)", "ผู้เสนอญัตติ/ผู้ร้อง", "สถานะ", "จัดการ"], AppBackendCore.CASE_SEARCH_ROW_REQUIRED = ["seq", "caseNo", "caseNum", "recNo", "recDate", "recDateText", "title", "considerationTitle", "petitioners", "petitionerName", "respondent", "agency", "status", "statusMeta", "reportColumns"];
+// Phase I contract cleanup: API allow-list is not maintained here anymore.
+// The only authoritative API surface is Code_20_Router._apiRouteRegistry_().
+// DTO/shape metadata below may enrich a route contract, but it must never create or allow an API method.
+AppBackendCore.API_ROUTE_CONTRACT_SOURCE = "Code_20_Router._apiRouteRegistry_";
+AppBackendCore.API_CONTRACT = Object.freeze({});
+AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1";
+AppBackendCore.API_DTO_CONTRACT_BY_METHOD = {
+apiSearchCasesLite: {
+owner: "CaseDomain.searchCases", sourceOfTruth: "MainData", dto: "case-search-flat-main-data-current", required: ["rows", "totalRecords", "page", "limit", "pageSize", "totalPages"], columns: AppBackendCore.CASE_SEARCH_HEADERS.slice(), rowRequired: AppBackendCore.CASE_SEARCH_ROW_REQUIRED.slice(), dateField: "recDateText", receiveNoField: "recNo", caseNoField: "caseNo"
+},
+apiBudgetGetTypeSummaryByFY: {
+owner: "BudgetDomain.getTypeSummary", sourceOfTruth: "BudgetImports", dto: "budget-type-summary-budgetimports-direct-current", required: ["rows", "totalRecords", "page", "limit"], serverPaged: !0
+},
+apiGetPeoplePageBundle: {
+owner: "PeopleDomain.getPageBundle", dto: "people-page-bundle-current", required: ["rows", "totalRecords"]
+},
+apiGetTracking: {
+owner: "TrackingDomain.getTracking", dto: "tracking-server-paged-current", required: ["rows", "totalRecords"]
+},
+apiAdminListUsers: {
+owner: "AdminDomain.listUsers", required: ["rows", "totalRecords"]
+},
+apiAdminListSubcommittees: {
+owner: "AdminDomain.listSubcommittees", required: ["rows", "totalRecords"]
+},
+apiListCommitteeMeetings: {
+owner: "MeetingDomain.listMeetings", dto: "meeting-list-current", required: ["rows", "totalRecords", "page", "limit"]
+},
+apiGetCommitteeMeetingPrintBundle: {
+owner: "MeetingDomain.getPrintBundle", dto: "meeting-print-bundle-current", required: ["overviewRows", "listMeetings", "summaryMeetings"]
+},
+apiGetDashboardBundle: {
+owner: "DashboardDomain.getBundle", dto: "dashboard-single-bundle-current", required: ["stats", "budget", "cases", "summary"]
+},
+apiBudgetSaveImport: {
+owner: "BudgetDomain.saveImport", sourceOfTruth: "BudgetImports", dto: "budget-import-write-envelope-current", required: ["ok", "data"], write: true, security: ["auth", "csrf", "actionToken", "writeGateway"]
+},
+apiBudgetDeleteImport: {
+owner: "BudgetDomain.deleteImport", sourceOfTruth: "BudgetImports", dto: "budget-import-delete-envelope-current", required: ["ok", "data"], write: true, security: ["auth", "csrf", "actionToken", "writeGateway"]
+},
+apiGetRouteContract: {
+owner: "Code_20_Router._apiRouteContract_", dto: "router-production-route-contract-current", required: ["ok", "routeCount", "handlerCount", "routerIssues", "publicEntrypointPolicy"]
+},
+apiGetPhase0ContractGate: {
+owner: "AppBackendCore.phase0ContractGateStatus", dto: "phase0-contract-gate-current", required: ["ok", "issues", "contracts", "uiDomChanged", "businessLogicChanged"]
+}
+};
+AppBackendCore._cloneApiContractObject = function(value) {
+var out = {}, src = value && "object" == typeof value ? value : {};
+Object.keys(src).forEach(function(key) {
+var item = src[key] && "object" == typeof src[key] ? src[key] : {};
+out[key] = Object.assign({}, item);
+});
+return out;
+};
+AppBackendCore._safeApiContractKey = function(method) {
+return "route_" + String(method || "").replace(/[^A-Za-z0-9_$]/g, "_");
+};
+AppBackendCore.getDtoContractByMethod = function(method) {
+method = String(method || "").trim();
+var src = AppBackendCore.API_DTO_CONTRACT_BY_METHOD || {}, dto = src[method] || null;
+return dto && "object" == typeof dto ? Object.assign({}, dto) : null;
+};
+AppBackendCore.findApiContractByMethod = function(contract, method) {
+method = String(method || "").trim();
+contract = contract || (AppBackendCore.getApiContract ? AppBackendCore.getApiContract({ includeRouterMirror: true }) : {});
+var found = null;
+Object.keys(contract || {}).some(function(key) {
+var c = contract[key] || {};
+if(String(c.method || "") === method) {
+found = c;
+return true;
+}
+return false;
+});
+return found;
+};
+AppBackendCore.getApiContract = function(options) {
+options = options || {};
+var contract = {}, registry = null;
+try {
+registry = _phase0ContractIsFunctionName_("_apiRouteRegistry_") ? _apiRouteRegistry_(!! options.refresh) : null;
+}
+catch(e) {
+try {
+_phase0ContractIsFunctionName_("_recordWarning_") && _recordWarning_("api.contract.routeRegistry", e, { owner: "Code_00_PlatformCore.AppBackendCore.getApiContract", stamp: AppBackendCore.API_CONTRACT_STAMP });
+}
+catch(_warn) {
+}
+registry = null;
+}
+Object.keys(registry || {}).sort().forEach(function(method) {
+var meta = registry[method] || {}, dto = AppBackendCore.getDtoContractByMethod ? AppBackendCore.getDtoContractByMethod(method) : null, key = AppBackendCore._safeApiContractKey(method), required = dto && Array.isArray(dto.required) ? dto.required.slice() : ["ok"];
+contract[key] = Object.assign({
+method: method,
+owner: String(meta.owner || meta.hotPathOwner || "Code_20_Router"),
+sourceOfTruth: String(meta.domain || meta.group || "router-registry"),
+dto: String(meta.dtoContract || "router-route-envelope-current"),
+required: required
+}, dto || {}, {
+method: method,
+owner: String(dto && dto.owner || meta.owner || meta.hotPathOwner || "Code_20_Router"),
+sourceOfTruth: String(dto && dto.sourceOfTruth || meta.domain || meta.group || "router-registry"),
+dto: String(dto && dto.dto || meta.dtoContract || "router-route-envelope-current"),
+required: required,
+routeContractOwner: "Code_20_Router._apiRouteRegistry_",
+dtoContractOwner: dto ? "AppBackendCore.API_DTO_CONTRACT_BY_METHOD" : "",
+routeAllowlistSource: "router-registry-only",
+contractStamp: AppBackendCore.API_CONTRACT_STAMP,
+routeMeta: {
+group: String(meta.group || ""),
+domain: String(meta.domain || meta.group || ""),
+minRole: String(meta.minRole || ""),
+public: !! meta.public,
+write: !! meta.write,
+csrf: !! meta.csrf,
+serverPaged: !! meta.serverPaged,
+serverFiltered: !! meta.serverFiltered,
+maxLimit: Number(meta.maxLimit || 0) || void 0,
+hotPath: !! meta.hotPath,
+aiRoute: !! meta.aiRoute,
+routeSource: String(meta.routeSource || "")
+}
+});
+});
+return contract;
+};
+AppBackendCore.PHASE0_LOCK = {
+stamp: "phase0-contract-gate-2026-06-18", owner: "Code_00_PlatformCore.AppBackendCore", uiDomChanged: false, businessLogicChanged: false, lockedContracts: {
+dom: "Index.html id/class/data-action locked; no DOM/CSS/layout mutation in cleanup", api: "AppBackendCore.getApiContract() derived from Code_20_Router._apiRouteRegistry_", dto: "AppBackendDTO envelope + domain row DTO", print: "AppPrint.printWithProfile", pager: "AppTablePager.renderStandardFooter/AppTable.footer", write: "writeGateway_ + route csrf/action token", caseStatus: "AppBackendCore.CASE_STATUS + AppBackendCore.normalizeCaseStatus"
+}, criticalApiMethods: ["apiGetDashboardBundle", "apiSearchCasesLite", "apiGetCaseReportExportRows", "apiGetPeoplePageBundle", "apiBudgetGetSummary", "apiBudgetGetTypeSummaryByFY", "apiBudgetSaveImport", "apiBudgetDeleteImport", "apiListCommitteeMeetings", "apiGetCommitteeMeetingSystem", "apiGetCommitteeMeetingPrintBundle", "apiGetPetitioners", "apiGetTracking", "apiAiDashboardInsights", "apiAdminListUsers", "apiGetRouteContract"], forbiddenChanges: ["DOM_ID_RENAME", "CSS_LAYOUT_CHANGE", "DATA_ACTION_RENAME", "DTO_KEY_RENAME", "SHEET_HEADER_RENAME", "BUSINESS_RULE_CHANGE"], requiredSmoke: ["login.dashboard.noBlank", "case.search.receiveDate.status.mapping", "case.save.delete.writeGateway", "petitioner.popup.location.auto", "people.footer.print", "budget.save.invalidate", "meeting.subcommittee.history.delete", "tracking.print.counter", "case.status.canonical.ai", "ai.notification.boundary"]
+};
+
+function _phase0ContractIsFunctionName_(name) {
+try {
+if(! name)return false;
+if("function" == typeof _appIsFnName_ && _appIsFnName_(name))return true;
+if("undefined" != typeof globalThis && "function" == typeof globalThis[name])return true;
+if("undefined" != typeof __APP_GLOBAL__ && __APP_GLOBAL__ && "function" == typeof __APP_GLOBAL__[name])return true;
+return false;
+}
+catch(e) {
+return false;
+}
+}
+function _phase0ContractMissingKeys_(obj, keys) {
+obj = obj || {};
+keys = Array.isArray(keys) ? keys: [];
+return keys.filter(function(key) {
+return ! Object.prototype.hasOwnProperty.call(obj, key);
+});
+}
+
+AppBackendCore.PHASE6_LIVE_SMOKE_MATRIX = Object.freeze({
+stamp: "phase6-live-smoke-matrix-current",
+owner: "Code_00_PlatformCore.AppBackendCore",
+executionOwner: "Scripts_Core_Runtime.AppLiveSmoke",
+mode: "deployment-read-only-live-plus-nondestructive-write-preflight",
+readMethods: ["apiGetPhase0ContractGate", "apiGetRouteContract", "apiGetDashboardBundle", "apiSearchCasesLite", "apiGetCaseReportExportRows", "apiBudgetGetSummary", "apiBudgetGetTypeSummaryByFY", "apiGetPeoplePageBundle", "apiListCommitteeMeetings", "apiGetCommitteeMeetingSystem", "apiGetCommitteeMeetingPrintBundle", "apiGetPetitioners", "apiGetTracking", "apiAdminListUsers", "apiAiDashboardInsights"],
+representativeWriteMethods: ["apiSaveCase", "apiDeleteCase", "apiBudgetSaveImport", "apiBudgetDeleteImport", "apiSavePersonnelStaff", "apiDeletePersonnelStaff", "apiSaveCommitteeMeetingSystem", "apiDeleteCommitteeMeetingSystem", "apiSavePetitioner", "apiDeletePetitioner", "apiSaveLetter", "apiDeleteLetter", "apiAdminSaveUser", "apiAdminDeleteUser"],
+automatedTests: ["frontend.contract", "backend.contract", "router.security", "login.dashboard.noBlank", "case.search.mapping", "budget.summary.typeSummary", "people.bundle.printOwner", "meeting.history.detail.printBundle", "petitioner.location.contract", "tracking.counter.pager.printOwner", "admin.roleGate", "ai.deferredLoad", "write.csrf.actionToken.preflight"],
+manualTests: ["case.add.edit.delete.save", "budget.save.delete.typeSummary.personnel", "people.tabs.salary.print", "meeting.committee.subcommittee.save.history.edit.delete.print", "petitioner.add.edit.show.print.locationAuto", "tracking.counter.print.pager", "admin.role.save.delete", "print.preview.allModules"],
+privacy: { payloadCaptured: false, rowValuesCaptured: false, tokenValuesCaptured: false },
+uiDomChanged: false,
+businessLogicChanged: false
+});
+function _phase6SmokeMatrixRoute_(routeContract, method) {
+routeContract = routeContract || {};
+return routeContract.routes && routeContract.routes[String(method || "")] || null;
+}
+AppBackendCore.phase6LiveSmokeMatrixStatus = function() {
+var spec = AppBackendCore.PHASE6_LIVE_SMOKE_MATRIX || {}, issues = [], routeContract = null, phase4 = null, phase5 = null;
+try {
+routeContract = _phase0ContractIsFunctionName_("_apiRouteContract_") ? _apiRouteContract_({ compact: true, source: "phase6-live-smoke-static-gate" }): null;
+}
+catch(routeErr) {
+issues.push({ code: "PHASE6_ROUTE_CONTRACT_ERROR", message: String(routeErr && routeErr.message || routeErr) });
+}
+if(! routeContract)issues.push({ code: "PHASE6_ROUTE_CONTRACT_MISSING" });
+(spec.readMethods || []).forEach(function(method) {
+var meta = _phase6SmokeMatrixRoute_(routeContract, method);
+if(! meta)issues.push({ code: "PHASE6_READ_ROUTE_MISSING", method: method });
+else if(true === meta.write)issues.push({ code: "PHASE6_READ_ROUTE_MARKED_WRITE", method: method });
+});
+(spec.representativeWriteMethods || []).forEach(function(method) {
+var meta = _phase6SmokeMatrixRoute_(routeContract, method);
+if(! meta)issues.push({ code: "PHASE6_WRITE_ROUTE_MISSING", method: method });
+else {
+if(true !== meta.write)issues.push({ code: "PHASE6_WRITE_ROUTE_NOT_MARKED_WRITE", method: method });
+if(true !== meta.csrf)issues.push({ code: "PHASE6_WRITE_ROUTE_WITHOUT_CSRF", method: method });
+if(true === meta.public)issues.push({ code: "PHASE6_PUBLIC_WRITE_ROUTE", method: method });
+if(! String(meta.writeBoundaryOwner || ""))issues.push({ code: "PHASE6_WRITE_BOUNDARY_OWNER_MISSING", method: method });
+}
+});
+if(routeContract && routeContract.phase3BackendBoundary && false === routeContract.phase3BackendBoundary.ok)issues.push({ code: "PHASE6_BACKEND_BOUNDARY_NOT_READY", routes: routeContract.phase3BackendBoundary.writeRoutesWithoutBoundary || [] });
+if(routeContract && routeContract.phase6WriteContract && false === routeContract.phase6WriteContract.ok)issues.push({ code: "PHASE6_WRITE_CONTRACT_NOT_READY", routes: routeContract.phase6WriteContract.writeRoutesWithoutGateway || [] });
+try {
+phase4 = "function" == typeof AppBackendCore.phase4CacheInvalidationLedgerStatus ? AppBackendCore.phase4CacheInvalidationLedgerStatus(): null;
+phase4 && false === phase4.ok && issues.push({ code: "PHASE6_CACHE_LEDGER_NOT_READY" });
+}
+catch(phase4Err) {
+issues.push({ code: "PHASE6_CACHE_LEDGER_ERROR", message: String(phase4Err && phase4Err.message || phase4Err) });
+}
+try {
+phase5 = "function" == typeof AppBackendCore.phase5PerformanceGateStatus ? AppBackendCore.phase5PerformanceGateStatus(): null;
+phase5 && false === phase5.ok && issues.push({ code: "PHASE6_PERFORMANCE_GATE_NOT_READY", missingHandlers: phase5.missingHandlers || [] });
+}
+catch(phase5Err) {
+issues.push({ code: "PHASE6_PERFORMANCE_GATE_ERROR", message: String(phase5Err && phase5Err.message || phase5Err) });
+}
+return {
+ok: 0 === issues.length,
+stamp: String(spec.stamp || "phase6-live-smoke-matrix-current"),
+owner: String(spec.owner || "Code_00_PlatformCore.AppBackendCore"),
+executionOwner: String(spec.executionOwner || "Scripts_Core_Runtime.AppLiveSmoke"),
+generatedAt: (new Date).toISOString(),
+staticGateOnly: true,
+liveDeploymentExecutionRequired: true,
+nonDestructiveAutomatedMode: true,
+automatedTestCount: (spec.automatedTests || []).length,
+manualTestCount: (spec.manualTests || []).length,
+readMethodCount: (spec.readMethods || []).length,
+representativeWriteMethodCount: (spec.representativeWriteMethods || []).length,
+routeCount: routeContract ? Number(routeContract.routeCount || 0): 0,
+phase4CacheLedgerOk: phase4 ? false !== phase4.ok: null,
+phase5PerformanceGateOk: phase5 ? false !== phase5.ok: null,
+issues: issues,
+matrix: {
+automatedTests: (spec.automatedTests || []).slice(),
+manualTests: (spec.manualTests || []).slice(),
+readMethods: (spec.readMethods || []).slice(),
+representativeWriteMethods: (spec.representativeWriteMethods || []).slice()
+},
+privacy: spec.privacy || {},
+uiDomChanged: false,
+businessLogicChanged: false
+};
+};
+
+
+AppBackendCore.PHASE7_PRODUCTION_VERIFICATION_GATE = Object.freeze({
+stamp: "phase7-production-verification-gate-current",
+owner: "Code_00_PlatformCore.AppBackendCore",
+executionOwner: "Scripts_Core_Runtime.AppProductionVerification",
+purpose: "final-live-deployment-verification-before-production-cleanup",
+requiredPreviousGates: ["phase0-contract", "phase1-runtime-owner", "phase2-page-controller", "phase3-write-boundary", "phase4-cache-ledger", "phase5-performance", "phase6-live-smoke", "phaseA-security-boundary", "phaseB-contract-release"],
+releaseCriteria: [
+"AppLiveSmoke.run({forceFresh:true}) completed on live deployment",
+"automated smoke tests have zero failed results",
+"manual UAT checklist passed for all critical modules",
+"write preflight confirms CSRF/action-token/role gate without data mutation",
+"runtime console error ledger has zero blocker errors during verification window",
+"performance gate has no critical API contract missing",
+"route metrics satisfy read + write = routeCount",
+"direct API negative tests are blocked",
+"generic DTO and Search Paging DTO are aligned",
+"DOM/CSS/API/DTO/business rule unchanged"
+],
+manualSignoffGroups: ["login.dashboard", "case.search.report.write", "tracking", "budget", "people", "meeting", "petitioner", "admin", "print.all", "console.performance"],
+uiDomChanged: false,
+businessLogicChanged: false
+});
+AppBackendCore.phase7ProductionVerificationGateStatus = function(options) {
+options = options || {};
+var spec = AppBackendCore.PHASE7_PRODUCTION_VERIFICATION_GATE || {}, issues = [], phase6 = null, phase5 = null, phaseB = null, routeContract = null;
+try {
+phase6 = "function" == typeof AppBackendCore.phase6LiveSmokeMatrixStatus ? AppBackendCore.phase6LiveSmokeMatrixStatus() : null;
+!phase6 && issues.push({ code: "PHASE7_PHASE6_STATIC_GATE_MISSING" });
+phase6 && false === phase6.ok && issues.push({ code: "PHASE7_PHASE6_STATIC_GATE_NOT_READY", details: phase6.issues || [] });
+}
+catch(phase6Err) {
+issues.push({ code: "PHASE7_PHASE6_STATIC_GATE_ERROR", message: String(phase6Err && phase6Err.message || phase6Err) });
+}
+try {
+phase5 = "function" == typeof AppBackendCore.phase5PerformanceGateStatus ? AppBackendCore.phase5PerformanceGateStatus() : null;
+!phase5 && issues.push({ code: "PHASE7_PHASE5_PERFORMANCE_GATE_MISSING" });
+phase5 && false === phase5.ok && issues.push({ code: "PHASE7_PHASE5_PERFORMANCE_GATE_NOT_READY", details: phase5.missingHandlers || phase5.issues || [] });
+}
+catch(phase5Err) {
+issues.push({ code: "PHASE7_PHASE5_PERFORMANCE_GATE_ERROR", message: String(phase5Err && phase5Err.message || phase5Err) });
+}
+try {
+routeContract = _phase0ContractIsFunctionName_("_apiRouteContract_") ? _apiRouteContract_({ compact: true, source: "phase7-production-verification-static-gate" }) : null;
+!routeContract && issues.push({ code: "PHASE7_ROUTE_CONTRACT_MISSING" });
+routeContract && false === routeContract.ok && issues.push({ code: "PHASE7_ROUTE_CONTRACT_NOT_READY", details: routeContract.routerIssues || routeContract.routeIssues || [] });
+if(routeContract) {
+var routeCount = Math.max(0, Number(routeContract.routeCount || 0) || 0);
+var readRouteCount = Math.max(0, Number(routeContract.readRouteCount || 0) || 0);
+var writeRouteCount = Math.max(0, Number(routeContract.writeRouteCount || 0) || 0);
+routeCount <= 0 && issues.push({ code: "PHASE7_ROUTE_COUNT_ZERO" });
+readRouteCount <= 0 && issues.push({ code: "PHASE7_READ_ROUTE_COUNT_ZERO" });
+writeRouteCount <= 0 && issues.push({ code: "PHASE7_WRITE_ROUTE_COUNT_ZERO" });
+routeCount > 0 && readRouteCount + writeRouteCount !== routeCount && issues.push({
+code: "PHASE7_ROUTE_COUNT_MISMATCH",
+routeCount: routeCount,
+readRouteCount: readRouteCount,
+writeRouteCount: writeRouteCount
+});
+if(routeContract.phase3BackendBoundary && false === routeContract.phase3BackendBoundary.ok)issues.push({ code: "PHASE7_WRITE_BOUNDARY_NOT_READY", details: routeContract.phase3BackendBoundary.writeRoutesWithoutBoundary || [] });
+if(routeContract.phase6WriteContract && false === routeContract.phase6WriteContract.ok)issues.push({ code: "PHASE7_WRITE_CONTRACT_NOT_READY", details: routeContract.phase6WriteContract.writeRoutesWithoutGateway || [] });
+if(routeContract.phase3BackendBoundary) {
+var phase3Read = Number(routeContract.phase3BackendBoundary.readRouteCount || 0) || 0;
+var phase3Write = Number(routeContract.phase3BackendBoundary.writeRouteCount || 0) || 0;
+phase3Read && phase3Read !== readRouteCount && issues.push({ code: "PHASE7_READ_ROUTE_METRIC_MISMATCH", routeContract: readRouteCount, phase3: phase3Read });
+phase3Write && phase3Write !== writeRouteCount && issues.push({ code: "PHASE7_WRITE_ROUTE_METRIC_MISMATCH", routeContract: writeRouteCount, phase3: phase3Write });
+}
+}
+}
+catch(routeErr) {
+issues.push({ code: "PHASE7_ROUTE_CONTRACT_ERROR", message: String(routeErr && routeErr.message || routeErr) });
+}
+try {
+phaseB = "function" == typeof AppBackendCore.phaseBContractReleaseGateStatus ? AppBackendCore.phaseBContractReleaseGateStatus({ source: "phase7-production-verification" }) : null;
+!phaseB && issues.push({ code: "PHASE7_PHASEB_CONTRACT_RELEASE_GATE_MISSING" });
+phaseB && false === phaseB.ok && issues.push({ code: "PHASE7_PHASEB_CONTRACT_RELEASE_GATE_NOT_READY", details: phaseB.issues || [] });
+}
+catch(phaseBErr) {
+issues.push({ code: "PHASE7_PHASEB_CONTRACT_RELEASE_GATE_ERROR", message: String(phaseBErr && phaseBErr.message || phaseBErr) });
+}
+return {
+ok: 0 === issues.length,
+stamp: String(spec.stamp || "phase7-production-verification-gate-current"),
+owner: String(spec.owner || "Code_00_PlatformCore.AppBackendCore"),
+executionOwner: String(spec.executionOwner || "Scripts_Core_Runtime.AppProductionVerification"),
+generatedAt: (new Date).toISOString(),
+staticGateOnly: true,
+liveDeploymentVerificationRequired: true,
+releaseReadyRequiresClientReport: true,
+previousGateCount: (spec.requiredPreviousGates || []).length,
+releaseCriteria: (spec.releaseCriteria || []).slice(),
+manualSignoffGroups: (spec.manualSignoffGroups || []).slice(),
+routeCount: routeContract ? Number(routeContract.routeCount || 0) : 0,
+writeRouteCount: routeContract ? Number(routeContract.writeRouteCount || 0) : 0,
+readRouteCount: routeContract ? Number(routeContract.readRouteCount || 0) : 0,
+publicRouteCount: routeContract ? Number(routeContract.publicRouteCount || 0) : 0,
+csrfWriteRouteCount: routeContract ? Number(routeContract.csrfWriteRouteCount || 0) : 0,
+phase5PerformanceGateOk: phase5 ? false !== phase5.ok : null,
+phase6LiveSmokeStaticGateOk: phase6 ? false !== phase6.ok : null,
+phase6AutomatedTestCount: phase6 ? Number(phase6.automatedTestCount || 0) : 0,
+phase6ManualTestCount: phase6 ? Number(phase6.manualTestCount || 0) : 0,
+phaseBContractReleaseGateOk: phaseB ? false !== phaseB.ok : null,
+directApiNegativeTestCount: phaseB && phaseB.directApiNegativeTests ? Number(phaseB.directApiNegativeTests.passed || 0) : 0,
+issues: issues,
+privacy: { payloadCaptured: false, rowValuesCaptured: false, tokenValuesCaptured: false, passwordCaptured: false },
+uiDomChanged: false,
+businessLogicChanged: false
+};
+};
+
+AppBackendCore.PHASE8_LOAD_ORDER_DEPENDENCY = Object.freeze({
+stamp: "phase8-load-order-dependency-cleanup-current",
+owner: "Code_00_PlatformCore.AppBackendCore",
+routerOwner: "Code_20_Router.resolve-domain-at-invocation",
+domainOwners: {
+CaseDomain: ["searchCases", "getReportOptions", "quickSummary"],
+TrackingDomain: ["getTracking"],
+MeetingDomain: ["getHistory", "listMeetings", "getSystem"],
+DashboardDomain: ["getBundle"],
+BudgetDomain: ["getSummary", "getTypeSummary"],
+PeopleDomain: ["getPageBundle"],
+PetitionerDomain: ["getList"],
+AdminDomain: ["listUsers", "saveUser", "deleteUser", "listSubcommittees"]
+},
+sourceOwners: {
+Code_30_Domain_Cases: ["CaseDomain", "TrackingDomain", "MeetingDomain", "DashboardDomain"],
+Code_32_Domain_Budget: ["BudgetDomain"],
+Code_33_Domain_People: ["PeopleDomain", "PetitionerDomain", "AdminDomain"]
+},
+routerCreatesDomainOwners: false,
+uiDomChanged: false,
+businessLogicChanged: false
+});
+AppBackendCore.phase8LoadOrderDependencyStatus = function() {
+var spec = AppBackendCore.PHASE8_LOAD_ORDER_DEPENDENCY || {}, issues = [], owners = {}, root = __APP_GLOBAL__ || {};
+Object.keys(spec.domainOwners || {}).forEach(function(ownerName) {
+var owner = root[ownerName], missingMethods = [];
+if(! owner || "object" != typeof owner)issues.push({ code: "PHASE8_DOMAIN_OWNER_MISSING", owner: ownerName });
+else (spec.domainOwners[ownerName] || []).forEach(function(method) {
+"function" != typeof owner[method] && missingMethods.push(method)
+});
+missingMethods.length && issues.push({ code: "PHASE8_DOMAIN_METHOD_MISSING", owner: ownerName, methods: missingMethods });
+owners[ownerName] = {
+ready: !! owner,
+requiredMethodCount: (spec.domainOwners[ownerName] || []).length,
+missingMethods: missingMethods
+}
+});
+"function" != typeof _routerDomainOwnerPhase8_ && issues.push({ code: "PHASE8_ROUTER_DOMAIN_RESOLVER_MISSING" });
+"function" != typeof _routerInvokeDomainPhase8_ && issues.push({ code: "PHASE8_ROUTER_DOMAIN_INVOKER_MISSING" });
+return {
+ok: 0 === issues.length,
+stamp: String(spec.stamp || "phase8-load-order-dependency-cleanup-current"),
+owner: String(spec.owner || "Code_00_PlatformCore.AppBackendCore"),
+generatedAt: (new Date).toISOString(),
+routerCreatesDomainOwners: false,
+routerResolvesAtInvocation: "function" == typeof _routerDomainOwnerPhase8_ && "function" == typeof _routerInvokeDomainPhase8_,
+ownerCount: Object.keys(spec.domainOwners || {}).length,
+owners: owners,
+issues: issues,
+uiDomChanged: false,
+businessLogicChanged: false
+}
+};
+
+AppBackendCore.phaseASecurityBoundaryStatus = function() {
+var issues = [], guarded = ["apiGetTracking", "apiSearchLookup", "apiCheckDuplicateCase", "apiAiAssistantStartJob", "apiAiAssistantGetJob"], sources = {
+};
+function resolveFn_(name) {
+try {
+if("undefined" != typeof globalThis && globalThis && "function" == typeof globalThis[name])return globalThis[name];
+if(_phase0ContractIsFunctionName_("_resolveGlobalFunctionDirect_")) {
+var resolved = _resolveGlobalFunctionDirect_(name);
+if("function" == typeof resolved)return resolved
+}
+}
+catch(_resolveErr) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("phaseA.security.resolve", _resolveErr, {
+method: String(name || "")
+})
+}
+return null
+}
+guarded.forEach(function(name) {
+var fn = resolveFn_(name), source = "function" == typeof fn ? String(fn): "";
+sources[name] = !! source;
+! source && issues.push({
+code: "SECURITY_ENTRY_HANDLER_MISSING", method: name
+});
+source && source.indexOf("_routerAuthorizedEntry_") < 0 && issues.push({
+code: "SECURITY_ROUTER_BOUNDARY_MISSING", method: name
+})
+});
+var routerPolicy = "function" == typeof _routerDirectEntrypointPolicy_ ? _routerDirectEntrypointPolicy_(): null;
+(! routerPolicy || true !== routerPolicy.routerOnlyDefault || true !== routerPolicy.directApiReadBlocked || true !== routerPolicy.directApiWriteBlocked) && issues.push({
+code: "SECURITY_ROUTER_POLICY_INCOMPLETE"
+});
+"function" != typeof _routerAuthorizedEntry_ && issues.push({
+code: "SECURITY_ROUTER_ENTRY_OWNER_MISSING", owner: "Code_20_Router._routerAuthorizedEntry_"
+});
+var startSource = "function" == typeof apiAiAssistantStartJob ? String(apiAiAssistantStartJob): "", getSource = "function" == typeof apiAiAssistantGetJob ? String(apiAiAssistantGetJob): "";
+(startSource.indexOf("_aiAssistantJobOwner_") < 0 || getSource.indexOf("_aiAssistantJobOwnedBy_") < 0) && issues.push({
+code: "AI_JOB_OWNERSHIP_CONTRACT_MISSING"
+});
+var renderSource = "function" == typeof renderVue3App_ ? String(renderVue3App_): "";
+renderSource.indexOf("ALLOWALL") >= 0 && issues.push({
+code: "XFRAME_ALLOWALL_ENABLED"
+});
+var postSource = "function" == typeof doPost ? String(doPost): "";
+postSource.indexOf("_apiRouterResolveFunction_") >= 0 && issues.push({
+code: "HTTP_INGRESS_DIRECT_HANDLER_FALLBACK_PRESENT"
+});
+("function" != typeof _loginRateLimitUserKey_ || "function" != typeof _loginRateLimitKeys_) && issues.push({
+code: "LOGIN_USERNAME_RATE_BUCKET_MISSING"
+});
+return {
+ok: 0 === issues.length, stamp: "phaseA-security-boundary-current", owner: "AppBackendCore.phaseASecurityBoundaryStatus", issues: issues, guardedMethods: guarded, routerPolicy: routerPolicy, aiJobOwnership: "principal+session-fingerprint", xFrameMode: renderSource.indexOf("ALLOWALL") < 0 ? "DEFAULT": "ALLOWALL", httpIngress: postSource.indexOf("_apiRouterResolveFunction_") < 0 ? "apiRouter-only-fail-closed": "direct-handler-fallback", loginRateLimit: "username+fingerprint", uiDomChanged: false, businessLogicChanged: false
+}
+};
+AppBackendCore.PHASEB_CONTRACT_RELEASE_GATE = Object.freeze({
+stamp: "phaseB-contract-release-gate-current",
+owner: "Code_00_PlatformCore.AppBackendCore",
+routeContractOwner: "Code_20_Router._apiRouteContract_",
+dtoContractOwner: "Code_20_Router.PRODUCTION_DTO_CONTRACT",
+requiredDirectNegativeMethods: ["apiGetTracking", "apiSearchLookup", "apiCheckDuplicateCase", "apiAiAssistantStartJob", "apiAiAssistantGetJob"],
+uiDomChanged: false,
+businessLogicChanged: false
+});
+AppBackendCore.phaseBContractReleaseGateStatus = function(options) {
+options = options || {};
+var spec = AppBackendCore.PHASEB_CONTRACT_RELEASE_GATE || {}, issues = [], routeContract = null, phaseA = null, negativeResults = [];
+function resolveFn_(name) {
+try {
+if("undefined" != typeof globalThis && globalThis && "function" == typeof globalThis[name])return globalThis[name];
+if(_phase0ContractIsFunctionName_("_resolveGlobalFunctionDirect_")) {
+var resolved = _resolveGlobalFunctionDirect_(name);
+if("function" == typeof resolved)return resolved
+}
+}
+catch(_resolveErr) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("phaseB.release.resolve", _resolveErr, { method: String(name || "") })
+}
+return null
+}
+function errorCode_(result) {
+if(!result || "object" != typeof result)return "";
+return String(result.errorCode || result.code || result.data && (result.data.errorCode || result.data.code) || result.meta && (result.meta.errorCode || result.meta.code) || "")
+}
+try {
+routeContract = _phase0ContractIsFunctionName_("_apiRouteContract_") ? _apiRouteContract_({ compact: true, source: "phaseB-contract-release-gate" }) : null;
+!routeContract && issues.push({ code: "PHASEB_ROUTE_CONTRACT_MISSING" });
+routeContract && false === routeContract.ok && issues.push({ code: "PHASEB_ROUTE_CONTRACT_NOT_READY", details: routeContract.routerIssues || routeContract.routeIssues || [] });
+if(routeContract) {
+var routeCount = Math.max(0, Number(routeContract.routeCount || 0) || 0);
+var readRouteCount = Math.max(0, Number(routeContract.readRouteCount || 0) || 0);
+var writeRouteCount = Math.max(0, Number(routeContract.writeRouteCount || 0) || 0);
+routeCount <= 0 && issues.push({ code: "PHASEB_ROUTE_COUNT_ZERO" });
+readRouteCount <= 0 && issues.push({ code: "PHASEB_READ_ROUTE_COUNT_ZERO" });
+writeRouteCount <= 0 && issues.push({ code: "PHASEB_WRITE_ROUTE_COUNT_ZERO" });
+routeCount > 0 && readRouteCount + writeRouteCount !== routeCount && issues.push({
+code: "PHASEB_ROUTE_COUNT_MISMATCH",
+routeCount: routeCount,
+readRouteCount: readRouteCount,
+writeRouteCount: writeRouteCount
+});
+Array.isArray(routeContract.writeRoutes) && routeContract.writeRoutes.length !== writeRouteCount && issues.push({ code: "PHASEB_WRITE_ROUTE_LIST_MISMATCH" });
+Array.isArray(routeContract.readRoutes) && routeContract.readRoutes.length !== readRouteCount && issues.push({ code: "PHASEB_READ_ROUTE_LIST_MISMATCH" });
+}
+}
+catch(routeErr) {
+issues.push({ code: "PHASEB_ROUTE_CONTRACT_ERROR", message: String(routeErr && routeErr.message || routeErr) });
+}
+var dto = "undefined" != typeof PRODUCTION_DTO_CONTRACT ? PRODUCTION_DTO_CONTRACT : null;
+var searchDto = dto && dto.routeContracts && dto.routeContracts.apiSearchCasesLite || null;
+(!dto || "production-dto-contract-v2" !== String(dto.contractStamp || "")) && issues.push({ code: "PHASEB_GENERIC_DTO_CONTRACT_NOT_READY" });
+(!searchDto || "paging-object" !== String(searchDto.dataShape || "")) && issues.push({ code: "PHASEB_SEARCH_PAGING_DTO_NOT_READY" });
+var requiredKeys = searchDto && Array.isArray(searchDto.requiredDataKeys) ? searchDto.requiredDataKeys : [];
+["rows", "totalRecords", "page", "pageSize", "totalPages"].forEach(function(key) {
+requiredKeys.indexOf(key) < 0 && issues.push({ code: "PHASEB_SEARCH_PAGING_DTO_KEY_MISSING", key: key })
+});
+var sampleEnvelope = null;
+try {
+sampleEnvelope = dto && "function" == typeof dto.canonicalPagingEnvelope ? dto.canonicalPagingEnvelope(new Array(20).fill(0).map(function(_, index) { return { id: index + 1 } }), {
+totalRecords: 27,
+page: 1,
+pageSize: 20,
+totalPages: 2
+}) : null;
+var sampleData = sampleEnvelope && sampleEnvelope.data;
+(!sampleData || !Array.isArray(sampleData.rows) || 20 !== sampleData.rows.length || 27 !== Number(sampleData.totalRecords) || 1 !== Number(sampleData.page) || 20 !== Number(sampleData.pageSize) || 2 !== Number(sampleData.totalPages)) && issues.push({ code: "PHASEB_SEARCH_PAGING_SAMPLE_INVALID" });
+}
+catch(dtoErr) {
+issues.push({ code: "PHASEB_SEARCH_PAGING_DTO_ERROR", message: String(dtoErr && dtoErr.message || dtoErr) });
+}
+var postSource = "function" == typeof doPost ? String(doPost) : "";
+(!postSource || postSource.indexOf("apiRouter") < 0 || postSource.indexOf("_apiRouterResolveFunction_") >= 0 || postSource.indexOf("_resolveGlobalFunction_") >= 0) && issues.push({ code: "PHASEB_HTTP_INGRESS_NOT_FAIL_CLOSED" });
+(spec.requiredDirectNegativeMethods || []).forEach(function(name) {
+var fn = resolveFn_(name), result = null, thrown = null, payload = {};
+"apiCheckDuplicateCase" === name && (payload.title = "phaseB-security-negative-test");
+"apiAiAssistantGetJob" === name && (payload.jobId = "phaseB-security-negative-test");
+if("function" != typeof fn) {
+issues.push({ code: "PHASEB_DIRECT_NEGATIVE_HANDLER_MISSING", method: name });
+negativeResults.push({ method: name, blocked: false, errorCode: "HANDLER_MISSING" });
+return
+}
+try {
+result = fn(payload)
+}
+catch(err) {
+thrown = err
+}
+var code = errorCode_(result), blocked = !!thrown || !!(result && false === result.ok && "ROUTER_AUTH_BOUNDARY_REQUIRED" === code);
+negativeResults.push({ method: name, blocked: blocked, errorCode: thrown ? "THREW_AUTH_BOUNDARY" : code });
+!blocked && issues.push({ code: "PHASEB_DIRECT_API_NEGATIVE_TEST_FAILED", method: name, observedErrorCode: code })
+});
+try {
+phaseA = "function" == typeof AppBackendCore.phaseASecurityBoundaryStatus ? AppBackendCore.phaseASecurityBoundaryStatus() : null;
+!phaseA && issues.push({ code: "PHASEB_PHASEA_SECURITY_GATE_MISSING" });
+phaseA && false === phaseA.ok && issues.push({ code: "PHASEB_PHASEA_SECURITY_GATE_NOT_READY", details: phaseA.issues || [] });
+}
+catch(phaseAErr) {
+issues.push({ code: "PHASEB_PHASEA_SECURITY_GATE_ERROR", message: String(phaseAErr && phaseAErr.message || phaseAErr) });
+}
+return {
+ok: 0 === issues.length,
+stamp: String(spec.stamp || "phaseB-contract-release-gate-current"),
+owner: String(spec.owner || "Code_00_PlatformCore.AppBackendCore"),
+generatedAt: (new Date).toISOString(),
+routeMetrics: {
+routeCount: routeContract ? Number(routeContract.routeCount || 0) : 0,
+readRouteCount: routeContract ? Number(routeContract.readRouteCount || 0) : 0,
+writeRouteCount: routeContract ? Number(routeContract.writeRouteCount || 0) : 0,
+publicRouteCount: routeContract ? Number(routeContract.publicRouteCount || 0) : 0,
+csrfWriteRouteCount: routeContract ? Number(routeContract.csrfWriteRouteCount || 0) : 0
+},
+dtoContract: {
+owner: dto ? String(dto.owner || "") : "",
+contractStamp: dto ? String(dto.contractStamp || "") : "",
+searchPagingContract: searchDto ? String(searchDto.contractStamp || "") : "",
+dataShape: searchDto ? String(searchDto.dataShape || "") : "",
+sampleOk: !!(sampleEnvelope && sampleEnvelope.data && 27 === Number(sampleEnvelope.data.totalRecords) && 2 === Number(sampleEnvelope.data.totalPages))
+},
+httpIngress: postSource.indexOf("apiRouter") >= 0 && postSource.indexOf("_apiRouterResolveFunction_") < 0 ? "apiRouter-only-fail-closed" : "invalid",
+directApiNegativeTests: {
+total: negativeResults.length,
+passed: negativeResults.filter(function(item) { return item.blocked }).length,
+results: negativeResults
+},
+phaseASecurityBoundaryOk: phaseA ? false !== phaseA.ok : null,
+issues: issues,
+liveDeploymentVerificationRequired: true,
+uiDomChanged: false,
+businessLogicChanged: false
+};
+};
+
+AppBackendCore.phase0ContractGateStatus = function(options) {
+options = options || {};
+var lock = AppBackendCore.PHASE0_LOCK || {}, api = AppBackendCore.getApiContract ? AppBackendCore.getApiContract({ includeRouterMirror: true }) : AppBackendCore.API_CONTRACT || {}, issues = [], apiNames = Object.keys(api), apiMethods = apiNames.map(function(key) {
+return String(api[key] && api[key].method || "");
+}).filter(Boolean), critical = (lock.criticalApiMethods || []).slice();
+apiNames.forEach(function(key) {
+var c = api[key] || {}, missing = _phase0ContractMissingKeys_(c, ["method", "owner"]);
+missing.length && issues.push({
+code: "API_CONTRACT_FIELD_MISSING", contract: key, missing: missing
+});
+c.method && ! _phase0ContractIsFunctionName_(c.method) && issues.push({
+code: "API_HANDLER_MISSING", contract: key, method: c.method
+});
+});
+critical.forEach(function(method) {
+method && apiMethods.indexOf(method) < 0 && issues.push({
+code: "CRITICAL_API_NOT_IN_CONTRACT", method: method
+});
+method && ! _phase0ContractIsFunctionName_(method) && issues.push({
+code: "CRITICAL_API_HANDLER_MISSING", method: method
+});
+});
+var routeContract = null;
+try {
+if(_phase0ContractIsFunctionName_("_apiRouteContract_")) {
+routeContract = _apiRouteContract_({
+source: "phase0-contract-gate", includeRegistry: false
+});
+routeContract && false === routeContract.ok && issues.push({
+code: "ROUTE_CONTRACT_NOT_OK", routeIssues: routeContract.routeIssues || []
+});
+}
+else {
+issues.push({
+code: "ROUTE_CONTRACT_HANDLER_MISSING", method: "_apiRouteContract_"
+});
+}
+}
+catch(e) {
+issues.push({
+code: "ROUTE_CONTRACT_ERROR", message: String(e && e.message || e)
+});
+}
+["writeGateway_"].forEach(function(name) {
+! _phase0ContractIsFunctionName_(name) && issues.push({
+code: "WRITE_OWNER_MISSING", method: name
+});
+});
+var dtoChecks = {
+caseSearchRow: "function" == typeof AppBackendDTO.caseSearchRow, caseSearchEnvelope: "function" == typeof AppBackendDTO.caseSearchEnvelope, normalizeCaseSearchDto: "function" == typeof AppBackendCore.normalizeCaseSearchDto
+};
+Object.keys(dtoChecks).forEach(function(key) {
+! dtoChecks[key] && issues.push({
+code: "DTO_OWNER_MISSING", owner: key
+});
+});
+var canonicalCaseStatuses = AppBackendCore.CASE_STATUS || [], requiredCaseStatuses = ["เรื่องเข้าใหม่", "ไม่รับเรื่อง", "อนุฯ พิจารณา", "รอพิจารณา", "กมธ. พิจารณา", "ยุติเรื่อง", "ส่งหน่วยงาน", "จัดทำรายงาน"], statusContractOk = "function" == typeof AppBackendCore.normalizeCaseStatus && canonicalCaseStatuses.length === requiredCaseStatuses.length && requiredCaseStatuses.every(function(status) {
+return canonicalCaseStatuses.indexOf(status) >= 0 && AppBackendCore.normalizeCaseStatus(status, { strict: true }) === status
+});
+statusContractOk || issues.push({
+code: "CASE_STATUS_CONTRACT_NOT_READY", owner: "AppBackendCore.normalizeCaseStatus"
+});
+[["รับเรื่อง", "เรื่องเข้าใหม่"], ["อยู่ระหว่างดำเนินการ", "รอพิจารณา"], ["รอติดตาม", "รอพิจารณา"], ["ส่งหน่วยงานที่เกี่ยวข้อง", "ส่งหน่วยงาน"]].forEach(function(pair) {
+AppBackendCore.normalizeCaseStatus(pair[0]) !== pair[1] && issues.push({
+code: "CASE_STATUS_ALIAS_MISMATCH", source: pair[0], expected: pair[1]
+})
+});
+var directEntrypointPolicy = routeContract && routeContract.publicEntrypointPolicy || null, directEntrypointOk = !! (directEntrypointPolicy && true === directEntrypointPolicy.routerOnlyDefault && false === directEntrypointPolicy.publicWriteAllowed && true === directEntrypointPolicy.directApiWriteBlocked && true === directEntrypointPolicy.directApiReadBlocked && Array.isArray(directEntrypointPolicy.directEntrypoints) && directEntrypointPolicy.directEntrypoints.indexOf("apiRouter") >= 0);
+directEntrypointOk || issues.push({
+code: "ROUTER_DIRECT_ENTRYPOINT_POLICY_NOT_READY", owner: "Code_20_Router._routerDirectEntrypointPolicy_"
+});
+var notificationPolicy = "undefined" != typeof AppNotificationGateway && AppNotificationGateway ? AppNotificationGateway.policy: null, notificationBoundaryOk = !! (notificationPolicy && true === notificationPolicy.scheduledOnly && false === notificationPolicy.acceptsExternalTokenArgument && false === notificationPolicy.aiRouteMutation && "function" == typeof AppNotificationGateway.sendLineText);
+notificationBoundaryOk || issues.push({
+code: "AI_NOTIFICATION_BOUNDARY_NOT_READY", owner: "AppNotificationGateway"
+});
+_phase0ContractIsFunctionName_("sendLineMessageAPI") && issues.push({
+code: "PUBLIC_LINE_TOKEN_BRIDGE_STILL_PRESENT", method: "sendLineMessageAPI"
+});
+var securityBoundaryGate = null, phaseBContractGate = null, performanceGate = null, phase6SmokeGate = null, phase7ProductionGate = null, phase8LoadOrderGate = null;
+try {
+securityBoundaryGate = "function" == typeof AppBackendCore.phaseASecurityBoundaryStatus ? AppBackendCore.phaseASecurityBoundaryStatus(): null;
+securityBoundaryGate && ! securityBoundaryGate.ok && issues.push({
+code: "PHASEA_SECURITY_BOUNDARY_NOT_READY", details: securityBoundaryGate.issues || []
+})
+}
+catch(_phaseASecurityErr) {
+issues.push({
+code: "PHASEA_SECURITY_BOUNDARY_ERROR", message: String(_phaseASecurityErr && _phaseASecurityErr.message || _phaseASecurityErr)
+})
+}
+try {
+phaseBContractGate = "function" == typeof AppBackendCore.phaseBContractReleaseGateStatus ? AppBackendCore.phaseBContractReleaseGateStatus({ source: "phase0-contract-gate" }) : null;
+phaseBContractGate && !phaseBContractGate.ok && issues.push({
+code: "PHASEB_CONTRACT_RELEASE_GATE_NOT_READY", details: phaseBContractGate.issues || []
+})
+}
+catch(_phaseBGateErr) {
+issues.push({
+code: "PHASEB_CONTRACT_RELEASE_GATE_ERROR", message: String(_phaseBGateErr && _phaseBGateErr.message || _phaseBGateErr)
+})
+}
+try {
+performanceGate = "function" == typeof AppBackendCore.phase5PerformanceGateStatus ? AppBackendCore.phase5PerformanceGateStatus(): null;
+performanceGate && ! performanceGate.ok && issues.push({
+code: "PHASE5_PERFORMANCE_GATE_NOT_READY", details: performanceGate.missingHandlers || performanceGate.issues || []
+});
+}
+catch(_phase5GateErr) {
+issues.push({
+code: "PHASE5_PERFORMANCE_GATE_ERROR", message: String(_phase5GateErr && _phase5GateErr.message || _phase5GateErr)
+});
+}
+try {
+phase6SmokeGate = "function" == typeof AppBackendCore.phase6LiveSmokeMatrixStatus ? AppBackendCore.phase6LiveSmokeMatrixStatus(): null;
+phase6SmokeGate && ! phase6SmokeGate.ok && issues.push({
+code: "PHASE6_LIVE_SMOKE_STATIC_GATE_NOT_READY", details: phase6SmokeGate.issues || []
+});
+}
+catch(_phase6GateErr) {
+issues.push({
+code: "PHASE6_LIVE_SMOKE_STATIC_GATE_ERROR", message: String(_phase6GateErr && _phase6GateErr.message || _phase6GateErr)
+});
+}
+try {
+phase7ProductionGate = "function" == typeof AppBackendCore.phase7ProductionVerificationGateStatus ? AppBackendCore.phase7ProductionVerificationGateStatus({ source: "phase0-contract-gate" }): null;
+phase7ProductionGate && ! phase7ProductionGate.ok && issues.push({
+code: "PHASE7_PRODUCTION_VERIFICATION_STATIC_GATE_NOT_READY", details: phase7ProductionGate.issues || []
+});
+}
+catch(_phase7GateErr) {
+issues.push({
+code: "PHASE7_PRODUCTION_VERIFICATION_STATIC_GATE_ERROR", message: String(_phase7GateErr && _phase7GateErr.message || _phase7GateErr)
+});
+}
+try {
+phase8LoadOrderGate = "function" == typeof AppBackendCore.phase8LoadOrderDependencyStatus ? AppBackendCore.phase8LoadOrderDependencyStatus(): null;
+phase8LoadOrderGate && ! phase8LoadOrderGate.ok && issues.push({
+code: "PHASE8_LOAD_ORDER_GATE_NOT_READY", details: phase8LoadOrderGate.issues || []
+});
+}
+catch(_phase8GateErr) {
+issues.push({
+code: "PHASE8_LOAD_ORDER_GATE_ERROR", message: String(_phase8GateErr && _phase8GateErr.message || _phase8GateErr)
+});
+}
+return {
+ok: 0 === issues.length, stamp: String(lock.stamp || "phase0-contract-gate"), owner: String(lock.owner || "Code_00_PlatformCore.AppBackendCore"), generatedAt: (new Date).toISOString(), uiDomChanged: false, businessLogicChanged: false, issues: issues, contracts: {
+apiContractCount: apiNames.length, criticalApiCount: critical.length, routeContractOk: routeContract ? routeContract.ok: null, routeCount: routeContract ? routeContract.routeCount: null, readRouteCount: routeContract ? routeContract.readRouteCount: null, writeRouteCount: routeContract ? routeContract.writeRouteCount: null, publicRouteCount: routeContract ? routeContract.publicRouteCount: null, writeOwner: "writeGateway_", dtoOwner: "AppBackendDTO", printOwner: "AppPrint.printWithProfile", pagerOwner: "AppTablePager/AppTable.footer", performanceGateOwner: "AppBackendCore.phase5PerformanceGateStatus", phase5PerformanceGateOk: performanceGate ? performanceGate.ok: null, performanceTargetCount: performanceGate ? Number(performanceGate.targetCount || 0): 0, phase6SmokeOwner: "AppBackendCore.phase6LiveSmokeMatrixStatus", phase6SmokeStaticGateOk: phase6SmokeGate ? phase6SmokeGate.ok: null, phase6AutomatedTestCount: phase6SmokeGate ? Number(phase6SmokeGate.automatedTestCount || 0): 0, phase6ManualTestCount: phase6SmokeGate ? Number(phase6SmokeGate.manualTestCount || 0): 0, phase7ProductionVerificationOwner: "AppBackendCore.phase7ProductionVerificationGateStatus", phase7ProductionVerificationStaticGateOk: phase7ProductionGate ? phase7ProductionGate.ok: null, phase7ManualSignoffGroupCount: phase7ProductionGate ? Number((phase7ProductionGate.manualSignoffGroups || []).length || 0): 0, phase8LoadOrderOwner: "AppBackendCore.phase8LoadOrderDependencyStatus", phase8LoadOrderGateOk: phase8LoadOrderGate ? phase8LoadOrderGate.ok: null, phase8DomainOwnerCount: phase8LoadOrderGate ? Number(phase8LoadOrderGate.ownerCount || 0): 0, phaseASecurityBoundaryOwner: "AppBackendCore.phaseASecurityBoundaryStatus", phaseASecurityBoundaryOk: securityBoundaryGate ? securityBoundaryGate.ok: null, phaseASecurityIssueCount: securityBoundaryGate ? Number((securityBoundaryGate.issues || []).length): 0, phaseBContractReleaseOwner: "AppBackendCore.phaseBContractReleaseGateStatus", phaseBContractReleaseOk: phaseBContractGate ? phaseBContractGate.ok: null, phaseBDirectNegativePassed: phaseBContractGate && phaseBContractGate.directApiNegativeTests ? Number(phaseBContractGate.directApiNegativeTests.passed || 0): 0, caseStatusOwner: "AppBackendCore.normalizeCaseStatus", canonicalCaseStatuses: (AppBackendCore.CASE_STATUS || []).slice(), caseStatusContractOk: statusContractOk, directEntrypointPolicyOk: directEntrypointOk, notificationBoundaryOwner: "AppNotificationGateway", notificationBoundaryOk: notificationBoundaryOk
+}, phaseASecurityBoundary: securityBoundaryGate, phaseBContractRelease: phaseBContractGate, phase6LiveSmoke: phase6SmokeGate, phase7ProductionVerification: phase7ProductionGate, phase8LoadOrder: phase8LoadOrderGate, requiredSmoke: (lock.requiredSmoke || []).slice(), forbiddenChanges: (lock.forbiddenChanges || []).slice()
+};
+};
+function _phase0ContractGateSnapshot_() {
+return AppBackendCore.phase0ContractGateStatus({
+source: "server-snapshot"
+});
+}
+function apiGetPhase0ContractGate(payload) {
+var snapshot = _phase0ContractGateSnapshot_(), gateOk = !! (snapshot && snapshot.ok), issueCount = snapshot && Array.isArray(snapshot.issues) ? snapshot.issues.length: 0, message = gateOk ? "Phase 0 Contract Gate ผ่าน": "Phase 0 Contract Gate ไม่ผ่าน";
+return {
+ok: gateOk, data: snapshot, result: snapshot, msg: message, error: gateOk ? "": "PHASE0_CONTRACT_GATE_FAILED", meta: {
+contractOwner: "phase0-contract-gate", route: "apiGetPhase0ContractGate", gateOk: gateOk, issueCount: issueCount, contractStamp: String(snapshot && snapshot.stamp || "phase0-contract-gate")
+}
+};
+}
+
+AppBackendCore.PHASE1_OWNER_CONTRACT = {
+stamp: "phase1-runtime-owner-cleanup-2026-06-16", owner: "Scripts_Core_Runtime.AppProductionContract", singleOwners: {
+runtime: "AppRuntime", api: "AppApi.call", pager: "AppTablePager.renderStandardFooter/AppTable.footer", print: "AppPrint.printWithProfile", safeDom: "AppDom/AppProductionSafeDom", pageController: "AppPageController"
+}, pageScriptsMustCallOwners: true, fallbackPolicy: "fail-loud-after-owner-lock", uiDomChanged: false, businessLogicChanged: false
+};
+AppBackendCore.PRODUCTION_OWNER_CONTRACT = {
+stamp: "production-owner-contract-current",
+owner: "Code_00_PlatformCore.AppBackendCore",
+uiDomChanged: false,
+businessLogicChanged: false,
+singleOwners: {
+api: "Code_20_Router._apiRouteRegistry_",
+router: "Code_20_Router",
+write: "writeGateway_",
+print: "AppPrint.printWithProfile",
+pager: "AppTable.footer",
+ai: "Code_22_AiGateway"
+}
+};
+var AppBackendDTO = __APP_GLOBAL__.AppBackendDTO = __APP_GLOBAL__.AppBackendDTO || {
+};
+AppBackendDTO.VERSION = "dto-current", AppBackendDTO.caseSearchRow = function(row, seq) {
+return AppBackendCore.normalizeCaseSearchDto(row || {
+}, seq || "")
+}, AppBackendDTO.caseSearchEnvelope = function(rows, meta) {
+return meta = meta || {
+}, {
+ok: ! 0, rows: rows = Array.isArray(rows) ? rows: [], totalRecords: Number(meta.totalRecords || rows.length) || 0, page: Number(meta.page || 1) || 1, limit: Number(meta.limit || meta.pageSize || rows.length || 20) || 20, pageSize: Number(meta.pageSize || meta.limit || rows.length || 20) || 20, totalPages: Number(meta.totalPages || 1) || 1, dto: "case-search-flat-main-data-current", sourceOfTruth: "MainData"
+}
+}, AppBackendCore.ok = function(data, meta) {
+return {
+ok: ! 0, data: data = data || {
+}, rows: Array.isArray(data.rows) ? data.rows: void 0, totalRecords: data.totalRecords, msg: "สำเร็จ", meta: meta || {
+}, generatedAt: (new Date).toISOString()
+}
+}, AppBackendCore.fail = function(code, message, detail) {
+return {
+ok: ! 1, error: String(code || "APP_ERROR"), msg: String(message || "เกิดข้อผิดพลาด"), detail: detail || null, generatedAt: (new Date).toISOString()
+}
+}, AppBackendCore.text = function(value) {
+return String(null == value ? "": value).replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/\s+/g, " ").trim()
+}, AppBackendCore.pick = function(row, keys, defaultValue) {
+row = row || {
+}, keys = Array.isArray(keys) ? keys: [keys];
+for(var i = 0;
+i < keys.length;
+i ++ ) {
+var key, v = row[keys[i]];
+if(null != v && "" !== String(v).trim())return v
+}
+return defaultValue || ""
+}, AppBackendCore.normalizedKey = function(value) {
+return String(null == value ? "": value).replace(/[\u00A0\u200B-\u200D\uFEFF]/g, "").replace(/[\s\n\r\t\-–—_()（）\[\]{}:：\/\.]+/g, "").toLowerCase()
+}, AppBackendCore.pickNormalized = function(row, keys, defaultValue) {
+row = row || {
+}, keys = Array.isArray(keys) ? keys: [keys];
+for(var normalized = null, i = 0;
+i < keys.length;
+i ++ ) {
+var key = keys[i], v = row[key];
+if(null != v && "" !== String(v).trim())return v;
+normalized || (normalized = {
+}, Object.keys(row).forEach(function(k) {
+var nk = AppBackendCore.normalizedKey(k);
+nk &&! Object.prototype.hasOwnProperty.call(normalized, nk) && (normalized[nk] = row[k])
+}));
+var nkey = AppBackendCore.normalizedKey(key);
+if(null != (v = nkey ? normalized[nkey]: void 0) && "" !== String(v).trim())return v
+}
+return defaultValue || ""
+}, AppBackendCore.makePickNormalized = function(row, defaultValue) {
+return function(keys) {
+return AppBackendCore.pickNormalized(row, keys, defaultValue || "")
+}
+}, AppBackendCore.matrixToObjects = function(matrix, options) {
+if(options = options || {
+}, (matrix = Array.isArray(matrix) ? matrix: []).length < 2)return[];
+var width = 0;
+matrix.forEach(function(r) {
+width = Math.max(width, Array.isArray(r) ? r.length: 0)
+});
+for(var schema = Array.isArray(options.schema) ? options.schema: [], aliases = options.aliases || {
+}, appAliases = options.appAliases || {
+}, normalizeKey = _appIsFn_(options.normalizeKey) ? options.normalizeKey: AppBackendCore.normalizedKey, headerResolver = _appIsFn_(options.headerResolver) ? options.headerResolver: null, headers = (matrix[0] || []).slice(0, width).map(function(h, i) {
+var raw = String(null == h ? "": h).trim(), nk = normalizeKey(raw);
+return headerResolver ? headerResolver(raw, nk, i, aliases, appAliases, schema): appAliases && (appAliases[raw] || appAliases[nk]) || aliases && (aliases[raw] || aliases[nk]) || raw || schema[i] || "col" + (i + 1)
+}), rows = [], r = 1;
+r < matrix.length;
+r ++ ) {
+for(var line = Array.isArray(matrix[r]) ? matrix[r]: [], obj = {
+__rowNumber: r + 1
+}, any =! 1, c = 0;
+c < width;
+c ++ ) {
+var key = headers[c] || "col" + (c + 1), value = line[c];
+obj[key] = value, null != value && "" !== String(value).trim() && (any =! 0)
+}
+if(any) {
+var deleted = String(obj.isDeleted || obj.deleted || obj.deletedAt || obj["ลบ"] || "").trim().toLowerCase();
+(! 0 === options.includeDeleted || "true" !== deleted && "1" !== deleted && "deleted" !== deleted && "ลบ" !== deleted) && rows.push(obj)
+}
+}
+return rows
+}, AppBackendCore.location = function(row) {
+return {
+subdistrict: AppBackendCore.pick(row, ["ตำบล", "แขวง", "subdistrict", "tambon", "subDistrict"], ""), district: AppBackendCore.pick(row, ["อำเภอ", "เขต", "district", "amphoe", "ampur"], ""), province: AppBackendCore.pick(row, ["จังหวัด", "province"], "")
+}
+}, AppBackendCore.dateText = function(value) {
+if(_appIsFnName_("_appFormatThaiDate_"))return _appFormatThaiDate_(value);
+if(_appIsFnName_("_formatThaiDate_"))return _formatThaiDate_(value);
+if(null == value || "" === value)return"";
+try {
+var d = "[object Date]" === Object.prototype.toString.call(value) ? value: new Date(value), dd, mm, yy;
+return ! d || isNaN(d.getTime()) ? String(value || ""): ("0" + d.getDate()).slice(- 2) + "/" + ("0" + (d.getMonth() + 1)).slice(- 2) + "/" + (d.getFullYear() + 543)
+}
+catch(_e) {
+return String(value || "")
+}
+}, AppBackendCore.daysSince = function(value) {
+var d = _appIsFnName_("_appParseDate_") ? _appParseDate_(value): null;
+if(! d && _appIsFnName_("_parseThaiDate_") && (d = _parseThaiDate_(value)), ! d)try {
+d = new Date(value)
+}
+catch(_e) {
+d = null
+}
+return ! d || isNaN(d.getTime()) ? 0: Math.floor(((new Date).getTime() - d.getTime())/864e5)
+}, AppBackendCore.statusMeta = function(status, startDate) {
+var st = AppBackendCore.text(status), caseStatus = AppBackendCore.isCanonicalCaseStatus(st) ? st: "", done = caseStatus ? AppBackendCore.isTerminalCaseStatus(caseStatus): "รายงานแล้ว" === st || "คืนเงินแล้ว" === st, age = AppBackendCore.daysSince(startDate);
+return {
+status: st, ageDays: age, isDone: done, isOverdue15Days: ! done && age > 15, colorClass: done ? "status-green": ! done && age > 15 ? "status-red": ""
+}
+}, AppBackendCore.reportColumns = function() {
+return[ {
+key: "caseNo", label: "ลำดับเรื่อง"
+}, {
+key: "recNo", label: "เลขรับเรื่อง"
+}, {
+key: "recDateText", label: "วันที่รับเรื่อง"
+}, {
+key: "title", label: "ชื่อเรื่อง"
+}, {
+key: "considerationTitle", label: "ชื่อเรื่องพิจารณา (ถ้ามี)"
+}, {
+key: "petitioners", label: "ผู้เสนอญัตติ/ผู้ร้อง"
+}, {
+key: "status", label: "สถานะ"
+}, {
+key: "actions", label: "จัดการ"
+}
+]
+}, AppBackendCore.isDateLikeText = function(value) {
+var s = AppBackendCore.text(value);
+return/^\d{1,2}[\/\-.]\d{1,2}[\/\-.](?:19|20|25)\d{2}$/.test(s) || /^(?:19|20|25)\d{2}-\d{1,2}-\d{1,2}/.test(s) || /GMT|เวลาอินโดจีน|^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s/i.test(s)
+}, AppBackendCore.normalizeCaseSearchDto = function(row, seq) {
+row = row || {
+};
+function meetingHistoryText_(value) {
+return String(null == value ? "": value).replace(/[\u200B-\u200D\uFEFF]/g, "").split(/\r?\n/).map(function(line) {
+return String(line || "").replace(/[\t ]+/g, " ").trim()
+}).filter(Boolean).join("\n")
+}
+var pick = AppBackendCore.pick, caseNo = AppBackendCore.text(pick(row, ["caseNo", "caseNum", "runningNo", "orderNo", "ลำดับเรื่อง", "ลำดับ"], "")), recNo = AppBackendCore.text(pick(row, ["recNo", "receiveNo", "เลขรับเรื่อง", "เลขที่รับเรื่อง", "ทะเบียนรับ"], "")), recRaw = pick(row, ["recDate", "recDateText", "receiveDate", "receivedDate", "dateReceived", "receiveDateText", "receivedDateText", "วันที่รับเรื่อง", "วันรับเรื่อง"], ""), recDateText = AppBackendCore.dateText(recRaw);
+AppBackendCore.isDateLikeText(recNo) && (recNo = "");
+var title = AppBackendCore.text(pick(row, ["title", "subject", "caseTitleDisplay", "ชื่อเรื่อง", "เรื่อง", "เรื่องร้องเรียน"], "")), consideration = AppBackendCore.text(pick(row, ["considerationTitle", "caseConsiderationTitle", "caseTitle", "ชื่อเรื่องพิจารณา (ถ้ามี)", "ชื่อเรื่องพิจารณา", "เรื่องพิจารณา"], "")), petitioners = AppBackendCore.text(pick(row, ["petitioners", "petitionerName", "petitioner", "requester", "complainant", "proposer", "motionProposer", "ผู้เสนอญัตติ/ผู้ร้อง", "ผู้เสนอญัตติ", "ผู้ร้อง"], "")), respondent = AppBackendCore.text(pick(row, ["respondent", "agencyName", "accusedAgency", "accused", "agency", "หน่วยงาน / ผู้ถูกร้อง", "หน่วยงาน/ผู้ถูกร้อง", "ผู้ถูกร้อง", "หน่วยงาน"], "")), status = AppBackendCore.text(pick(row, ["status", "caseStatus", "processStatus", "currentStatus", "สถานะ", "สถานะเรื่อง", "สถานะปัจจุบัน"], "")), statusRaw = status;
+AppBackendCore.isDateLikeText(status) && (status = ""), status = AppBackendCore.normalizeCaseStatus(status, { defaultStatus: "เรื่องเข้าใหม่" });
+var loc = AppBackendCore.location(row), coOwners = AppBackendCore.text(pick(row, ["coOwners", "coAssignees", "ผู้ร่วมรับผิดชอบ", "ผู้รับผิดชอบร่วม"], "")), offerDateRaw = pick(row, ["offerDate", "offerDateText", "bookDate", "letterDate", "documentDate", "dateProposed", "proposalDate", "proposeDate", "submittedDate", "submitDate", "วันที่หนังสือ", "วันที่เสนอ", "วันที่เสนอเรื่อง", "วันที่ยื่น", "วันที่ยื่นเรื่อง"], ""), petitionerPhone = AppBackendCore.text(pick(row, ["petitionerPhone", "petitionerTel", "petitionerTelephone", "petitionerMobile", "petitionerContactPhone", "proposerPhone", "proposerTel", "proposerTelephone", "proposerMobile", "requesterPhone", "complainantPhone", "phone", "tel", "mobile", "telephone", "เบอร์โทรศัพท์ผู้เสนอญัตติ/ผู้ร้อง", "เบอร์โทรผู้เสนอญัตติ/ผู้ร้อง", "โทรศัพท์ผู้เสนอญัตติ/ผู้ร้อง", "เบอร์โทรศัพท์ผู้ร้อง", "เบอร์โทรศัพท์", "เบอร์โทร", "โทรศัพท์"], "")), closedReason = AppBackendCore.text(pick(row, ["closedReason", "closeReason", "terminateReason", "stopReason", "endReason", "caseCloseReason", "caseEndReason", "statusReason", "decisionReason", "reason", "remark", "note", "เหตุผล", "เหตุผลยุติเรื่อง", "เหตุผลการยุติเรื่อง", "หมายเหตุ"], "")), rejectionReason = AppBackendCore.text(pick(row, ["rejectionReason", "rejectReason", "notAcceptedReason", "notReceiveReason", "notAcceptReason", "caseRejectReason", "statusReason", "decisionReason", "reason", "remark", "note", "เหตุผล", "เหตุผล (ไม่รับเรื่อง)", "เหตุผลไม่รับเรื่อง", "เหตุผลการไม่รับเรื่อง", "หมายเหตุ"], "")), remark = AppBackendCore.text(pick(row, ["remark", "note", "หมายเหตุ"], "")), keySummary = AppBackendCore.text(pick(row, ["keySummary", "summary", "description", "สรุปสาระสำคัญ"], "")), committeeHistory = meetingHistoryText_(pick(row, ["committeeHistory", "committeeMeeting", "committeeMeetings", "committeeMeetingHistory", "meetingCommitteeHistory", "คณะกรรมาธิการ"], "")), subcommitteeHistory = meetingHistoryText_(pick(row, ["subcommitteeHistory", "subcommitteeMeeting", "subcommitteeMeetings", "subcommitteeMeetingHistory", "meetingSubcommitteeHistory", "คณะอนุกรรมาธิการ"], "")), out = {
+id: AppBackendCore.text(pick(row, ["id", "caseId", "รหัส"], "")), caseId: AppBackendCore.text(pick(row, ["caseId", "id", "รหัส"], "")), seq: seq || row.seq || "", caseNo: caseNo, caseNum: caseNo, runningNo: caseNo, recNo: recNo, receiveNo: recNo, recDate: recDateText, recDateText: recDateText, receiveDate: recDateText, receiveDateText: recDateText, offerDate: AppBackendCore.dateText(offerDateRaw), offerDateText: AppBackendCore.dateText(offerDateRaw), letterDate: AppBackendCore.dateText(offerDateRaw), documentDate: AppBackendCore.dateText(offerDateRaw), title: title, subject: title, considerationTitle: consideration, caseTitle: consideration, petitioners: petitioners, petitionerName: petitioners, fullName: petitioners, petitionerPhone: petitionerPhone, phone: petitionerPhone, tel: petitionerPhone, respondent: respondent, agency: respondent, agencyName: respondent, status: status || "เรื่องเข้าใหม่", statusRaw: statusRaw, cat: AppBackendCore.text(pick(row, ["cat", "caseType", "ประเภทเรื่อง", "ประเภท"], "")), subCat: AppBackendCore.text(pick(row, ["subCat", "issue", "ประเด็นพิจารณา", "ประเด็น"], "")), assignees: AppBackendCore.text(pick(row, ["assignees", "owner", "กมธ.รับผิดชอบ", "กรรมาธิการรับผิดชอบ"], "")), coAssignees: coOwners, coOwners: coOwners, opStaff: AppBackendCore.text(pick(row, ["opStaff", "staffs", "เจ้าหน้าที่ฝ่ายเลขานุการ", "เจ้าหน้าที่ฝ่ายปฏิบัติการ"], "")), committeeHistory: committeeHistory, committeeMeeting: committeeHistory, subcommitteeHistory: subcommitteeHistory, subcommitteeMeeting: subcommitteeHistory, closedReason: closedReason, rejectionReason: rejectionReason, reason: closedReason || rejectionReason || remark, remark: remark, note: remark, keySummary: keySummary, type: "case", typeLabel: "เรื่องพิจารณา", subdistrict: loc.subdistrict, district: loc.district, province: loc.province
+};
+return out["ลำดับเรื่อง"] = out.caseNo, out["เลขรับเรื่อง"] = out.recNo, out["วันที่รับเรื่อง"] = out.recDateText, out["ชื่อเรื่อง"] = out.title, out["ชื่อเรื่องพิจารณา (ถ้ามี)"] = out.considerationTitle, out["ผู้เสนอญัตติ/ผู้ร้อง"] = out.petitioners, out["ผู้ถูกร้อง"] = out.respondent, out["หน่วยงาน"] = out.agencyName, out["คณะกรรมาธิการ"] = out.committeeHistory, out["คณะอนุกรรมาธิการ"] = out.subcommitteeHistory, out["สถานะ"] = out.status, out.statusMeta = AppBackendCore.statusMeta(out.status, out.recDateText), out.reportColumns = {
+caseNo: out.caseNo, recNo: out.recNo, recDateText: out.recDateText, title: out.title, considerationTitle: out.considerationTitle, committeeHistory: out.committeeHistory, subcommitteeHistory: out.subcommitteeHistory, petitioners: out.petitioners, status: out.status
+}, out
+}, AppBackendCore.normalizeCaseSearchResponse = function(res) {
+res = res || {
+};
+for(var rows = Array.isArray(res.rows) ? res.rows: Array.isArray(res.data) ? res.data: [], i = 0;
+i < rows.length;
+i ++ )rows[i] = AppBackendCore.normalizeCaseSearchDto(rows[i], rows[i] && rows[i].seq || i + 1);
+return res.rows = rows, res.data = rows, res.items = rows, res.columns = AppBackendCore.reportColumns(), res.dto = "case-search-flat-main-data-current", res.owner = res.owner || "CaseDomain.searchCases", res.sourceOfTruth = "MainData", res
+}, AppBackendCore.validateContract = function(name, res) {
+var apiContract = AppBackendCore.getApiContract ? AppBackendCore.getApiContract({ includeRouterMirror: true }) : AppBackendCore.API_CONTRACT || {};
+var c = apiContract[name] || (AppBackendCore.findApiContractByMethod ? AppBackendCore.findApiContractByMethod(apiContract, name) : null);
+if(! c)return {
+ok: ! 0
+};
+res = res || {
+};
+var missing = [];
+(c.required || []).forEach(function(k) {
+void 0 !== res[k] || res.data && void 0 !== res.data[k] || missing.push(k)
+});
+var rowMissing = [], rows = Array.isArray(res.rows) ? res.rows: Array.isArray(res.data) ? res.data: [];
+return rows.length && (c.rowRequired || []).length && (c.rowRequired || []).forEach(function(k) {
+void 0 === rows[0][k] && rowMissing.push(k)
+}), {
+ok: 0 === missing.length && 0 === rowMissing.length, missing: missing, rowMissing: rowMissing, contract: c
+}
+};
+var AppRepository = __APP_GLOBAL__.AppRepository = __APP_GLOBAL__.AppRepository || {
+};
+AppRepository.owner = "Code_01_Platform_SheetRepo active facade only";
+AppRepository.getSpreadsheet = function() {
+return _appIsFnName_("getSpreadsheet_") ? getSpreadsheet_(): SpreadsheetApp.getActiveSpreadsheet()
+};
+AppRepository.getSheet = function(name) {
+return _appIsFnName_("getSheet_") ? getSheet_(name): function() {
+var sh = AppRepository.getSpreadsheet().getSheetByName(String(name || ""));
+if(! sh)throw new Error("SHEET_NOT_FOUND: " + name);
+return sh
+}
+()
+};
+AppRepository.readMatrix = function(name) {
+var r = AppRepository.getSheet(name).getDataRange();
+return r ? r.getValues(): []
+};
+AppRepository.getRangeValues = function(sheetName, row, col, numRows, numCols) {
+return AppRepository.getSheet(sheetName).getRange(Number(row) || 1, Number(col) || 1, Math.max(1, Number(numRows) || 1), Math.max(1, Number(numCols) || 1)).getValues()
+};
+AppRepository.setRangeValues = function(sheetName, row, col, values, options) {
+if(! (values = Array.isArray(values) ? values: []).length)return 0;
+var width = values.reduce(function(w, r) {
+return Math.max(w, Array.isArray(r) ? r.length: 1)
+}, 1), matrix = values.map(function(r) {
+for(r = Array.isArray(r) ? r: [r];
+r.length < width;
+)r.push("");
+return r
+});
+AppRepository.getSheet(sheetName).getRange(Number(row) || 1, Number(col) || 1, matrix.length, width).setValues(matrix);
+options &&! 1 === options.invalidate || AppRepository.invalidateDomain(String(options && options.domain || sheetName || "").toLowerCase());
+return matrix.length
+};
+AppRepository.setCellValue = function(sheetName, row, col, value, options) {
+return AppRepository.setRangeValues(sheetName, row, col, [[value]], options || {
+})
+};
+AppRepository.setRangeNumberFormat = function(sheetName, row, col, numRows, numCols, format) {
+AppRepository.getSheet(sheetName).getRange(Number(row) || 1, Number(col) || 1, Math.max(1, Number(numRows) || 1), Math.max(1, Number(numCols) || 1)).setNumberFormat(String(format || "@"));
+return ! 0
+};
+AppRepository.clearSheetContents = function(sheetName) {
+AppRepository.getSheet(sheetName).clearContents();
+AppRepository.invalidateDomain(String(sheetName || "").toLowerCase());
+return ! 0
+};
+AppRepository.clearRangeContent = function(sheetName, row, col, numRows, numCols) {
+AppRepository.getSheet(sheetName).getRange(Number(row) || 1, Number(col) || 1, Math.max(1, Number(numRows) || 1), Math.max(1, Number(numCols) || 1)).clearContent();
+AppRepository.invalidateDomain(String(sheetName || "").toLowerCase());
+return ! 0
+};
+AppRepository.flush = function() {
+try {
+return"undefined" != typeof SpreadsheetApp && SpreadsheetApp.flush && SpreadsheetApp.flush(), ! 0
+}
+catch(e) {
+return _appWarn_("repository.flush.failed", e, {
+owner: AppRepository.owner
+}), ! 1
+}
+};
+AppRepository.readObjects = function(sheetName, options) {
+return _appIsFnName_("readSheetObjects_") ? readSheetObjects_(sheetName, options || {
+}): AppBackendCore.matrixToObjects(AppRepository.readMatrix(sheetName), Object.assign({
+includeDeleted: ! 0
+}, options || {
+}))
+};
+AppRepository.page = function(rows, payload, defaultLimit, maxLimit) {
+rows = Array.isArray(rows) ? rows: [];
+payload = payload || {
+};
+var page = Math.max(1, Number(payload.page || 1) || 1), limit = Math.max(1, Number(payload.limit || payload.pageSize || defaultLimit || 20) || 20);
+maxLimit && (limit = Math.min(limit, Number(maxLimit)));
+if(! 0 === payload.noPage)return {
+rows: rows, totalRecords: rows.length, page: 1, limit: rows.length || limit, pageSize: rows.length || limit, totalPages: 1, serverPaged: ! 1
+};
+var st = (page - 1) * limit;
+return {
+rows: rows.slice(st, st + limit), totalRecords: rows.length, page: page, limit: limit, pageSize: limit, totalPages: Math.max(1, Math.ceil(rows.length/limit)), serverPaged: ! 0
+}
+};
+AppRepository.invalidateDomain = function(domain) {
+domain = String(domain || "").toLowerCase();
+if(_appIsFnName_("_writeGatewayShouldDeferInvalidation_") && _writeGatewayShouldDeferInvalidation_()) {
+var queued = _writeGatewayQueueInvalidationDomain_(domain);
+return queued ? [queued]: []
+}
+var out = [];
+try {
+__APP_GLOBAL__.AppDataService && AppDataService.invalidate && out.push(AppDataService.invalidate(domain, "AppRepository.invalidateDomain"))
+}
+catch(e) {
+_appWarn_("repository.invalidateDomain.AppDataService", e, {
+domain: domain
+})
+}
+try {
+_appIsFnName_("_AppCacheInvalidateDomain_") && out.push(_AppCacheInvalidateDomain_(domain))
+}
+catch(e2) {
+_appWarn_("repository.invalidateDomain.cacheStamp", e2, {
+domain: domain
+})
+}
+try {
+var c = CacheService.getScriptCache();
+[domain, domain + ":list", domain + ":search", domain + ":summary", domain + ":bundle", "dashboard", "dashboard:bundle"].forEach(function(k) {
+try {
+k && (!_appIsFnName_("_writeGatewayMarkCacheKey_") || _writeGatewayMarkCacheKey_(k)) && c.remove(String(k))
+}
+catch(_e) {
+_appIgnore_(_e, "c6.C00:460")
+}
+})
+}
+catch(e3) {
+_appWarn_("repository.invalidateDomain.cacheService", e3, {
+domain: domain
+})
+}
+return out
+};
+AppRepository.afterWrite = function(domains) {
+domains = Array.isArray(domains) ? domains: [domains];
+var out = [];
+domains.forEach(function(d) {
+out = out.concat(AppRepository.invalidateDomain(d))
+});
+return out
+};
+AppRepository.withWriteLock = function(label, fn) {
+if("function" != typeof fn)throw new Error("AppRepository.withWriteLock ต้องรับ callback");
+if("function" == typeof withWriteLock_)return withWriteLock_("repository:" + String(label || "write"), fn, 3e4);
+var lock = null, locked =! 1;
+try {
+if(! (locked = (lock = LockService.getScriptLock()).tryLock(3e4)))throw new Error("WRITE_LOCK_TIMEOUT: " + String(label || "repository"));
+return fn()
+}
+finally {
+try {
+locked && lock && lock.releaseLock()
+}
+catch(e) {
+_appIgnore_(e, "repository.lock.release")
+}
+}
+};
+AppRepository.writeObject = function(sheetName, idField, obj, options) {
+options = options || {
+};
+obj = obj || {
+};
+idField = String(idField || "id");
+return AppRepository.withWriteLock("writeObject:" + sheetName, function() {
+var id = String(obj[idField] || "").trim();
+id || (id = Utilities.getUuid(), obj[idField] = id);
+if(_appIsFnName_("findSheetObjectByKey_") && _appIsFnName_("updateSheetObjectByKey_") && _appIsFnName_("appendSheetObject_")) {
+var exists = findSheetObjectByKey_(sheetName, idField, id, {
+includeDeleted: ! 0
+});
+exists ? updateSheetObjectByKey_(sheetName, idField, id, ! 0 === options.replace ? obj: Object.assign({
+}, exists, obj)): appendSheetObject_(sheetName, obj);
+AppRepository.invalidateDomain(String(options.domain || sheetName || "").toLowerCase());
+return obj
+}
+var sh = AppRepository.getSheet(sheetName), lastRow = Math.max(1, sh.getLastRow() || 1), lastCol = Math.max(1, sh.getLastColumn() || 1), headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h) {
+return String(h || "").trim()
+}), idCol = headers.indexOf(idField);
+if(idCol < 0)throw new Error("SHEET_ID_FIELD_NOT_FOUND: " + sheetName + "." + idField);
+var target = 0, existing = [];
+if(lastRow > 1) {
+for(var ids = sh.getRange(2, idCol + 1, lastRow - 1, 1).getValues(), r = 0;
+r < ids.length;
+r ++ )if(String(ids[r][0] || "").trim() === id) {
+target = r + 2;
+break
+}
+target && (existing = sh.getRange(target, 1, 1, headers.length).getValues()[0] || [])
+}
+var row = headers.map(function(h, i) {
+return void 0 !== obj[h] ? obj[h]: ! 0 !== options.replace && target && existing[i] || ""
+});
+sh.getRange(target || lastRow + 1, 1, 1, headers.length).setValues([row]);
+AppRepository.invalidateDomain(String(options.domain || sheetName || "").toLowerCase());
+return obj
+})
+};
+AppDomain.Config = AppDomain.Config || {
+}, AppDomain.Config.getSpreadsheetId = AppDomain.Config.getSpreadsheetId || function() {
+return _getSpreadsheetId_()
+};
+var APP_RELEASE = APP_DEPLOY_RELEASE;
+function _appRelease_() {
+return APP_RELEASE
+}
+function _appSharedPad2_(value) {
+return((value = Number(value) || 0) < 10 ? "0": "") + String(value)
+}
+function _appPhoneForDisplay_(value) {
+var raw = String(null == value ? "": value).replace(/^'+/, "").replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+if(! raw)return"";
+var digits = raw.replace(/[^0-9]/g, "");
+return/^660[689]\d{8}$/.test(digits) ? digits.slice(2): /^66[689]\d{8}$/.test(digits) ? "0" + digits.slice(2): /^[689]\d{8}$/.test(digits) || /^2\d{7}$/.test(digits) ? "0" + digits: /^0\d{7,9}$/.test(digits) ? digits: /^0?\d{8,10}$/.test(digits) && raw === digits ? "0" === digits.charAt(0) ? digits: "0" + digits: raw
+}
+function _appPhoneForSheet_(value) {
+var raw = _appPhoneForDisplay_(value);
+return raw ? /^0\d{6,}$/.test(raw) ? "'" + raw: raw: ""
+}
+function _appThaiDateText_(value) {
+if(null == value)return"";
+if("[object Date]" === Object.prototype.toString.call(value) &&! isNaN(value.getTime())) {
+var y = value.getFullYear();
+return y < 2400 && (y += 543), _appSharedPad2_(value.getDate()) + "/" + _appSharedPad2_(value.getMonth() + 1) + "/" + y
+}
+var raw = String(value || "").trim();
+if(! raw)return"";
+var m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+if(m) {
+var y1 = Number(m[3]);
+return y1 < 2400 && (y1 += 543), _appSharedPad2_(m[1]) + "/" + _appSharedPad2_(m[2]) + "/" + y1
+}
+var iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+if(iso) {
+var y2 = Number(iso[1]);
+return y2 < 2400 && (y2 += 543), _appSharedPad2_(iso[3]) + "/" + _appSharedPad2_(iso[2]) + "/" + y2
+}
+if(/GMT|เวลาอินโดจีน/.test(raw)) {
+var d = new Date(raw.replace(/\s*\(.*?\)\s*/g, " ").replace(/เวลาอินโดจีน/g, ""));
+if(! isNaN(d.getTime())) {
+var y3 = d.getFullYear();
+return y3 < 2400 && (y3 += 543), _appSharedPad2_(d.getDate()) + "/" + _appSharedPad2_(d.getMonth() + 1) + "/" + y3
+}
+}
+return raw
+}
+function getDeploymentProfile_(payload) {
+var env;
+return payload = payload || {
+}, {
+environment: String(payload.environment || _scriptProp_("APP_ENVIRONMENT", APP_RELEASE.channel || "production") || "production").toLowerCase(), channel: APP_RELEASE.channel, stamp: APP_RELEASE.stamp, assetStamp: APP_RELEASE.assetStamp, generatedAt: (new Date).toISOString()
+}
+}
+function getRuntimeOperationalPolicy_() {
+return {
+contract: "policy-current"
+}
+}
+function _getRuntimeConfigBundle_() {
+return {
+release: APP_RELEASE, deployment: getDeploymentProfile_({
+}), policy: getRuntimeOperationalPolicy_()
+}
+}
+function getProductionContractSpec_() {
+return {
+stamp: "contract-current", generatedAt: (new Date).toISOString()
+}
+}
+function _performanceBudgets_() {
+return {
+maxResponseBytesDefault: 7e5, maxRowsReadDefault: 2500, maxDurationMsDefault: 25e3, maxInitialPayloadBytes: 5e5
+}
+}
+function _estimateJsonBytes_(value) {
+try {
+return Utilities.newBlob(JSON.stringify(null == value ? null: value)).getBytes().length
+}
+catch(_e) {
+_recordWarning_("ec", _e);
+try {
+return JSON.stringify(value || "").length
+}
+catch(_e2) {
+return 0
+}
+}
+}
+function _materializedCacheKey_(key, scope) {
+var base = "materialized:" + String(key || "");
+if(null == scope || "" === scope)return base;
+var seed = base + ":" + JSON.stringify(scope);
+return base + ":" + (_appIsFnName_("_hashPassword_") ? _hashPassword_(seed).slice(0, 32): String(seed).slice(0, 64))
+}
+function _materializedGet_(key, scope) {
+try {
+var k = _materializedCacheKey_(key, scope), v = _AppCacheGetJson_(k);
+return null == v ? null: {
+hit: ! 0, key: k, value: v
+}
+}
+catch(_e) {
+return _recordWarning_("materialized.get", _e, {
+key: key
+}), null
+}
+}
+function _materializedPut_(key, scopeOrValue, valueOrTtl, ttlMaybe) {
+try {
+var scoped = arguments.length >= 4, scope, value = scoped ? valueOrTtl: scopeOrValue, ttl = scoped ? ttlMaybe: valueOrTtl;
+return _AppCachePutJson_(_materializedCacheKey_(key, scoped ? scopeOrValue: ""), value, ttl || 600)
+}
+catch(_e) {
+return _recordWarning_("materialized.put", _e, {
+key: key
+}), ! 1
+}
+}
+function _noteResponseBudget_(method, response) {
+try {
+return {
+method: String(method || ""), bytes: _estimateJsonBytes_(response), budgets: _performanceBudgets_()
+}
+}
+catch(_e) {
+return _recordWarning_("responseBudget.note", _e, {
+method: method
+}), null
+}
+}
+var __APP_EXEC_CACHE__ = __APP_GLOBAL__.__APP_EXEC_CACHE__ = __APP_GLOBAL__.__APP_EXEC_CACHE__ || {
+}, __APP_ACTIVE_EXECUTION_GUARD__ = __APP_GLOBAL__.__APP_ACTIVE_EXECUTION_GUARD__ || null, __APP_EXECUTION_GUARD_STAMP__ = __APP_GLOBAL__.__APP_EXECUTION_GUARD_STAMP__ || "deadline-guard-zero-debt-current";
+function createExecutionGuard_(options) {
+options = options || {
+};
+var startedAt = Date.now(), maxMs = Math.max(1e3, Number(options.maxMs || 33e4)), warningMs = Math.max(0, Math.min(maxMs, Number(options.warningMs || Math.floor(.85 * maxMs)))), checks = [];
+function elapsedMs() {
+return Date.now() - startedAt
+}
+function timeLeftMs() {
+return Math.max(0, maxMs - elapsedMs())
+}
+function check(stage, detail) {
+var snapshot = {
+stage: String(stage || "check"), elapsedMs: elapsedMs(), timeLeftMs: timeLeftMs(), detail: detail || null
+};
+if(checks.push(snapshot), warningMs && snapshot.elapsedMs >= warningMs && _appIsFnName_("_recordWarning_") && _recordWarning_("r5.1.executionGuard.warning", new Error("execution guard warning"), {
+stage: snapshot.stage, elapsedMs: snapshot.elapsedMs, label: String(options.label || options.route || "")
+}), snapshot.elapsedMs >= maxMs)throw new Error("Execution deadline reached: " + snapshot.stage);
+return snapshot
+}
+return {
+stamp: __APP_EXECUTION_GUARD_STAMP__, label: String(options.label || options.route || "execution"), startedAt: startedAt, maxMs: maxMs, warningMs: warningMs, elapsedMs: elapsedMs, timeLeftMs: timeLeftMs, isNearDeadline: function() {
+return elapsedMs() >= warningMs
+}, shouldStop: function() {
+return elapsedMs() >= maxMs
+}, check: check, throwIfNearDeadline: check, snapshot: function() {
+return {
+stamp: __APP_EXECUTION_GUARD_STAMP__, label: String(options.label || options.route || "execution"), startedAt: startedAt, elapsedMs: elapsedMs(), timeLeftMs: timeLeftMs(), maxMs: maxMs, checks: checks.slice(- 20)
+}
+}
+}
+}
+function _setActiveExecutionGuard_(guard) {
+var previous = __APP_GLOBAL__.__APP_ACTIVE_EXECUTION_GUARD__ || null;
+return __APP_GLOBAL__.__APP_ACTIVE_EXECUTION_GUARD__ = guard || null, __APP_ACTIVE_EXECUTION_GUARD__ = guard || null, previous
+}
+/**
+* Builds the single production log envelope consumed by Apps Script Cloud Logging.
+* The helper never stores authentication secrets and preserves the existing
+* _serverLog_(level, label, detail) contract for all callers.
+*
+* @param {string} level
+* @param {string} label
+* @param {*} detail
+* @return {!Object}
+*/
+function _structuredLogEnvelope_(level, label, detail) {
+var now = new Date(), raw = detail && "object" == typeof detail ? detail: {
+value: null == detail ? null: String(detail)
+}, safeDetail = null;
+try {
+safeDetail = _appIsFnName_("_redactSecurityAuditValue_") ? _redactSecurityAuditValue_(raw): raw
+}
+catch(_redactLogErr) {
+safeDetail = {
+redactionFailed: ! 0, message: String(_redactLogErr && _redactLogErr.message || _redactLogErr).slice(0, 240)
+}
+}
+var requestId = String(raw.requestId || raw.reqId || raw.correlationId || ""), durationValue = Number(raw.durationMs);
+return {
+schemaVersion: "commission.log.v1", timestamp: now.toISOString(), severity: String(level || "info").toUpperCase(), event: String(label || "app"), eventId: "evt_" + now.getTime() + "_" + Math.floor(1e6 * Math.random()), component: String(raw.component || raw.owner || String(label || "app").split(".")[0] || "app"), requestId: requestId, correlationId: String(raw.correlationId || requestId || ""), method: String(raw.method || ""), errorCode: String(raw.errorCode || raw.code || ""), durationMs: isFinite(durationValue) ? durationValue: null, detail: safeDetail
+}
+}
+/**
+* Writes one redacted JSON record. console.* is preferred because Apps Script
+* forwards it to Cloud Logging; Logger.log remains the compatibility fallback.
+*
+* @param {string} level
+* @param {string} label
+* @param {*} detail
+* @return {boolean}
+*/
+function _serverLog_(level, label, detail) {
+level = String(level || "info").toLowerCase(), label = String(label || "app").trim() || "app";
+try {
+var payload = _structuredLogEnvelope_(level, label, detail), line = JSON.stringify(payload), consoleMethod = "error" === level ? "error": "warn" === level ? "warn": "log";
+"undefined" != typeof console && console && "function" == typeof console[consoleMethod] ? console[consoleMethod](line): Logger.log("%s", line)
+}
+catch(_logErr) {
+try {
+Logger.log("[" + level.toUpperCase() + "] " + label + " " + String(_logErr && _logErr.message || _logErr))
+}
+catch(_ignoreLogErr) {
+_appIgnore_(_ignoreLogErr, "c.s")
+}
+}
+return ! 1
+}
+function _logWarn_(label, detail) {
+return _serverLog_("warn", label, detail)
+}
+function _safeErrorSummary_(error, detail) {
+var message = "", name = "", stack = "";
+try {
+message = String(error && error.message || error || ""), name = String(error && error.name || ""), stack = String(error && error.stack || "").split("\n").slice(0, 3).join(" | ")
+}
+catch(_summaryErr) {
+message = "unknown error"
+}
+var safeDetail = null;
+try {
+safeDetail = null == detail ? null: JSON.parse(JSON.stringify(detail, function(key, value) {
+return/token|password|csrf|secret|authorization|cookie/i.test(String(key || "")) ? "[REDACTED]": "string" == typeof value && value.length > 320 ? value.slice(0, 320) + "…": value
+}))
+}
+catch(_detailErr) {
+try {
+safeDetail = String(detail || "").slice(0, 320)
+}
+catch(_defaultDetailErr) {
+safeDetail = null
+}
+}
+return {
+error: message.slice(0, 500), name: name.slice(0, 120), stack: stack.slice(0, 900), detail: safeDetail
+}
+}
+function _traceEnsureRequestMetrics_() {
+try {
+return void 0 !== __APP_REQUEST_SCOPE_METRICS__ && __APP_REQUEST_SCOPE_METRICS__ ? (__APP_REQUEST_SCOPE_METRICS__.warnings = Number(__APP_REQUEST_SCOPE_METRICS__.warnings || 0), __APP_REQUEST_SCOPE_METRICS__.errors = Number(__APP_REQUEST_SCOPE_METRICS__.errors || 0), __APP_REQUEST_SCOPE_METRICS__.warnLabels = __APP_REQUEST_SCOPE_METRICS__.warnLabels || {
+}, __APP_REQUEST_SCOPE_METRICS__.errorLabels = __APP_REQUEST_SCOPE_METRICS__.errorLabels || {
+}, __APP_REQUEST_SCOPE_METRICS__): null
+}
+catch(_traceMetricsErr) {
+return _appIsFnName_("_recordWarning_") && _recordWarning_("observed.catch", _traceMetricsErr, {
+file: "C00"
+}), null
+}
+}
+function _traceMetricLabelBump_(kind, label) {
+try {
+var m = _traceEnsureRequestMetrics_();
+if(! m)return ! 1;
+var bucket = "error" === kind ? "errorLabels": "warnLabels";
+return m[bucket] = m[bucket] || {
+}, label = String(label || kind || "event").slice(0, 120), m[bucket][label] = Number(m[bucket][label] || 0) + 1, "error" === kind ? m.errors = Number(m.errors || 0) + 1: m.warnings = Number(m.warnings || 0) + 1, ! 0
+}
+catch(_traceBumpErr) {
+return _appIsFnName_("_recordWarning_") && _recordWarning_("observed.catch", _traceBumpErr, {
+file: "C00"
+}), ! 1
+}
+}
+function _traceNoteWarning_(label) {
+return _traceMetricLabelBump_("warn", label)
+}
+function _traceNoteError_(label) {
+return _traceMetricLabelBump_("error", label)
+}
+function _traceObservabilityConfig_() {
+function flag(name, defaultValue) {
+try {
+var v = _appIsFnName_("_scriptProp_") ? String(_scriptProp_(name, defaultValue ? "Y": "N") || ""): "";
+return"Y" === (v = String(v || "").trim().toUpperCase()) || "YES" === v || "TRUE" === v || "1" === v || "ON" === v
+}
+catch(_flagErr) {
+return !! defaultValue
+}
+}
+var num = __Code_00_PlatformCore_num;
+function __Code_00_PlatformCore_num(name, defaultValue) {
+try {
+var v = _appIsFnName_("_scriptProp_") ? Number(_scriptProp_(name, defaultValue)): Number(defaultValue);
+return isFinite(v) ? v: Number(defaultValue)
+}
+catch(_numErr) {
+return Number(defaultValue)
+}
+}
+return {
+stamp: "observability-current", logAll: flag("OBSERVABILITY_LOG_ALL", ! 1), logStart: flag("OBSERVABILITY_LOG_START", ! 1), slowMs: num("OBSERVABILITY_SLOW_MS", 800), heavyRows: num("OBSERVABILITY_HEAVY_ROWS", 500), warningThreshold: num("OBSERVABILITY_WARNING_THRESHOLD", 1), maxPayloadPreviewBytes: num("OBSERVABILITY_MAX_PREVIEW_BYTES", 900), sampleApiPerf: flag("API_PERF_SAMPLE_ENABLED", ! 1)
+}
+}
+function _traceSanitizeValue_(value, depth) {
+if((depth = Number(depth || 0)) > 3)return"[MAX_DEPTH]";
+if(null == value)return value;
+if("string" == typeof value)return value.length > 260 ? value.slice(0, 260) + "…": value;
+if("number" == typeof value || "boolean" == typeof value)return value;
+if(value instanceof Date)return value.toISOString();
+if(Array.isArray(value))return value.slice(0, 8).map(function(item) {
+return _traceSanitizeValue_(item, depth + 1)
+});
+if("object" == typeof value) {
+var out = {
+};
+return Object.keys(value).slice(0, 30).forEach(function(k) {
+if(/token|password|csrf|secret|authorization|cookie|hash/i.test(String(k || "")))return out[k] = "[REDACTED]", void 0;
+out[k] = _traceSanitizeValue_(value[k], depth + 1)
+}), out
+}
+return String(value)
+}
+function _traceLog_(level, label, detail) {
+try {
+return _serverLog_(level || "info", label || "observability.core", _traceSanitizeValue_(detail || {
+}, 0))
+}
+catch(_traceLogErr) {
+return _appIsFnName_("_recordWarning_") && _recordWarning_("observed.catch", _traceLogErr, {
+file: "C00"
+}), ! 1
+}
+}
+function _routeTraceStart_(ctx) {
+try {
+ctx = ctx || {
+};
+var cfg = _traceObservabilityConfig_();
+return ctx.traceState = {
+stamp: cfg.stamp, startedAt: Date.now(), method: String(ctx.method || ""), requestId: String(ctx.requestId || ""), group: String(ctx.routeMeta && (ctx.routeMeta.group || ctx.routeMeta.domain) || "general")
+}, cfg.logStart && _traceLog_("info", "observability.api.start", {
+method: ctx.traceState.method, requestId: ctx.traceState.requestId, group: ctx.traceState.group, at: (new Date).toISOString()
+}), ctx.traceState
+}
+catch(_traceStartErr) {
+return _traceNoteWarning_("observability.trace.start.failed"), null
+}
+}
+function _routeTraceEnd_(ctx, normalized, status) {
+try {
+ctx = ctx || {
+}, normalized = normalized && "object" == typeof normalized ? normalized: {
+};
+var cfg = _traceObservabilityConfig_(), metrics = "function" == typeof getRequestScopeMetrics_ ? getRequestScopeMetrics_(): {
+}, perf = normalized.perf || {
+}, durationMs = Number(normalized.latencyMs || perf.durationMs || Date.now() - Number(ctx.startedAt || Date.now())), rowsRead = Number(perf.rowsRead || metrics.rowsRead || 0), warningCount = Number(metrics.warnings || 0), errorCount = Number(metrics.errors || 0), ok =! 1 !== normalized.ok &&! normalized.errorCode, sample = {
+stamp: cfg.stamp, status: String(status || (ok ? "ok": "error")), method: String(ctx.method || normalized.method || ""), requestId: String(ctx.requestId || normalized.requestId || ""), group: String(ctx.routeMeta && (ctx.routeMeta.group || ctx.routeMeta.domain) || perf.group || "general"), ok: !! ok, durationMs: durationMs, rowsRead: rowsRead, payloadBytes: Number(perf.payloadBytes || 0), performanceGateStatus: String(perf.gate && perf.gate.status || normalized.performanceGateStatus || "not-profiled"), cacheHit: ! (! perf.cacheHit &&! metrics.cacheHit), cacheHits: Number(perf.cacheHits || metrics.cacheHits || 0), cacheMisses: Number(perf.cacheMisses || metrics.cacheMisses || 0), source: String(perf.source || normalized.cacheSource || normalized.source || "apiRouter"), degraded: ! (! perf.degraded &&! normalized.degraded), warningCount: warningCount, errorCount: errorCount, errorCode: String(normalized.errorCode || ""), warnLabels: _traceSanitizeValue_(metrics.warnLabels || {
+}, 0), errorLabels: _traceSanitizeValue_(metrics.errorLabels || {
+}, 0), sheetsRead: _traceSanitizeValue_(metrics.sheetsRead || {
+}, 0), at: (new Date).toISOString()
+}, targetMs = _appIsFnName_("_appPerformanceTargetMs_") ? _appPerformanceTargetMs_(sample.method): 0;
+targetMs && (sample.targetMs = targetMs, sample.overTarget = durationMs >= targetMs, sample.note = sample.overTarget ? "over-target": "within-target");
+var shouldLog = cfg.logAll ||! sample.ok || durationMs >= cfg.slowMs || rowsRead >= cfg.heavyRows || warningCount >= cfg.warningThreshold || errorCount > 0 || targetMs && durationMs >= targetMs;
+return shouldLog && _traceLog_(sample.ok ? "info": "error", "observability.api.end", sample), ! 0 !== cfg.sampleApiPerf ||! _appIsFnName_("_recordPerformanceSample_") || sample.ok &&! shouldLog || _recordPerformanceSample_(sample), sample
+}
+catch(_traceEndErr) {
+return _traceNoteWarning_("observability.trace.end.failed"), null
+}
+}
+function _recordWarning_(label, error, detail) {
+_traceNoteWarning_(label = String(label || "swallowed.error"));
+try {
+var cache = _appIsFnName_("_execCache_") ? _execCache_(): __APP_GLOBAL__.__APP_EXEC_CACHE__ || {
+};
+cache.warnThrottle = cache.warnThrottle || {
+};
+var now = Date.now(), prev = Number(cache.warnThrottle[label] || 0);
+if(cache.warnThrottle[label] = now, prev && now - prev < 15e3)return ! 1;
+var critical = /auth|csrf|token|session|login|logout|write|save|delete|print|router|budget|case|meeting|tracking|AppPrint|AppPageController/i.test(label);
+return _serverLog_(critical ? "error": "warn", label, Object.assign({
+criticalPath: critical
+}, _safeErrorSummary_(error, detail) || {
+}))
+}
+catch(_recordWarningErr) {
+try {
+Logger.log("[WARN] " + label + " " + String(error && error.message || error || "") + " / recordWarningFailed=" + String(_recordWarningErr && _recordWarningErr.message || _recordWarningErr))
+}
+catch(_ignoreWarnErr) {
+return _appIsFnName_("_recordWarning_") && _recordWarning_("observed.catch", _ignoreWarnErr, {
+file: "C00"
+}), ! 1
+}
+return ! 1
+}
+}
+function _logApiFailure_(label, error, detail) {
+_traceNoteError_(label = String(label || "api.failure"));
+try {
+return _serverLog_("error", label, _safeErrorSummary_(error, detail))
+}
+catch(_logApiFailureErr) {
+return _recordWarning_("api.failure.log.failed", _logApiFailureErr, {
+label: label
+})
+}
+}
+function _execCache_() {
+return __APP_EXEC_CACHE__ || (__APP_GLOBAL__.__APP_EXEC_CACHE__ = {
+})
+}
+function _scriptPropertiesService_() {
+return PropertiesService.getScriptProperties()
+}
+function _scriptPropertiesSnapshot_(forceRefresh) {
+var cache = _execCache_();
+if(! forceRefresh && cache.scriptPropertiesSnapshot && "object" == typeof cache.scriptPropertiesSnapshot)return cache.scriptPropertiesSnapshot;
+var props = {
+};
+try {
+props = _scriptPropertiesService_().getProperties() || {
+}
+}
+catch(err) {
+_logWarn_("properties.snapshot", {
+error: String(err && err.message || err)
+}), props = {
+}
+}
+return cache.scriptPropertiesSnapshot = props, cache.scriptPropertiesLoadedAt = Date.now(), props
+}
+function _scriptProp_(key, defaultValue) {
+if(! (key = String(key || "").trim()))return defaultValue;
+var props = _scriptPropertiesSnapshot_();
+return Object.prototype.hasOwnProperty.call(props, key) ? props[key]: defaultValue
+}
+function _productionHotPathFullSheetReadAllowed_(owner) {
+owner = String(owner || "").trim() || "unknown";
+var raw = String(_scriptProp_("ALLOW_HOT_PATH_FULL_SHEET_READ", "N") || "N").trim().toUpperCase(), allowed = "Y" === raw || "YES" === raw || "TRUE" === raw || "1" === raw || "ON" === raw;
+if(! allowed)try {
+_logWarn_("production.hotPath.fullSheetRead.blocked", {
+owner: owner, property: "ALLOW_HOT_PATH_FULL_SHEET_READ", expected: "Y only for emergency migration read"
+})
+}
+catch(_e) {
+_appIgnore_(_e, "c.s")
+}
+return allowed
+}
+function _scriptPropertiesGovernancePolicy_() {
+var mode = String(_scriptProp_("SCRIPT_PROPERTIES_WRITE_MODE", "READ_ONLY") || "READ_ONLY").trim().toUpperCase(), allow = String(_scriptProp_("ALLOW_SCRIPT_PROPERTIES_WRITE", _scriptProp_("APP_ALLOW_SCRIPT_PROPERTIES_WRITE", "N")) || "N").trim().toUpperCase(), setupUnlocked = "SETUP_UNLOCKED" === mode || "MIGRATION_UNLOCKED" === mode || "WRITE_UNLOCKED" === mode, explicitAllow = "Y" === allow || "YES" === allow || "TRUE" === allow || "1" === allow;
+return {
+stamp: "script-properties-read-only-governance-current", mode: mode, readOnly: ! (setupUnlocked || explicitAllow), setupUnlocked: setupUnlocked, explicitAllow: explicitAllow, writeOwner: "_setScriptProp_/_setScriptProps_/_deleteScriptProp_", projectSettingsAreSourceOfTruth: ! 0, runtimeAutoCreateDisabled: ! 0
+}
+}
+function _scriptPropertiesReadOnly_() {
+return !! _scriptPropertiesGovernancePolicy_().readOnly
+}
+function _scriptPropertiesRuntimeWritesAllowed_() {
+return ! _scriptPropertiesReadOnly_()
+}
+function _scriptPropertyWriteError_(operation, key, context) {
+var ctx = context && "object" == typeof context ? context: {
+};
+return new Error("Script Properties are read-only in Production Final: " + String(operation || "write") + " " + String(key || "") + ". ตั้งค่าผ่าน Project Settings เท่านั้น หรือเปิด SCRIPT_PROPERTIES_WRITE_MODE=SETUP_UNLOCKED ชั่วคราวเฉพาะช่วง setup. context=" + JSON.stringify(ctx))
+}
+function _assertScriptPropertiesWriteAllowed_(operation, key, context) {
+if(_scriptPropertiesRuntimeWritesAllowed_())return ! 0;
+throw _scriptPropertyWriteError_(operation, key, context)
+}
+function _setScriptProp_(key, value, context) {
+if(! (key = String(key || "").trim()))return ! 1;
+_assertScriptPropertiesWriteAllowed_("setProperty", key, context || {
+}), _scriptPropertiesService_().setProperty(key, String(null == value ? "": value));
+try {
+_scriptPropertiesSnapshot_(! 0)
+}
+catch(_e) {
+_recordWarning_("properties.snapshot.refresh", _e)
+}
+return ! 0
+}
+function _setScriptProps_(values, context) {
+values = values && "object" == typeof values ? values: {
+};
+var clean = {
+};
+Object.keys(values).forEach(function(k) {
+var key = String(k || "").trim();
+key && (clean[key] = String(null == values[k] ? "": values[k]))
+});
+var keys = Object.keys(clean);
+if(! keys.length)return ! 1;
+_assertScriptPropertiesWriteAllowed_("setProperties", keys.join(","), context || {
+}), _scriptPropertiesService_().setProperties(clean, ! 1);
+try {
+_scriptPropertiesSnapshot_(! 0)
+}
+catch(_e) {
+_recordWarning_("properties.snapshot.refresh", _e)
+}
+return ! 0
+}
+function _deleteScriptProp_(key, context) {
+if(! (key = String(key || "").trim()))return ! 1;
+_assertScriptPropertiesWriteAllowed_("deleteProperty", key, context || {
+}), _scriptPropertiesService_().deleteProperty(key);
+try {
+_scriptPropertiesSnapshot_(! 0)
+}
+catch(_e) {
+_recordWarning_("properties.snapshot.refresh", _e)
+}
+return ! 0
+}
+function _runtimeStateCacheKey_(key) {
+key = String(key || "").trim();
+try {
+return"rt_state_" + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, key, Utilities.Charset.UTF_8)).replace(/=+$/g, "").slice(0, 48)
+}
+catch(_e) {
+return"rt_state_" + key.replace(/[^A-Za-z0-9_\-]/g, "_").slice(0, 80)
+}
+}
+function _runtimeStateGet_(key, defaultValue) {
+if(! (key = String(key || "").trim()))return defaultValue;
+var exec = _execCache_();
+if(exec.runtimeState = exec.runtimeState || {
+}, Object.prototype.hasOwnProperty.call(exec.runtimeState, key))return exec.runtimeState[key];
+try {
+var cache = _appIsFnName_("_AppScriptCache_") ? _AppScriptCache_(): null, raw = cache ? cache.get(_runtimeStateCacheKey_(key)): null;
+if(null != raw)return exec.runtimeState[key] = raw, raw
+}
+catch(_e) {
+_appIgnore_(_e, "c.s")
+}
+return defaultValue
+}
+function _runtimeStateSet_(key, value, ttlSeconds) {
+if(! (key = String(key || "").trim()))return ! 1;
+var raw = String(null == value ? "": value), exec = _execCache_();
+exec.runtimeState = exec.runtimeState || {
+}, exec.runtimeState[key] = raw;
+try {
+var cache = _appIsFnName_("_AppScriptCache_") ? _AppScriptCache_(): null;
+cache && cache.put(_runtimeStateCacheKey_(key), raw, Math.max(30, Math.min(Number(ttlSeconds || 21600) || 21600, 21600)))
+}
+catch(_e) {
+_appIgnore_(_e, "c.s")
+}
+return ! 0
+}
+function _hmacSecret_() {
+var secret = String(_scriptProp_("APP_HMAC_SECRET", "") || "").trim();
+if(secret)return secret;
+var pepper = String(_scriptProp_("PASSWORD_PEPPER", "") || "").trim();
+if(pepper)return _hmacSha256Hex_("committee-app-hmac-secret-bootstrap|" + pepper, pepper);
+if(_scriptPropertiesReadOnly_())throw new Error("APP_HMAC_SECRET หรือ PASSWORD_PEPPER ยังไม่ได้ตั้งค่าใน Project Settings; Production Final ห้ามสร้าง Script Properties อัตโนมัติ");
+try {
+return _setScriptProp_("APP_HMAC_SECRET", secret = Utilities.base64EncodeWebSafe(Utilities.getUuid() + ":" + Utilities.getUuid() + ":" + Date.now()).replace(/=+$/g, ""), {
+owner: "_hmacSecret_", mode: "setup-unlocked"
+}), secret
+}
+catch(err) {
+throw _recordWarning_("scriptProperties.hmacSecret", err), new Error("APP_HMAC_SECRET unavailable: " + String(err && err.message || err))
+}
+}
+function _hmacSha256Hex_(message, secret) {
+var bytes;
+return message = String(null == message ? "": message), (secret = String(null == secret ? "": secret)) || (secret = _hmacSecret_()), Utilities.computeHmacSha256Signature(message, secret, Utilities.Charset.UTF_8).map(function(b) {
+var v = (b < 0 ? b + 256: b).toString(16);
+return 1 === v.length ? "0" + v: v
+}).join("")
+}
+function _getScriptPropertyNumberCached_(key, defaultValue, ttlMs) {
+key = String(key || "").trim(), ttlMs = Math.max(1e3, Number(ttlMs || 3e5) || 3e5);
+var now = Date.now(), exec = _execCache_();
+if(key) {
+var cache = exec["propnum:" + key];
+if(cache && cache.expiresAt > now && isFinite(cache.value))return cache.value
+}
+var raw = Number(_scriptProp_(key, defaultValue)), value = isFinite(raw) && raw > 0 ? raw: Number(defaultValue || 0) || 0;
+return key && (exec["propnum:" + key] = {
+value: value, expiresAt: now + ttlMs
+}), value
+}
+function _spreadsheetConfigKeys_() {
+return["SPREADSHEET_ID", "MAIN_SPREADSHEET_ID", "MASTER_SPREADSHEET_ID", "DATA_SPREADSHEET_ID", "WORKBOOK_ID", "SHEET_ID", "SPREADSHEET_URL", "MAIN_SPREADSHEET_URL", "WORKBOOK_URL", "SHEET_URL"]
+}
+function _extractSpreadsheetIdCandidate_(raw) {
+if(! (raw = String(raw || "").trim()))return"";
+var match = raw.match(/[-\w]{25,}/);
+return match && match[0] ? String(match[0]).trim(): raw.replace(/^['"]+|['"]+$/g, "").trim()
+}
+function _isLikelySpreadsheetId_(id) {
+return id = String(id || "").trim(), /^[A-Za-z0-9_-]{25,}$/.test(id)
+}
+function _maskSpreadsheetCandidate_(value) {
+return(value = String(value || "").trim()) ? value.length <= 12 ? value: value.slice(0, 6) + "…" + value.slice(- 6): ""
+}
+function _rememberResolvedSpreadsheetId_(id) {
+if(! (id = String(id || "").trim()))return"";
+try {
+if(_appIsFnName_("_scriptPropertiesRuntimeWritesAllowed_") &&! _scriptPropertiesRuntimeWritesAllowed_())return _appIsFnName_("_runtimeStateSet_") && _runtimeStateSet_("SPREADSHEET_ID_RESOLVED_LAST", id, 21600), id;
+_setScriptProp_("SPREADSHEET_ID", id, {
+owner: "_rememberResolvedSpreadsheetId_", mode: "setup-unlocked"
+})
+}
+catch(_e) {
+_recordWarning_("scriptProperties.spreadsheetIdRememberSkipped", _e), _logWarn_("spreadsheet.rememberResolvedId", {
+error: String(_e && _e.message || _e)
+})
+}
+return id
+}
+function _resolveSpreadsheetHandle_() {
+if(AppInfra && AppInfra._spreadsheetHandle && AppInfra._spreadsheetHandle.ss && AppInfra._spreadsheetHandle.id)return AppInfra._spreadsheetHandle;
+var exec = _execCache_();
+if(exec.spreadsheetHandle && exec.spreadsheetHandle.ss && exec.spreadsheetHandle.id)return AppInfra._spreadsheetHandle = exec.spreadsheetHandle, exec.spreadsheetHandle;
+var props = _scriptPropertiesSnapshot_(), keys = _spreadsheetConfigKeys_(), seen = {
+}, candidates = [], issues = [];
+keys.forEach(function(key) {
+var raw = String(props[key] || "").trim();
+if(raw) {
+var id = _extractSpreadsheetIdCandidate_(raw);
+id &&! seen[id] && (seen[id] =! 0, candidates.push({
+id: id, source: key, raw: raw
+}))
+}
+});
+for(var i = 0;
+i < candidates.length;
+i ++ ) {
+var candidate = candidates[i];
+if(_isLikelySpreadsheetId_(candidate.id))try {
+var ss = SpreadsheetApp.openById(candidate.id), resolvedId = String(ss.getId() || candidate.id).trim();
+return AppInfra._spreadsheetHandle = exec.spreadsheetHandle = {
+id: resolvedId, ss: ss, source: candidate.source
+}, "SPREADSHEET_ID" !== candidate.source && _rememberResolvedSpreadsheetId_(resolvedId), AppInfra._spreadsheetHandle
+}
+catch(openErr) {
+_recordWarning_("ec", openErr), issues.push(candidate.source + "=" + _maskSpreadsheetCandidate_(candidate.id) + " (" + String(openErr && openErr.message || openErr) + ")")
+}
+else issues.push(candidate.source + "=" + _maskSpreadsheetCandidate_(candidate.raw || candidate.id) + " (รูปแบบไม่ถูกต้อง)")
+}
+try {
+var activeSs = SpreadsheetApp.getActiveSpreadsheet ? SpreadsheetApp.getActiveSpreadsheet(): SpreadsheetApp.getActive();
+if(activeSs && activeSs.getId && activeSs.getId()) {
+var activeId = String(activeSs.getId() || "").trim();
+if(activeId)return AppInfra._spreadsheetHandle = exec.spreadsheetHandle = {
+id: activeId, ss: activeSs, source: "ACTIVE_SPREADSHEET"
+}, _rememberResolvedSpreadsheetId_(activeId), AppInfra._spreadsheetHandle
+}
+}
+catch(activeErr) {
+_recordWarning_("ec", activeErr), issues.push("ACTIVE_SPREADSHEET (" + String(activeErr && activeErr.message || activeErr) + ")")
+}
+throw new Error("ไม่พบ Spreadsheet ที่ใช้งานได้ กรุณาตรวจสอบ Script Properties เช่น SPREADSHEET_ID หรือผูกสคริปต์กับชีตให้ถูกต้อง" + (issues.length ? " | ตรวจพบ: " + issues.join(" ; "): ""))
+}
+function _getSpreadsheetId_() {
+return _resolveSpreadsheetHandle_().id
+}
+function normalizeDateOutput_(value) {
+return AppDomain.Formatters && AppDomain.Formatters.normalizeDateOutput ? AppDomain.Formatters.normalizeDateOutput(value): String(value || "")
+}
+function _getGeminiKey_() {
+return _scriptProp_("GEMINI_API_KEY", "") || ""
+}
+function _getLineToken_() {
+return _scriptProp_("LINE_TOKEN", "") || ""
+}
+function _getLineTarget_() {
+var t = _scriptProp_("LINE_TARGET_ID", "");
+return t || ""
+}
+function _getGeminiModel_() {
+return _validateGeminiModelName_(_scriptProp_("GEMINI_MODEL", "gemini-2.0-flash"))
+}
+function _allowedGeminiModels_() {
+return {
+"gemini-2.0-flash": ! 0, "gemini-1.5-flash": ! 0, "gemini-1.5-pro": ! 0, "gemini-2.5-flash": ! 0, "gemini-2.5-pro": ! 0
+}
+}
+function _validateGeminiModelName_(model) {
+var value = String(model || "").trim();
+return _allowedGeminiModels_()[value] ? value: (_logWarn_("ai.model.invalid", {
+model: value || "(empty)", default: "gemini-2.0-flash"
+}), "gemini-2.0-flash")
+}
+var GEMINI_ENDPOINT_BASE = "https://generativelanguage.googleapis.com/v1beta/models/";
+function _buildGeminiEndpoint_() {
+return GEMINI_ENDPOINT_BASE + _getGeminiModel_() + ":generateContent?key="
+}
+var GEMINI_EMBED_EP = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=";
+function _scriptPropBool_(key, defaultValue) {
+var raw = String(_scriptProp_(key, defaultValue ? "true": "false") || "").trim().toLowerCase();
+return !! /^(1|true|yes|y|on)$/i.test(raw) ||! /^(0|false|no|n|off)$/i.test(raw) &&!! defaultValue
+}
+function _scriptPropNumber_(key, defaultValue, minValue, maxValue) {
+var n = Number(_scriptProp_(key, defaultValue));
+return isFinite(n) || (n = Number(defaultValue || 0)), void 0 !== minValue && (n = Math.max(Number(minValue), n)), void 0 !== maxValue && (n = Math.min(Number(maxValue), n)), n
+}
+function _apiPayloadMaxBytes_() {
+return _scriptPropNumber_("API_MAX_PAYLOAD_BYTES", 2097152, 65536, 5242880)
+}
+function _apiPayloadMaxDepth_() {
+return _scriptPropNumber_("API_MAX_PAYLOAD_DEPTH", 12, 4, 24)
+}
+function _apiPayloadMaxArrayLength_() {
+return _scriptPropNumber_("API_MAX_ARRAY_LENGTH", 5e3, 100, 5e4)
+}
+function _apiPayloadMaxStringLength_() {
+return _scriptPropNumber_("API_MAX_STRING_CHARS", 3e5, 1e4, 1e6)
+}
+function _jsonByteLength_(value) {
+var s = "string" == typeof value ? value: JSON.stringify(null == value ? "": value);
+return Utilities.newBlob(String(s || "")).getBytes().length
+}
+function _redactSecurityAuditValue_(value, depth) {
+if(depth = Number(depth || 0) || 0, null == value)return value;
+if(depth > 4)return"[depth-limit]";
+if(Array.isArray(value))return value.slice(0, 8).map(function(item) {
+return _redactSecurityAuditValue_(item, depth + 1)
+});
+if("object" != typeof value) {
+var text = String(value);
+return/bearer\s+[A-Za-z0-9_\.\-]+/i.test(text) || /^[A-Za-z0-9_\-\.]{48,}$/.test(text) ? "[REDACTED]": text.length > 220 ? text.slice(0, 220) + "…": value
+}
+var out = {
+};
+return Object.keys(value).slice(0, 40).forEach(function(k) {
+var lk = String(k || "").toLowerCase();
+/token|csrf|password|secret|authorization|cookie|credential|resumehandle/.test(lk) ? out[k] = "[REDACTED]": out[k] = _redactSecurityAuditValue_(value[k], depth + 1)
+}), out
+}
+function _assertApiPayloadEnvelopeSafe_(method, payload, source) {
+method = String(method || "").trim();
+var bytes = _jsonByteLength_(null == payload ? {
+}
+: payload);
+if(bytes > _apiPayloadMaxBytes_())throw new Error("API payload ใหญ่เกินขนาดที่อนุญาต");
+var maxDepth = _apiPayloadMaxDepth_(), maxArray = _apiPayloadMaxArrayLength_(), maxString = _apiPayloadMaxStringLength_();
+function walk(value, depth, path) {
+if(depth > maxDepth)throw new Error("API payload ซ้อนลึกเกินกำหนด: " + path);
+if("string" == typeof value && value.length > maxString)throw new Error("API payload มีข้อความยาวเกินกำหนด: " + path);
+if(value && "object" == typeof value)if(Array.isArray(value)) {
+if(value.length > maxArray)throw new Error("API payload มีรายการมากเกินกำหนด: " + path);
+for(var i = 0;
+i < Math.min(value.length, 80);
+i ++ )walk(value[i], depth + 1, path + "[" + i + "]")
+}
+else {
+var keys = Object.keys(value);
+if(keys.length > 500)throw new Error("API payload มีจำนวน field มากเกินกำหนด: " + path);
+keys.slice(0, 500).forEach(function(k) {
+walk(value[k], depth + 1, path ? path + "." + k: k)
+})
+}
+}
+return walk(payload, 0, method || "payload"), {
+ok: ! 0, bytes: bytes, source: String(source || "")
+}
+}
+function _allowedExternalHosts_() {
+return {
+"generativelanguage.googleapis.com": ! 0, "api.line.me": ! 0
+}
+}
+function _assertTrustedExternalUrl_(url, feature) {
+if(! (url = String(url || "").trim()))throw new Error("ไม่พบ external endpoint");
+if(! 0 !== _scriptPropBool_("APP_EXTERNAL_FETCH_ENABLED", ! 0))throw new Error("ปิดการเชื่อมต่อ external service ในระบบ");
+var m = url.match(/^https:\/\/([^\/\?#:]+)(?:[\/\?#:]|$)/i), host = m ? String(m[1] || "").toLowerCase(): "";
+if(! host ||! _allowedExternalHosts_()[host])throw new Error("ไม่อนุญาต external endpoint: " + host);
+try {
+_safeAudit_("security.externalFetch.allowed", {
+feature: String(feature || ""), host: host
+})
+}
+catch(_auditExternal) {
+_recordWarning_("ec", _auditExternal)
+}
+return ! 0
+}
+function _securityAuditRouteAccess_(eventStage, method, meta, payload, sess, requestId, detail) {
+try {
+meta = meta || {
+};
+var minRole = String(meta.minRole || "").toLowerCase(), group = String(meta.group || meta.domain || ""), sensitive;
+return ! (! meta.write && "admin" !== minRole &&! /^admin/.test(group) && "ai" !== group && "ai" !== meta.domain) && (_safeAudit_("security.route." + String(eventStage || "event"), {
+method: String(method || ""), requestId: String(requestId || ""), group: group, write: !! meta.write, admin: "admin" === minRole, csrf: !! meta.csrf, actor: String(sess && (sess.username || sess.email || sess.user) || ""), payload: _redactSecurityAuditValue_(payload || {
+}), detail: _redactSecurityAuditValue_(detail || {
+})
+}, sess && (sess.username || sess.email || sess.user) || "system"), ! 0)
+}
+catch(_auditErr) {
+return _recordWarning_("ec", _auditErr), ! 1
+}
+}
+function _securityProductionGateSnapshot_() {
+var pepperConfigured =! 1, hmacConfigured =! 1;
+try {
+pepperConfigured =!! String(_scriptProp_("PASSWORD_PEPPER", "") || "").trim(), hmacConfigured =!! String(_scriptProp_("APP_HMAC_SECRET", "") || _scriptProp_("PASSWORD_PEPPER", "") || "").trim()
+}
+catch(_secretSnapshotErr) {
+pepperConfigured =! 1, hmacConfigured =! 1
+}
+return {
+stamp: "security-production-gate-current-final-lock", productionGateLock: ! 0, allowedSecurityProfiles: ["production-strict"], payloadGuard: ! 0, auditRedaction: ! 0, externalHostAllowlist: Object.keys(_allowedExternalHosts_()), routeContractAudit: ! 0, aiRoutesRequireCsrf: ! 0, strictActionTokens: ! 0, maintenanceToolsDefault: "disabled", passwordPepperConfigured: pepperConfigured, hmacSecretConfigured: hmacConfigured, browserStorage: "deny-sensitive-plus-allowlist-memory-auth"
+}
+}
+var _ROLE_RANK_ = {
+viewer: 0, staff: 1, admin: 2, administrator: 2
+};
+function _toErrorText_(value, defaultValue) {
+if(null == value || "" === value)return String(defaultValue || "เกิดข้อผิดพลาด");
+if("string" == typeof value)return value;
+if(value && "object" == typeof value) {
+var picked = value.message || value.msg || value.error || value.details;
+if(picked)return String(picked);
+try {
+return JSON.stringify(value)
+}
+catch(_e) {
+_recordWarning_("ec", _e)
+}
+}
+return String(value || defaultValue || "เกิดข้อผิดพลาด")
+}
+function _appPerfCountRows_(value) {
+try {
+if(Array.isArray(value))return value.length;
+if(! value || "object" != typeof value)return 0;
+if(Array.isArray(value.rows))return value.rows.length;
+if(Array.isArray(value.data))return value.data.length;
+if(Array.isArray(value.items))return value.items.length;
+if(Array.isArray(value.records))return value.records.length;
+if(value.data && "object" == typeof value.data)return _appPerfCountRows_(value.data)
+}
+catch(_e) {
+_appIsFnName_("_recordWarning_") ? _recordWarning_("ec", _e): _appIsFnName_("_logWarn_") ? _logWarn_("ec", {
+error: String(_e && _e.message || _e)
+}): void _e
+}
+return 0
+}
+var APP_PERFORMANCE_GATE_PHASE5 = Object.freeze({
+stamp: "phase5-performance-gate-current",
+owner: "Code_00_PlatformCore.AppPerformanceGate",
+targets: Object.freeze({
+apiGetDashboardBundle: Object.freeze({ targetMs: 3000, maxRowsRead: 4000, maxPayloadBytes: 220000, cacheOwner: "DashboardDomain", firstPaintCritical: !0 }),
+apiSearchCasesLite: Object.freeze({ targetMs: 5000, maxRowsRead: 3000, maxPayloadBytes: 220000, serverPaged: !0, maxPageSize: 100, compactReadModel: !0 }),
+apiGetCaseReportExportRows: Object.freeze({ targetMs: 15000, maxRowsRead: 8000, maxPayloadBytes: 5000000, onDemandOnly: !0, initialLoadAllowed: !1 }),
+apiGetPhase4QaGate: Object.freeze({ targetMs: 8000, maxRowsRead: 100, maxPayloadBytes: 500000, onDemandOnly: !0, initialLoadAllowed: !1, noDataMutation: !0 }),
+apiGetPhase5ReleaseReadiness: Object.freeze({ targetMs: 5000, maxRowsRead: 100, maxPayloadBytes: 650000, onDemandOnly: !0, initialLoadAllowed: !1, noDataMutation: !0, releaseGate: !0 }),
+apiBudgetGetSummary: Object.freeze({ targetMs: 5000, maxRowsRead: 5000, maxPayloadBytes: 350000 }),
+apiBudgetGetTypeSummaryByFY: Object.freeze({ targetMs: 8000, maxRowsRead: 7000, maxPayloadBytes: 850000 }),
+apiGetPeoplePageBundle: Object.freeze({ targetMs: 8000, maxRowsRead: 6000, maxPayloadBytes: 850000 }),
+apiGetCommitteeMeetingSystem: Object.freeze({ targetMs: 8000, maxRowsRead: 6000, maxPayloadBytes: 850000 }),
+apiGetTracking: Object.freeze({ targetMs: 5000, maxRowsRead: 4000, maxPayloadBytes: 700000 }),
+loginDashboardFirstPaint: Object.freeze({ targetMs: 1500, frontend: !0 }),
+printPreview: Object.freeze({ targetMs: 2000, frontend: !0 })
+}),
+rules: Object.freeze({
+dashboardDomainCacheOnly: !0,
+boundedTelemetry: !0,
+noPayloadLogging: !0,
+uiDomChanged: !1,
+businessLogicChanged: !1
+})
+});
+function _appPerformanceProfile_(method) {
+var key = String(method || "");
+return APP_PERFORMANCE_GATE_PHASE5.targets[key] || null
+}
+function _appPerformancePayloadBytes_(value) {
+try {
+var text = "string" == typeof value ? value: JSON.stringify(null == value ? null: value);
+return "undefined" != typeof Utilities && Utilities.newBlob ? Utilities.newBlob(String(text || "")).getBytes().length: String(text || "").length
+}
+catch(_payloadSizeErr) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("performance.payload.size", _payloadSizeErr);
+return 0
+}
+}
+function _appPerformanceEvaluate_(method, metrics) {
+metrics = metrics || {};
+var profile = _appPerformanceProfile_(method), durationMs = Math.max(0, Number(metrics.durationMs || 0)), rowsRead = Math.max(0, Number(metrics.rowsRead || 0)), payloadBytes = Math.max(0, Number(metrics.payloadBytes || 0)), violations = [];
+if(! profile)return {
+ok: !0, status: "not-profiled", method: String(method || ""), stamp: APP_PERFORMANCE_GATE_PHASE5.stamp, violations: []
+};
+Number(profile.targetMs || 0) > 0 && durationMs > Number(profile.targetMs) && violations.push("DURATION_OVER_TARGET");
+Number(profile.maxRowsRead || 0) > 0 && rowsRead > Number(profile.maxRowsRead) && violations.push("ROWS_READ_OVER_BUDGET");
+Number(profile.maxPayloadBytes || 0) > 0 && payloadBytes > Number(profile.maxPayloadBytes) && violations.push("PAYLOAD_OVER_BUDGET");
+return {
+ok: 0 === violations.length, status: violations.length ? "over-budget": "within-budget", method: String(method || ""), stamp: APP_PERFORMANCE_GATE_PHASE5.stamp, targetMs: Number(profile.targetMs || 0), durationMs: durationMs, maxRowsRead: Number(profile.maxRowsRead || 0), rowsRead: rowsRead, maxPayloadBytes: Number(profile.maxPayloadBytes || 0), payloadBytes: payloadBytes, cacheHit: !! metrics.cacheHit, violations: violations
+}
+}
+function _appPerformanceTargetMs_(method) {
+var profile = _appPerformanceProfile_(method);
+return Number(profile && profile.targetMs || 0)
+}
+AppBackendCore.phase5PerformanceGateStatus = function() {
+var targets = APP_PERFORMANCE_GATE_PHASE5.targets || {}, names = Object.keys(targets), apiNames = names.filter(function(name) {
+return 0 === name.indexOf("api")
+}), missingHandlers = apiNames.filter(function(name) {
+return ! _phase0ContractIsFunctionName_(name)
+}), percentiles = _appIsFnName_("getPerformancePercentilesSnapshot_") ? getPerformancePercentilesSnapshot_(apiNames): {
+ok: ! 1, methods: {
+}, sampleCount: 0, owner: "not-loaded"
+};
+return {
+ok: 0 === missingHandlers.length, stamp: APP_PERFORMANCE_GATE_PHASE5.stamp, owner: APP_PERFORMANCE_GATE_PHASE5.owner, targetCount: names.length, apiTargetCount: apiNames.length, frontendTargetCount: names.filter(function(name) { return 0 !== name.indexOf("api") }).length, missingHandlers: missingHandlers, targets: targets, percentiles: percentiles, rules: APP_PERFORMANCE_GATE_PHASE5.rules, uiDomChanged: !1, businessLogicChanged: !1
+}
+};
+
+var APP_RELEASE_HARDENING_PHASE5 = Object.freeze({
+stamp: "phase5-release-hardening-ui-stability-2026-06-30",
+owner: "Code_00_PlatformCore.AppReleaseHardeningPhase5",
+policy: "release-manifest + runtime-telemetry-classification + operator-smoke-gate",
+requiredRoutes: Object.freeze(["apiBootstrap", "apiGetRouteContract", "apiGetPhase1Contract", "apiGetPhase4QaGate", "apiGetPhase5ReleaseReadiness", "apiSearchCasesLite", "apiGetCaseReportOptions", "apiGetCaseReportExportRows", "apiSaveMeetingLog"]),
+requiredMetadata: Object.freeze(["gasDeploymentId", "githubCommitHash", "contractStamp", "cacheBustVersion"]),
+telemetryClasses: Object.freeze(["transport-failure", "route-rejection", "backend-read-failure", "empty-result", "ok-data"]),
+uiDomChanged: false,
+businessLogicChanged: false,
+dataMutation: false
+});
+function _phase5SafeScriptProp_(name, fallback) {
+try { return String(_scriptProp_(String(name || ""), fallback || "") || "") }
+catch(_phase5PropErr) { return String(fallback || "") }
+}
+function _phase5ReleaseManifest_(payload) {
+payload = payload || {};
+var release = null;
+try { release = _appIsFnName_("_appRelease_") ? _appRelease_() : null } catch(_phase5ReleaseErr) { release = null }
+
+// Phase 5 stack-safe manifest rule:
+// This function runs inside the login/bootstrap path. It must not call route-contract,
+// bootstrap, client-contract, or QA functions that can re-enter the same path.
+var contractStamp = String(payload.contractStamp || "");
+if(!contractStamp) {
+try { contractStamp = String(("undefined" != typeof ROUTER_CLEANUP_VERSION && ROUTER_CLEANUP_VERSION) || "router-cleanup-current") + "-production-route-contract-current" }
+catch(_phase5ContractConstErr) { contractStamp = "router-cleanup-current-production-route-contract-current" }
+}
+var phase1Stamp = "";
+try { phase1Stamp = _appIsFnName_("_phase1SingleSourceContract_") ? String((_phase1SingleSourceContract_({ compact: !0, bootstrapSafe: !0 }) || {}).stamp || "") : "" } catch(_phase5Phase1Err) { phase1Stamp = "" }
+var phase4Stamp = "";
+try { phase4Stamp = "undefined" != typeof PHASE4_CASE_REPORT_INDEX_STAMP ? String(PHASE4_CASE_REPORT_INDEX_STAMP || "") : "" } catch(_phase5Phase4Err) { phase4Stamp = "" }
+return {
+ok: true,
+stamp: APP_RELEASE_HARDENING_PHASE5.stamp,
+owner: APP_RELEASE_HARDENING_PHASE5.owner,
+gasDeploymentId: String(payload.gasDeploymentId || _phase5SafeScriptProp_("GAS_DEPLOYMENT_ID", "") || _phase5SafeScriptProp_("DEPLOYMENT_ID", "") || ""),
+githubCommitHash: String(payload.githubCommitHash || _phase5SafeScriptProp_("GITHUB_COMMIT_HASH", "") || _phase5SafeScriptProp_("GITHUB_SHA", "") || ""),
+contractStamp: contractStamp,
+cacheBustVersion: String(payload.cacheBustVersion || _phase5SafeScriptProp_("APP_CACHE_BUST_VERSION", "") || release && (release.assetVersion || release.version) || APP_RELEASE_HARDENING_PHASE5.stamp),
+phase1ContractStamp: phase1Stamp,
+phase4IndexStamp: phase4Stamp,
+generatedAt: (new Date).toISOString(),
+readOnly: true,
+noDataMutation: true,
+bootstrapSafe: true
+}
+}
+function _phase5QaCheck_(name, ok, detail, severity) {
+return { name: String(name || ""), ok: !!ok, severity: String(severity || (ok ? "info" : "error")), detail: detail || {}, at: (new Date).toISOString() }
+}
+function _phase5ClassifyApiOutcome_(method, value, error) {
+var message = String(error && (error.message || error) || value && (value.message || value.msg || value.error || value.errorCode || value.code) || "");
+var lower = message.toLowerCase();
+if(error) {
+if(/api_method_not_in_contract|route|contract|not allowed|forbidden|unauthorized/.test(lower))return { className: "route-rejection", method: String(method || ""), message: message };
+if(/timeout|transport|network|failed to fetch|app transport|ไม่พร้อมใช้งาน/.test(lower))return { className: "transport-failure", method: String(method || ""), message: message };
+return { className: "backend-read-failure", method: String(method || ""), message: message }
+}
+if(value && "object" == typeof value) {
+if(!1 === value.ok || "read-error" === value.errorState || value.error || value.errorCode)return { className: "backend-read-failure", method: String(method || ""), message: message };
+var rows = Array.isArray(value.rows) ? value.rows : Array.isArray(value.data) ? value.data : Array.isArray(value.items) ? value.items : null;
+var total = null != value.totalRecords ? Number(value.totalRecords || 0) : null != value.total ? Number(value.total || 0) : rows ? rows.length : null;
+if(null !== total && total <= 0)return { className: "empty-result", method: String(method || ""), message: "empty-result" };
+}
+return { className: "ok-data", method: String(method || ""), message: "ok" }
+}
+function _phase5RuntimeTelemetryPolicy_() {
+return { ok: true, stamp: APP_RELEASE_HARDENING_PHASE5.stamp, owner: APP_RELEASE_HARDENING_PHASE5.owner, classes: APP_RELEASE_HARDENING_PHASE5.telemetryClasses.slice ? APP_RELEASE_HARDENING_PHASE5.telemetryClasses.slice() : ["transport-failure", "route-rejection", "backend-read-failure", "empty-result", "ok-data"], boundedRecentEvents: 50, payloadLogging: false, browserStorage: "localStorage-summary-only", uiDomChanged: false, businessLogicChanged: false }
+}
+function _phase5OperatorSmokeChecklist_() {
+return [
+{ id: "smoke.login", title: "เข้าสู่ระบบ", expected: "apiBootstrap ส่ง user, routeContract และ csrfToken" },
+{ id: "smoke.search", title: "ค้นหาเรื่องพิจารณา", expected: "apiSearchCasesLite ส่ง rows พร้อม paging ภายในเวลาเป้าหมาย" },
+{ id: "smoke.meetingLog.save", title: "บันทึกประวัติการประชุม", expected: "apiSaveMeetingLog ส่ง ok=true และ reload หลัง save ไม่บล็อกผล save" },
+{ id: "smoke.report.export", title: "จัดพิมพ์รายงาน", expected: "apiGetCaseReportExportRows includeMeetingHistory=true แสดงคณะกรรมาธิการ/อนุกรรมาธิการ/เหตุผล" },
+{ id: "smoke.print.preview", title: "ตัวอย่างก่อนพิมพ์", expected: "เปิด print preview ได้โดยไม่เกิด runtime error" }
+]
+}
+function apiGetPhase5ReleaseReadiness(payload) {
+payload = payload || {};
+var started = Date.now(), checks = [], routeNames = [];
+try { if(_appIsFnName_("_apiRouteRegistry_"))routeNames = Object.keys(_apiRouteRegistry_() || {}) }
+catch(_phase5RouteErr) { checks.push(_phase5QaCheck_("route.registry.read", !1, { error: String(_phase5RouteErr && _phase5RouteErr.message || _phase5RouteErr) })) }
+APP_RELEASE_HARDENING_PHASE5.requiredRoutes.forEach(function(route) {
+checks.push(_phase5QaCheck_("route.registered." + route, routeNames.indexOf(route) > -1 || 0 === routeNames.length, { route: route }))
+});
+var manifest = _phase5ReleaseManifest_(payload || {});
+["gasDeploymentId", "githubCommitHash"].forEach(function(name) {
+checks.push(_phase5QaCheck_("release.metadata." + name, !!String(manifest[name] || "").trim(), { valuePresent: !!String(manifest[name] || "").trim() }, "warning"))
+});
+["contractStamp", "cacheBustVersion"].forEach(function(name) {
+checks.push(_phase5QaCheck_("release.metadata." + name, !!String(manifest[name] || "").trim(), { valuePresent: !!String(manifest[name] || "").trim() }, "error"))
+});
+var phase4 = null;
+if(!1 !== payload.includePhase4Qa && _appIsFnName_("apiGetPhase4QaGate")) {
+try { phase4 = apiGetPhase4QaGate({ source: "phase5-release-readiness", noCache: !0, bypassCache: !0 }) }
+catch(_phase5QaErr) { phase4 = { ok: !1, error: String(_phase5QaErr && _phase5QaErr.message || _phase5QaErr) } }
+checks.push(_phase5QaCheck_("phase4.qaGate", !!(phase4 && phase4.ok), { failed: Number(phase4 && phase4.failed || 0), error: String(phase4 && phase4.error || "") }))
+}
+var perf = _appIsFnName_("_appPerformanceProfile_") ? _appPerformanceProfile_("apiGetPhase5ReleaseReadiness") : null;
+checks.push(_phase5QaCheck_("performance.profile.apiGetPhase5ReleaseReadiness", !!perf, { targetMs: Number(perf && perf.targetMs || 0) }));
+var telemetryPolicy = _phase5RuntimeTelemetryPolicy_();
+checks.push(_phase5QaCheck_("runtime.telemetry.classes", telemetryPolicy.classes.length >= 5, { classes: telemetryPolicy.classes }));
+var ledger = null;
+try { ledger = _appIsFnName_("_cacheInvalidationLedgerStatusPhase4_") ? _cacheInvalidationLedgerStatusPhase4_() : null }
+catch(_phase5LedgerErr) { ledger = { ok: !1, error: String(_phase5LedgerErr && _phase5LedgerErr.message || _phase5LedgerErr) } }
+checks.push(_phase5QaCheck_("cacheLedger.phase4.available", !!(ledger && ledger.ok), { stamp: String(ledger && ledger.stamp || "") }));
+var hardFailures = checks.filter(function(c) { return !c.ok && "warning" !== c.severity }).length;
+var warnings = checks.filter(function(c) { return !c.ok && "warning" === c.severity }).length;
+var passed = checks.filter(function(c) { return c.ok }).length;
+var score = Math.max(0, Math.round(100 * passed / Math.max(1, checks.length)) - hardFailures * 10);
+return {
+ok: 0 === hardFailures,
+readyForProductionCandidate: 0 === hardFailures && warnings <= 2,
+score: score,
+owner: APP_RELEASE_HARDENING_PHASE5.owner,
+stamp: APP_RELEASE_HARDENING_PHASE5.stamp,
+policy: APP_RELEASE_HARDENING_PHASE5.policy,
+manifest: manifest,
+checks: checks,
+passed: passed,
+failed: hardFailures,
+warnings: warnings,
+phase4QaGate: phase4,
+telemetryPolicy: telemetryPolicy,
+operatorSmokeChecklist: _phase5OperatorSmokeChecklist_(),
+readOnly: true,
+noDataMutation: true,
+durationMs: Math.max(0, Date.now() - started),
+generatedAt: (new Date).toISOString(),
+meta: { source: "Phase5ReleaseReadiness", uiDomChanged: false, businessLogicChanged: false }
+}
+}
+AppBackendCore.phase5ReleaseHardeningStatus = function() {
+return { ok: true, stamp: APP_RELEASE_HARDENING_PHASE5.stamp, owner: APP_RELEASE_HARDENING_PHASE5.owner, policy: APP_RELEASE_HARDENING_PHASE5.policy, telemetryPolicy: _phase5RuntimeTelemetryPolicy_(), operatorSmokeChecklist: _phase5OperatorSmokeChecklist_(), uiDomChanged: false, businessLogicChanged: false }
+};
+
+function _appPerformanceTargetLabel_(method, durationMs) {
+var t = _appPerformanceTargetMs_(method);
+return t ? Number(durationMs || 0) >= t ? "over-target": "within-target": ""
+}
+function _appPerfMeta_(method, startedAt, data, source, extra) {
+var metrics = {
+};
+try {
+metrics = "function" == typeof getRequestScopeMetrics_ ? getRequestScopeMetrics_(): {
+}
+}
+catch(_e) {
+metrics = {
+}
+}
+var rowsReturned = _appPerfCountRows_(data), payloadBytes = _appIsFnName_("_appPerformancePayloadBytes_") ? _appPerformancePayloadBytes_(data): 0;
+var meta = {
+method: String(method || ""), durationMs: Math.max(0, Date.now() - Number(startedAt || Date.now())), rowsRead: Number(metrics.rowsRead || extra && extra.rowsRead || rowsReturned || 0), rowsReturned: Number(extra && extra.rowsReturned || rowsReturned || 0), payloadBytes: Number(extra && extra.payloadBytes || payloadBytes || 0), cacheHit: !! (metrics.cacheHit || extra && extra.cacheHit), source: String(source || extra && extra.source || data && data.source || data && data.meta && data.meta.source || "live"), degraded: !! (extra && extra.degraded || data && data.degraded || data && data.meta && data.meta.degraded)
+}, targetMs = _appIsFnName_("_appPerformanceTargetMs_") ? _appPerformanceTargetMs_(method): 0;
+return targetMs && (meta.targetMs = targetMs, meta.overTarget = meta.durationMs >= targetMs, meta.targetStatus = _appPerformanceTargetLabel_(method, meta.durationMs)), extra && "object" == typeof extra && Object.keys(extra).forEach(function(k) {
+void 0 === meta[k] && (meta[k] = extra[k])
+}), meta
+}
+function _attachAppPerfMeta_(result, method, startedAt, source, extra) {
+var data, perf = _appPerfMeta_(method, startedAt, ((result = result && "object" == typeof result ? result: {
+}).data && "object" == typeof result.data, result.data), source, extra || {
+});
+return result.perf = Object.assign({
+}, result.perf || {
+}, perf), result.data && "object" == typeof result.data &&! Array.isArray(result.data) && (result.data.meta = Object.assign({
+}, result.data.meta || {
+}, {
+method: perf.method, durationMs: perf.durationMs, rowsRead: perf.rowsRead, rowsReturned: perf.rowsReturned, payloadBytes: perf.payloadBytes, cacheHit: perf.cacheHit, source: perf.source, degraded: perf.degraded
+})), result
+}
+function _withHotApiTelemetry_(method, payload, source, runner) {
+var startedAt = Date.now();
+try {
+var result;
+return _attachAppPerfMeta_(runner(payload || {
+}), method, startedAt, source || "hot-api", {
+degraded: ! 1
+})
+}
+catch(e) {
+var out;
+return _attachAppPerfMeta_(err_(e && e.message ? e.message: String(e), {
+rows: [], data: [], meta: {
+degraded: ! 0, source: source || "hot-api-error"
+}
+}), method, startedAt, source || "hot-api-error", {
+degraded: ! 0
+})
+}
+}
+function ok_(data, msg) {
+return {
+ok: ! 0, data: void 0 === data ? null: data, msg: String(msg || ""), error: ""
+}
+}
+function err_(msg, data) {
+var txt = _toErrorText_(msg, "เกิดข้อผิดพลาด");
+return {
+ok: ! 1, data: void 0 === data ? null: data, msg: txt, error: txt
+}
+}
+var PLATFORM_RESULT_NORMALIZER_OWNER = "Code_00_PlatformCore._platformNormalizeResult_";
+function _platformNormalizeResult_(result, successMsg, failureMsg) {
+if(result && "object" == typeof result && (Object.prototype.hasOwnProperty.call(result, "ok") || Object.prototype.hasOwnProperty.call(result, "success"))) {
+var ok = Object.prototype.hasOwnProperty.call(result, "ok") ?!! result.ok: !! result.success, data = Object.prototype.hasOwnProperty.call(result, "data") ? result.data: (src = result, extra = {
+}, Object.keys(src || {
+}).forEach(function(k) {
+"ok" !== k && "success" !== k && "msg" !== k && "error" !== k && (extra[k] = src[k])
+}), Object.keys(extra).length ? extra: null), msg = String(result.msg || result.error || (ok ? successMsg || "": failureMsg || "เกิดข้อผิดพลาด") || ""), out = {
+ok: ok, data: data, msg: msg, error: ok ? "": String(result.error || msg || "เกิดข้อผิดพลาด")
+};
+return Object.keys(result).forEach(function(k) {
+Object.prototype.hasOwnProperty.call(out, k) || "success" === k || (out[k] = result[k])
+}), out
+}
+var src, extra;
+return"boolean" == typeof result ? result ? ok_(null, successMsg || ""): err_(failureMsg || "ดำเนินการไม่สำเร็จ"): ok_(result, successMsg || "")
+}
+var __APP_WRITE_LOCK_DEPTH__ = "number" == typeof __APP_WRITE_LOCK_DEPTH__ ? __APP_WRITE_LOCK_DEPTH__: 0;
+function withWriteLock_(name, fn, timeoutMs) {
+if("function" != typeof fn)throw new Error("withWriteLock_ ต้องรับ callback");
+if(__APP_WRITE_LOCK_DEPTH__ > 0) {
+__APP_WRITE_LOCK_DEPTH__ ++ ;
+try {
+return fn()
+}
+finally {
+__APP_WRITE_LOCK_DEPTH__ = Math.max(0, __APP_WRITE_LOCK_DEPTH__ - 1)
+}
+}
+var lock = LockService.getScriptLock();
+lock.waitLock(Number(timeoutMs || 2e4)), __APP_WRITE_LOCK_DEPTH__ ++ ;
+try {
+return fn()
+}
+finally {
+__APP_WRITE_LOCK_DEPTH__ = Math.max(0, __APP_WRITE_LOCK_DEPTH__ - 1);
+try {
+lock.releaseLock()
+}
+catch(_e) {
+_recordWarning_("lock.release", _e)
+}
+}
+}
+var APP_BACKEND_BOUNDARY_PHASE3 = {
+stamp: "phase3-backend-read-write-boundary-current",
+owner: "Code_00_PlatformCore.AppBackendBoundary",
+routerOwner: "Code_20_Router",
+repositoryOwner: "AppRepository",
+writeOwner: "writeGateway_",
+domainWriteOwner: "domainWrite_",
+policy: "router-read-write-context + one-root-write-gateway + domain-operation-join",
+uiDomChanged: false,
+businessLogicChanged: false
+};
+var __APP_BACKEND_BOUNDARY_STACK__ = Array.isArray(__APP_BACKEND_BOUNDARY_STACK__) ? __APP_BACKEND_BOUNDARY_STACK__: [];
+var __APP_WRITE_GATEWAY_DEPTH__ = "number" == typeof __APP_WRITE_GATEWAY_DEPTH__ ? __APP_WRITE_GATEWAY_DEPTH__: 0;
+var __APP_WRITE_GATEWAY_CHAIN__ = Array.isArray(__APP_WRITE_GATEWAY_CHAIN__) ? __APP_WRITE_GATEWAY_CHAIN__: [];
+var APP_CACHE_INVALIDATION_LEDGER_PHASE4 = Object.freeze({
+stamp: "phase4-cache-invalidation-ledger-current",
+owner: "Code_00_PlatformCore.AppCacheInvalidationLedger",
+policy: "one-root-mutation-ledger + canonical-domain-dependencies + one-stamp-bump-per-transaction",
+canonicalDomains: ["case", "letters", "meeting", "budget", "people", "admin", "dashboard"],
+uiDomChanged: false,
+businessLogicChanged: false
+});
+var __APP_WRITE_INVALIDATION_QUEUE__ = Array.isArray(__APP_WRITE_INVALIDATION_QUEUE__) ? __APP_WRITE_INVALIDATION_QUEUE__: [];
+var __APP_WRITE_INVALIDATION_CACHE_KEYS__ = __APP_WRITE_INVALIDATION_CACHE_KEYS__ && "object" == typeof __APP_WRITE_INVALIDATION_CACHE_KEYS__ ? __APP_WRITE_INVALIDATION_CACHE_KEYS__: {};
+var __APP_WRITE_INVALIDATION_FLUSHING__ = !0 === __APP_WRITE_INVALIDATION_FLUSHING__;
+var __APP_CACHE_LEDGER_TXN__ = __APP_CACHE_LEDGER_TXN__ && "object" == typeof __APP_CACHE_LEDGER_TXN__ ? __APP_CACHE_LEDGER_TXN__: null;
+function _cacheLedgerUniquePushPhase4_(list, value) {
+value = String(value || "").trim();
+return value && list.indexOf(value) < 0 && list.push(value), value
+}
+function _cacheLedgerCanonicalDomainPhase4_(domain) {
+domain = String(domain || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
+var aliases = {
+case: "case", cases: "case", maindata: "case", search: "case", reporttrack: "case", reportoptions: "case",
+letter: "letters", letters: "letters", tracking: "letters",
+meeting: "meeting", meetings: "meeting", meetinglog: "meeting", meetinglogs: "meeting", committeemeeting: "meeting", committeemeetings: "meeting", committeemeetingagendaitems: "meeting", committeemeetingagenda: "meeting",
+budget: "budget", budgetimports: "budget", budgetsummary: "budget", budgettypesummary: "budget", budgetsettings: "budget", budgetyearsettings: "budget", budgetyearsettingsitems: "budget", salarysettings: "budget", salarypayments: "budget", adminreports: "admin",
+people: "people", personnel: "people", personnelcomm: "people", personnelop: "people", personnelstaff: "people", personnelsubcommittees: "people", petitioner: "people", petitioners: "people", subcommittee: "people", subcommittees: "people", meetinglookup: "people",
+admin: "admin", user: "admin", users: "admin", systemsettings: "admin", config: "admin", auditlog: "admin",
+dashboard: "dashboard"
+};
+return aliases[domain] || (domain ? domain: "general")
+}
+function _cacheLedgerProfilesPhase4_() {
+return {
+case: {
+stamps: ["case", "cases", "maindata", "search", "reportoptions", "tracking", "meetinglookup", "dashboard"],
+sheets: ["MainData"], dirty: ["cases", "dashboard", "tracking"]
+},
+letters: {
+stamps: ["letters", "tracking", "cases", "reportoptions", "dashboard"],
+sheets: ["Letters"], dirty: ["tracking", "cases", "dashboard"]
+},
+meeting: {
+stamps: ["meeting", "meetings", "meetinglogs", "meetinglookup", "cases", "dashboard"],
+sheets: ["MeetingLogs", "CommitteeMeetings", "CommitteeMeetingAgendaItems", "CommitteeMeetingAgenda"], dirty: ["meetings", "cases", "dashboard"]
+},
+budget: {
+stamps: ["budget", "budgetimports", "budgetsummary", "budgettypesummary", "budgetsettings", "salarysettings", "salarypayments", "adminreports", "dashboard"],
+sheets: ["BudgetImports"], dirty: ["budgetsummary", "budgettypesummary", "dashboard"]
+},
+people: {
+stamps: ["people", "personnel", "personnel_comm", "personnel_op", "personnel_staff", "personnel_subcommittees", "petitioners", "subcommittees", "meetinglookup", "budgetsummary", "dashboard"],
+sheets: [], dirty: ["people", "dashboard"]
+},
+admin: {
+stamps: ["admin", "users", "adminreports", "dashboard"], sheets: [], dirty: ["admin", "dashboard"]
+},
+dashboard: {
+stamps: ["dashboard"], sheets: [], dirty: ["dashboard"]
+},
+general: {
+stamps: ["general", "dashboard"], sheets: [], dirty: ["dashboard"]
+}
+}
+}
+function _cacheLedgerSheetDomainsPhase4_(sheetName) {
+var map = {
+MainData: ["case"], Letters: ["letters"], MeetingLogs: ["meeting"], CommitteeMeetings: ["meeting"], CommitteeMeetingAgendaItems: ["meeting"], CommitteeMeetingAgenda: ["meeting"],
+BudgetImports: ["budget"], BudgetSummary: ["budget"], BudgetYearSettingsItems: ["budget"], BudgetYearSettings: ["budget"], SalarySettings: ["budget", "people"], SalaryPayments: ["budget", "people"],
+Personnel_Comm: ["people"], Personnel_Op: ["people"], Personnel_Staff: ["people", "budget"], Personnel_Subcommittees: ["people"], Petitioners: ["people", "case"], Subcommittees: ["people"],
+Users: ["admin"], SystemSettings: ["admin"], Config: ["admin"], AuditLog: ["admin"]
+};
+return(map[String(sheetName || "").trim()] || []).slice()
+}
+function _cacheLedgerNewTxnPhase4_(rootWriteName) {
+return {
+id: "undefined" != typeof Utilities && Utilities.getUuid ? Utilities.getUuid(): String(Date.now()),
+stamp: APP_CACHE_INVALIDATION_LEDGER_PHASE4.stamp,
+owner: APP_CACHE_INVALIDATION_LEDGER_PHASE4.owner,
+rootWriteName: String(rootWriteName || "write"),
+startedAt: Date.now(),
+domains: [], sheets: [], reasons: [], sources: [], stampKeys: [], dirtyDomains: [], cacheKeys: [], bumpedStamps: {}, removedCacheKeys: {},
+mutationObserved: false, flushing: false, flushCount: 0, flushedAt: ""
+}
+}
+function _cacheLedgerEnsureTxnPhase4_(rootWriteName) {
+return __APP_CACHE_LEDGER_TXN__ || (__APP_CACHE_LEDGER_TXN__ = _cacheLedgerNewTxnPhase4_(rootWriteName)), __APP_CACHE_LEDGER_TXN__
+}
+function _cacheLedgerQueueDomainPhase4_(domain, source, reason) {
+var txn = _cacheLedgerEnsureTxnPhase4_(__APP_WRITE_GATEWAY_CHAIN__[0] || "write"), canonical = _cacheLedgerCanonicalDomainPhase4_(domain), profile = _cacheLedgerProfilesPhase4_()[canonical] || _cacheLedgerProfilesPhase4_().general;
+_cacheLedgerUniquePushPhase4_(txn.domains, canonical);
+canonical !== "dashboard" && (profile.stamps || []).indexOf("dashboard") > -1 && _cacheLedgerUniquePushPhase4_(txn.domains, "dashboard");
+(profile.stamps || []).forEach(function(k) { _cacheLedgerUniquePushPhase4_(txn.stampKeys, String(k || "").toLowerCase()) });
+(profile.sheets || []).forEach(function(sh) { _cacheLedgerUniquePushPhase4_(txn.sheets, sh) });
+(profile.dirty || []).forEach(function(k) { _cacheLedgerUniquePushPhase4_(txn.dirtyDomains, k) });
+source && _cacheLedgerUniquePushPhase4_(txn.sources, source);
+reason && _cacheLedgerUniquePushPhase4_(txn.reasons, reason);
+txn.mutationObserved = true;
+_cacheLedgerUniquePushPhase4_(__APP_WRITE_INVALIDATION_QUEUE__, canonical);
+return { ok: true, queued: true, deferred: true, domain: canonical, source: String(source || ""), owner: APP_CACHE_INVALIDATION_LEDGER_PHASE4.owner, stamp: APP_CACHE_INVALIDATION_LEDGER_PHASE4.stamp }
+}
+function _cacheLedgerQueueSheetPhase4_(sheetName, source, reason) {
+sheetName = String(sheetName || "").trim();
+if(!sheetName)return { ok: false, queued: false, reason: "empty-sheet", owner: APP_CACHE_INVALIDATION_LEDGER_PHASE4.owner };
+var txn = _cacheLedgerEnsureTxnPhase4_(__APP_WRITE_GATEWAY_CHAIN__[0] || "write");
+_cacheLedgerUniquePushPhase4_(txn.sheets, sheetName);
+var mappedDomains = _cacheLedgerSheetDomainsPhase4_(sheetName);
+mappedDomains.length ? mappedDomains.forEach(function(domain) { _cacheLedgerQueueDomainPhase4_(domain, source || "sheet:" + sheetName, reason || "sheet-mutation") }): _cacheLedgerQueueDomainPhase4_("general", source || "sheet:" + sheetName, reason || "sheet-mutation");
+source && _cacheLedgerUniquePushPhase4_(txn.sources, source);
+reason && _cacheLedgerUniquePushPhase4_(txn.reasons, reason);
+txn.mutationObserved = true;
+return { ok: true, queued: true, deferred: true, sheetName: sheetName, domains: mappedDomains.length ? mappedDomains: ["general"], owner: APP_CACHE_INVALIDATION_LEDGER_PHASE4.owner, stamp: APP_CACHE_INVALIDATION_LEDGER_PHASE4.stamp }
+}
+function _cacheLedgerQueueWriteProfilePhase4_(name, payload) {
+var routeName = String(name || ""), n = routeName.toLowerCase(), matched = false, exact = {
+apiAdminSaveUser: ["admin"], apiAdminDeleteUser: ["admin"],
+apiAdminSaveSubcommittee: ["people", "admin"], apiAdminDeleteSubcommittee: ["people", "admin"],
+apiBudgetAdminSaveYearSettingsRows: ["budget", "admin"],
+apiSaveCase: ["case"], apiDeleteCase: ["case"],
+apiSavePetitioner: ["people", "case"], apiDeletePetitioner: ["people", "case"],
+apiSavePersonnelComm: ["people"], apiSavePersonnelOp: ["people"], apiSavePersonnelStaff: ["people"], apiSavePersonnelSubcommittee: ["people"],
+apiDeletePersonnelComm: ["people"], apiDeletePersonnelOp: ["people"], apiDeletePersonnelStaff: ["people"], apiDeletePersonnelSubcommittee: ["people"],
+apiSaveCommitteeMeetingSystem: ["meeting"], apiDeleteCommitteeMeetingSystem: ["meeting"],
+apiSaveSalarySettings: ["budget", "people"], apiSaveMeetingLog: ["meeting"], apiDeleteMeetingLog: ["meeting"],
+apiSaveLetter: ["letters"], apiDeleteLetter: ["letters"], apiCleanupMeetingData: ["meeting"],
+apiBudgetSaveImport: ["budget"], apiBudgetDeleteImport: ["budget"]
+};
+function add(domain) { matched = true; _cacheLedgerQueueDomainPhase4_(domain, "write:" + (routeName || "write"), "route-mutation") }
+if(exact[routeName])exact[routeName].forEach(add);
+else {
+/case|maindata|search/.test(n) && add("case");
+/letter|tracking/.test(n) && add("letters");
+/meeting/.test(n) && add("meeting");
+/budget|import|yearsettings/.test(n) && add("budget");
+/salary/.test(n) && (add("budget"), add("people"));
+/people|personnel|subcommittee/.test(n) && add("people");
+/petition/.test(n) && (add("people"), add("case"));
+/admin|user/.test(n) && add("admin")
+}
+matched || add("general");
+return _cacheLedgerEnsureTxnPhase4_(name)
+}
+function _cacheLedgerShouldDeferPhase4_() {
+return _writeGatewayIsActive_() && !__APP_WRITE_INVALIDATION_FLUSHING__ && !(__APP_CACHE_LEDGER_TXN__ && __APP_CACHE_LEDGER_TXN__.flushing)
+}
+function _cacheLedgerIsFlushingPhase4_() {
+return !!(__APP_CACHE_LEDGER_TXN__ && __APP_CACHE_LEDGER_TXN__.flushing)
+}
+function _cacheLedgerMarkStampPhase4_(entityName) {
+entityName = String(entityName || "default").trim().toLowerCase() || "default";
+var txn = _cacheLedgerEnsureTxnPhase4_(__APP_WRITE_GATEWAY_CHAIN__[0] || "write");
+if(!_cacheLedgerIsFlushingPhase4_())return true;
+if(txn.bumpedStamps[entityName])return false;
+return txn.bumpedStamps[entityName] = true, true
+}
+function _cacheLedgerMarkCacheKeyPhase4_(key) {
+key = String(key || "");
+if(!key)return false;
+var txn = _cacheLedgerEnsureTxnPhase4_(__APP_WRITE_GATEWAY_CHAIN__[0] || "write");
+if(!_cacheLedgerIsFlushingPhase4_())return true;
+if(txn.removedCacheKeys[key])return false;
+return txn.removedCacheKeys[key] = true, _cacheLedgerUniquePushPhase4_(txn.cacheKeys, key), true
+}
+function _cacheLedgerResetPhase4_(rootWriteName) {
+__APP_CACHE_LEDGER_TXN__ = _cacheLedgerNewTxnPhase4_(rootWriteName || "write");
+return __APP_CACHE_LEDGER_TXN__
+}
+function _cacheLedgerFlushPhase4_(name, payload, options) {
+options = options || {};
+var txn = _cacheLedgerQueueWriteProfilePhase4_(name, payload), warnings = [], stampResults = {}, sheetResults = [], cache = null;
+if(txn.flushing)return { ok: true, skipped: true, reason: "already-flushing", owner: APP_CACHE_INVALIDATION_LEDGER_PHASE4.owner, stamp: APP_CACHE_INVALIDATION_LEDGER_PHASE4.stamp };
+txn.flushing = true;
+txn.flushCount += 1;
+__APP_WRITE_INVALIDATION_FLUSHING__ = true;
+try {
+if(txn.domains.indexOf("budget") > -1)try { _appIsFnName_("_runtimeStateSet_") && _runtimeStateSet_("BudgetTypeSummaryDirty", "Y", 21600) } catch(e0) { warnings.push("budgetDirty:" + String(e0 && e0.message || e0)) }
+try { _appIsFnName_("_current8MarkDirtyDomains_") && _current8MarkDirtyDomains_(txn.dirtyDomains.slice(), String((txn.reasons || [])[0] || name || "write")) } catch(e1) { warnings.push("dirtyDomains:" + String(e1 && e1.message || e1)) }
+txn.stampKeys.slice().forEach(function(k) {
+try { _appIsFnName_("_AppCacheInvalidateDomain_") && (stampResults[k] = _AppCacheInvalidateDomain_(k)) } catch(e2) { warnings.push("stamp:" + k + ":" + String(e2 && e2.message || e2)) }
+});
+txn.sheets.slice().forEach(function(sh) {
+try { _appIsFnName_("invalidateSheetCache_") && sheetResults.push(invalidateSheetCache_(sh)) } catch(e3) { warnings.push("sheet:" + sh + ":" + String(e3 && e3.message || e3)) }
+});
+try {
+cache = CacheService.getScriptCache();
+txn.stampKeys.forEach(function(k) {
+[k, k + ":list", k + ":search", k + ":summary", k + ":bundle"].forEach(function(cacheKey) {
+try { cacheKey && _cacheLedgerMarkCacheKeyPhase4_(cacheKey) && cache.remove(String(cacheKey)) } catch(_cacheRemoveErr) {}
+})
+});
+["dashboard", "dashboard:bundle"].forEach(function(cacheKey) {
+try { _cacheLedgerMarkCacheKeyPhase4_(cacheKey) && cache.remove(cacheKey) } catch(_dashboardCacheRemoveErr) {}
+})
+} catch(e4) { warnings.push("cacheService:" + String(e4 && e4.message || e4)) }
+try { _appIsFnName_("_requestScopeReset_") && _requestScopeReset_() } catch(e5) { warnings.push("requestScope:" + String(e5 && e5.message || e5)) }
+txn.flushedAt = (new Date).toISOString();
+}
+finally {
+txn.flushing = false;
+__APP_WRITE_INVALIDATION_FLUSHING__ = false
+}
+return {
+ok: 0 === warnings.length,
+owner: APP_CACHE_INVALIDATION_LEDGER_PHASE4.owner,
+stamp: APP_CACHE_INVALIDATION_LEDGER_PHASE4.stamp,
+transactionId: txn.id,
+rootWriteName: txn.rootWriteName,
+canonicalDomains: txn.domains.slice(),
+stampKeys: txn.stampKeys.slice(),
+sheets: txn.sheets.slice(),
+dirtyDomains: txn.dirtyDomains.slice(),
+removedCacheKeys: txn.cacheKeys.slice(),
+sources: txn.sources.slice(),
+reasons: txn.reasons.slice(),
+mutationObserved: !!txn.mutationObserved,
+flushCount: txn.flushCount,
+stampResults: stampResults,
+sheetResults: sheetResults,
+recovery: !!options.recovery,
+warnings: warnings,
+elapsedMs: Math.max(0, Date.now() - Number(txn.startedAt || Date.now()))
+}
+}
+function _cacheInvalidationLedgerStatusPhase4_() {
+var txn = __APP_CACHE_LEDGER_TXN__;
+return {
+ok: true,
+stamp: APP_CACHE_INVALIDATION_LEDGER_PHASE4.stamp,
+owner: APP_CACHE_INVALIDATION_LEDGER_PHASE4.owner,
+policy: APP_CACHE_INVALIDATION_LEDGER_PHASE4.policy,
+active: _writeGatewayIsActive_(),
+flushing: _cacheLedgerIsFlushingPhase4_(),
+transaction: txn ? {
+id: txn.id, rootWriteName: txn.rootWriteName, domains: txn.domains.slice(), sheets: txn.sheets.slice(), stampKeys: txn.stampKeys.slice(), dirtyDomains: txn.dirtyDomains.slice(), mutationObserved: !!txn.mutationObserved, flushCount: Number(txn.flushCount || 0), flushedAt: String(txn.flushedAt || "")
+}: null,
+rules: { oneRootLedger: true, canonicalDomains: true, uniqueStampPerTransaction: true, sheetInvalidationDeferred: true, failureRecovery: true, uiDomChanged: false, businessLogicChanged: false }
+}
+}
+function _writeGatewayShouldDeferInvalidation_() {
+return _cacheLedgerShouldDeferPhase4_()
+}
+function _writeGatewayQueueInvalidationDomain_(domain) {
+domain = String(domain || "").trim();
+return domain ? _cacheLedgerQueueDomainPhase4_(domain, "AppRepository.invalidateDomain", "repository-mutation"): null
+}
+function _writeGatewayDeferredDomains_() {
+return __APP_CACHE_LEDGER_TXN__ ? __APP_CACHE_LEDGER_TXN__.domains.slice(): __APP_WRITE_INVALIDATION_QUEUE__.slice()
+}
+function _writeGatewayMarkCacheKey_(key) {
+return _cacheLedgerMarkCacheKeyPhase4_(key)
+}
+function _writeGatewayResetInvalidationQueue_(rootWriteName) {
+__APP_WRITE_INVALIDATION_QUEUE__ = [];
+__APP_WRITE_INVALIDATION_CACHE_KEYS__ = {};
+__APP_WRITE_INVALIDATION_FLUSHING__ = false;
+rootWriteName ? _cacheLedgerResetPhase4_(rootWriteName): __APP_CACHE_LEDGER_TXN__ = null
+}
+function _writeGatewayInvalidationLedgerStatusPhase3_() {
+var status = _cacheInvalidationLedgerStatusPhase4_();
+return Object.assign({}, status, {
+phase3Compatible: true,
+queuedDomains: status.transaction ? status.transaction.domains.slice(): [],
+flushedCacheKeys: __APP_CACHE_LEDGER_TXN__ ? __APP_CACHE_LEDGER_TXN__.cacheKeys.slice(): [],
+rootOnly: true
+})
+}
+AppBackendCore.phase4CacheInvalidationLedgerStatus = _cacheInvalidationLedgerStatusPhase4_;
+AppRepository.cacheInvalidationLedgerStatus = _cacheInvalidationLedgerStatusPhase4_;
+function _backendBoundaryEnter_(method, meta) {
+meta = meta || {
+};
+var ctx = {
+method: String(method || ""), mode: ! 0 === meta.write ? "write": "read", domain: String(meta.domain || meta.group || "general"), routeOwner: String(meta.owner || "Code_20_Router"), startedAt: Date.now(), gatewayCalls: 0, rootGatewayCalls: 0, nestedGatewayCalls: 0, gatewayNames: [], domainOperations: [], violations: []
+};
+return __APP_BACKEND_BOUNDARY_STACK__.push(ctx), ctx
+}
+function _backendBoundaryCurrent_() {
+return __APP_BACKEND_BOUNDARY_STACK__.length ? __APP_BACKEND_BOUNDARY_STACK__[__APP_BACKEND_BOUNDARY_STACK__.length - 1]: null
+}
+function _backendBoundaryNoteGateway_(name, isRoot) {
+var ctx = _backendBoundaryCurrent_();
+if(! ctx)return null;
+if("read" === ctx.mode) {
+var code = "READ_ROUTE_WRITE_BOUNDARY_VIOLATION:" + String(ctx.method || "unknown");
+throw ctx.violations.push(code), new Error(code)
+}
+return ctx.gatewayCalls += 1, isRoot ? ctx.rootGatewayCalls += 1: ctx.nestedGatewayCalls += 1, ctx.gatewayNames.push(String(name || "write")), ctx
+}
+function _backendBoundaryNoteDomainWrite_(name) {
+var ctx = _backendBoundaryCurrent_();
+if(! ctx)return null;
+if("read" === ctx.mode) {
+var code = "READ_ROUTE_DOMAIN_WRITE_VIOLATION:" + String(ctx.method || "unknown");
+throw ctx.violations.push(code), new Error(code)
+}
+return ctx.domainOperations.push(String(name || "domain-write")), ctx
+}
+function _backendBoundarySnapshot_(ctx) {
+ctx = ctx || _backendBoundaryCurrent_();
+return ctx ? {
+ok: 0 === ctx.violations.length, stamp: APP_BACKEND_BOUNDARY_PHASE3.stamp, owner: APP_BACKEND_BOUNDARY_PHASE3.owner, method: ctx.method, mode: ctx.mode, domain: ctx.domain, routeOwner: ctx.routeOwner, gatewayCalls: Number(ctx.gatewayCalls || 0), rootGatewayCalls: Number(ctx.rootGatewayCalls || 0), nestedGatewayCalls: Number(ctx.nestedGatewayCalls || 0), gatewayNames: ctx.gatewayNames.slice(), domainOperations: ctx.domainOperations.slice(), violations: ctx.violations.slice(), durationMs: Math.max(0, Date.now() - Number(ctx.startedAt || Date.now()))
+}: {
+ok: ! 0, inactive: ! 0, stamp: APP_BACKEND_BOUNDARY_PHASE3.stamp, owner: APP_BACKEND_BOUNDARY_PHASE3.owner
+}
+}
+function _backendBoundaryLeave_(ctx) {
+if(! ctx)return null;
+var idx = __APP_BACKEND_BOUNDARY_STACK__.lastIndexOf(ctx);
+return idx >- 1 && __APP_BACKEND_BOUNDARY_STACK__.splice(idx, 1), _backendBoundarySnapshot_(ctx)
+}
+function _backendBoundaryAttachResult_(result, snapshot) {
+if(! result || "object" != typeof result || Array.isArray(result))return result;
+var meta = Object.assign({
+}, result.meta || {
+});
+return meta.backendBoundary = snapshot || _backendBoundarySnapshot_(), result.meta = meta, result
+}
+function _backendBoundaryContractPhase3_() {
+return {
+ok: ! 0, stamp: APP_BACKEND_BOUNDARY_PHASE3.stamp, owner: APP_BACKEND_BOUNDARY_PHASE3.owner, routerOwner: APP_BACKEND_BOUNDARY_PHASE3.routerOwner, repositoryOwner: APP_BACKEND_BOUNDARY_PHASE3.repositoryOwner, writeOwner: APP_BACKEND_BOUNDARY_PHASE3.writeOwner, domainWriteOwner: APP_BACKEND_BOUNDARY_PHASE3.domainWriteOwner, policy: APP_BACKEND_BOUNDARY_PHASE3.policy, activeBoundaryDepth: __APP_BACKEND_BOUNDARY_STACK__.length, activeWriteGatewayDepth: __APP_WRITE_GATEWAY_DEPTH__, rules: {
+readRouteCannotEnterWriteGateway: ! 0, writeRouteRequiresOneRootGateway: ! 0, directApiWriteRequiresRouterBoundary: ! 0, nestedDomainOperationJoinsRootGateway: ! 0, rootOnlyCacheInvalidation: ! 0, repositoryInvalidationDeferredToRoot: ! 0, partialWriteCacheRecovery: ! 0, phase4CanonicalMutationLedger: ! 0, uniqueMutationStampPerTransaction: ! 0, directDomainInvocationStillProtected: ! 0, uiDomChanged: ! 1, businessLogicChanged: ! 1, noNewFiles: ! 0
+}
+}
+}
+function _writeGatewayIsActive_() {
+return __APP_WRITE_GATEWAY_DEPTH__ > 0
+}
+function domainWrite_(name, payload, handler, successMsg, failureMsg) {
+if("function" != typeof handler)throw new Error("domainWrite_ ต้องรับ callback");
+if(! _writeGatewayIsActive_())return writeGateway_(name, payload, handler, successMsg, failureMsg);
+var operationName = String(name || "domain-write").trim() || "domain-write";
+_backendBoundaryNoteDomainWrite_(operationName);
+var normalized = _platformNormalizeResult_(handler(payload), successMsg, failureMsg);
+if(normalized && "object" == typeof normalized &&! Array.isArray(normalized)) {
+var meta = Object.assign({
+}, normalized.meta || {
+});
+meta.domainWriteOwner = "domainWrite_", meta.domainWriteName = operationName, meta.domainWriteJoinedRoot =! 0, meta.writeStamp = APP_BACKEND_BOUNDARY_PHASE3.stamp, normalized.meta = meta
+}
+return normalized
+}
+var APP_WRITE_CONTRACT_PHASE6 = {
+stamp: "phase6-save-write-contract-current", owner: "writeGateway_", policy: "single-write-owner-lock-normalize-invalidate", uiDomChanged: false, businessLogicChanged: false
+};
+function _writeGatewayOwnerContractPhase6_() {
+var methods = [];
+try {
+var reg = _appIsFnName_("_apiRouteRegistry_") ? _apiRouteRegistry_(): {
+};
+Object.keys(reg || {
+}).forEach(function(name) {
+var meta = reg[name] || {
+};
+! 0 === meta.write && methods.push(name)
+})
+}
+catch(_e) {
+_recordWarning_("phase6.write.contract.registry", _e)
+}
+return {
+ok: true, stamp: APP_WRITE_CONTRACT_PHASE6.stamp, owner: APP_WRITE_CONTRACT_PHASE6.owner, writeRouteCount: methods.length, writeRoutes: methods.sort(), contract: "all write/save/delete route handlers must execute through writeGateway_ and router CSRF/action-token gate", requiredResultMeta: ["writeOwner", "writeName", "writeStamp", "cacheInvalidation"], uiDomChanged: false, businessLogicChanged: false
+}
+}
+function _writeGatewayDomainsPhase6_(name, payload) {
+var txn = _cacheLedgerQueueWriteProfilePhase4_(name, payload);
+return txn.domains.slice()
+}
+function _writeGatewayInvalidateAfterWritePhase6_(name, payload, result) {
+return _cacheLedgerFlushPhase4_(name, payload, {
+resultOk: !result || false !== result.ok
+})
+}
+function writeGateway_(name, payload, handler, successMsg, failureMsg) {
+var started = Date.now(), writeName = String(name || "write").trim() || "write", isRoot = 0 === __APP_WRITE_GATEWAY_DEPTH__, chain;
+if("function" != typeof handler)throw new Error("writeGateway_ ต้องรับ callback");
+if(isRoot && /^api[A-Z0-9_]/.test(writeName) &&! _backendBoundaryCurrent_())return err_("ไม่อนุญาตให้เรียก Write API โดยข้าม apiRouter", {
+errorCode: "ROUTER_WRITE_BOUNDARY_REQUIRED", writeOwner: "writeGateway_", writeName: writeName, boundaryOwner: "Code_20_Router", directInvocationBlocked: !0
+});
+_backendBoundaryNoteGateway_(writeName, isRoot), isRoot && (__APP_WRITE_GATEWAY_CHAIN__ = [], _writeGatewayResetInvalidationQueue_(writeName)), chain = __APP_WRITE_GATEWAY_CHAIN__, chain.push(writeName), __APP_WRITE_GATEWAY_DEPTH__ += 1;
+function executeWrite_() {
+var raw = handler(payload), normalized = _platformNormalizeResult_(raw, successMsg, failureMsg);
+if(normalized && "object" == typeof normalized &&! Array.isArray(normalized)) {
+var meta = Object.assign({
+}, normalized.meta || {
+});
+meta.writeOwner = "writeGateway_", meta.writeName = isRoot ? writeName: String(meta.writeName || writeName), meta.writeRootName = String(chain[0] || writeName), meta.writeStamp = APP_WRITE_CONTRACT_PHASE6.stamp, meta.writeLatencyMs = Date.now() - started, meta.writeDepth = __APP_WRITE_GATEWAY_DEPTH__, meta.writeRoot =!! isRoot, meta.writeChain = chain.slice(), normalized.writeGateway =! 0, normalized.writeOwner = "writeGateway_", normalized.writeName = isRoot ? writeName: String(normalized.writeName || writeName);
+if(! 1 !== normalized.ok)if(isRoot) {
+var cacheInfo = _writeGatewayInvalidateAfterWritePhase6_(writeName, payload, normalized);
+meta.cacheInvalidation = Object.assign({
+}, meta.cacheInvalidation || {
+}, cacheInfo || {
+});
+try {
+normalized.data && "object" == typeof normalized.data &&! Array.isArray(normalized.data) && (normalized.data.cacheInvalidation = normalized.data.cacheInvalidation || cacheInfo)
+}
+catch(_dataMetaErr) {
+_recordWarning_("phase3.write.dataMeta", _dataMetaErr)
+}
+}
+else meta.cacheInvalidation = Object.assign({
+}, meta.cacheInvalidation || {
+}, {
+ok: ! 0, skipped: ! 0, reason: "nested-write-joined-root", owner: "writeGateway_", rootWriteName: String(chain[0] || writeName), stamp: APP_BACKEND_BOUNDARY_PHASE3.stamp
+});
+if(!normalized.ok && isRoot && _writeGatewayDeferredDomains_().length) {
+var failedResultRecovery = _writeGatewayInvalidateAfterWritePhase6_(writeName, payload, normalized);
+failedResultRecovery.recovery = !0;
+failedResultRecovery.reason = "failed-result-after-repository-mutation";
+meta.cacheInvalidation = Object.assign({}, meta.cacheInvalidation || {}, failedResultRecovery)
+}
+normalized.meta = meta
+}
+return normalized
+}
+try {
+return isRoot ? withWriteLock_(writeName, executeWrite_): executeWrite_()
+}
+catch(e) {
+_recordWarning_("phase3.writeGateway.error", e, {
+writeName: writeName, isRoot: isRoot, writeDepth: __APP_WRITE_GATEWAY_DEPTH__
+});
+var recoveryInfo = null;
+if(isRoot && _writeGatewayDeferredDomains_().length)try {
+recoveryInfo = _writeGatewayInvalidateAfterWritePhase6_(writeName, payload, null);
+recoveryInfo.recovery = !0;
+recoveryInfo.reason = "exception-after-repository-mutation"
+}
+catch(_recoveryErr) {
+_recordWarning_("phase3.writeGateway.cacheRecovery", _recoveryErr, {
+writeName: writeName
+})
+}
+var phaseDWriteError = typeof _routerPhaseDClassifyError_ === "function" ? _routerPhaseDClassifyError_(writeName, {
+write: !0, csrf: !0, group: "write"
+}, e, "WRITE_GATEWAY_EXCEPTION"): null;
+var failed = err_(phaseDWriteError && phaseDWriteError.message || e && e.message ? phaseDWriteError && phaseDWriteError.message || e.message: String(e), {
+writeOwner: "writeGateway_", writeName: writeName, writeRootName: String(chain[0] || writeName), writeStamp: APP_WRITE_CONTRACT_PHASE6.stamp, backendBoundaryStamp: APP_BACKEND_BOUNDARY_PHASE3.stamp, cacheInvalidation: recoveryInfo, writeReliabilityStamp: phaseDWriteError && phaseDWriteError.stamp || "phaseK-write-schema-unification-2026-07-02-r1", rawError: phaseDWriteError && phaseDWriteError.rawMessage || String(e && e.message || e)
+});
+return failed.errorCode = phaseDWriteError && phaseDWriteError.errorCode || "WRITE_GATEWAY_EXCEPTION", failed.writeGateway =! 0, failed.writeOwner = "writeGateway_", failed.writeName = writeName, failed
+}
+finally {
+__APP_WRITE_GATEWAY_DEPTH__ = Math.max(0, __APP_WRITE_GATEWAY_DEPTH__ - 1), chain.pop(), isRoot && 0 === __APP_WRITE_GATEWAY_DEPTH__ && (__APP_WRITE_GATEWAY_CHAIN__ = [], _writeGatewayResetInvalidationQueue_())
+}
+}
+function escapeHtml_(v) {
+return String(v || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+}
+function sanitizeRow_(obj) {
+var clean = {
+};
+return Object.keys(obj).forEach(function(k) {
+var v = obj[k];
+clean[k] = "string" == typeof v ? escapeHtml_(v): v
+}), clean
+}
+function _shouldPersistSessionMeta_(sess, options) {
+if(! 1 === (options = options || {
+}).persistMeta)return ! 1;
+if(! 0 === options.persistMeta ||! 0 === options.forcePersist)return ! 0;
+sess = sess && "object" == typeof sess ? sess: {
+};
+var lastPersistMs = Date.parse(String(sess.persistedAt || sess.lastPersistedAt || ""));
+return ! isFinite(lastPersistMs) || lastPersistMs <= 0 || Date.now() - lastPersistMs >= 1e3 * _SESSION_TOUCH_PERSIST_INTERVAL_
+}
+function _sessionNowIso_() {
+return(new Date).toISOString()
+}
+function _sessionExpiryIso_(baseIso) {
+if(_appIsFnName_("_sessionExpiryDisabled_") && _sessionExpiryDisabled_())return _sessionPersistentUntilIso_();
+var baseMs = Date.parse(String(baseIso || ""));
+return(! isFinite(baseMs) || baseMs <= 0) && (baseMs = Date.now()), new Date(baseMs + 1e3 * _SESSION_TTL_).toISOString()
+}
+function _normalizeSessionEnvelope_(userObj) {
+var sess = Object.assign({
+}, userObj && "object" == typeof userObj ? userObj: {
+}), nowIso = _sessionNowIso_();
+return sess.issuedAt = String(sess.issuedAt || nowIso), sess.lastSeenAt = String(sess.lastSeenAt || nowIso), sess.touchedAt = nowIso, sess.persistedAt && (sess.persistedAt = String(sess.persistedAt)), sess.persistentSession =! (! _appIsFnName_("_sessionExpiryDisabled_") ||! _sessionExpiryDisabled_()), sess.expiresAt = _sessionExpiryIso_(sess.lastSeenAt || nowIso), sess
+}
+function _isSessionExpired_(sess) {
+if(! sess || "object" != typeof sess)return ! 0;
+var expiresMs = Date.parse(String(sess.expiresAt || ""));
+if(! isFinite(expiresMs) || expiresMs <= 0) {
+var defaultBase = Date.parse(String(sess.lastSeenAt || sess.issuedAt || ""));
+if(! isFinite(defaultBase) || defaultBase <= 0)return ! 0;
+expiresMs = defaultBase + 1e3 * _SESSION_TTL_
+}
+return expiresMs <= Date.now()
+}
+function _appSha256Hex_(raw) {
+return raw ? Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(raw), Utilities.Charset.UTF_8).map(function(b) {
+var v = (b < 0 ? b + 256: b).toString(16);
+return 1 === v.length ? "0" + v: v
+}).join(""): "";
+var bytes
+}
+function _hashPassword_(raw) {
+return _appSha256Hex_(raw)
+}
+function _sessionTokenFingerprintForLog_(token) {
+try {
+return _hashPassword_(String(token || "")).slice(0, 12)
+}
+catch(_e) {
+return"unavailable"
+}
+}
+function _storeSession_(token, userObj, options) {
+if(! (token = String(token || "")))return ! 1;
+var normalized = _normalizeSessionEnvelope_(userObj || {
+}), persistMeta = _shouldPersistSessionMeta_(normalized, options || {
+});
+persistMeta && (normalized.persistedAt = _sessionNowIso_());
+try {
+persistMeta && _appIsFnName_("_persistSessionMeta_") && _persistSessionMeta_(token, normalized)
+}
+catch(_e) {
+_recordWarning_("ec", _e), _logWarn_("session.persistMeta", {
+tokenFingerprint: _sessionTokenFingerprintForLog_(token), error: String(_e && _e.message || _e)
+})
+}
+try {
+safeCachePut_(_AppScriptCache_(), "sess_" + token, normalized, _SESSION_TTL_)
+}
+catch(e) {
+_recordWarning_("ec", e), _logWarn_("session.cachePut", {
+tokenFingerprint: _sessionTokenFingerprintForLog_(token), error: String(e && e.message || e)
+})
+}
+return ! 0
+}
+function _getSession_(token) {
+if(! (token = String(token || "")))return null;
+try {
+var raw = _AppScriptCache_().get("sess_" + token);
+if(raw) {
+var cached = JSON.parse(raw);
+return _isSessionExpired_(cached) ? (_clearSession_(token), null): cached
+}
+}
+catch(e) {
+_recordWarning_("ec", e), _logWarn_("session.cacheGet", {
+tokenFingerprint: _sessionTokenFingerprintForLog_(token), error: String(e && e.message || e)
+})
+}
+try {
+if(_appIsFnName_("_recoverSessionFromMeta_")) {
+var recovered = _recoverSessionFromMeta_(token);
+if(recovered) {
+if(_isSessionExpired_(recovered))return _clearSession_(token), null;
+try {
+safeCachePut_(_AppScriptCache_(), "sess_" + token, recovered, _SESSION_TTL_)
+}
+catch(_eWarm) {
+_recordWarning_("ec", _eWarm), _logWarn_("session.cacheWarm", {
+tokenFingerprint: _sessionTokenFingerprintForLog_(token), error: String(_eWarm && _eWarm.message || _eWarm)
+})
+}
+return recovered
+}
+}
+}
+catch(_e2) {
+_recordWarning_("ec", _e2), _logWarn_("session.recoverMeta", {
+tokenFingerprint: _sessionTokenFingerprintForLog_(token), error: String(_e2 && _e2.message || _e2)
+})
+}
+return null
+}
+function _clearSession_(token) {
+token = String(token || "");
+try {
+_AppScriptCache_().remove("sess_" + token)
+}
+catch(e) {
+_recordWarning_("ec", e), _logWarn_("session.cacheRemove", {
+tokenFingerprint: _sessionTokenFingerprintForLog_(token), error: String(e && e.message || e)
+})
+}
+try {
+_appIsFnName_("_clearSessionMeta_") && _clearSessionMeta_(token)
+}
+catch(_e) {
+_recordWarning_("ec", _e), _logWarn_("session.clearMeta", {
+tokenFingerprint: _sessionTokenFingerprintForLog_(token), error: String(_e && _e.message || _e)
+})
+}
+return ! 0
+}
+function _rotateSessionToken_(oldToken, sess, payload, reason) {
+if(! (oldToken = String(oldToken || "")) ||! sess)throw new Error("ไม่พบ session สำหรับหมุน token");
+var nextToken = Utilities.getUuid(), nextSess = Object.assign({
+}, sess || {
+}), csrf;
+try {
+_appIsFnName_("_attachSessionBinding_") && _attachSessionBinding_(nextSess, payload || {
+})
+}
+catch(_bindingErr) {
+_recordWarning_("ec", _bindingErr)
+}
+nextSess.tokenRotatedAt = (new Date).toISOString(), nextSess.tokenRotationReason = String(reason || "production"), _storeSession_(nextToken, nextSess, {
+persistMeta: ! 0
+});
+try {
+_clearSession_(oldToken)
+}
+catch(_clearOldErr) {
+_recordWarning_("ec", _clearOldErr), _logWarn_("session.rotate.clearOld", {
+tokenFingerprint: _sessionTokenFingerprintForLog_(oldToken), error: String(_clearOldErr && _clearOldErr.message || _clearOldErr)
+})
+}
+return {
+token: nextToken, csrfToken: _issueCsrfToken_(nextToken, nextSess), user: nextSess
+}
+}
+function _issueCsrfToken_(token, sess) {
+sess = sess || _getSession_(token) || {
+};
+var next = Utilities.getUuid() + "-" + _hmacSha256Hex_(String(token || "") + "|" + Date.now(), _hmacSecret_()).slice(0, 10);
+return sess.csrfToken = next, sess.csrfIssuedAt = (new Date).toISOString(), _storeSession_(token, sess), next
+}
+function _singleUseCsrfKey_(token) {
+return"csrf_action_" + _hmacSha256Hex_(String(token || ""), _hmacSecret_()).slice(0, 32)
+}
+function _issueSingleUseCsrfToken_(parentToken, sess, action) {
+if(parentToken = String(parentToken || ""), sess = sess || _getSession_(parentToken) || {
+}, ! parentToken ||! sess)throw new Error("ไม่พบ session สำหรับออก action token");
+var actionToken = "act_" + Utilities.getUuid() + "_" + _hmacSha256Hex_(parentToken + "|" + String(action || "") + "|" + Date.now(), _hmacSecret_()).slice(0, 12), payload = {
+parentTokenHash: _hmacSha256Hex_(parentToken, _hmacSecret_()).slice(0, 32), action: String(action || ""), issuedAt: (new Date).toISOString()
+};
+return safeCachePut_(_AppScriptCache_(), _singleUseCsrfKey_(actionToken), payload, 300), actionToken
+}
+function _verifySingleUseCsrfToken_(actionToken, parentToken, action) {
+if(0 !== (actionToken = String(actionToken || "")).indexOf("act_"))return ! 1;
+var consume = function() {
+var key = _singleUseCsrfKey_(actionToken), raw = "";
+try {
+raw = _AppScriptCache_().get(key)
+}
+catch(_e) {
+_recordWarning_("csrf.action.cacheRead", _e), raw = ""
+}
+if(! raw)throw new Error("CSRF action token หมดอายุหรือถูกใช้แล้ว");
+var data = {
+};
+try {
+data = JSON.parse(raw)
+}
+catch(_e2) {
+_recordWarning_("csrf.action.parse", _e2);
+throw new Error("CSRF action token ไม่ถูกต้อง")
+}
+var expectedParent = _hmacSha256Hex_(String(parentToken || ""), _hmacSecret_()).slice(0, 32);
+if(String(data.parentTokenHash || "") !== expectedParent)throw new Error("CSRF action token ไม่ตรงกับ session");
+if(data.action && action && String(data.action) !== String(action))throw new Error("CSRF action token ไม่ตรงกับ action");
+try {
+_AppScriptCache_().remove(key)
+}
+catch(_removeErr) {
+_recordWarning_("csrf.action.cacheRemove", _removeErr);
+throw new Error("ไม่สามารถยืนยันการใช้ CSRF action token ได้")
+}
+return ! 0
+};
+if(_appIsFnName_("_withScriptLock_"))return _withScriptLock_(5e3, function() {
+return consume()
+});
+var lock = LockService.getScriptLock();
+lock.waitLock(5e3);
+try {
+return consume()
+}
+finally {
+try {
+lock.releaseLock()
+}
+catch(_releaseErr) {
+_recordWarning_("csrf.action.lockRelease", _releaseErr)
+}
+}
+}
+function _verifyCsrfToken_(payload, sess, options) {
+payload = payload || {
+}, sess = sess || {
+}, options = options || {
+};
+var sent = String(payload.csrfActionToken || payload.actionToken || payload._actionToken || payload.csrfToken || payload.csrf || payload._csrf || "").trim(), expected = String(sess.csrfToken || "").trim();
+if(! expected)throw new Error("CSRF token ไม่มีใน session");
+if(sent && 0 === sent.indexOf("act_"))return _verifySingleUseCsrfToken_(sent, String(payload.token || payload._token || ""), options.action || payload.actionMethod || "");
+if(! 0 === options.requireAction)throw new Error("CSRF action token จำเป็นสำหรับ write action");
+if(! sent || sent !== expected)throw new Error("CSRF token ไม่ถูกต้องหรือหมดอายุ");
+return ! 0
+}
+function _apiRouterWriteMethods_() {
+var out = {
+};
+try {
+if(_appIsFnName_("_apiRouteRegistry_")) {
+var registry = _apiRouteRegistry_() || {
+};
+Object.keys(registry).forEach(function(name) {
+var meta;
+! 0 === (registry[name] || {
+}).write && (out[name] =! 0)
+})
+}
+}
+catch(_e) {
+_recordWarning_("ec", _e)
+}
+return out
+}
+function _isWriteApiMethod_(name) {
+if(! (name = String(name || "").trim()))return ! 1;
+try {
+if(_appIsFnName_("_apiRouteMeta_")) {
+var meta = _apiRouteMeta_(name);
+if(meta)return ! 0 === meta.write
+}
+}
+catch(_e) {
+_recordWarning_("ec", _e)
+}
+return !! _apiRouterWriteMethods_()[name]
+}
+function _checkGeminiRateLimit_(token) {
+var key = "rl_gem_" + (token || "anon"), cache = _AppScriptCache_();
+try {
+var c = parseInt(cache.get(key) || "0", 10);
+if(c >= 15)throw new Error("เรียกใช้ AI บ่อยเกินไป กรุณารอสักครู่");
+cache.put(key, String(c + 1), 60)
+}
+catch(e) {
+if(_recordWarning_("ec", e), - 1 !== e.message.indexOf("บ่อยเกินไป"))throw e
+}
+}
+function apiLogout(payload) {
+try {
+payload = payload || {
+};
+var token = String(payload && (payload.token || payload._token) || "").trim();
+return payload.resumeHandle && _appIsFnName_("_revokeSessionResumeHandle_") && _revokeSessionResumeHandle_(payload.resumeHandle), token && _clearSession_(token), ok_({
+loggedOut: ! 0, tokenCleared: !! token, resumeHandleCleared: !! payload.resumeHandle
+})
+}
+catch(e) {
+return _recordWarning_("ec", e), err_(e.message)
+}
+}
+function _payloadValue_(payload, keys) {
+for(var list = Array.isArray(keys) ? keys: [keys], i = 0;
+i < list.length;
+i ++ ) {
+var key = list[i];
+if(payload && void 0 !== payload[key] && null !== payload[key] && "" !== payload[key])return payload[key]
+}
+return""
+}
+function isSoftDeletedRow_(r) {
+if(! r || "object" != typeof r)return ! 1;
+var v = r.isDeleted;
+if(! 0 === v)return ! 0;
+if("string" == typeof v) {
+var s = v.trim().toLowerCase();
+if("true" === s || "1" === s || "yes" === s || "y" === s)return ! 0
+}
+return ! 1
+}
+function _renderVue3JsonSafe_(value, fallback) {
+try {
+return JSON.stringify(void 0 === value ? fallback: value)
+}
+catch(_e) {
+try {
+_appIsFnName_("_recordWarning_") && _recordWarning_("render.json.safe", _e)
+}
+catch(_ignore) {
+_appIgnore_(_ignore, "c6.C00:1951")
+}
+return JSON.stringify(void 0 === fallback ? {
+}
+: fallback)
+}
+}
+function _renderVue3InvokeSafe_(name, args, fallback) {
+try {
+var root = "undefined" != typeof globalThis ? globalThis: this, fn = root && root[name];
+if("function" == typeof fn)return fn.apply(root, args || [])
+}
+catch(e) {
+try {
+_appIsFnName_("_recordWarning_") && _recordWarning_("render.invoke." + name, e)
+}
+catch(_ignore) {
+_appIgnore_(_ignore, "c6.C00:1967")
+}
+}
+return fallback
+}
+function _renderVue3BootstrapDefault_(e) {
+var p = "dashboard";
+try {
+var q = e && e.parameter ? e.parameter: {
+};
+p = String(q.page || q.view || q.route || "dashboard").trim() || "dashboard"
+}
+catch(_e) {
+p = "dashboard"
+}
+return {
+ok: ! 0, page: p, requestedPage: p, session: null, user: null, source: "Code_00_PlatformCore.renderVue3App_", generatedAt: (new Date).toISOString()
+}
+}
+function renderVue3App_(e) {
+var title = "ระบบบริหารจัดการเรื่องพิจารณา", template = HtmlService.createTemplateFromFile("Index");
+template.appTitle = title;
+var bootstrap = _renderVue3InvokeSafe_("_vue3SessionBootstrapCanonical_", [e, {
+securityGate: ! 1
+}
+], null);
+return bootstrap || (bootstrap = _renderVue3InvokeSafe_("_vue3ResolveSessionBootstrap_", [e], _renderVue3BootstrapDefault_(e))), template.bootstrapJson = _renderVue3JsonSafe_(bootstrap, _renderVue3BootstrapDefault_(e)), template.assetManifestJson = _renderVue3InvokeSafe_("getAppAssetManifestJson_", [], null) || _renderVue3JsonSafe_({
+}, {
+}), template.deferredScriptMapJson = _renderVue3InvokeSafe_("getAppDeferredScriptMapJson_", [], null) || _renderVue3JsonSafe_({
+}, {
+}), template.deferredTemplateMapJson = _renderVue3InvokeSafe_("getAppDeferredTemplateMapJson_", [], null) || _renderVue3JsonSafe_({
+}, {
+}), template.coreRuntimeFilesJson = _renderVue3InvokeSafe_("getAppCoreRuntimeFilesJson_", [], null) || _renderVue3JsonSafe_([], []), template.evaluate().setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT)
+}
+
+var GITHUB_GAS_BACKEND_STAMP = "commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1";
+function _githubSafeJson_(value) {
+try { return JSON.stringify(value == null ? null : value); }
+catch(e) { return JSON.stringify({ ok:false, error:String(e && e.message || e) }); }
+}
+function _githubEscapeScriptJson_(value) {
+return _githubSafeJson_(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+}
+function _githubJsonOut_(obj) {
+return ContentService.createTextOutput(_githubSafeJson_(obj || {})).setMimeType(ContentService.MimeType.JSON);
+}
+function _githubJsOut_(src) {
+return ContentService.createTextOutput(String(src || "")).setMimeType(ContentService.MimeType.JAVASCRIPT || ContentService.MimeType.TEXT);
+}
+function _githubCallbackName_(e) {
+var p = e && e.parameter || {};
+return String(p.callback || p.cb || "").replace(/[^A-Za-z0-9_$\.]/g, "");
+}
+function _githubLogoConfig_() {
+var cfg = { svg:"", png96:"", png192:"", png512:"", inline:"", active:"", source:"" };
+try { if (typeof getAppLogoConfig_ === "function") cfg = getAppLogoConfig_() || cfg; } catch(_e) {}
+if(!cfg.active) {
+var fallbackSvg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#f8fafc"/><circle cx="64" cy="48" r="26" fill="#d4af37"/><path d="M28 100h72M40 88h48M48 74h32" stroke="#334155" stroke-width="7" stroke-linecap="round"/><text x="64" y="55" text-anchor="middle" font-family="Sarabun, Arial" font-size="18" fill="#334155">สภา</text></svg>');
+cfg = { svg:fallbackSvg, png96:fallbackSvg, png192:fallbackSvg, png512:fallbackSvg, inline:"", active:fallbackSvg, source:"github-default" };
+}
+return cfg;
+}
+function _githubPublicConfigPayload_() {
+var logo = _githubLogoConfig_();
+return { ok:true, source:"__githubPublicConfig", stamp:GITHUB_GAS_BACKEND_STAMP, releaseStamp:APP_DEPLOY_RELEASE.stamp, assetStamp:APP_DEPLOY_RELEASE.assetStamp, contractStamp:APP_DEPLOY_RELEASE.contractStamp, deployRelease:APP_DEPLOY_RELEASE, generatedAt:(new Date()).toISOString(), logoUrl:String(logo.active || logo.svg || logo.png192 || ""), appLogo:logo, appTitle:"ระบบบริหารจัดการเรื่องพิจารณา", dashboardInitialIncludeBudget:false, dashboardBudgetHydrationEnabled:true, dashboardBudgetOwner:"BudgetDomain", phaseESeparateBudgetHydration:true, phaseIContractGate:true, phaseJRuntimeSlimming:true, phaseKWriteSchemaUnification:true, phaseLVercelMigrationFoundation:true, phaseMVercelApiProxyEnabled:true, phaseQRuntimeSlimming:true, sizeGateEnabled:true, removedBrowserTransports:true, vercelStaticFrontendReady:true, vercelApiProxyEnabled:true, hostingTarget:"vercel-api-proxy", vercelBuildTool:"tools/generate_vercel_env.py", phaseIContractFinalCleanup:true, phaseGSecurityHardening:true, fastLoginJsonp:false, phaseGFastLoginJsonpDisabled:true, requireBridgeReadyMessage:true, allowAssumedBridgeReady:false, canonicalEditableRoot:"gas-backend", generatedMirrorRoot:"github-pages/partials", generatedMirrorPolicy:"do-not-edit-generated-mirrors", syncTool:"tools/sync_frontend_partials.py", releaseGate:"tools/release_gate.py", securityGate:"tools/release_gate.py", technicalDebtManifest:"TECH_DEBT_MANIFEST.json", singleSourcePolicy:"docs/SINGLE_SOURCE_POLICY.md", writeSchemaGate:"tools/release_gate.py", sizeGate:"tools/release_gate.py" };
+}
+function _githubRenderPublicConfig_(e) {
+var cb = _githubCallbackName_(e), payload = _githubPublicConfigPayload_();
+return cb ? _githubJsOut_(cb + "(" + _githubSafeJson_(payload) + ");") : _githubJsonOut_(payload);
+}
+function _githubNormalizeResult_(result, method) {
+result = result && typeof result === "object" ? result : { ok:false, error:String(result || "empty result") };
+if(result.result && result.ok == null && typeof result.result === "object") result = result.result;
+if(result.data && typeof result.data === "object") {
+if(result.token == null && result.data.token != null) result.token = result.data.token;
+if(result.user == null && result.data.user != null) result.user = result.data.user;
+if(result.csrfToken == null && result.data.csrfToken != null) result.csrfToken = result.data.csrfToken;
+if(result.resumeHandle == null && result.data.resumeHandle != null) result.resumeHandle = result.data.resumeHandle;
+}
+result.method = result.method || method || "";
+return result;
+}
+function _githubBackendTransportRemoved_(name) {
+return _githubJsonOut_({ ok:false, error:String(name || "transport") + " ถูกถอดออกแล้วใน Phase Q; ใช้ Vercel /api proxy เท่านั้น", errorCode:"REMOVED_BROWSER_TRANSPORT", transport:"vercel-api-proxy-only", releaseStamp:GITHUB_GAS_BACKEND_STAMP });
+}
+function doGet(e) {
+var p = e && e.parameter || {};
+if(p.__githubPublicConfig != null) return _githubRenderPublicConfig_(e);
+if(p.__removedBridgeClient != null || p.__removedBridgeNamedRequest != null || p.__removedJsonpApi != null || p.__removedFastLogin != null || p.__removedLoginPost != null) return _githubBackendTransportRemoved_("GAS browser transport");
+if(p.health || p.ping) return _githubHealth_(e);
+return renderVue3App_(e)
+}
+
+function doPost(e) {
+function jsonOut(obj) {
+return ContentService.createTextOutput(JSON.stringify(obj || {
+})).setMimeType(ContentService.MimeType.JSON)
+}
+try {
+var params = e && e.parameter || {};
+
+var contents = e && e.postData && e.postData.contents ? String(e.postData.contents): "{}";
+if(_jsonByteLength_(contents) > _apiPayloadMaxBytes_())return jsonOut({
+ok: ! 1, error: "API payload ใหญ่เกินขนาดที่อนุญาต", errorCode: "PAYLOAD_TOO_LARGE"
+});
+var body = {
+};
+try {
+body = JSON.parse(contents)
+}
+catch(_pe) {
+return _recordWarning_("ec", _pe), jsonOut({
+ok: ! 1, error: "JSON request body ไม่ถูกต้อง", errorCode: "BAD_JSON"
+})
+}
+var method = String(body.method || body.action || "").trim(), payload = body.payload || body.params || body.data || {
+}, result;
+if(! method)return jsonOut({
+ok: ! 1, error: "method required in request body", errorCode: "METHOD_REQUIRED"
+});
+try {
+_assertApiPayloadEnvelopeSafe_(method, payload, "doPost")
+}
+catch(_payloadErr) {
+return _recordWarning_("ec", _payloadErr), jsonOut({
+ok: ! 1, error: String(_payloadErr && _payloadErr.message || _payloadErr), errorCode: "PAYLOAD_REJECTED"
+})
+}
+try {
+if("function" != typeof apiRouter)throw new Error("apiRouter ไม่พร้อมใช้งาน");
+result = apiRouter({
+method: method, payload: payload
+})
+}
+catch(re) {
+_recordWarning_("ec", re), result = {
+ok: ! 1, error: String(re && re.message || re), msg: String(re && re.message || re)
+}
+}
+return jsonOut(result || {
+ok: ! 1, error: "no result"
+})
+}
+catch(e2) {
+return _recordWarning_("ec", e2), jsonOut({
+ok: ! 1, error: String(e2 && e2.message || e2)
+})
+}
+}
+AppDomain.Formatters = AppDomain.Formatters || {
+}, AppDomain.Formatters.normalizeDateOutput = AppDomain.Formatters.normalizeDateOutput || function(value) {
+if(! value && 0 !== value)return"";
+var d = value;
+return"number" == typeof value && value > 3e4 && value < 7e4 ? d = new Date(Math.round(86400 * (value - 25569) * 1e3)): value instanceof Date || (d = new Date(value)), d instanceof Date &&! isNaN(d.getTime()) ? Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd"): String(value || "")
+}, AppDomain.Formatters.getFiscalYearFromDate = AppDomain.Formatters.getFiscalYearFromDate || function(value) {
+var d = value instanceof Date ? value: new Date(value || new Date);
+return isNaN(d.getTime()) && (d = new Date), Number(d.getMonth() >= 9 ? d.getFullYear() + 544: d.getFullYear() + 543)
+}, AppDomain.Formatters.formatCaseNo = AppDomain.Formatters.formatCaseNo || function(runningNo, dateValue, explicitYear) {
+var n = String(null == runningNo ? "": runningNo).trim(), by = String(null == explicitYear ? "": explicitYear).trim();
+return by || (by = String(AppDomain.Formatters.getFiscalYearFromDate(dateValue || new Date))), [n, by].filter(Boolean).join("/")
+};
+
+var ROUTER1_PLATFORM_INFRA_OWNER = "router1-platform-infra-cache-audit-perf-owner-current";
+function _routerNumberProp_(name, defaultValue, minValue, maxValue) {
+var raw = "";
+try {
+_appIsFnName_("_scriptProp_") ? raw = _scriptProp_(name, ""): "undefined" != typeof PropertiesService && (raw = PropertiesService.getScriptProperties().getProperty(name) || "")
+}
+catch(_e) {
+raw = ""
+}
+var n = Number(raw || defaultValue);
+return isFinite(n) || (n = Number(defaultValue) || 0), minValue = Number(minValue), maxValue = Number(maxValue), isFinite(minValue) && (n = Math.max(minValue, n)), isFinite(maxValue) && (n = Math.min(maxValue, n)), Math.floor(n)
+}
+function _buildDigestHex_(input) {
+var digest;
+return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(input || ""), Utilities.Charset.UTF_8).map(function(b) {
+var v = (b < 0 ? b + 256: b).toString(16);
+return 1 === v.length ? "0" + v: v
+}).join("")
+}
+function _cacheGetJson_(key) {
+if(! key)return null;
+var value = _AppCacheGetJson_("router:" + String(key));
+try {
+_appIsFnName_("_requestScopeNoteCacheAccess_") && _requestScopeNoteCacheAccess_("domainBundleCache", null != value, 1)
+}
+catch(_cacheMetricErr) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("performance.domainCache.metric", _cacheMetricErr)
+}
+return value
+}
+function _cachePutJson_(key, value, ttlSeconds) {
+if(! key)return !1;
+var stored = _AppCachePutJson_("router:" + String(key), value, Math.max(30, Number(ttlSeconds || 120)));
+try {
+stored && _appIsFnName_("_requestScopeNoteCacheAccess_") && _requestScopeNoteCacheAccess_("domainBundleCacheWrite", !0, 1)
+}
+catch(_cacheMetricErr) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("performance.domainCache.writeMetric", _cacheMetricErr)
+}
+return stored
+}
+function _invalidateDerivedCaches_(domain, reason) {
+domain = _cacheLedgerCanonicalDomainPhase4_(domain);
+reason = String(reason || domain + "-write");
+if(_cacheLedgerShouldDeferPhase4_())return _cacheLedgerQueueDomainPhase4_(domain, "derived-cache-helper", reason);
+var txnWas = __APP_CACHE_LEDGER_TXN__;
+try {
+_cacheLedgerResetPhase4_(reason);
+_cacheLedgerQueueDomainPhase4_(domain, "derived-cache-helper-direct", reason);
+return _cacheLedgerFlushPhase4_(reason, {}, { direct: true })
+}
+finally {
+__APP_CACHE_LEDGER_TXN__ = txnWas
+}
+}
+function _invalidateCaseDerivedCaches_(reason) {
+return _invalidateDerivedCaches_("case", reason || "case-write")
+}
+function _invalidateLettersDerivedCaches_(reason) {
+return _invalidateDerivedCaches_("letters", reason || "letters-write")
+}
+function _invalidateMeetingDerivedCaches_(reason) {
+return _invalidateDerivedCaches_("meeting", reason || "meeting-write")
+}
+function _invalidateBudgetDerivedCaches_(reason) {
+return _invalidateDerivedCaches_("budget", reason || "budget-write")
+}
+function _invalidateAdminDerivedCaches_(reason) {
+return _invalidateDerivedCaches_("admin", reason || "admin-write")
+}
+function _dashboardCacheScope_(payload, sess) {
+return payload = payload || {
+}, sess = sess || {
+}, {
+r: String(sess.role || payload.userRole || "viewer").toLowerCase(), u: String(sess.username || sess.user || payload.userName || "").toLowerCase(), fy: String(payload.fy || payload.budgetFy || payload.defaultBudgetFY || ""), l: Math.max(0, Math.min(Number(payload.caseLimit || 0) || 0, 120)), b: ! 0 === payload.includeBudget ? 1: 0, c: ! 0 === payload.includeCases ? 1: 0, mr: ! 0 === payload.includeMeetingRows ? 1: 0, ro: ! 0 === payload.includeReportOptions ? 1: 0, s: ! 0 === payload.includeSchema ? 1: 0, h: ! 0 === payload.includeHealth ? 1: 0, rt: String(payload.reportType || "all"), q: String(payload.reportQuery || payload.query || "")
+}
+}
+function _dashboardBundleCacheKey_(payload, sess) {
+var scope = _dashboardCacheScope_(payload, sess);
+return"dash_bundle_due_classifier_v2_" + _routerEntityCacheStamp_("dashboard") + "_letters_" + _routerEntityCacheStamp_("letters") + "_" + _buildDigestHex_(JSON.stringify(scope))
+}
+
+function ensureAuditLogSchema_() {
+var ss = getSpreadsheet_(), sh = ss.getSheetByName("AuditLog"), expected = ["timestamp", "action", "user", "detail"];
+if(! sh)return(sh = ss.insertSheet("AuditLog")).getRange(1, 1, 1, 4).setValues([expected]), sh.setFrozenRows(1), sh;
+var current = sh.getLastColumn() >= 4 ? sh.getRange(1, 1, 1, 4).getValues()[0]: [], mismatch;
+return(current.length < 4 || expected.some(function(v, i) {
+return String(current[i] || "").trim() !== v
+})) && (sh.getMaxColumns() < 4 && sh.insertColumnsAfter(sh.getMaxColumns(), 4 - sh.getMaxColumns()), sh.getRange(1, 1, 1, 4).setValues([expected]), sh.setFrozenRows(1)), sh
+}
+function _enterpriseAuditWrite_(rows) {
+if(! (rows = Array.isArray(rows) ? rows: []).length)return 0;
+var lock = null;
+try {
+! (lock = "undefined" != typeof LockService && LockService.getDocumentLock ? LockService.getDocumentLock(): null) && "undefined" != typeof LockService && LockService.getScriptLock && (lock = LockService.getScriptLock()), lock && lock.waitLock(_appIsFnName_("_routerNumberProp_") ? _routerNumberProp_("AUDIT_LOG_LOCK_WAIT_MS", 8e3, 1e3, 3e4): 8e3);
+var sh = ensureAuditLogSchema_();
+return sh.getRange(sh.getLastRow() + 1, 1, rows.length, 4).setValues(rows), rows.length
+}
+finally {
+try {
+lock && lock.releaseLock()
+}
+catch(_releaseErr) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("audit.lock.release", _releaseErr)
+}
+}
+}
+function _routerAuditSheetWriteEnabled_() {
+try {
+var raw = _appIsFnName_("_scriptProp_") ? String(_scriptProp_("AUDIT_SHEET_WRITE_ENABLED", "N") || "N"): "N";
+return/^(1|true|yes|y|on)$/i.test(String(raw || "").trim())
+}
+catch(_auditPropErr) {
+return _appIsFnName_("_recordWarning_") && _recordWarning_("ec", _auditPropErr, {
+file: "C20"
+}), ! 1
+}
+}
+function logAudit_(action, detail) {
+try {
+var safeDetail = _appIsFnName_("_redactSecurityAuditValue_") ? _redactSecurityAuditValue_(detail || {
+}): detail || {
+}, entry = {
+ts: (new Date).toISOString(), action: String(action || ""), detail: safeDetail
+}, user = "";
+if(detail && "object" == typeof detail && (user = String(detail.user || detail.username || detail.email || "")), ! _routerAuditSheetWriteEnabled_()) {
+try {
+_appIsFnName_("_serverLog_") && _serverLog_("info", "audit." + String(action || "event"), {
+action: entry.action, user: user, detail: safeDetail
+})
+}
+catch(_logOnlyErr) {
+_appIsFnName_("_recordWarning_") ? _recordWarning_("ec", _logOnlyErr): _appIsFnName_("_logWarn_") ? _logWarn_("ec", {
+error: String(_logOnlyErr && _logOnlyErr.message || _logOnlyErr)
+}): void _logOnlyErr
+}
+return {
+ok: ! 0, sheetWrite: ! 1
+}
+}
+return _enterpriseAuditWrite_([[entry.ts, entry.action, user, _safeJsonStringify_(safeDetail)]]), {
+ok: ! 0, sheetWrite: ! 0
+}
+}
+catch(e) {
+try {
+return ! 1
+}
+catch(_e2) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("ec", _e2)
+}
+}
+}
+var __APP_API_PERF_CACHE_KEY__ = "APP_API_PERF_SAMPLES_Current";
+function _apiPerfJsonParse_(text, defaultValue) {
+try {
+return JSON.parse(String(text || ""))
+}
+catch(_e) {
+return defaultValue
+}
+}
+function _apiPerformanceThresholds_() {
+return {
+sampleLimit: 120, maxDurationMsDefault: 1200, maxRowsReadDefault: 1e3, minCacheHitRatio: .2, maxViolationRatio: .1, byGroup: {
+dashboard: {
+maxDurationMs: 900, maxRowsRead: 800
+}, search: {
+maxDurationMs: 1200, maxRowsRead: 600
+}, tracking: {
+maxDurationMs: 1200, maxRowsRead: 600
+}, budget: {
+maxDurationMs: 1300, maxRowsRead: 1500
+}, meeting: {
+maxDurationMs: 1300, maxRowsRead: 1500
+}, personnel: {
+maxDurationMs: 1300, maxRowsRead: 1500
+}, petitioners: {
+maxDurationMs: 1300, maxRowsRead: 1500
+}, admin: {
+maxDurationMs: 1800, maxRowsRead: 2e3
+}, ai: {
+maxDurationMs: 5e3, maxRowsRead: 1e3
+}
+}
+}
+}
+function _recordApiPerfSample_(sample) {
+try {
+if(! (sample = sample || {
+}).method)return ! 1;
+var enabled =! 1;
+try {
+var raw = _appIsFnName_("_scriptProp_") ? String(_scriptProp_("API_PERF_SAMPLE_ENABLED", "N") || "N"): "N";
+enabled = /^(1|true|yes|y|on)$/i.test(String(raw || "").trim())
+}
+catch(_perfFlagErr) {
+enabled =! 1
+}
+if(! enabled)return ! 1;
+var cfg = _apiPerformanceThresholds_(), cache = _AppScriptCache_(), rows = _apiPerfJsonParse_(cache.get(__APP_API_PERF_CACHE_KEY__), []);
+Array.isArray(rows) || (rows = []);
+var item = {
+at: String(sample.at || (new Date).toISOString()), method: String(sample.method || ""), group: String(sample.group || sample.domain || "general"), ok: ! 1 !== sample.ok, durationMs: Math.max(0, Number(sample.durationMs || 0)), rowsRead: Math.max(0, Number(sample.rowsRead || 0)), payloadBytes: Math.max(0, Number(sample.payloadBytes || 0)), performanceGateStatus: String(sample.performanceGateStatus || "not-profiled"), cacheHit: !! sample.cacheHit, cacheHits: Math.max(0, Number(sample.cacheHits || 0)), cacheMisses: Math.max(0, Number(sample.cacheMisses || 0))
+};
+return rows.unshift(item), rows = rows.slice(0, Number(cfg.sampleLimit || 120)), cache.put(__APP_API_PERF_CACHE_KEY__, JSON.stringify(rows), 21600), ! 0
+}
+catch(_e) {
+return _appIsFnName_("_recordWarning_") && _recordWarning_("ec", _e, {
+file: "C20"
+}), ! 1
+}
+}
+
+
+var ROUTER_PHASE4_PLATFORM_FACADE_STAMP = "phase4-router-platform-observability-owner-current";
+function _platformRouterEntityNameForRoute_(method, meta) {
+var group = String(meta && (meta.group || meta.domain || "") || "").toLowerCase();
+var name = String(method || "").toLowerCase();
+var blob = group + " " + name;
+return /budget/.test(blob) ? "budget" : /people|personnel|staff|salary/.test(blob) ? "people" : /tracking|letter/.test(blob) ? "tracking" : /meeting/.test(blob) ? "meeting" : /petitioner/.test(blob) ? "petitioner" : /case|search|report/.test(blob) ? "case" : group || "general";
+}
+function _platformRouterCacheTelemetryForRoute_(method, meta) {
+var entity = _platformRouterEntityNameForRoute_(method, meta), stamp = "";
+try {
+_appIsFnName_("_entityCacheStamp_") && (stamp = String(_entityCacheStamp_(entity) || ""));
+} catch (e) {
+_appIsFnName_("_recordWarning_") ? _recordWarning_("phase4.router.cacheTelemetry", e, { method: String(method || ""), entity: entity }) : void e;
+}
+return {
+entity: entity,
+entityStamp: stamp,
+cacheInvalidated: !(!meta || !meta.write),
+method: String(method || ""),
+generatedAt: (new Date()).toISOString(),
+owner: "Code_00_PlatformCore._platformRouterCacheTelemetryForRoute_",
+stamp: ROUTER_PHASE4_PLATFORM_FACADE_STAMP
+};
+}
+function _platformRouterPerfSampleEnabled_() {
+try {
+var cfg = _appIsFnName_("_traceObservabilityConfig_") ? _traceObservabilityConfig_() : {};
+if (cfg && !0 === cfg.sampleApiPerf) return !0;
+} catch (cfgErr) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("phase4.router.perf.cfg", cfgErr);
+}
+try {
+var raw = _appIsFnName_("_scriptProp_") ? String(_scriptProp_("API_PERF_SAMPLE_ENABLED", "N") || "N") : "N";
+return /^(1|true|yes|y|on)$/i.test(String(raw || "").trim());
+} catch (propErr) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("phase4.router.perf.prop", propErr);
+return !1;
+}
+}
+function _platformRouterRecordPerf_(normalized, method, routeMeta, requestId) {
+try {
+if (!_platformRouterPerfSampleEnabled_()) return !1;
+routeMeta = routeMeta || {};
+normalized = normalized || {};
+var perfSample = {
+method: String(method || ""),
+requestId: String(requestId || ""),
+group: String(routeMeta.group || routeMeta.domain || "general"),
+ok: !!normalized.ok,
+durationMs: Number(normalized.latencyMs || 0),
+rowsRead: normalized.perf && normalized.perf.rowsRead,
+payloadBytes: normalized.perf && normalized.perf.payloadBytes,
+performanceGateStatus: normalized.perf && normalized.perf.gate && normalized.perf.gate.status,
+cacheHit: normalized.perf && normalized.perf.cacheHit,
+cacheHits: normalized.perf && normalized.perf.cacheHits,
+cacheMisses: normalized.perf && normalized.perf.cacheMisses,
+source: normalized.perf && normalized.perf.source,
+degraded: normalized.perf && normalized.perf.degraded,
+warningCount: normalized.perf && normalized.perf.warningCount,
+errorCount: normalized.perf && normalized.perf.errorCount,
+errorCode: String(normalized.errorCode || ""),
+at: (new Date()).toISOString(),
+owner: "Code_00_PlatformCore._platformRouterRecordPerf_",
+stamp: ROUTER_PHASE4_PLATFORM_FACADE_STAMP
+};
+_appIsFnName_("_recordApiPerfSample_") && _recordApiPerfSample_(perfSample);
+(normalized.latencyMs >= 800 || normalized.perf && Number(normalized.perf.rowsRead || 0) >= 500) && _appIsFnName_("_recordApiPerfSample_") && _recordApiPerfSample_(Object.assign({}, perfSample, { slowOrHeavy: !0, telemetryOnly: !0 }));
+_appIsFnName_("_recordPerformanceSample_") && _recordPerformanceSample_(perfSample);
+return !0;
+} catch (e) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("phase4.router.perf.record", e, { method: String(method || "") });
+return !1;
+}
+}
+function _platformRouterAuditAccess_(status, method, meta, payload, sess, requestId, detail) {
+try {
+_appIsFnName_("_securityAuditRouteAccess_") && _securityAuditRouteAccess_(status, method, meta || {}, payload || null, sess || null, requestId, detail || {});
+return !0;
+} catch (e) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("phase4.router.audit.access", e, { method: String(method || ""), status: String(status || "") });
+return !1;
+}
+}
+function _platformRouterLogAudit_(action, detail) {
+try {
+"function" === typeof logAudit_ && logAudit_(String(action || "api.router"), detail || {});
+return !0;
+} catch (e) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("phase4.router.audit.log", e, { action: String(action || "") });
+return !1;
+}
+}
+function _auditEventTaxonomy_() {
+return { auth: "auth", router: "router", admin: "admin", caseData: "case-data", meetingData: "meeting-data", letters: "letters", budget: "budget" };
+}
+function auditEvent_(type, payload) {
+try {
+var taxonomy = _auditEventTaxonomy_();
+var normalizedType = taxonomy[type] || String(type || "system");
+logAudit_("app." + normalizedType, payload || {});
+return !0;
+} catch (e) {
+_appIsFnName_("_recordWarning_") && _recordWarning_("phase4.auditEvent", e, { type: String(type || "") });
+return !1;
+}
+}
+
+var __APP_REQUEST_SCOPE_CACHE__ = void 0 !== __APP_REQUEST_SCOPE_CACHE__ && __APP_REQUEST_SCOPE_CACHE__ ? __APP_REQUEST_SCOPE_CACHE__: {
+}, __APP_REQUEST_SCOPE_METRICS__ = {
+hits: 0, misses: 0, rowsRead: 0, warnings: 0, errors: 0, sheetsRead: {
+}, cacheKinds: {
+}, warnLabels: {
+}, errorLabels: {
+}
+};
