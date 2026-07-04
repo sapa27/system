@@ -11,15 +11,15 @@ Rules:
 
    ```bash
    python tools/sync_frontend_partials.py --check
-   python tools/release_gate.py
-   python tools/release_gate.py
+   python tools/phaseG_security_gate.py
+   python tools/phaseK_write_schema_gate.py
    ```
 
 5. Keep one API owner: `Code_20_Router.gs::_apiRouteRegistry_()` derives backend/client contract checks.
-6. Keep one transport policy: browser uses same-origin Vercel API proxy only.
-7. Keep security hardening active: no browser fallback transport and no direct GAS client calls.
+6. Keep one transport policy: public contract reads by JSONP, authenticated reads and writes by bridge.
+7. Keep Phase G security hardening active: no fast-login JSONP session issuance and no assumed bridge readiness.
 8. Keep one dashboard budget owner: `BudgetDomain` hydrates budget after dashboard first paint.
 
 Phase I does not add APIs or change business logic. It restores enforceable release gates and prevents drift.
 
-Current release: `commission-v1.1-phaseQ-runtime-slim-size-gate-2026-07-03-r1`.
+Current release: `commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1`.
