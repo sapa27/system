@@ -1000,6 +1000,30 @@ catch(e){
 return err_(e.message||String(e))
 }
 }
+function apiAdminListUsers(payload){
+var _auth=_peopleSafeReq_(payload,"admin","apiAdminListUsers");
+return _auth.ok?(payload=_auth.payload||{
+},AdminDomain.listUsers(payload||{
+})):_auth.result
+}
+function apiAdminSaveUser(payload){
+return writeGateway_("apiAdminSaveUser",payload||{
+},function(input){
+var _auth=_peopleSafeReq_(input,"admin","apiAdminSaveUser");
+return _auth.ok?(input=_auth.payload||{
+},AdminDomain.saveUser(input||{
+})):_auth.result
+},"บันทึกผู้ใช้งานสำเร็จ","บันทึกผู้ใช้งานไม่สำเร็จ")
+}
+function apiAdminDeleteUser(payload){
+return writeGateway_("apiAdminDeleteUser",payload||{
+},function(input){
+var _auth=_peopleSafeReq_(input,"admin","apiAdminDeleteUser");
+return _auth.ok?(input=_auth.payload||{
+},AdminDomain.deleteUser(input||{
+})):_auth.result
+},"ลบ/ระงับผู้ใช้งานสำเร็จ","ลบ/ระงับผู้ใช้งานไม่สำเร็จ")
+}
 function apiAdminListSubcommittees(payload){
 var _auth=_peopleSafeReq_(payload,"admin","apiAdminListSubcommittees");
 return _auth.ok?(payload=_auth.payload||{
