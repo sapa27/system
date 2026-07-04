@@ -8,5 +8,5 @@ Run from the package root:
 
 ```bash
 python tools/sync_frontend_partials.py
-python tools/release_gate.py
+python tools/phaseK_write_schema_gate.py
 ```
