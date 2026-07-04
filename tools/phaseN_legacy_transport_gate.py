@@ -8,6 +8,25 @@ ASSET = "asset-manifest-commission-v1.1-phaseN-remove-legacy-transport-2026-07-0
 MODE = "phaseN-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
 SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
 CRITICAL_APIS = ["apiBudgetGetSummary","apiGetPetitioners","apiGetCommitteeMeetingSystem","apiSearchCasesLite","apiGetTracking","apiLogin"]
+
+PHASE5_SIZE_BUDGETS = {
+    # Phase 5 regression guards. Hot read paths use existing router/domain cache
+    # owners; no API routes, files, UI, or business rules are added.
+    "gas-backend/Scripts_Core_Runtime.html": 397000,
+    "github-pages/partials/Scripts_Core_Runtime.html": 397500,
+    "gas-backend/Scripts_Page_Meeting.html": 247500,
+    "github-pages/partials/Scripts_Page_Meeting.html": 248000,
+    "gas-backend/Code_30_Domain_Cases.gs": 333900,
+    "gas-backend/Code_32_Domain_Budget.gs": 235900,
+    "gas-backend/Index.html": 269500,
+}
+PHASE5_TOTAL_SOURCE_BUDGET = 4827000
+PHASE5_NEXT_SLIMMING_TARGETS = {
+    # Informational next-step targets; not enforced in Phase 5.
+    "gas-backend/Scripts_Core_Runtime.html": 360000,
+    "gas-backend/Scripts_Page_Meeting.html": 220000,
+    "gas-backend/Code_30_Domain_Cases.gs": 310000,
+}
 REQUIRED = ["vercel.json","package.json",".env.example","api/_gasProxyCommon.js","api/gas.js","api/login.js","api/public-config.js","github-pages/vercel-env.generated.js","tools/generate_vercel_env.py","tools/sync_frontend_partials.py","tools/phaseG_security_gate.py","tools/phaseN_legacy_transport_gate.py","docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.md","docs/SINGLE_SOURCE_POLICY.md","TECH_DEBT_MANIFEST.json"]
 errors=[]; checks=[]
 def read(rel:str)->str:
@@ -53,6 +72,23 @@ def function_body(text: str, name: str) -> str:
             if depth == 0:
                 return text[i + 1:j]
     return ""
+
+def phase5_source_size_bytes() -> int:
+    return sum(p.stat().st_size for p in ROOT.rglob('*') if p.is_file() and '__pycache__' not in p.parts)
+
+def phase5_size_budget_report():
+    rows=[]; offenders=[]
+    for rel, budget in PHASE5_SIZE_BUDGETS.items():
+        p = ROOT / rel
+        actual = p.stat().st_size if p.exists() else -1
+        ok_size = p.exists() and actual <= budget
+        rows.append({"path": rel, "bytes": actual, "budget": budget, "ok": ok_size})
+        if not ok_size:
+            offenders.append(f"{rel}={actual}>{budget}")
+    total = phase5_source_size_bytes()
+    total_ok = total <= PHASE5_TOTAL_SOURCE_BUDGET
+    return rows, offenders, total, total_ok
+
 def all_source_text()->str:
     chunks=[]
     for p in ROOT.rglob('*'):
@@ -128,13 +164,40 @@ def main():
     ok('static API_CONTRACT disabled', contains_code(platform, 'AppBackendCore.API_CONTRACT = Object.freeze({})'), 'contract cleanup')
     ok('Phase N metadata in public config', contains_code(platform, 'phaseNLegacyTransportRemoved:true') and contains_code(platform, 'legacyJsonpTransportRemoved:true') and contains_code(platform, 'legacyGasBridgeTransportRemoved:true') and contains_code(platform, 'legacyLoginPostIframeRemoved:true'), 'backend public config metadata')
     for api in CRITICAL_APIS: ok(f'critical API {api}', api in router or api in platform, api)
+    css_sources = {"gas-backend/Index.html": read('gas-backend/Index.html'), "github-pages/index.html": index}
+    css_bad_literals = ["body.app-ready#login-page", "#p-dash.modern-dash-hero", "calc(100%-", "calc(100%+", "padding:.58rem.82rem"]
+    css_bad_hits = []
+    for css_name, css_text in css_sources.items():
+        for bad_css in css_bad_literals:
+            if bad_css in css_text:
+                css_bad_hits.append(css_name + ":" + bad_css)
+        for rx in [r"padding:\.[0-9]+rem\.[0-9]+rem", r"margin:\.[0-9]+rem\.[0-9]+rem", r"gap:\.[0-9]+rem\.[0-9]+rem", r"calc\([^)]*%-[^)]*\)"]:
+            if re.search(rx, css_text):
+                css_bad_hits.append(css_name + ":" + rx)
+    ok('ui css compaction safety', not css_bad_hits, ', '.join(css_bad_hits))
+    budget_backend = read('gas-backend/Code_32_Domain_Budget.gs')
+    dashboard_backend = read('gas-backend/Code_30_Domain_Cases.gs')
+    dash_budget_body = function_body(dashboard_backend, '_dashboardBudgetFromBudgetDomainPhaseE_')
+    api_budget_summary_body = function_body(budget_backend, 'apiBudgetGetSummary')
+    ok('Phase 4 budget dashboard owner delegated to BudgetDomain', 'BudgetDomain.getDashboardSummaryForDashboard' in dash_budget_body and '_getDashboardBudgetByPlanCurrentFYImpl_' not in dash_budget_body and 'BudgetImports' not in dashboard_backend and 'budget delegated to BudgetDomain' in dashboard_backend, 'dashboard budget must not own BudgetImports reads')
+    ok('Phase 4 apiBudgetGetSummary dashboard hydration stays in BudgetDomain facade', 'BudgetDomain.getDashboardSummaryForDashboard' in api_budget_summary_body and '_budgetGetDashboardSummaryForDashboardPhaseE_(dashPayload)' not in api_budget_summary_body and 'phase4-budget-domain-owner-unavailable' in api_budget_summary_body, 'no direct dashboard fallback from apiBudgetGetSummary')
+    ok('Phase 4 budget owner contract stamp', 'PHASE4_BUDGET_SINGLE_OWNER_STAMP' in budget_backend and 'dashboardBudgetOwner:"BudgetDomain.getDashboardSummaryForDashboard"' in compact(budget_backend), 'budget single owner stamp')
+    dashboard_frontend = read('gas-backend/Scripts_Page_Dashboard.html')
+    sheet_repo = read('gas-backend/Code_01_Platform_SheetRepo.gs')
+    ok('Phase 5 dashboard budget hydration uses cacheable payload', 'dashboard-budget-hydration-phase5-cache' in dashboard_frontend and 'source:"dashboard-budget-hydration-phaseO-force-fresh"' not in dashboard_frontend and 'cacheTtlSeconds:600' in dashboard_frontend and 'snapshotTtlSeconds:600' in dashboard_frontend, 'dashboard lazy budget hydration must not force bypass cache')
+    ok('Phase 5 budget dashboard hydration preserves explicit freshness only', 'forceFresh:payload.forceFresh===!0' in api_budget_summary_body and 'noCache:payload.noCache===!0' in api_budget_summary_body and 'bypassCache:payload.bypassCache===!0' in api_budget_summary_body and 'cacheTtlSeconds:Number(payload.cacheTtlSeconds||600)||600' in api_budget_summary_body, 'apiBudgetGetSummary dashboard hydration must not hard-force fresh reads')
+    ok('Phase 5 hot read route cache TTLs retained', 'apiSearchCasesLite:600' in sheet_repo and 'apiGetTracking:600' in sheet_repo and 'apiGetPeoplePageBundle:600' in sheet_repo and 'apiBudgetGetSummary:600' in sheet_repo, 'critical read APIs must remain router-cache eligible')
     drift=mirror_in_sync(); ok('generated mirrors in sync', not drift, ', '.join(drift))
     write_methods=write_methods_from_router(router); schemas=schema_methods(router); missing=sorted(set(write_methods)-schemas); ok('write schema covers write routes', not missing, ', '.join(missing))
+
+    size_rows, size_offenders, source_total, source_total_ok = phase5_size_budget_report()
+    ok('Phase 5 file size budgets', not size_offenders, '; '.join(size_offenders))
+    ok('Phase 5 total source size budget', source_total_ok, f"{source_total}>{PHASE5_TOTAL_SOURCE_BUDGET}")
     ok('manifest phase N', manifest.get('phase')=='N', str(manifest.get('phase')))
     ok('manifest release', manifest.get('release')==RELEASE and manifest.get('releaseStamp')==RELEASE, str(manifest.get('release')))
     ok('manifest release gate', manifest.get('releaseGate')=='tools/phaseN_legacy_transport_gate.py', str(manifest.get('releaseGate')))
     ok('manifest legacy removed', manifest.get('phaseNLegacyTransportRemoved') is True and manifest.get('legacyJsonpTransportRemoved') is True and manifest.get('legacyGasBridgeTransportRemoved') is True and manifest.get('legacyLoginPostIframeRemoved') is True, str(manifest))
-    report={'ok':not errors,'phase':'N','release':RELEASE,'transportMode':MODE,'checks':checks,'errors':errors,'writeRouteCount':len(write_methods),'schemaMethodCount':len(schemas)}
+    report={'ok':not errors,'phase':'N','release':RELEASE,'transportMode':MODE,'checks':checks,'errors':errors,'writeRouteCount':len(write_methods),'schemaMethodCount':len(schemas),'phase5SizeBudgets':size_rows,'phase5TotalSourceBytes':source_total,'phase5TotalSourceBudget':PHASE5_TOTAL_SOURCE_BUDGET,'phase5NextSlimmingTargets':PHASE5_NEXT_SLIMMING_TARGETS}
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if errors: sys.exit(1)
 if __name__=='__main__': main()
