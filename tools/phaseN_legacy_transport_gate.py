@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+from pathlib import Path
+import json, re, sys
+ROOT = Path(__file__).resolve().parents[1]
+RELEASE = "commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1"
+ASSET = "asset-manifest-commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1"
+MODE = "phaseN-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
+SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
+CRITICAL_APIS = ["apiBudgetGetSummary","apiGetPetitioners","apiGetCommitteeMeetingSystem","apiSearchCasesLite","apiGetTracking","apiLogin"]
+REQUIRED = ["vercel.json","package.json",".env.example","api/_gasProxyCommon.js","api/gas.js","api/login.js","api/public-config.js","github-pages/vercel-env.generated.js","tools/generate_vercel_env.py","tools/sync_frontend_partials.py","tools/phaseG_security_gate.py","tools/phaseN_legacy_transport_gate.py","docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.md","docs/SINGLE_SOURCE_POLICY.md","TECH_DEBT_MANIFEST.json"]
+errors=[]; checks=[]
+def read(rel:str)->str:
+    p=ROOT/rel
+    if not p.exists(): errors.append(f"missing file: {rel}"); return ""
+    return p.read_text(encoding='utf-8', errors='ignore')
+def ok(name, cond, detail=""):
+    checks.append({"name":name,"ok":bool(cond),"detail":detail})
+    if not cond: errors.append(f"{name}: {detail}")
+
+def compact(text: str) -> str:
+    s = re.sub(r"\s+", "", text or "")
+    return s.replace(":true", ":!0").replace("=true", "=!0").replace(":false", ":!1").replace("=false", "=!1")
+
+def contains_code(text: str, pattern: str) -> bool:
+    return compact(pattern) in compact(text)
+
+def function_body(text: str, name: str) -> str:
+    m = re.search(r"function\s+" + re.escape(name) + r"\s*\([^)]*\)\s*\{", text)
+    if not m:
+        return ""
+    i = m.end() - 1
+    depth = 0
+    in_str = None
+    esc = False
+    for j in range(i, len(text)):
+        ch = text[j]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == in_str:
+                in_str = None
+            continue
+        if ch in ("'", '\"', '`'):
+            in_str = ch
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return text[i + 1:j]
+    return ""
+def all_source_text()->str:
+    chunks=[]
+    for p in ROOT.rglob('*'):
+        if p.is_file() and p.suffix.lower() in {'.html','.js','.gs','.py','.json','.md','.example'} and '__pycache__' not in p.parts:
+            chunks.append(p.read_text(encoding='utf-8', errors='ignore'))
+    return '\n'.join(chunks)
+def mirror_in_sync():
+    drift=[]; header_re=re.compile(r"^<!-- GENERATED MIRROR:[\s\S]*?-->\s*")
+    for src in (ROOT/'gas-backend').glob('Scripts_*.html'):
+        dst=ROOT/'github-pages'/'partials'/src.name
+        if not dst.exists(): drift.append(f"missing mirror: {src.name}"); continue
+        source=src.read_text(encoding='utf-8')
+        mirror=header_re.sub('', dst.read_text(encoding='utf-8'))
+        if source!=mirror: drift.append(src.name)
+    return drift
+def write_methods_from_router(router:str):
+    methods=set(); body=[]
+    for fname in ["_routerAdminRoutes_","_routerPhase1CoreRouteTuples_"]:
+        b=function_body(router, fname)
+        if b: body.append(b)
+    for names, flags in re.findall(r'\["([^"]+)",\s*"[^"]+",\s*"[^"]+",\s*"([^"]*)"', '\n'.join(body)):
+        if 'w' not in flags: continue
+        for name in names.split('|'):
+            name=name.strip()
+            if name: methods.add(name)
+    return sorted(methods)
+def schema_methods(router:str):
+    body=function_body(router, "_routerPhaseKWriteSchemaByMethod_")
+    return set(x or y for x, y in re.findall(r'(?:\"(api[A-Za-z0-9_]+)\"|(api[A-Za-z0-9_]+))\s*:', body or ''))
+
+def main():
+    for rel in REQUIRED: ok(f"required file {rel}", (ROOT/rel).exists(), rel)
+    alltext=all_source_text(); platform=read('gas-backend/Code_00_PlatformCore.gs'); router=read('gas-backend/Code_20_Router.gs'); app=read('github-pages/app-config.js'); transport=read('github-pages/github-gas-transport.js'); generated=read('github-pages/vercel-env.generated.js'); common=read('api/_gasProxyCommon.js'); index=read('github-pages/index.html'); diag=read('github-pages/diagnostic.html')
+    vercel=json.loads(read('vercel.json') or '{}'); package=json.loads(read('package.json') or '{}'); manifest=json.loads(read('TECH_DEBT_MANIFEST.json') or '{}')
+    ok('doGet single', platform.count('function doGet(')==1, str(platform.count('function doGet(')))
+    ok('doPost single', platform.count('function doPost(')==1, str(platform.count('function doPost(')))
+    ok('apiGithubBridgeCall compatibility endpoint single', platform.count('function apiGithubBridgeCall(')==1, str(platform.count('function apiGithubBridgeCall(')))
+    ok('release stamp present', RELEASE in alltext, RELEASE)
+    ok('asset stamp present', ASSET in alltext, ASSET)
+    ok('transport mode present', MODE in alltext, MODE)
+    ok('old Phase M release removed from runtime/config/gates', ('phaseM-' + 'vercel-api-proxy-2026-07-02-r1') not in (app+transport+generated+common+index+diag), 'old phaseM release must not remain in runtime path')
+    ok('schema stamp retained', SCHEMA_STAMP in alltext, SCHEMA_STAMP)
+    ok('Vercel output dir', vercel.get('outputDirectory')=='github-pages', str(vercel.get('outputDirectory')))
+    ok('Vercel build runs Phase N gate', 'tools/phaseN_legacy_transport_gate.py' in str(vercel.get('buildCommand','')), str(vercel.get('buildCommand','')))
+    ok('package build runs Phase N gate', 'phaseN_legacy_transport_gate.py' in str(package.get('scripts',{}).get('build','')), str(package.get('scripts',{}).get('build','')))
+    ok('proxy functions exist', all((ROOT/'api'/f).exists() for f in ['gas.js','login.js','public-config.js','_gasProxyCommon.js']), 'api proxy files')
+    ok('server GAS env used by proxy', 'process.env.GAS_WEB_APP_URL' in common, 'server env')
+    ok('Phase N header used by proxy', 'X-Phase-N-Vercel-Proxy' in common and 'X-Phase-M-Vercel-Proxy' not in common, 'proxy header')
+    ok('Vercel env phase N', '"phase":"N"' in generated and '"phaseNLegacyTransportRemoved":true' in generated, 'generated env metadata')
+    ok('index uses Phase N assets', RELEASE in index and MODE in index, 'index script stamps')
+    ok('diagnostic uses Phase N assets', RELEASE in diag and MODE in diag, 'diagnostic script stamps')
+    ok('app-config proxy only flags', contains_code(app, 'phaseNLegacyTransportRemoved: true') and contains_code(app, 'readJsonpApi: false') and contains_code(app, 'publicJsonpReadMethods: []') and contains_code(app, 'loginFormPost: false'), 'app-config Phase N flags')
+    ok('transport is proxy only', 'function runVercelApiProxy' in transport and 'function runVercelLoginProxy' in transport and 'function runReadWithPolicy' in transport, 'proxy funcs')
+    forbidden_transport = ['function runJsonpApi','function runGasViaClient','function runLoginPost','function runFastLoginJsonp','__githubFastLogin=1','document.createElement(\'iframe\')','document.createElement("iframe")','postMessage(','GAS_IFRAME_TRANSPORT_REQUEST']
+    bad=[x for x in forbidden_transport if x in transport]
+    ok('legacy browser transport functions removed', not bad, ', '.join(bad))
+    ok('transport reports legacy removed', contains_code(transport, '__legacyTransportRemoved = true') and contains_code(transport, 'jsonpRemoved:true') and contains_code(transport, 'hiddenBridgeRemoved:true') and contains_code(transport, 'loginPostIframeRemoved:true'), 'status flags')
+    ok('write invalidates client read cache', 'function runWriteWithPolicy' in transport and 'before-write' in transport and 'phaseNWriteCacheInvalidation' in transport and 'apiCacheEpoch' in transport, 'write cache invalidation')
+    ok('auth/bootstrap reads are not cached', 'function isCacheSafeReadMethod' in transport and 'isAuthOrBootstrapMethod' in transport and 'apiSessionResume' in transport and 'apiBootstrap' in transport, 'auth/bootstrap cache bypass')
+    ok('transport options are propagated', contains_code(transport, 'root.AppTransport.run = function(fn, args, options)') and contains_code(transport, 'runVercelApiProxy(req.method, req.payload || {}, options || {})'), 'per-call timeout/options propagation')
+    ok('critical runtime forwards transport options', contains_code(read('github-pages/critical-login-runtime.js'), 'RT.rawRun = RT.rawRun || function(fn, args, options)') and contains_code(read('github-pages/critical-login-runtime.js'), 'RT.call = RT.call || function(m, p, options)'), 'critical runtime options')
+    core_runtime = read('gas-backend/Scripts_Core_Runtime.html')
+    admin_page = read('gas-backend/Scripts_Page_Admin.html')
+    ok('core runtime sends transport options directly', contains_code(core_runtime, 'root.AppTransport.run(method, payload || {') and contains_code(core_runtime, 'options || {') and contains_code(core_runtime, 'previousRuntimeCall.call(runtime, method, payload || {'), 'single-owner runtime options propagation')
+    ok('runtime write clears sessionStorage client cache', 'function invalidateWriteCaches' in core_runtime and 'AppClientCacheOwner' in core_runtime and 'app:write-cache-invalidated' in core_runtime, 'runtime AppClientCacheOwner invalidation')
+    ok('runtime write emits mutation event', 'function emitWriteMutation' in core_runtime and 'app:data-mutated' in core_runtime and 'after-write-ok' in core_runtime, 'write mutation event')
+    ok('runtime write refresh broker installed', 'function installWriteRefreshBroker' in core_runtime and contains_code(core_runtime, 'pages.refresh = function') and 'AppWriteRefreshBroker' in core_runtime and 'app:write-refresh-scheduled' in core_runtime, 'active page refresh after successful write')
+    ok('admin browser diagnostics slimmed', 'app-production-diagnostics-deferred-owner' not in admin_page and 'app-production-diagnostics-slim-stub-current' in admin_page and 'PRODUCTION_DIAGNOSTICS_REMOVED_FROM_BROWSER_BUNDLE' in admin_page and (ROOT/'gas-backend'/'Scripts_Page_Admin.html').stat().st_size < 75000, 'remove heavy smoke/verification implementation from browser admin bundle')
+    ok('apiLogin uses /api/login only', contains_code(transport, 'runVercelLoginProxy(req.payload || {})') and 'function runLoginPost' not in transport, 'login path')
+    ok('AppTransport.ping uses proxy', "apiGetRouteContract" in transport and 'vercel-api-proxy-only-ping' in transport, 'ping path')
+    ok('fast-login disabled in backend', contains_code(platform, 'fastLoginJsonp:false') and 'FAST_LOGIN_JSONP_DISABLED' in platform, 'backend public config/security')
+    ok('assumed bridge ready not enabled in frontend', 'assumedReady=true' not in compact(transport) and contains_code(app, 'allowAssumedBridgeReady: false'), 'assumed ready')
+    ok('static API_CONTRACT disabled', contains_code(platform, 'AppBackendCore.API_CONTRACT = Object.freeze({})'), 'contract cleanup')
+    ok('Phase N metadata in public config', contains_code(platform, 'phaseNLegacyTransportRemoved:true') and contains_code(platform, 'legacyJsonpTransportRemoved:true') and contains_code(platform, 'legacyGasBridgeTransportRemoved:true') and contains_code(platform, 'legacyLoginPostIframeRemoved:true'), 'backend public config metadata')
+    for api in CRITICAL_APIS: ok(f'critical API {api}', api in router or api in platform, api)
+    drift=mirror_in_sync(); ok('generated mirrors in sync', not drift, ', '.join(drift))
+    write_methods=write_methods_from_router(router); schemas=schema_methods(router); missing=sorted(set(write_methods)-schemas); ok('write schema covers write routes', not missing, ', '.join(missing))
+    ok('manifest phase N', manifest.get('phase')=='N', str(manifest.get('phase')))
+    ok('manifest release', manifest.get('release')==RELEASE and manifest.get('releaseStamp')==RELEASE, str(manifest.get('release')))
+    ok('manifest release gate', manifest.get('releaseGate')=='tools/phaseN_legacy_transport_gate.py', str(manifest.get('releaseGate')))
+    ok('manifest legacy removed', manifest.get('phaseNLegacyTransportRemoved') is True and manifest.get('legacyJsonpTransportRemoved') is True and manifest.get('legacyGasBridgeTransportRemoved') is True and manifest.get('legacyLoginPostIframeRemoved') is True, str(manifest))
+    report={'ok':not errors,'phase':'N','release':RELEASE,'transportMode':MODE,'checks':checks,'errors':errors,'writeRouteCount':len(write_methods),'schemaMethodCount':len(schemas)}
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    if errors: sys.exit(1)
+if __name__=='__main__': main()
