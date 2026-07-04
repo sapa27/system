@@ -1,0 +1,240 @@
+๓
+    ิIjiW  ใ                  ๓^  • S SK Jr  S SKJr  S SKrS SKrS SKr\" \ 5      R                  5       R                  S   r
+Sr
+SrS r
+Sr/ S	QrS
+S
+SS
+SSSS. rSrS1rSSSS.r/ SQr/ r/ rS'S jrS(S jrS)S jrS*S jrS+S jrS,S jrS rS-S  jrS! rS.S" jr S.S# jr!S/S$ jr"S% r#\$S&:X  a  \#" 5         gg)0้    )ฺ
+annotations)ฺPathN้   z<commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1zKasset-manifest-commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1z;phaseN-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframez-phaseK-write-schema-unification-2026-07-02-r1)ฺapiBudgetGetSummaryฺapiGetPetitionersฺapiGetCommitteeMeetingSystemฺapiSearchCasesLiteฺapiGetTrackingฺapiLoginiฐ iค iฬฦ iภศ iL i| iผ ) ๚%gas-backend/Scripts_Core_Runtime.htmlz/github-pages/partials/Scripts_Core_Runtime.html๚%gas-backend/Scripts_Page_Meeting.htmlz/github-pages/partials/Scripts_Page_Meeting.html๚#gas-backend/Code_30_Domain_Cases.gs๚$gas-backend/Code_32_Domain_Budget.gs๚gas-backend/Index.htmliฮI ๚$github-pages/vercel-env.generated.jsi@~ i`[ i๐บ )r   r
+   r   )๚
+vercel.json๚package.jsonz.env.example๚api/_gasProxyCommon.jsz
+api/gas.jszapi/login.jszapi/public-config.jsr   ztools/generate_vercel_env.pyztools/sync_frontend_partials.pyztools/phaseG_security_gate.py๚%tools/phaseN_legacy_transport_gate.pyz'docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.mdzdocs/SINGLE_SOURCE_POLICY.md๚TECH_DEBT_MANIFEST.jsonc                ๓   • [         U -
+  nUR                  5       (       d  [        R                   SU  35        gUR	                  SSS9$ )Nzmissing file: ฺ ๚utf-8ฺignoreฉฺencodingฺerrors)ฺROOTฺexistsr   ฺappendฺ	read_text)ฺrelฺps     ฺ%tools/phaseN_legacy_transport_gate.pyฺreadr%   '   s=   € 
+3h€Aุ
+88::”v—}‘} ~ฐcฐUะ%;ิ<ภRุ
+;;  ฐ;ะ
+9ะ9๓    c                ๓   • [         R                  U [        U5      US.5        U(       d  [        R                  U  SU 35        g g )N)ฺnameฺokฺdetailz: )ฺchecksr    ฺboolr   )r(   ฺcondr*   s      r$   r)   r)   +   s4   € 
+MM$คDจฃJธั?ิ@
+”—‘ $  rจ&จะ2ี34r&   c                ๓ศ   • [         R                  " SSU =(       d    S5      nUR                  SS5      R                  SS5      R                  S S5      R                  S	S
+5      $ )
+Nz\s+r   z:truez:!0z=truez=!0z:falsez:!1z=falsez=!1)ฺreฺsubฺ replace)ฺtextฺss     r$   ฺ compactr4   /   sR   € 
+vr4: 2ำ&€Aุ
+99Weำ
+$ื
+,ั
+,จWฐeำ
+<ื
+Dั
+DภXศuำ
+Uื
+]ั
+]ะ^fะhmำ
+nะnr&   c                ๓0   • [        U5      [        U 5      ;   $ ฉN)r4   )r2   ฺ patterns     r$   ฺ
+contains_coder8   3   s   € 
+7ำ
+w t}ั
+,ะ,r&   c                ๓”  • [         R                  " S[         R                  " U5      -   S-   U 5      nU(       d  gUR                   5       S-
+  nSnS nSn[	        U[
+        U 5      5       H]  n X    nU(       a  U(       a  SnOUS :X  a  SnO X…:X  a  S nM*  US	;   a  UnM4  US
+:X  a   US-
+  nMA  US
+:X  d  MI  US-  nUS:X  d  MV  XS-   U  s  $ 
+   g)Nz
+function\s+z\s*\([^)]*\)\s*\{r   r   r   Fฺ\T)ฺ'ฺ"ฺ`ฺ{ฺ})r/   ฺsearchฺescapeฺendฺrangeฺlen)	r2   r(   ฺmฺiฺdepthฺin_strฺescฺjฺchs	            r$   ฺ
+function_bodyrL   6   sิ   € 
+		.ค2ง9ข9จTฃ?ั2ะ5IัIศ4ำP€A
+ุุ	 !
+€Aุ
+€Eุ
+€Fุ
+€C
+1”c$“iึ
+ ุ
+W
+ุ‘ุt“ุ‘ุ“ุูุ
+
+ะ!ำ
+!ุFูุ
+
+9ุQJEุ
+3YุQJEุzุ E !}า$๑% !๐& r&   c                 ๓&  • Sn [         R                  S5       Hu  nUR                  5       (       a  SUR                  ;   a  M*  UR	                  [         5      R
+                  5       nU[        ;   a  MY  XR                  5       R                  -
+  n Mw  
+   U $ )Nr   ฺ*ฺ
+__pycache__)	r   ฺrglobฺ is_fileฺpartsฺ
+relative_toฺas_posixฺPHASE5_DYNAMIC_GENERATED_FILESฺstatฺ st_size)ฺtotalr#   r"   s      r$   ฺphase5_source_size_bytesrY   S   sp   € ุ
+€E
+ZZ_ุyy{{mจqฏwฉwำ6ูุmmDำ!ื*ั*ำ,ุ
+ิ0ำ
+0ูุ
+—‘“ื!ั!ั!๑
+ ๐ €Lr&   c                 ๓  • / n / n[         R                  5        H  u  p#[        U-
+  nUR                   5       (       a  UR	                  5       R
+                  OSnUR                   5       =(       a    XS:*  nU R
+                  X%X6S.5        U(       a  Mw  UR
+                  U SU SU 35        M’  
+   [        5       n U [        :*  nXXx4$ )N้)ฺpathฺbytesฺbudgetr)   ฺ=ฺ>)	ฺPHASE5_SIZE_BUDGETSฺitemsr   r   rV   rW   r    rY   ฺPHASE5_TOTAL_SOURCE_BUDGET)	ฺrowsฺ	offendersr"   r^   r#   ฺactualฺ ok_sizerX   ฺtotal_oks	            r$   ฺphase5_size_budget_reportri   ^   sฎ   € ุ	
+€DrY*ื0ั0ึ2
+3Jุ%&งXกXงZกZ—‘“ื!า!ฐRุ—(‘(“*ื1 ั!1 ุ
+
+SธVัSิT฿wุืั u A f XจQจvจhะ7ึ8๑
+ 3๔ 
+%ำ&€Eุิ2ั2€Hุ
+Eะ
++ะ+r&   c                 ๓0  • / n [         R                  S5       Hk  nUR                  5       (       d  M  UR                  R	                  5       S;   d  M:  SUR
+                  ;  d  ML  U R
+                  UR                  SSS95        Mm  
+   S R                  U 5      $ )NrN   >    ๚.gs๚.js๚.md๚.py๚.html๚.json๚.examplerO   r   r   r   ฺ
+)	r   rP   rQ   ฺsuffixฺlowerrR   r    r!   ฺjoin)ฺchunksr#   s     r$   ฺall_source_textrw   k   s|   € ุ
+
+€F
+ZZ_ุ
+99;;188>>ำ+ะ/cีcะhuะ}~๗  ~E๑  ~E๕  iEุMM!++จwธx+ะHึI๑ ๐ 99Vำ
+ะr&   c                 ๓ฐ  • / n [         R                  " S5      n[        S-
+  R                   S5       Hก  n[        S-
+  S-
+  UR                  -
+  nUR
+                  5       (       d   U R
+                  SUR                   35        MQ  UR                  S S9nUR                  S	UR                  S S95      nXE:w  d  M  U R
+                  UR                  5        Mฃ  
+   U $ )
+Nz%^<!-- GENERATED MIRROR:[\s\S]*?-->\s*๚
+gas-backendzScripts_*.html๚github-pagesฺpartialszmissing mirror: r   )r   r   )	r/   ฺ compiler   ฺglobr(   r   r    r!   r0   )ฺdriftฺ	header_reฺsrcฺdstฺsourceฺmirrors         r$   ฺmirror_in_syncr   q   sฒ   € ุ
+€E
+
+ะ#KำLi]ั"ื(ั(ะ)9ึ:ั 
+ั*จ3ฏ8ฉ8ั3ุzz||U\\ะ,<ธSฟXนXธJะ*GิHษ(ุ}} g}ะ.ุ}}R งกธ  ะ!@ำAุ
+>5<<จฏฉึ1๑
+ ;๐ €Lr&   c                ๓~  • [        5       n/ nS H(  n[        X5      nU(       d  M  UR                  U5        M*  
+   [        R                  " SSR
+                  U5      5       HO  u  pVSU;  a  M
+  UR
+                  S5       H-  n U R                  5       n U (       d  M  UR                  U 5        M/  
+   MQ  
+   [        U5      $ )N)ฺ_routerAdminRoutes_ฺ_routerPhase1CoreRouteTuples_z.\["([^"]+)",\s*"[^"]+",\s*"[^"]+",\s*"([^"]*)"rr   ฺwฺ|)
+ฺsetrL   r    r/   ฺ findallru   ฺsplitฺstripฺaddฺsorted)ฺrouterฺ methodsฺbodyฺfnameฺbฺnamesฺflagsr(   s           r$   ฺwrite_methods_from_routerr—   z   s   € E€G4H
+ำ
+&฿
+1dkk!n๑ I๔ 
+
+ะ#TะVZืV_ัV_ะ`dำVeึfุ
+eำ
+Xุ—K‘K ึ$Dุ—‘“D฿tW—[‘[ ึ&๓ %๑ g๔
+ '?ะr&   c                ๓z   • [        U S5      n[        S [        R                  " SU=(       d    S5       5       5      $ )Nฺ!_routerPhaseKWriteSchemaByMethod_c              3  ๓<   #   • U  H  u  pU=(       d    Uv •  M  
+   g 7fr6   ฉ )ฺ.0ฺxฺys      r$   ฺ	<genexpr>ฺ!schema_methods.<locals>.<genexpr>   s   ้ € ะoา"n$!qvAvา"n๙s   z1(?:\"(api[A-Za-z0-9_]+)\"|(api[A-Za-z0-9_]+))\s*:r   )rL   r   r/   r   )r   r’   s     r$   ฺschema_methodsrก   …   s3   € 	vะBำ	C€D
+ัoค"ง*ข*ะ-aะcgืcmะkmิ"nำoำ
+oะor&   c                ๓@  • [        U S-
+  S-
+  5      n[        U S-
+  S-
+  5      n/ SQnU Vs/ s H  oDU;  d  M
+  UPM  
+   nnU(       a  [        SSR                  U5      -   5        S  H  nXb;  d  M
+  [        SU 35        M  
+   S	U;  d  S
+U;  a  [        S
+5        g g s  snf )Nry   zCode_33_Domain_People.gszCode_20_Router.gs)z#function apiAdminListUsers(payload)z"function apiAdminSaveUser(payload)z$function apiAdminDeleteUser(payload)zAdminDomain.listUserszAdminDomain.saveUserzAdminDomain.deleteUserz,Phase 5 admin user facade contract missing: ๚, )ฺapiAdminListUsersฺapiAdminSaveUserฺapiAdminDeleteUserz7Phase 5 admin user route missing from router registry: zapiAdminSaveUser:{required:[]}zapiAdminDeleteUser:{required:[z'Phase 5 admin user write schema missing)r%   ฺfailru   ) ฺrootฺpeopler   ฺrequiredฺitemฺ missingฺmethods           r$   ฺ check_admin_user_facade_contractrฎ      sฑ   € 
+$ั&ะ)CัCำ
+D€F
+$ั&ะ)<ั<ำ
+=€F๒ €H๑ !)ำ?ขธั,>tก€Gะ? ะ
+;ธdฟiนiศ ำ>Pั
+PิQQุ
+ี
+ะJศ6ศ(ะSึT๑ R๐ (จvำ 5ะ9Yะagำ9gะ
+6ี7๐ :h๙๒
+ @s
+   ซ	BธBc                 ๓  • [          H(  n [        SU  3[        U -
+  R                   5       U 5        M*  
+   [	        5       n[
+        S5      n[
+        S5      n[
+        S5      n[
+        S5      n[
+        S5      n[
+        S 5      n [
+        S5      n[
+        S	5      n	[        R                  " [
+        S
+5      =(       d    S
+5      n
+[        R                  " [
+        S5      =(       d    S
+5      n
+[        R                  " [
+        S
+5      =(       d    S
+5      n[        SUR                  S5      S:H  [        UR                  S5      5      5        [        SUR                  S5      S:H  [        UR                  S5      5      5        [        SUR                  S5      S:H  [        UR                  S5      5      5        [        S[        U;   [        5        [        S[        U;   [        5        [        S[        U;   [        5        [        SSXE-   U-   U -   U-   U	-   ;  S5        [        S[        U;   [        5        [        SU
+R                  S5      S:H  [        U
+R                  S5      5      5        [        SS [        U
+R                  S!S"5      5      ;   [        U
+R                  S!S"5      5      5        [        S#S$[        U
+R                  S%0 5      R                  S&S"5      5      ;   [        U
+R                  S%0 5      R                  S&S"5      5      5        [        S'[        S( S) 5       5      S*5        [        S+S,U ;   S-5        [        S.S/U ;   =(       a    S0U ;  S15        [        S2S3U;   =(       a    S4U;   S55        [        S6[        U;   =(       a	    [        U;   S75        [        S8[        U	;   =(       a	    [        U	;   S95        [        S:[!        US;5      =(       a2    [!        US<5      =(       a    [!        US=5      =(       a    [!        US>5      S?5        [        S@SAU;   =(       a    SBU;   =(       a    SCU;   SD5        / SEQn
+U
+ Vs/ s H  o๎U;   d  M
+  UPM  
+   nn[        SFU(       + SGR#                  U5      5        [        SH[!        USI5      =(       a2    [!        USJ5      =(       a    [!        USK5      =(       a    [!        USL5      SM5        [        SNSOU;   =(       a    SPU;   =(       a    SQU;   =(       a    SRU;   SS5        [        STSUU;   =(       a    SVU;   =(       a    SWU;   =(       a    SXU;   SY5        [        SZ[!        US[5      =(       a    [!        US\5      S]5        [        S^[!        [
+        S_5      S`5      =(       a    [!        [
+        S_5      Sa5      Sb5        [
+        Sc5      n[
+        Sd5      n[        Se[!        USf5      =(       a    [!        USg5      =(       a    [!        USh5      Si5        [        SjSkU;   =(       a    SlU;   =(       a    SmU;   Sn5        [        SoSpU;   =(       a    SqU;   =(       a    SrU;   Ss5        [        StSuU;   =(       a$    [!        USv5      =(       a    SwU;   =(       a    SxU;   Sy5        [        SzS{U;  =(       a?    S|U;   =(       a3    S}U;   =(       a'    [        S~-
+  S-
+  R%                  5       R&                  S€:  S5        [        S[!        US5      =(       a    SU;  S…5        [        SSU;   =(       a    SU;   S5        [        S[!        US5      =(       a    SU;   S5        [        SS[)        U5      ;  =(       a    [!        US5      S‘5        [        S’[!        US“5      S”5        [        S•S–[)        U5      ;   =(       a    S—U;   S5        [        SSU;   =(       a;    S[+        US5      ;   =(       a%    S[+        US5      ;   =(       a    S[+        US5      ;   S 5        [        SกSขU;   =(       a/    Sฃ[)        U5      ;   =(       a    SคU;   =(       a    Sฅ[)        U5      ;   Sฆ5        [        SงSจU;   =(       a    Sฉ[)        U5      ;   =(       a    SชU;   Sซ5        [        SฌSญU;   =(       a    SฎU;   =(       a    SฏU;   Sฐ5        [        SฑSฒU;   =(       a    SณU;   Sด5        [        SตSถU;   =(       a    SทU;   =(       a    SธU;   =(       a    SนU;   Sบ5        [        Sป[!        USผ5      =(       a2    [!        USฝ5      =(       a    [!        USพ5      =(       a    [!        USฟ5      Sภ5        [,         H"  n[        SมU 3UU;   =(       d    UU;   U5        M$  
+   [
+        Sย5      USร.n/ SฤQn/ nUR/                  5        Hl  u  nnU H"  nUU;   d  M
+  UR1                  USล-   U-   5        M$  
+   Sฦ H8  n[2        R4                  " UU5      (       d  M!  UR1                  USล-   U-   5        M:  
+   Mn  
+   [        SวU(       + SGR#                  U5      5        [
+        Sศ5      n[
+        Sษ5      n[+        USส5      n[+        USห5      n[        SฬSอU;   =(       a    SฮU;  =(       a    SฯU;  =(       a    SะU;   Sั5        [        SาSอU;   =(       a    SำU;  =(       a    SิU;   Sี5        [        SึSืU;   =(       a    Sุ[)        U5      ;   Sู5        [+        USฺ5      n[        SSU;  =(       a    SU;   S5        [
+        S฿5      n[
+        Sเ5      n [        SแSโU;   =(       a    SใU;  =(       a    SไU;   =(       a    SๅU;   Sๆ5        [        S็S่U;   =(       a    S้U;   =(       a    S๊U;   =(       a    S๋U;   S์5        [        SํS๎U ;   =(       a    S๏U ;   =(       a    S๐U ;   =(       a    S๑U ;   S๒5        [7        5       n![        S๓U!(       + SGR#                  U!5      5        [9        U5      n"[;        U5      n#[=        [?        U"5      U#-
+  5      n$[        S๔U$(       + SGR#                  U$5      5        [A        5       u  n%n&n'n([        S๕U&(       + S๖R#                  U&5      5        [        S๗U(U' S๘[B         S๙[=        [D        5       35        [        S๚UR                  S๛5      S:H  [        UR                  S๛5      5      5        [        SUR                  S5      [        :H  =(       a    UR                  S5      [        :H  [        UR                  S5      5      5        [        GS UR                  GS5      S :H  [        UR                  GS5      5      5        [        GSUR                  GS5      GSL =(       aM    UR                  GS5      GSL =(       a1    UR                  GS5      GSL =(       a    UR                  GS 5      GSL [        U5      5        [G        [        5        [H        (       + S[        [        [J        [H        [M        U"5      [M        U#5      U%U'[B        [=        [D        5      [N        GS.
+n)[Q        [        RR                  " U)GS	GS
+GS
+95        [H        (       a  [T        RV                  " S5        g g s  snf (  Nzrequired file z#gas-backend/Code_00_PlatformCore.gszgas-backend/Code_20_Router.gszgithub-pages/app-config.jsz$github-pages/github-gas-transport.jsr   r   ๚github-pages/index.htmlzgithub-pages/diagnostic.htmlr   z{}r   r   zdoGet singlezfunction doGet(r   z
+doPost singlezfunction doPost(z1apiGithubBridgeCall compatibility endpoint singlezfunction apiGithubBridgeCall(zrelease stamp presentzasset stamp presentztransport mode presentz5old Phase M release removed from runtime/config/gatesz%phaseM-vercel-api-proxy-2026-07-02-r1z2old phaseM release must not remain in runtime pathzschema stamp retainedzVercel output dirฺoutputDirectoryrz   zVercel build runs Phase N gater   ฺbuildCommandr   zpackage build runs Phase N gatezphaseN_legacy_transport_gate.pyฺ scriptsฺbuildzproxy functions existc              3  ๓V   #   • U  H  n[         S -
+  U-
+  R                  5       v •  M!  
+   g7f)ฺapiN)r   r   )r   ฺfs     r$   r   ฺmain.<locals>.<genexpr>ญ   s1   ้ € ๐  $D๒  FCภคTจ%กZฐก\ื$9ั$9ื$;ะ$;๒  FC๙s   '))zgas.jszlogin.jszpublic-config.jsz_gasProxyCommon.jszapi proxy fileszserver GAS env used by proxyzprocess.env.GAS_WEB_APP_URLz
+server envzPhase N header used by proxyzX-Phase-N-Vercel-ProxyzX-Phase-M-Vercel-Proxyzproxy headerzVercel env phase Nz
+"phase":"N"z#"phaseNLegacyTransportRemoved":truezgenerated env metadatazindex uses Phase N assetszindex script stampszdiagnostic uses Phase N assetszdiagnostic script stampszapp-config proxy only flagsz"phaseNLegacyTransportRemoved: truezreadJsonpApi: falsezpublicJsonpReadMethods: []zloginFormPost: falsezapp-config Phase N flagsztransport is proxy onlyzfunction runVercelApiProxyzfunction runVercelLoginProxyzfunction runReadWithPolicyz
+proxy funcs)	zfunction runJsonpApizfunction runGasViaClient๚function runLoginPostzfunction runFastLoginJsonpz__githubFastLogin=1z document.createElement('iframe')z document.createElement("iframe")zpostMessage(ฺGAS_IFRAME_TRANSPORT_REQUESTz*legacy browser transport functions removedrฃ   z transport reports legacy removedz__legacyTransportRemoved = truezjsonpRemoved:truezhiddenBridgeRemoved:truezloginPostIframeRemoved:truezstatus flagsz#write invalidates client read cachezfunction runWriteWithPolicyzbefore-writeฺphaseNWriteCacheInvalidationฺ
+apiCacheEpochzwrite cache invalidationz#auth/bootstrap reads are not cachedzfunction isCacheSafeReadMethodฺisAuthOrBootstrapMethodฺapiSessionResumeฺapiBootstrapzauth/bootstrap cache bypassz transport options are propagatedz3root.AppTransport.run = function(fn, args, options)z?runVercelApiProxy(req.method, req.payload || {}, options || {})z$per-call timeout/options propagationz+critical runtime forwards transport optionsz&github-pages/critical-login-runtime.jsz4RT.rawRun = RT.rawRun || function(fn, args, options)z,RT.call = RT.call || function(m, p, options)zcritical runtime optionsr   z#gas-backend/Scripts_Page_Admin.htmlz-core runtime sends transport options directlyz*root.AppTransport.run(method, payload || {zoptions || {z6previousRuntimeCall.call(runtime, method, payload || {z(single-owner runtime options propagationz0runtime write clears sessionStorage client cachezfunction invalidateWriteCachesฺAppClientCacheOwnerzapp:write-cache-invalidatedz(runtime AppClientCacheOwner invalidationz"runtime write emits mutation eventzfunction emitWriteMutationzapp:data-mutatedzafter-write-okzwrite mutation eventz&runtime write refresh broker installedz"function installWriteRefreshBrokerzpages.refresh = functionฺAppWriteRefreshBrokerzapp:write-refresh-scheduledz*active page refresh after successful writez!admin browser diagnostics slimmedz)app-production-diagnostics-deferred-ownerz,app-production-diagnostics-slim-stub-currentฺ2PRODUCTION_DIAGNOSTICS_REMOVED_FROM_BROWSER_BUNDLEry   zScripts_Page_Admin.htmli๘$ zHremove heavy smoke/verification implementation from browser admin bundlezapiLogin uses /api/login onlyz&runVercelLoginProxy(req.payload || {})rน   z
+login pathzAppTransport.ping uses proxyฺapiGetRouteContractzvercel-api-proxy-only-pingz	ping pathzfast-login disabled in backendzfastLoginJsonp:falseฺFAST_LOGIN_JSONP_DISABLEDzbackend public config/securityz,assumed bridge ready not enabled in frontendzassumedReady=truezallowAssumedBridgeReady: falsez
+assumed readyzstatic API_CONTRACT disabledz/AppBackendCore.API_CONTRACT = Object.freeze({})zcontract cleanupzaction token not writez(apiIssueActionToken","viewer","auth","c"zmethod!=="apiIssueActionToken"ฺ	preflightz6write schema is canonical fallback for write preflightz"function _routerSchemaWriteMethod_z!_routerSchemaWriteMethod_(method)ฺ_routerIsWriteRoute_z/contractWrite=routeMeta.write===!0||schemaWriteฺ_routerPhaseDWritePreflight_z-contractCsrf=routeMeta.csrf===!0||schemaWritez6schema-backed writes must not fail on stale route metaz?write route meta normalized from schema before backend boundaryz#function _routerEffectiveWriteMeta_zout.write=!0,out.csrf=!0ฺ phase5WriteContractRouterReentryz7returnmeta?_routerEffectiveWriteMeta_(method,meta):nullzXwrite/csrf must be stamped before _backendBoundaryEnter_ so writeGateway sees write modezAdirect write calls re-enter apiRouter instead of bypassing routerz"writeGateway-direct-router-reentryz/apiRouter({method:writeName,payload:payload||{}ฺROUTER_WRITE_BOUNDARY_REQUIREDzslegacy direct apiDelete/apiSave calls must be routed back through apiRouter and still keep bypass block as fallbackz.SweetAlert duplicate and focus guard installedzswal.a11y.focusฺ__duplicatePopupSuppressedฺ__APP_LAST_SWAL_KEY__z4prevent stacked popups and aria-hidden focus warningz7Thai datepicker active-page scan optimization installedzthaiDate.scopez .page:not(.d-none):not([hidden])z2avoid scanning whole app on datepicker enhancementz)Thai datepicker fast-open guard installedz!thai-datepicker-fast-open-currentzactiveInput===input&&existingzenhance(input),close()z$Date.now()-Number(lastOpenAt||0)<500zUavoid double open/rebuild from focusin+click and avoid parent-wide scan on input openz!Phase N metadata in public configz!phaseNLegacyTransportRemoved:truez legacyJsonpTransportRemoved:truez$legacyGasBridgeTransportRemoved:truez!legacyLoginPostIframeRemoved:truezbackend public config metadataz
+critical API r   )r   rฐ   )zbody.app-ready#login-pagez#p-dash.modern-dash-heroz
+calc(100%-z
+calc(100%+zpadding:.58rem.82remฺ:)zpadding:\.[0-9]+rem\.[0-9]+remzmargin:\.[0-9]+rem\.[0-9]+remzgap:\.[0-9]+rem\.[0-9]+remzcalc\([^)]*%-[^)]*\)zui css compaction safetyr   r   ฺ'_dashboardBudgetFromBudgetDomainPhaseE_r   z8Phase 4 budget dashboard owner delegated to BudgetDomainz,BudgetDomain.getDashboardSummaryForDashboardฺ'_getDashboardBudgetByPlanCurrentFYImpl_ฺ
+BudgetImportsz budget delegated to BudgetDomainz1dashboard budget must not own BudgetImports readszLPhase 4 apiBudgetGetSummary dashboard hydration stays in BudgetDomain facadez:_budgetGetDashboardSummaryForDashboardPhaseE_(dashPayload)z&phase4-budget-domain-owner-unavailablez5no direct dashboard fallback from apiBudgetGetSummaryz#Phase 4 budget owner contract stampฺ PHASE4_BUDGET_SINGLE_OWNER_STAMPzCdashboardBudgetOwner:"BudgetDomain.getDashboardSummaryForDashboard"zbudget single owner stampฺ_dashboardCaseStatusKey_uJ   Dashboard case status key canonical เธฃเธฑเธเน€เธฃเธทเนเธญเธ maps to s0z"s1"uQ   เธฃเธฑเธเน€เธฃเธทเนเธญเธ|เธฃเธฑเธเน€เธเนเธฒ|^เธฃเธฑเธ$/.test(compact)?"s0"u|   เธฃเธฑเธเน€เธฃเธทเนเธญเธ/เธฃเธฑเธเน€เธเนเธฒ must count under เน€เธฃเธทเนเธญเธเน€เธเนเธฒเนเธซเธกเน, not hidden s1z'gas-backend/Scripts_Page_Dashboard.htmlz)gas-backend/Code_01_Platform_SheetRepo.gsz9Phase 5 dashboard budget hydration uses cacheable payloadz'dashboard-budget-hydration-phase5-cachez6source:"dashboard-budget-hydration-phaseO-force-fresh"zcacheTtlSeconds:600zsnapshotTtlSeconds:600z;dashboard lazy budget hydration must not force bypass cachezDPhase 5 budget dashboard hydration preserves explicit freshness onlyz"forceFresh:payload.forceFresh===!0znoCache:payload.noCache===!0z$bypassCache:payload.bypassCache===!0z9cacheTtlSeconds:Number(payload.cacheTtlSeconds||600)||600zGapiBudgetGetSummary dashboard hydration must not hard-force fresh readsz*Phase 5 hot read route cache TTLs retainedzapiSearchCasesLite:600zapiGetTracking:600zapiGetPeoplePageBundle:600zapiBudgetGetSummary:600z4critical read APIs must remain router-cache eligiblezgenerated mirrors in syncz write schema covers write routeszPhase 5 file size budgetsz; z(Phase 5 deterministic source size budgetr`   z$; dynamic generated files excluded: zmanifest phase NฺphaseฺNzmanifest releaseฺ releaseฺreleaseStampzmanifest release gateฺ
+releaseGatezmanifest legacy removedฺphaseNLegacyTransportRemovedTฺlegacyJsonpTransportRemovedฺlegacyGasBridgeTransportRemovedฺlegacyLoginPostIframeRemoved)
+r)   rา   rิ   ฺ
+transportModer+   r   ฺwriteRouteCountฺschemaMethodCountฺphase5SizeBudgetsฺphase5TotalSourceBytesฺphase5TotalSourceBudgetฺ#phase5DynamicGeneratedFilesExcludedฺphase5NextSlimmingTargetsF้   )ฺensure_asciiฺindent),ฺREQUIREDr)   r   r   rw   r%   ฺjsonฺloadsฺcountฺstrฺ RELEASEฺASSETฺMODEฺSCHEMA_STAMPฺgetฺallr8   ru   rV   rW   r4   rL   ฺ
+CRITICAL_APISrb   r    r/   r@   r   r—   rก   r   r   ri   rc   rU   rฎ   r   r+   rD   ฺPHASE5_NEXT_SLIMMING_TARGETSฺprintฺdumpsฺsysฺexit)*r"   ฺ alltextฺplatformr   ฺappฺ	transportฺ	generatedฺcommonฺindexฺdiagฺvercelฺ packageฺmanifestฺforbidden_transportr   ฺbadฺcore_runtimeฺ
+admin_pagerถ   ฺ
+css_sourcesฺcss_bad_literalsฺcss_bad_hitsฺcss_nameฺcss_textฺ bad_cssฺrxฺbudget_backendฺdashboard_backendฺdash_budget_bodyฺapi_budget_summary_bodyฺdash_status_bodyฺdashboard_frontendฺ
+sheet_repor~   ฺ
+write_methodsฺ schemasrฌ   ฺ	size_rowsฺsize_offendersฺsource_totalฺsource_total_okฺreports*                                             r$   ฺmainr     sั  € ฿nจSจEะ2ดTธ#ฑXื4Eั4Eำ4GศึMxำ€Gฌะ-Rำ(Sxิ\`๐  bA๓  ]BะU[๔  HL๐  Mi๓  Hj๐  DG๔  vz๐  {a๓  vb๐  lu๔  nr๐  sY๓  nZ๐  dm๔  cg๐  h@๓  cA๐  \b๔  IM๐  Ng๓  Ih๐  CH๔  os๐  tR๓  oS๐  jn
+::”d=ำ)ื1จTำ
+2€FผDฟJบJฤtศNำG[ืGcะ_cำ<dฐGิosืoyาoyิz~๐  @Y๓  {Z๗  {b๐  ^b๓  pcะfn€~x—~‘~ะ&7ำ8ธ!ั;ผSภวมะPaำAbำ=cิd€ะ'9ำ:ธAั=ผsภ8ว>ม>ะRdำCeำ?fิgะ :ธHฟNนNะKjำ<kะmnั<nิpsะt|๗  uC๑  uC๐  Dc๓  ud๓  qe๔  fะ ค จ7ั 2ดGิ<ะ e wั.ดิ6ะ คจกด$ิ7ะ >ะAmะwz๑  xE๐  FO๑  xO๐  PV๑  xV๐  W\๑  x\๐  ]a๑  xa๑  Ab๐  dX๔  Yะ คฐ ั 7ผิFะ FJJะ'8ำ9ธ>ัIฬ3ศvฯzษzะZkำOlำKmิnะ 'ะ)PิTWะX^ืXbัXbะcqะrtำXuำTvั)vิx{๐  }C๗  }G๑  }G๐  HV๐  WY๓  }Z๓  y[๔  \ะ (ะ*KฬsะSZืS^ัS^ะ_hะikำSlืSpัSpะqxะy{ำS|ำO}ั*}๔  @C๐  DK๗  DO๑  DO๐  PY๐  Z\๓  D]๗  Da๑  Da๐  bi๐  jl๓  Dm๓  @n๔  oะ ค๑  $D๑  FC๓  $D๓  !D๐  FW๔  Xะ %ะ'Dศั'NะP\ิ]ะ %ะ'?ภ6ั'Iื'tะNfะntัNt๐  wE๔  Fะ ]จiั7ืnะ<aะenั<n๐  qI๔  Jะ "คGจuั$4ื$FผภนะH]ิ^ะ 'ฌฐDฉื)IผTภTน\ะKeิfะ $คmฐCะ9]ำ&^๗  'qิcpะqt๐  wL๓  dM๗  'q๔  R_๐  `c๐  eA๓  RB๗  'q๔  GT๐  UX๐  Zp๓  Gq๐  sM๔  Nะ  ะ">ภ)ั"K๗  #jะPnะr{ัP{๗  #j๐  A]๐  aj๑  Aj๐  ly๔  z๒ Oะู'ำ:า'qฐ	ฉ>ั'€Cะ:ะ 3ธดWธdฟiนiศปnิMะ )ฌ=ธะDeำ+f๗  ,Nิkx๐  zC๐  EX๓  lY๗  ,N๔  ^k๐  lu๐  wQ๓  ^R๗  ,N๔  Wd๐  en๐  pM๓  WN๐  P^๔  _ะ ,ะ.Kศyั.X๗  /Jะ]kะoxั]x๗  /J๐  ~\๐  `i๑  ~i๗  /J๐  n}๐  AJ๑  nJ๐  Lf๔  gะ ,ะ.NะR[ั.[๗  /Kะ`y๐  ~G๑  aG๗  /K๐  L^๐  bk๑  Lk๗  /K๐  p~๐  BK๑  pK๐  Mj๔  kะ )ฌ=ธะDyำ+z๗  ,[๔  @M๐  NW๐  YZ๓  @[๐  ]C๔  Dะ 4ดmฤDะIqำDr๐  uk๓  7l๗  7^๔  q~๔  C๐  Dl๓  m๐  o]๓  q^๐  `z๔  {ะ?ำ@€Lะ;ำ<€Jะ 6ผ
+ภl๐  UA๓  9B๗  9L๔  GT๐  Ua๐  cq๓  Gr๗  9L๔  wD๐  EQ๐  SK๓  wL๐  Nx๔  yะ 9ะ;[ะ_kั;k๗  <H๐  qF๐  JV๑  qV๗  <H๐  [x๐  |H๑  [H๐  Jt๔  uะ +ะ-Iศ\ั-Y๗  .fะ^p๐  uA๑  _A๗  .f๐  FV๐  Zf๑  Ff๐  h~๔  ะ /ะ1UะYeั1e๗  2@ิjw๐  yE๐  Ga๓  kb๗  2@๐  g~๐  BN๑  gN๗  2@๐  Sp๐  t@๑  S@๐  Bn๔  oะ *ะ,Wะ_iั,i๗  -|๐  o]๐  ak๑  ok๗  -|๐  pd๐  hr๑  pr๗  -|๔  x|๐  }J๑  xJ๐  Kd๑  xd๗  wj๑  wj๓  wl๗  wt๑  wt๐  w|๑  w|๐  ~H๔  Iะ &ฌ
+ฐiะAiำ(j๗  )X๐  pG๐  OX๑  pX๐  Zf๔  gะ %ะ'<ภ	ั'Iื'wะNjะnwัNw๐  zE๔  Fะ 'ฌฐxะAWำ)X๗  *Eะ]x๐  }E๑  ^E๐  Gg๔  hะ 5ะ7JิRYะZcำRdั7d๗  8^ิivะwz๐  }]๓  j^๐  `o๔  pะ %ค}ฐXะ?pำ'q๐  tF๔  Gะ ะ!KฬwะW]หั!^๗  "N๐  dD๐  HN๑  dN๐  P[๔  \ะ ?ะAeะioัAo๗  Be๐  uX๔  \i๐  jp๐  rH๓  \I๑  uI๗  Be๐  N๔  CP๐  QW๐  Yw๓  Cx๑  Nx๗  Be๐  }l๔  p}๐  ~D๐  Fd๓  pe๑  }e๐  g_ ๔  ` ะ HะJoะsyัJy๗  Kn๐  Y๔  ]d๐  ek๓  ]l๑  l๗  Kn๐  qS๐  W]๑  q]๗  Kn๐  b[๔  _f๐  gm๓  _n๑  bn๐  pJ๔  Kะ JะLpะt|ัL|๗  My๐  Bs๔  w~๐  G๓  wH๑  BH๗  My๐  Mm๐  qy๑  My๐  {p๔  qะ 7ะ9Jศlั9Z๗  :xะ_{๐  @L๑  `L๗  :x๐  Qh๐  lx๑  Qx๐  zp๔  qะ @ะBRะVbัBb๗  CZ๐  hJ๐  NZ๑  hZ๐  \P๔  Qะ 2ะ4Wะ[gั4g๗  5D๐  mL๐  P\๑  m\๗  5D๐  ay๐  }I๑  aI๗  5D๐  Nt๐  xD๑  ND๐  F]๔  ^ะ *ฌMธ(ะDgำ,h๗  -nิmz๐  |D๐  Fh๓  ni๗  -n๔  n{๐  |D๐  Fl๓  nm๗  -n๔  r๐  @H๐  Jm๓  rn๐  pP๔  Q฿b =ฐฐะ!6ธธvน
+ื8XศะPXษะZ]ึ^}-1ะ2Jำ-Kะhmัn€K๒ Eะุ€Lุ)ื/ั/ึ1ั('Gุ(ี"ุื#ั# HจsกNฐWั$<ึ=๑ (๓ PByyXื&ำ&ุื#ั# HจsกNฐRั$7ึ8๓ P๑	 2๔  ะ ! |ิ#3ฐTทYฑYธ|ำ5LิMะ@ำA€NะBำCะ$ะ%6ะ8aำbะ+จNะ<QำRะะ AะCq๐  vF๑  DF๗  Du๐  Kt๐  |L๑  KL๗  Du๐  Q`๐  hy๑  Qy๗  Du๐  ~`๐  du๑  ~u๐  wj๔  kะ U๐  XF๐  Ja๑  Xa๗  XI๐  fb๐  jA๑  fA๗  XI๐  Fn๐  rI๑  FI๐  KB๔  Cะ ,ะ.PะTbั.b๗  /H๐  hm๔  qx๐  yG๓  qH๑  hH๐  Je๔  f$ะ%6ะ8RำSะะ SะU[ะcsัUs๗  V`๐  yL๐  P`๑  y`๐  b`๔  aะGำHะะAำB€Jะ BะDm๐  rD๑  ED๗  E~๐  IA๐  I[๑  I[๗  E~๐  `u๐  yK๑  `K๗  E~๐  Ph๐  l~๑  P~๐  @}๔  ~ะ MะOs๐  xO๑  PO๗  Pn๐  Tr๐  vM๑  TM๗  Pn๐  Rx๐  |S๑  RS๗  Pn๐  XS๐  Wn๑  Xn๐  py๔  zะ 3ะ5MะQ[ั5[๗  6^ะ`t๐  yC๑  aC๗  6^๐  Hd๐  hr๑  Hr๗  6^๐  wP๐  T^๑  w^๐  `V๔  W
+ำ
+€EBะ:ภผIภtวyมyะQVำGWิX+จFำ3€Mผ^ศFำ=SฐWิ]cิdgะhuำdvะw~ัd~ำ]ะU\๔  BD๐  Eg๐  mt๔  it๐  vz๗  v๑  v๐  @G๓  vH๔  BIไ?Xำ?Zั<€I~|จ_ะ "จิ$6ธฟ	น	ภ.ำ8QิRะ 1ฐ?ภ|ภnะTUิVpะUq๐  rV๔  W]๔  ^|๓  W}๐  V~๐  E๔  @ะ 8<<จ ำ0ฐ#ั5ดsธ8ฟ<น<ศ ำ;Pำ7QิRะ 8<<จ	ำ2ดGั;ืeภวมศ^ำ@\ิ^eั@eิgjะksืkwัkw๐  yB๓  lC๓  hD๔  Eั  งกฉ]ำ ;ะ=dั dิfiะjrืjvัjv๑  xE๓  kF๓  gG๔  Hั   (ง,ก,ั/Mำ"NัRVะ"V๗  #Dะ[cื[gั[g๑  iF๓  \G๑  KO๐  \O๗  #D๐  T\๗  T`๑  T`๑  aB๓  TC๑  GK๐  TK๗  #D๐  PX๗  P\๑  P\๑  ]{๓  P|๑  @D๐  PD๔  FI๐  JR๓  FS๔  T$คTิ*” Cด'ฬ$ิX^ิhn๔  BE๐  FS๓  BT๔  il๐  mt๓  iu๐  JS๐  my๔  Tn๔  U[๔  \z๓  U{๔  Xt๒  u€F	$**Vฉ%นา
+:ิ;฿ 
+vsxx{€v๙๒E 	;s   ะ8	yัyฺ__main__)r"   r๊   ฺreturnr๊   )r   )r2   r๊   r  r๊   )r2   r๊   r7   r๊   r  r,   )r2   r๊   r(   r๊   r  r๊   )r  ฺint)r  r๊   )r   r๊   )rจ   zpathlib.Pathr  ฺNone)%ฺ
+__future__r   ฺ pathlibr   r็   r/   r๕   ฺ__file__ฺ resolveฺ parentsr   r๋   r์   rํ   r๎   r๑   ra   rc   rU   r๒   rๆ   r   r+   r%   r)   r4   r8   rL   rY   ri   rw   r   r—   rก   rฎ   r  ฺ__name__r   r&   r$   ฺ<module>r&     s๘   ๐ๅ " ฿ ำ ู 
+H~ื ั ำ ื 'ั 'จั *€ุ
+H€ ุU€ุ D€ุ>€๒ L€
+๐
+ .4ุ7=ุ-3ุ7=ุ+1ุ,2ุ$๑
+ะ ๐ %ะ ๐ +๐
+"ะ ๐ .4ุ-3ุ+1๑	 ะ ๒ X€ุ 	€"6๔:๔4๔o๔-๔๔:	๒
+,๔๒๔
+๔p๔
+8๒(Z๐v Zำะr&   
