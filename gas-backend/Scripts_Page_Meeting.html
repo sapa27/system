@@ -1032,7 +1032,7 @@ catch(_idErr){
 "function"==typeof __appObserve&&__appObserve(_idErr,"meeting.delete.id")
 }
 return logId?s("apiDeleteMeetingLog",{
-logId:logId,id:logId,caseId:T("meeting-caseId")
+logId:logId,id:logId,caseId:T("meeting-caseId"),actionMethod:"apiDeleteMeetingLog",forceFresh:!0,noCache:!0,bypassCache:!0,source:"meeting.deleteLog.legacy"
 }).then(function(){
 var caseId=T("meeting-caseId");
 return!caseId||Be(caseId)
@@ -2278,7 +2278,7 @@ return n!==i?n-i:String(e&&(e.dateRaw||e.date||e.meetingDate)||"").localeCompare
 }),y.history=e.slice();
 var t=e.map(function(e){
 var t=KeMeetingHistoryDate(e.dateRaw||e.date||e.meetingDate||"-")||"-",n=[e.note||e.summary||"-",e.result?"ผล: "+e.result:""].filter(Boolean).join(" • "),ct=d(e.committeeType||e.meetingGroup||"คณะกรรมาธิการ"),sn=d(e.subcommitteeName||e.subcommittee||""),mt="คณะอนุกรรมาธิการ"===ct&&sn||ct;
-return'<tr><td class="text-center">'+a(e.round||"-")+'</td><td class="text-center">'+a(t)+"</td><td>"+a(mt||"-")+"</td><td>"+a(n)+'</td><td class="text-center"><button type="button" class="btn btn-sm btn-outline-primary me-1" data-action="meetingEditLog" data-log-id="'+a(e.logId||e.id||e.rowId||e.meetingLogId||e.__rowId||e.round||"")+'"><i class="fas fa-pen-to-square"></i></button><button type="button" class="btn btn-sm btn-outline-danger" data-action="meetingDeleteLog" data-log-id="'+a(e.logId||e.id||e.rowId||e.meetingLogId||e.__rowId||e.round||"")+'"><i class="fas fa-trash"></i></button></td></tr>'
+return'<tr><td class="text-center">'+a(e.round||"-")+'</td><td class="text-center">'+a(t)+"</td><td>"+a(mt||"-")+"</td><td>"+a(n)+'</td><td class="text-center"><button type="button" class="btn btn-sm btn-outline-primary me-1" data-action="meetingEditLog" data-log-id="'+a(e.logId||e.id||e.rowId||e.meetingLogId||e.__rowId||e.round||"")+'"><i class="fas fa-pen-to-square"></i></button><button type="button" class="btn btn-sm btn-outline-danger" data-action="meetingDeleteLog" data-app-global-delete-confirm="1" data-log-id="'+a(e.logId||e.id||e.rowId||e.meetingLogId||e.__rowId||e.round||"")+'"><i class="fas fa-trash"></i></button></td></tr>'
 }).join("");
 t||(t='<tr><td colspan="5" class="text-center text-muted py-3">ยังไม่มีประวัติการประชุม</td></tr>'),g("meeting-history-tbody",t)
 }
@@ -4379,7 +4379,7 @@ typeof __appObserve==="function"&&__appObserve(_,"c6.SPM:4180")
 return!1
 }
 var payload={
-logId:id,id:id,caseId:value("meeting-caseId"),actionMethod:"delete"
+logId:id,id:id,caseId:value("meeting-caseId"),actionMethod:"apiDeleteMeetingLog",forceFresh:!0,noCache:!0,bypassCache:!0,source:"meeting.deleteLog.contract"
 };
 return api("apiDeleteMeetingLog",payload).then(function(){
 try{
