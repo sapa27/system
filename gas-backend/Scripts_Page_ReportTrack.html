@@ -1109,7 +1109,7 @@ state=state||{
 };
 var requestedPageSize=Math.max(10,Math.min(100,Number(state.pageSize||20)||20)),requestedPage=Math.max(1,Number(state.page||1)||1),requestedQuery=queryFor(mode),requestedReportType="report"===mode?clean((byId("report-type")||{
 }).value||"all"):"all",requestedReportValue="report"===mode?clean((byId("report-group-value")||{
-}).value||""):"",cacheBaseKey=[mode,requestedPageSize,requestedQuery,requestedReportType,requestedReportValue,"caseNum","asc","phase3-report-readmodel-v1"].join("|"),requestKey=cacheBaseKey+"|page="+requestedPage,now=Date.now?Date.now():+new Date,cacheTtlMs=0;
+}).value||""):"",cacheBaseKey=[mode,requestedPageSize,requestedQuery,requestedReportType,requestedReportValue,"caseNum","asc","phase3-report-readmodel-v1"].join("|"),requestKey=cacheBaseKey+"|page="+requestedPage,now=Date.now?Date.now():+new Date,cacheTtlMs=180000;
 if(state.pageCacheBaseKey!==cacheBaseKey)state.pageCacheBaseKey=cacheBaseKey,state.pageCache=Object.create(null),state.pagePrefetch=Object.create(null);
 state.pageCache=state.pageCache||Object.create(null),state.pagePrefetch=state.pagePrefetch||Object.create(null);
 function normalizeEntry(res,pageNo){
@@ -1145,7 +1145,21 @@ return state.pageCache[String(entry.page)]=entry,entry
 })
 }
 function schedulePrefetch(entry){
-return void 0
+try{
+if(!entry||!entry.serverPaged)return void 0;
+var pageNo=Math.max(1,Number(entry.page||requestedPage)||1),totalPages=Math.max(1,Number(entry.totalPages||1)||1),targets=[];
+pageNo<totalPages&&targets.push(pageNo+1),pageNo>1&&targets.push(pageNo-1);
+targets.forEach(function(pg){
+var key=String(pg);
+state.pageCache[key]||state.pagePrefetch[key]||(state.pagePrefetch[key]=fetchPage(pg,!0).then(function(pre){
+return pre&&(state.pageCache[String(pre.page||pg)]=pre),pre
+},function(err){
+delete state.pagePrefetch[key];
+try{reportTrackWarn("reportTrack.prefetch",err,{mode:mode,page:pg})}catch(_warn){__appObserve(_warn,"report.prefetch.warn")}
+return null
+}))
+})
+}catch(_prefetchErr){try{reportTrackWarn("reportTrack.prefetch.schedule",_prefetchErr,{mode:mode})}catch(_warn2){__appObserve(_warn2,"report.prefetch.schedule.warn")}}
 }
 var cachedEntry=state.pageCache[String(requestedPage)],currentTime=Date.now?Date.now():+new Date;
 if(cachedEntry&&cachedEntry.contract==="report-track-page-cache-v1"&&cachedEntry.expiresAt>currentTime){

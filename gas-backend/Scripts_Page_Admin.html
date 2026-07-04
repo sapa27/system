@@ -718,7 +718,7 @@ if(iso){
 var y=Number(iso[1]);
 return y>2400&&(y-=543),("0"+Number(iso[3])).slice(-2)+"/"+("0"+Number(iso[2])).slice(-2)+"/"+(y+543)
 }
-if(/GMT|เวลาอินโดจีน|เวลา/.test(raw)&&/1900/.test(raw))return"";
+if(/\bGMT|เวลาอินโดจีน|เวลา/.test(raw)&&/\b1900\b/.test(raw))return"";
 try{
 var d=new Date(raw);
 if(!isNaN(d.getTime())&&d.getFullYear()>=2e3)return("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+(d.getFullYear()+543)
