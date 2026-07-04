@@ -146,7 +146,7 @@ title:"ยืนยันการลบ?",icon:"warning",showCancelButton:!0,co
 }).then(function(res){
 if(!res.isConfirmed)return!1;
 var payload={
-petId:petId,__authTransportOwner:"AppApiMiddlewarePipeline"
+petId:petId,id:petId,actionMethod:"apiDeletePetitioner",forceFresh:!0,noCache:!0,bypassCache:!0,__authTransportOwner:"AppApiMiddlewarePipeline"
 };
 return apiCall("apiDeletePetitioner",payload).then(function(){
 var rows=storeGet("petitioner.cachedRows",[]);
@@ -502,7 +502,7 @@ warn("petitioner.save.selectorSet",_selectorSetErr)
 return rows
 }
 function apiSavePetitionerRecord(payload){
-var savePayload=petitionerPayload(payload);
+var savePayload=petitionerPayload(payload);savePayload.actionMethod="apiSavePetitioner",savePayload.forceFresh=!0,savePayload.noCache=!0,savePayload.bypassCache=!0;
 return apiCall("apiSavePetitioner",savePayload).then(function(res){
 var saved=unwrapPetitionerSaveResponse(res);
 return saved.petId&&!savePayload.petId&&(savePayload.petId=saved.petId),upsertPetitionerLocalRow(savePayload),__appIsFn(root.renderPetitionerList)&&root.renderPetitionerList(),!root.Swal||appSwalFire("สำเร็จ","บันทึกข้อมูลผู้ร้องเรียนแล้ว","success")

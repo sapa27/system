@@ -364,7 +364,7 @@ root.searchDeleteCase=function(id){
 if(!(id=clean(id)))return!1;
 var run=function(){
 return previousDelete&&!previousDelete.__reportTrackDeleteWrapped?previousDelete(id):api("apiDeleteCase",{
-caseId:id,id:id
+caseId:id,id:id,actionMethod:"apiDeleteCase",forceFresh:!0,noCache:!0,bypassCache:!0,source:"reportTrack.deleteCase"
 }).then(function(){
 return searchState.pageCache=Object.create(null),searchState.pageCacheBaseKey="",searchState.pagePrefetch=Object.create(null),reportState.pageCache=Object.create(null),reportState.pageCacheBaseKey="",reportState.pagePrefetch=Object.create(null),root.searchAll(searchState.page)
 })

@@ -1231,7 +1231,7 @@ o=t.storeGet?String(t.storeGet("auth.csrfToken","")||""):""
 catch(t){
 "function"==typeof __appObserve&&__appObserve(t,"ec")
 }
-n.__authTransportOwner="AppApiMiddlewarePipeline",!n.clientContext&&a&&__appIsFn(a.getClientContext)&&(n.clientContext=a.getClientContext())
+n.__authTransportOwner="AppApiMiddlewarePipeline",n.actionMethod=n.actionMethod||e,n.forceFresh=!0,n.noCache=!0,n.bypassCache=!0,o&&!n.csrfToken&&(n.csrfToken=o),o&&!n.csrf&&(n.csrf=o),o&&!n._csrf&&(n._csrf=o),!n.clientContext&&a&&__appIsFn(a.getClientContext)&&(n.clientContext=a.getClientContext())
 }
 catch(t){
 "function"==typeof __appObserve&&__appObserve(t,"ec")
