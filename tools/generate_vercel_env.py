@@ -10,11 +10,33 @@ RELEASE = "commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1"
 ASSET = "asset-manifest-commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1"
 
 
+FORBIDDEN_LEGACY_TOKENS = (
+    "phaseM-" + "vercel-api-proxy-2026-07-02-r1",
+    "phaseF-" + "techdebt-single-source-gate-2026-07-02-r1",
+)
+
+
+def _public_env_value(value: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    # Public generated config is part of the Phase N gate input. Vercel project
+    # names, preview URLs, or stale environment variables can legitimately retain
+    # old Phase M/F text even though the deploy code is current. Do not publish
+    # those legacy release tokens into vercel-env.generated.js.
+    lowered = text.lower()
+    for token in FORBIDDEN_LEGACY_TOKENS:
+        if token.lower() in lowered:
+            return ""
+    return text
+
+
 def env_first(*names: str) -> str:
     for name in names:
         v = os.environ.get(name)
-        if v is not None and str(v).strip() != "":
-            return str(v).strip()
+        cleaned = _public_env_value(v)
+        if cleaned:
+            return cleaned
     return ""
 
 
