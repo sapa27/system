@@ -1,3 +1,4 @@
+<!-- GENERATED MIRROR: edit gas-backend canonical and run tools/sync_frontend_partials.py -->
 <script>
 !function(){
 "use strict";
@@ -441,7 +442,7 @@ catch(_scroll){
 "function"==typeof __appObserve&&__appObserve(_scroll,"meeting.editLetter.scroll")
 }
 return!0
-},window.meetingDeleteLetter=function(t){
+},window.meetingDeleteLetterSinglePath=window.meetingDeleteLetter=function(t){
 if(!t)return!1;
 var n=function(){
 return s("apiDeleteLetter",{
@@ -1022,7 +1023,7 @@ _e(),Ue(),$e()
 },window.meetingToggleAiSection=function(){
 var e=r("meeting-ai-box");
 e&&e.classList.toggle("d-none")
-},window.delLog=function(ctx){
+},window.meetingDeleteLogSinglePath=window.delLog=function(ctx){
 var logId=d(ctx||"").trim();
 try{
 var node=ctx&&ctx.target&&ctx.target.closest?ctx.target.closest('[data-log-id],[data-id],[data-action="meetingDeleteLog"]'):ctx&&ctx.closest?ctx.closest('[data-log-id],[data-id],[data-action="meetingDeleteLog"]'):null;
@@ -2701,12 +2702,15 @@ return!!__appIsFn(window.meetingSharedSave)&&window.meetingSharedSave(t)
 }
 ();
 </script>
+<script id="meeting-uiux-stability-owner">
+(function(w,d){if(!w||!d||w.__MEETING_UIUX_STABILITY_OWNER__)return;w.__MEETING_UIUX_STABILITY_OWNER__=1;var c="#p-meeting .app-card{border:1px solid #e2e8f0!important;border-radius:20px!important;box-shadow:0 18px 45px #0f172414!important;overflow:hidden}#p-meeting #meeting-workspace>.app-card:first-child{background:linear-gradient(135deg,#fff,#f8fafc 65%,#fff8df)!important;border-top:4px solid #c5a028!important}#p-meeting .nav-tabs{gap:.35rem;border:0;padding:.35rem;background:#f8fafc;border-radius:18px;box-shadow:inset 0 0 0 1px #e2e8f0}#p-meeting .nav-tabs .nav-link{border:0;border-radius:14px;color:#475569;font-weight:800;min-height:44px}#p-meeting .nav-tabs .nav-link.active{background:#061f3d;color:#fff;box-shadow:0 10px 22px #061f3d2e}#p-meeting #meeting-tab-content{border:1px solid #e2e8f0!important;border-radius:0 0 20px 20px!important;box-shadow:0 16px 38px #0f17240f!important}#p-meeting .form-control,#p-meeting .form-select,#p-meeting .btn{border-radius:13px;min-height:40px}#p-meeting textarea.form-control{min-height:84px}#p-meeting .check-list-box,#p-meeting .table-responsive{border-radius:16px}@media(max-width:575.98px){#p-meeting .nav-tabs .nav-item,#p-meeting .d-flex.flex-wrap.gap-2>button{flex:1 1 100%}#p-meeting .nav-tabs .nav-link{width:100%}}",f=function(){var h=d.head||d.documentElement;if(!h||d.getElementById("meeting-uiux-stability-style"))return;var s=d.createElement("style");s.id="meeting-uiux-stability-style";s.textContent=c;h.appendChild(s)};d.readyState==="loading"?d.addEventListener("DOMContentLoaded",f,{once:1}):f();w.AppMeetingUiUxStability={stamp:"current",apply:f}})(window,document);
+</script>
 <script>
 (function(){try{window.AppBootstrap&&__appIsFn(window.AppBootstrap.markMainUiReady)&&window.AppBootstrap.markMainUiReady(),document.dispatchEvent(new CustomEvent("app:main-ui-ready"))}catch(t){typeof __appObserve=="function"&&__appObserve(t,"ec")}})();
 </script>
 
 <script>
-(function(){var e=window;if(!window.__meetingAppPageAdapterReady&&(window.__meetingAppPageAdapterReady=!0,window.AppPages&&__appIsFn(window.AppPages.register))){var t={init:window.initMeetingPage,setMode:window.meetingSetMode,goSearch:window.meetingGoSearch,editLog:window.meetingEditLog,editLetter:window.meetingEditLetter,deleteLetter:window.meetingDeleteLetter},n={init:function(e2){return typeof t.init!="function"||t.init(e2||{})},dispose:function(){try{document.documentElement&&(document.documentElement.dataset.meetingDisposedAt=String(Date.now()))}catch(e2){typeof __appObserve=="function"&&__appObserve(e2,"ec")}return!0},setMode:function(e2){return __appIsFn(t.setMode)&&t.setMode(e2)},search:function(){return __appIsFn(t.goSearch)&&t.goSearch()},editLog:function(e2){return __appIsFn(t.editLog)&&t.editLog(e2)},editLetter:function(e2){return __appIsFn(t.editLetter)&&t.editLetter(e2)},deleteLetter:function(e2){return __appIsFn(t.deleteLetter)&&t.deleteLetter(e2)},reload:function(){return typeof t.init!="function"||t.init({force:!0})}};if(window.AppPages.register("meeting",n),__appIsFn(window.AppPages.expose)&&window.AppPages.expose("meeting",n,{globals:{meetingSetMode:"setMode",meetingGoSearch:"search",meetingEditLog:"editLog",meetingEditLetter:"editLetter",meetingDeleteLetter:"deleteLetter"},override:!1}),__appIsFn(window.AppPages.registerActions)){var i=function(e2,t2){var n2=e2&&(e2.target||e2.button||e2.currentTarget||e2);return n2&&n2.closest&&(n2=n2.closest("["+t2+"]")||n2),n2&&n2.getAttribute&&n2.getAttribute(t2)||""};window.AppPages.registerActions("meeting",{meetingSetMode:function(e2){return n.setMode(i(e2,"data-mode")||i(e2,"data-meeting-mode")||"search")},meetingSearchCase:function(){return __appIsFn(e.meetingSearchCase)?e.meetingSearchCase(!0):n.search()},meetingCreateNew:function(ev){return typeof meetingCreateNewSafe=="function"?meetingCreateNewSafe(ev&&ev.event?ev.event:null):__appIsFn(e.meetingCreateNew)?e.meetingCreateNew():n.setMode("case")},meetingRefreshData:function(){return __appIsFn(e.meetingRefreshData)?e.meetingRefreshData():n.reload()},meetingGoSearch:function(){return n.search()},meetingEditCase:function(e2){var id=i(e2,"data-case-id")||e2&&e2.context&&(e2.context.caseId||e2.context.id)||e2&&e2.caseId||"";return!!window.meetingEditCase&&window.meetingEditCase(id,e2&&e2.context?e2.context:{})},meetingEditLog:function(e2){return __appIsFn(window.meetingEditLog)&&window.meetingEditLog(e2)},meetingDeleteLog:function(e2){return!!window.delLog&&window.delLog(i(e2,"data-log-id"))},meetingEditLetter:function(e2){return n.editLetter(i(e2,"data-letter-id"))},meetingDeleteLetter:function(e2){return n.deleteLetter(i(e2,"data-letter-id"))},meetingSharedDelete:function(){return!!window.meetingSharedDelete&&window.meetingSharedDelete()},meetingSelectPetitionerButton:function(e2){return!!window.meetingSelectPetitioner&&window.meetingSelectPetitioner(i(e2,"data-name"),i(e2,"data-phone"))},removeClosestReplyRow:function(e2){var t2=e2.target&&e2.target.closest?e2.target.closest(".row"):null;return t2&&t2.remove(),!0}})}}})();
+(function(){var e=window;if(!window.__meetingAppPageAdapterReady&&(window.__meetingAppPageAdapterReady=!0,window.AppPages&&__appIsFn(window.AppPages.register))){var t={init:window.initMeetingPage,setMode:window.meetingSetMode,goSearch:window.meetingGoSearch,editLog:window.meetingEditLog,editLetter:window.meetingEditLetter,deleteLetter:window.meetingDeleteLetter},n={init:function(e2){return typeof t.init!="function"||t.init(e2||{})},dispose:function(){try{document.documentElement&&(document.documentElement.dataset.meetingDisposedAt=String(Date.now()))}catch(e2){typeof __appObserve=="function"&&__appObserve(e2,"ec")}return!0},setMode:function(e2){return __appIsFn(t.setMode)&&t.setMode(e2)},search:function(){return __appIsFn(t.goSearch)&&t.goSearch()},editLog:function(e2){return __appIsFn(t.editLog)&&t.editLog(e2)},editLetter:function(e2){return __appIsFn(t.editLetter)&&t.editLetter(e2)},deleteLetter:function(e2){return __appIsFn(t.deleteLetter)&&t.deleteLetter(e2)},reload:function(){return typeof t.init!="function"||t.init({force:!0})}};if(window.AppPages.register("meeting",n),__appIsFn(window.AppPages.expose)&&window.AppPages.expose("meeting",n,{globals:{meetingSetMode:"setMode",meetingGoSearch:"search",meetingEditLog:"editLog",meetingEditLetter:"editLetter",meetingDeleteLetter:"deleteLetter"},override:!1}),__appIsFn(window.AppPages.registerActions)){var i=function(e2,t2){var n2=e2&&(e2.target||e2.button||e2.currentTarget||e2);return n2&&n2.closest&&(n2=n2.closest("["+t2+"]")||n2),n2&&n2.getAttribute&&n2.getAttribute(t2)||""};window.AppPages.registerActions("meeting",{meetingSetMode:function(e2){return n.setMode(i(e2,"data-mode")||i(e2,"data-meeting-mode")||"search")},meetingSearchCase:function(){return __appIsFn(e.meetingSearchCase)?e.meetingSearchCase(!0):n.search()},meetingCreateNew:function(ev){return typeof meetingCreateNewSafe=="function"?meetingCreateNewSafe(ev&&ev.event?ev.event:null):__appIsFn(e.meetingCreateNew)?e.meetingCreateNew():n.setMode("case")},meetingRefreshData:function(){return __appIsFn(e.meetingRefreshData)?e.meetingRefreshData():n.reload()},meetingGoSearch:function(){return n.search()},meetingEditCase:function(e2){var id=i(e2,"data-case-id")||e2&&e2.context&&(e2.context.caseId||e2.context.id)||e2&&e2.caseId||"";return!!window.meetingEditCase&&window.meetingEditCase(id,e2&&e2.context?e2.context:{})},meetingEditLog:function(e2){return __appIsFn(window.meetingEditLog)&&window.meetingEditLog(e2)},meetingDeleteLog:function(e2){var id=i(e2,"data-log-id")||i(e2,"data-id");return __appIsFn(window.meetingDeleteLogSinglePath)?window.meetingDeleteLogSinglePath(id):!!window.delLog&&window.delLog(id)},meetingEditLetter:function(e2){return n.editLetter(i(e2,"data-letter-id"))},meetingDeleteLetter:function(e2){return n.deleteLetter(i(e2,"data-letter-id"))},meetingSharedDelete:function(){return!!window.meetingSharedDelete&&window.meetingSharedDelete()},meetingSelectPetitionerButton:function(e2){return!!window.meetingSelectPetitioner&&window.meetingSelectPetitioner(i(e2,"data-name"),i(e2,"data-phone"))},removeClosestReplyRow:function(e2){var t2=e2.target&&e2.target.closest?e2.target.closest(".row"):null;return t2&&t2.remove(),!0}})}}})();
 </script>
 
 <script id="committee-meeting-system-owner">
@@ -4368,46 +4372,11 @@ var t=target(ctx),btn,rec=rowFromButton(t&&t.closest?t.closest('[data-action="me
 return rec?fill(rec):!!__appIsFn(root.meetingEditLog)&&root.meetingEditLog(ctx)
 }
 function delLog(ctx){
-var id=text(("string"==typeof ctx?ctx:"")||attr(ctx,"data-log-id")||attr(ctx,"data-id")||value("meeting-currentLogId"));
-if(!id){
-try{
-root.Swal&&root.Swal.fire("ไม่พบข้อมูล","ไม่พบรหัสประวัติการประชุมที่ต้องการลบ","warning")
-}
-catch(_){
-typeof __appObserve==="function"&&__appObserve(_,"c6.SPM:4180")
-}
-return!1
-}
-var payload={
-logId:id,id:id,caseId:value("meeting-caseId"),actionMethod:"apiDeleteMeetingLog",forceFresh:!0,noCache:!0,bypassCache:!0,source:"meeting.deleteLog.contract"
-};
-return api("apiDeleteMeetingLog",payload).then(function(){
-try{
-root.loadMeetingHistory?root.loadMeetingHistory(payload.caseId):root.refreshMeetingHistory&&root.refreshMeetingHistory(payload.caseId)
-}
-catch(_r){
-typeof __appObserve==="function"&&__appObserve(_r,"c6.SPM:4191")
-}
-try{
-root.Swal&&root.Swal.fire("สำเร็จ","ลบประวัติการประชุมแล้ว","success")
-}
-catch(_s){
-typeof __appObserve==="function"&&__appObserve(_s,"c6.SPM:4196")
-}
-return!0
-}).catch(function(err){
-try{
-root.Swal&&root.Swal.fire("ลบไม่สำเร็จ",String(err&&err.message||err||""),"error")
-}
-catch(_e){
-typeof __appObserve==="function"&&__appObserve(_e,"c6.SPM:4203")
-}
-return!1
-})
+return __appIsFn(root.meetingDeleteLogSinglePath)?root.meetingDeleteLogSinglePath(ctx):__appIsFn(root.delLog)?root.delLog(ctx):!1
 }
 function delLetter(ctx){
 var id=text(("string"==typeof ctx?ctx:"")||attr(ctx,"data-letter-id")||attr(ctx,"data-id"));
-return __appIsFn(root.deleteLetter)?root.deleteLetter(id):__appIsFn(root.meetingDeleteLetter)?root.meetingDeleteLetter(id):api("apiDeleteLetter",{
+return __appIsFn(root.meetingDeleteLetterSinglePath)?root.meetingDeleteLetterSinglePath(id):__appIsFn(root.meetingDeleteLetter)?root.meetingDeleteLetter(id):__appIsFn(root.deleteLetter)?root.deleteLetter(id):api("apiDeleteLetter",{
 letterId:id,id:id,caseId:value("meeting-caseId"),actionMethod:"delete"
 })
 }

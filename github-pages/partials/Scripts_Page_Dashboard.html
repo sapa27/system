@@ -1,3 +1,4 @@
+<!-- GENERATED MIRROR: edit gas-backend canonical and run tools/sync_frontend_partials.py -->
 <!--C5_MOVED_AI_RUNTIME_FROM_CORE_TO_DASHBOARD-->
 <script id="app-ai-bridge-shared-owner">
 !function(){
@@ -760,7 +761,7 @@ total:p,recent:b,byResult:g
 }
 function w(t){
 var e=t&&t.data&&"object"==typeof t.data&&!Array.isArray(t.data)?t.data:o(t),a=o(e.dashboardDto||e.dto||e.dashboard);
-if("dashboard-canonical-dto-current"===a.contractVersion){
+if("phaseF-dashboard-status-read-model-current"===String(a.caseStats&&a.caseStats.statusReadModelStamp||a.meta&&a.meta.statusReadModelStamp||"")||"dashboard-canonical-dto-current"===a.contractVersion){
 var s=o(a.summary),n=Object.assign({
 },s,{
 total:i(s.totalCases||a.caseStats&&a.caseStats.total),pending:i(s.pendingCases),completed:i(s.completedCases),overdueLetters:i(s.overdueLetters),soonOverdue:i(s.soonOverdue),totalMeetings:i(s.totalMeetings),recentMeetings:i(s.recentMeetings),statusRows:d(a.caseStats&&a.caseStats.statusRows),byType:d(a.typeStats),byTopic:d(a.issueStats),letters:o(a.trackingStats),meetings:o(a.meetingStats)
@@ -777,8 +778,8 @@ var r=Object.assign({
 },o(e.stats||e.summaryStats)),l=o(e.quickCounts),c=o(e.summary),u=Object.assign({
 },c,l,r);
 !d(u.byType).length&&d(l.byType).length&&(u.byType=l.byType),!d(u.byTopic).length&&d(l.byTopic).length&&(u.byTopic=l.byTopic),!d(u.statusRows).length&&d(l.byStatus||l.statusRows).length&&(u.statusRows=l.byStatus||l.statusRows),!d(u.byType).length&&d(e.byType).length&&(u.byType=e.byType),!d(u.byTopic).length&&d(e.byTopic).length&&(u.byTopic=e.byTopic),!d(u.statusRows).length&&d(e.statusRows||e.byStatus).length&&(u.statusRows=e.statusRows||e.byStatus),u.letters||!e.letters&&!c.letters||(u.letters=e.letters||c.letters),!u.meetings&&(e.meetings||e.meetingSummary||c.meetings)&&(u.meetings=e.meetings||e.meetingSummary||c.meetings),!i(u.total)&&i(c.totalCases)&&(u.total=i(c.totalCases));
-var m=d(e.rows||e.caseRows||u.caseRows||e.cases&&e.cases.rows),p=d(e.letterRows||u.letterRows||e.trackingRows||u.trackingRows||e.letters&&e.letters.rows),b=d(e.meetingRows||u.meetingRows||e.meetingLogs||u.meetingLogs||e.meetings&&e.meetings.rows);
-if((!d(u.byType).length||!d(u.byTopic).length||!d(u.statusRows).length)&&m.length){
+var m=d(e.rows||e.caseRows||u.caseRows||e.cases&&e.cases.rows),p=d(e.letterRows||u.letterRows||e.trackingRows||u.trackingRows||e.letters&&e.letters.rows),b=d(e.meetingRows||u.meetingRows||e.meetingLogs||u.meetingLogs||e.meetings&&e.meetings.rows),k="phaseF-dashboard-status-read-model-current"===String(u.statusReadModelStamp||u.dashboardStatusReadModelStamp||o(e.meta).statusReadModelStamp||"");
+if((!d(u.byType).length||!d(u.byTopic).length||!d(u.statusRows).length)&&!k&&m.length){
 var g={
 },y={
 },h={
