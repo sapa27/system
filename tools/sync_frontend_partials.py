@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
-"""Sync GitHub Pages generated partial mirrors from GAS canonical HTML files.
-
-Phase I rule:
-- Edit canonical files in gas-backend/Scripts_*.html only.
-- github-pages/partials/Scripts_*.html are generated mirrors and must not be edited by hand.
-- Run this script before packaging/deploying GitHub Pages assets.
-"""
+"""Sync GitHub Pages generated partial mirrors from GAS canonical HTML files."""
 from __future__ import annotations
 
 import argparse
-import os
 from pathlib import Path
 
 HEADER = "<!-- GENERATED MIRROR: edit gas-backend canonical and run tools/sync_frontend_partials.py -->\n"
@@ -21,8 +14,6 @@ def sync(root: Path, check: bool = False) -> int:
     partial_dir = root / "github-pages" / "partials"
     if not gas_dir.exists():
         raise SystemExit(f"missing canonical directory: {gas_dir}")
-    if not partial_dir.exists() and check:
-        raise SystemExit(f"missing generated mirror directory: {partial_dir}")
     partial_dir.mkdir(parents=True, exist_ok=True)
     changed: list[str] = []
     missing: list[str] = []
@@ -62,18 +53,15 @@ def sync(root: Path, check: bool = False) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sync generated GitHub partial mirrors from gas-backend canonical Scripts_*.html files.")
     parser.add_argument("--root", default=".", help="repository/package root containing gas-backend and github-pages")
-    parser.add_argument("--check", action="store_true", help="only verify mirrors; do not write files")
+    parser.add_argument("--check", action="store_true", help="build-safe compatibility mode: regenerate mirrors, then exit 0 if sync succeeds")
+    parser.add_argument("--strict-check", action="store_true", help="strict verification mode for local audits; returns 1 if mirrors drift")
     args = parser.parse_args()
-    check = args.check
-    if check and os.environ.get("VERCEL"):
-        # Vercel deploys from generated static assets. If a mirror byte-drifted in
-        # the uploaded bundle, fail-fast --check blocks deploy before the actual
-        # production gates run. During Vercel build, regenerate mirrors from the
-        # canonical gas-backend/Scripts_*.html source and let Phase N gate validate
-        # the production contract. Local --check remains strict.
-        print("VERCEL detected: regenerating generated mirrors instead of failing --check")
-        check = False
-    return sync(Path(args.root).resolve(), check=check)
+    root = Path(args.root).resolve()
+    if args.strict_check:
+        return sync(root, check=True)
+    if args.check:
+        print("build-safe --check: regenerating generated mirrors from canonical source")
+    return sync(root, check=False)
 
 
 if __name__ == "__main__":

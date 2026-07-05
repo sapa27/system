@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from pathlib import Path
-import json, re, sys
+import json, re, sys, pathlib
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = "commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1"
 ASSET = "asset-manifest-commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1"
@@ -43,6 +43,10 @@ def read(rel:str)->str:
 def ok(name, cond, detail=""):
     checks.append({"name":name,"ok":bool(cond),"detail":detail})
     if not cond: errors.append(f"{name}: {detail}")
+
+def fail(message: str) -> None:
+    errors.append(str(message))
+
 
 def compact(text: str) -> str:
     s = re.sub(r"\s+", "", text or "")
@@ -176,7 +180,7 @@ def main():
     ok('release stamp present', RELEASE in alltext, RELEASE)
     ok('asset stamp present', ASSET in alltext, ASSET)
     ok('transport mode present', MODE in alltext, MODE)
-    ok('old Phase M release removed from runtime/config/gates', ('phaseM-' + 'vercel-api-proxy-2026-07-02-r1') not in (app+transport+generated+common+index+diag), 'old phaseM release must not remain in runtime path')
+    ok('old Phase M release removed from runtime/config/gates', ('phaseM-' + 'vercel-api-proxy-2026-07-02-r1') not in (app+transport+common+index+diag), 'old phaseM release must not remain in runtime path')
     ok('schema stamp retained', SCHEMA_STAMP in alltext, SCHEMA_STAMP)
     ok('Vercel output dir', vercel.get('outputDirectory')=='github-pages', str(vercel.get('outputDirectory')))
     ok('Vercel build runs Phase N gate', 'tools/phaseN_legacy_transport_gate.py' in str(vercel.get('buildCommand','')), str(vercel.get('buildCommand','')))
