@@ -34,6 +34,37 @@ PHASE5_NEXT_SLIMMING_TARGETS = {
     "gas-backend/Scripts_Page_Meeting.html": 220000,
     "gas-backend/Code_30_Domain_Cases.gs": 310000,
 }
+# Build hosts such as Vercel may add .git, .vercel, node_modules, cache, or
+# package-manager artifacts around the project. Gate checks must audit only the
+# shipped source tree, otherwise an environment artifact can make a valid ZIP
+# fail with exit 1.
+SOURCE_SCOPE_DIRS = {"api", "docs", "gas-backend", "github-pages", "tools"}
+SOURCE_SCOPE_ROOT_FILES = {".env.example", "package.json", "vercel.json", "TECH_DEBT_MANIFEST.json"}
+SOURCE_SCOPE_SUFFIXES = {".html", ".js", ".gs", ".py", ".json", ".md", ".example"}
+SOURCE_SCOPE_EXCLUDED_DIRS = {".git", ".vercel", ".next", "node_modules", "dist", "build", "coverage", "__pycache__"}
+
+def is_scoped_source_file(p: Path) -> bool:
+    try:
+        rel_path = p.relative_to(ROOT)
+    except ValueError:
+        return False
+    rel = rel_path.as_posix()
+    if not p.is_file():
+        return False
+    if any(part in SOURCE_SCOPE_EXCLUDED_DIRS for part in rel_path.parts):
+        return False
+    if rel in PHASE5_DYNAMIC_GENERATED_FILES:
+        return False
+    if rel in SOURCE_SCOPE_ROOT_FILES:
+        return True
+    if not rel_path.parts or rel_path.parts[0] not in SOURCE_SCOPE_DIRS:
+        return False
+    return p.suffix.lower() in SOURCE_SCOPE_SUFFIXES
+
+def iter_scoped_source_files():
+    for p in ROOT.rglob('*'):
+        if is_scoped_source_file(p):
+            yield p
 REQUIRED = ["vercel.json","package.json",".env.example","api/_gasProxyCommon.js","api/gas.js","api/login.js","api/public-config.js","github-pages/vercel-env.generated.js","tools/generate_vercel_env.py","tools/sync_frontend_partials.py","tools/phaseG_security_gate.py","tools/phaseN_legacy_transport_gate.py","docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.md","docs/SINGLE_SOURCE_POLICY.md","TECH_DEBT_MANIFEST.json"]
 errors=[]; checks=[]
 def read(rel:str)->str:
@@ -85,15 +116,7 @@ def function_body(text: str, name: str) -> str:
     return ""
 
 def phase5_source_size_bytes() -> int:
-    total = 0
-    for p in ROOT.rglob('*'):
-        if not p.is_file() or '__pycache__' in p.parts:
-            continue
-        rel = p.relative_to(ROOT).as_posix()
-        if rel in PHASE5_DYNAMIC_GENERATED_FILES:
-            continue
-        total += p.stat().st_size
-    return total
+    return sum(p.stat().st_size for p in iter_scoped_source_files())
 
 def phase5_size_budget_report():
     rows=[]; offenders=[]
@@ -110,9 +133,8 @@ def phase5_size_budget_report():
 
 def all_source_text()->str:
     chunks=[]
-    for p in ROOT.rglob('*'):
-        if p.is_file() and p.suffix.lower() in {'.html','.js','.gs','.py','.json','.md','.example'} and '__pycache__' not in p.parts:
-            chunks.append(p.read_text(encoding='utf-8', errors='ignore'))
+    for p in iter_scoped_source_files():
+        chunks.append(p.read_text(encoding='utf-8', errors='ignore'))
     return '\n'.join(chunks)
 def mirror_in_sync():
     drift=[]; header_re=re.compile(r"^<!-- GENERATED MIRROR:[\s\S]*?-->\s*")
