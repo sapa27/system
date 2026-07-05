@@ -4,7 +4,7 @@
   "release": "commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1",
   "releaseStamp": "commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1",
   "assetStamp": "asset-manifest-commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1",
-  "updatedAt": "2026-07-05T17:05:00+07:00",
+  "updatedAt": "2026-07-05T10:10:00+07:00",
   "releaseGate": "tools/phaseN_legacy_transport_gate.py",
   "transportMode": "phaseN-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
   "singleSourcePolicy": "docs/SINGLE_SOURCE_POLICY.md",
@@ -174,7 +174,10 @@
     "task6Code32ReducedBytes": 2624,
     "task6BudgetPhysicalLedgerCompacted": true,
     "task6BudgetAliasArrayOwnerConstants": 25,
-    "task6NetSourceReducedBytesFromTask5": 1234
+    "task6NetSourceReducedBytesFromTask5": 1234,
+    "phase5TotalSourceBytes": 4840287,
+    "dashboardPageBytes": 110834,
+    "dashboardPartialBytes": 110928
   },
   "currentDebtTargets": [
     {
@@ -368,5 +371,20 @@
     "noNewFiles": true,
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false
+  },
+  "dashboardBudgetHydrationGuardLedger": {
+    "owner": "gas-backend/Scripts_Page_Dashboard.html",
+    "task": "dashboard-budget-hydration-preserve-status-summary",
+    "rootCause": "budget-only hydration payload was normalized as a full dashboard payload and overwrote summaryStats/statusRows with empty/zero values",
+    "fix": "phase1MergeDashboardData now detects budget-only patches and preserves base summaryStats/statusRows/meeting rows while merging only budgetStats and meta",
+    "affectedUi": [
+      "Dashboard > สถานะ",
+      "Dashboard > Budget Overview"
+    ],
+    "apiAdded": false,
+    "filesAdded": false,
+    "uiLayoutDomIdsChanged": false,
+    "businessLogicChanged": false,
+    "buildVerified": "npm run build"
   }
 }
