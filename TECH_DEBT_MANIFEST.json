@@ -428,5 +428,16 @@
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false,
     "buildVerified": "exact Vercel command + npm run build"
+  },
+  "vercelDeterministicBuildLedger": {
+    "owner": "tools/generate_vercel_env.py + tools/sync_frontend_partials.py",
+    "task": "deterministic-vercel-build-exit1-hardening",
+    "rootCause": "Vercel build command can still exit 1 when dynamic public env values or generated mirror byte drift enter the checked build path.",
+    "fix": "Generated public Vercel config is deterministic and no longer copies Vercel/public env values; sync_frontend_partials.py --check is build-safe and regenerates mirrors from gas-backend canonical source, while --strict-check remains available for local audits.",
+    "apiAdded": false,
+    "filesAdded": false,
+    "uiLayoutDomIdsChanged": false,
+    "businessLogicChanged": false,
+    "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --check && npm run check:api && python3 tools/phaseG_security_gate.py && python3 tools/phaseN_legacy_transport_gate.py"
   }
 }
