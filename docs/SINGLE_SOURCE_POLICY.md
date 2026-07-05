@@ -44,7 +44,6 @@ python3 tools/generate_vercel_env.py
 python3 tools/sync_frontend_partials.py --check
 npm run check:api
 python3 tools/phaseG_security_gate.py
-python3 tools/phaseK_write_schema_gate.py
 python3 tools/phaseN_legacy_transport_gate.py
 ```
 
@@ -54,9 +53,9 @@ or simply:
 npm run build
 ```
 
-## Phase 1 hardening policy
+## Production-current hardening policy
 
-Phase 1 is a no-business-logic-change hardening step. It does not add files, routes, APIs, or UI behavior. It only:
+The current production hardening policy is a no-business-logic-change cleanup step. It does not add files, routes, APIs, or UI behavior. It only:
 
 1. aligns this policy document with the actual Phase N proxy-only runtime,
 2. prevents legacy transport drift,
@@ -66,7 +65,7 @@ Phase 1 is a no-business-logic-change hardening step. It does not add files, rou
 
 Hard size budgets are regression guards, not the final slimming target. Phase 2 should reduce the largest files further while preserving the current UI/UX and business rules.
 
-## Current debt targets after Phase 1
+## Current debt targets
 
 - Slim `gas-backend/Scripts_Core_Runtime.html` without adding files.
 - Slim `gas-backend/Scripts_Page_Meeting.html` without changing meeting UI/UX.
