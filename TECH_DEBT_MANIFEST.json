@@ -499,15 +499,16 @@
     ]
   },
   "vercelNodeRuntimePinLedger": {
-    "owner": "package.json + vercel.json",
-    "task": "pin-vercel-node-runtime-and-align-build-command",
-    "rootCause": "Vercel warned that engines node >=18 can auto-upgrade on future major Node releases; project-level build command logs still showed the legacy --check command, so repository build command is aligned with that exact command while keeping generated mirror self-heal support.",
-    "fix": "package.json engines pinned to node 20.x; vercel.json buildCommand now delegates to npm run build to satisfy the Vercel 256-character schema limit; package.json build script keeps the strict production gate sequence.",
+    "owner": "package.json + tools/phaseN_legacy_transport_gate.py",
+    "task": "pin-vercel-node-runtime-24x",
+    "rootCause": "Vercel reports Node.js 20.x is deprecated for deployments created on or after 2026-10-01 and requires engines.node 24.x.",
+    "fix": "package.json engines.node is pinned to 24.x while vercel.json buildCommand remains npm run build and strict gates remain in package.json scripts.build.",
     "apiAdded": false,
     "filesAdded": false,
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false,
-    "buildVerified": "npm run build + vercel.json schema-safe buildCommand"
+    "buildVerified": "npm run build with package engines.node=24.x",
+    "requiredNodeEngine": "24.x"
   },
   "vercelDeterministicBuildLedger": {
     "owner": "tools/generate_vercel_env.py + tools/sync_frontend_partials.py",
