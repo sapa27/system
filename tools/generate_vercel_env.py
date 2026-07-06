@@ -5,19 +5,21 @@ import json
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "github-pages" / "vercel-env.generated.js"
-RELEASE = "commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1"
-ASSET = "asset-manifest-commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1"
+RELEASE = "commission-v1.2-production-current-contract-freeze-2026-07-06-r1"
+ASSET = "asset-manifest-commission-v1.2-production-current-contract-freeze-2026-07-06-r1"
+VERSION = "1.2.0-production-current"
 
 
 def main() -> None:
     cfg = {
-        "phase": "N",
+        "releaseTrack": "production-current",
+        "version": VERSION,
         "releaseStamp": RELEASE,
         "assetStamp": ASSET,
         "hostingTarget": "vercel-api-proxy",
         "vercelStaticFrontendReady": True,
         "vercelApiProxyEnabled": True,
-        "phaseNLegacyTransportRemoved": True,
+        "legacyTransportRemoved": True,
         "legacyJsonpTransportRemoved": True,
         "legacyGasBridgeTransportRemoved": True,
         "legacyLoginPostIframeRemoved": True,
@@ -42,8 +44,8 @@ def main() -> None:
         "(function(root){'use strict';var cfg=" + json.dumps(cfg, ensure_ascii=False, separators=(",", ":")) + ";"
         "root.__VERCEL_MIGRATION_CONFIG__=Object.freeze(cfg);"
         "root.APP_DEPLOY_RELEASE=Object.assign({},root.APP_DEPLOY_RELEASE||{},"
-        "{stamp:cfg.releaseStamp,assetStamp:cfg.assetStamp,hostingTarget:cfg.hostingTarget,"
-        "phaseLVercelMigrationFoundation:true,phaseMVercelApiProxyEnabled:true,vercelApiProxyEnabled:true,phaseNLegacyTransportRemoved:true});"
+        "{stamp:cfg.releaseStamp,assetStamp:cfg.assetStamp,version:cfg.version,hostingTarget:cfg.hostingTarget,"
+        "vercelStaticFrontendReady:true,vercelApiProxyEnabled:true,vercelApiProxyEnabled:true,legacyTransportRemoved:true});"
         "})(window);\n"
     )
     OUT.parent.mkdir(parents=True, exist_ok=True)
