@@ -211,6 +211,7 @@ var c=normalizeCase(row),v="cat"===type?c.cat:"sub"===type?c.subCat:"comm"===typ
 })
 },root.searchAll=function(page){
 searchState.page=Math.max(1,Number(page||1)||1);
+if(1===searchState.page){searchState.forceFreshNext=!0;searchState.pageCache=Object.create(null);searchState.pagePrefetch=Object.create(null);searchState.inFlightRequestPromise=null;searchState.inFlightRequestKey=""}
 var tb=byId("search-table-res"),table=tb&&tb.closest?tb.closest("table"):null,hadRows=Array.isArray(searchState.rows)&&searchState.rows.length>0;
 !hadRows&&tb&&setHtml(tb,'<tr><td colspan="8" class="text-center text-muted p-4">กำลังค้นหาข้อมูล...</td></tr>'),table&&table.setAttribute("aria-busy","true");
 return loadCases(searchState,"search").then(function(result){
@@ -1115,6 +1116,8 @@ var requestedPageSize=Math.max(10,Math.min(100,Number(state.pageSize||20)||20)),
 }).value||""):"",cacheBaseKey=[mode,requestedPageSize,requestedQuery,requestedReportType,requestedReportValue,"caseNum","asc","phase3-report-readmodel-v1"].join("|"),requestKey=cacheBaseKey+"|page="+requestedPage,now=Date.now?Date.now():+new Date,cacheTtlMs=180000;
 if(state.pageCacheBaseKey!==cacheBaseKey)state.pageCacheBaseKey=cacheBaseKey,state.pageCache=Object.create(null),state.pagePrefetch=Object.create(null);
 state.pageCache=state.pageCache||Object.create(null),state.pagePrefetch=state.pagePrefetch||Object.create(null);
+var manualFresh=!0===state.forceFreshNext;
+manualFresh&&(state.forceFreshNext=!1,state.pageCache=Object.create(null),state.pagePrefetch=Object.create(null),state.inFlightRequestPromise=null,state.inFlightRequestKey="");
 function normalizeEntry(res,pageNo){
 if(res&&"object"==typeof res&&!1===res.ok)throw new Error(res.error||res.msg||"apiSearchCasesLite ไม่สำเร็จ");
 var data=unwrap(res),meta=pagingMetaFrom(res,data&&"object"==typeof data&&!Array.isArray(data)?data:{
@@ -1137,7 +1140,7 @@ __appObserve(_reportRowsStoreErr,"ec")
 }
 function payloadFor(pageNo,prefetch){
 var payload={
-query:requestedQuery,page:pageNo,limit:requestedPageSize,pageSize:requestedPageSize,noPage:!1,fullList:!1,sortBy:"caseNum",sortDir:"asc",forceFresh:!1,cacheTtlSeconds:600,noCache:!1,bypassCache:!1,serverPaged:!0,compactReadModel:!0,includeMeetingHistory:!1,receiveNoFix:"single-owner",receiveDateFix:"MainData.phase3ReadModel",pagingContract:"case-search-page-envelope-v3",source:prefetch?"search-report-page-prefetch-cache-first":"search-report-phase3-read-model-cache-first",requestStabilityContract:"latest-request-wins-phase3-read-model",productionSingleOwner:!0,productionSingleOwnerOnly:!0
+query:requestedQuery,page:pageNo,limit:requestedPageSize,pageSize:requestedPageSize,noPage:!1,fullList:!1,sortBy:"caseNum",sortDir:"asc",forceFresh:manualFresh&&!prefetch,cacheTtlSeconds:manualFresh&&!prefetch?0:600,noCache:manualFresh&&!prefetch,bypassCache:manualFresh&&!prefetch,serverPaged:!0,compactReadModel:!0,includeMeetingHistory:!1,receiveNoFix:"single-owner",receiveDateFix:"MainData.phase3ReadModel",pagingContract:"case-search-page-envelope-v3",source:manualFresh&&!prefetch?"search-report-manual-force-fresh":"search-report-phase3-read-model-cache-first",requestStabilityContract:"latest-request-wins-phase3-read-model",productionSingleOwner:!0,productionSingleOwnerOnly:!0
 };
 return"report"===mode&&(payload.reportType=requestedReportType,payload.reportValue=requestedReportValue),payload
 }
@@ -1165,14 +1168,14 @@ return null
 }catch(_prefetchErr){try{reportTrackWarn("reportTrack.prefetch.schedule",_prefetchErr,{mode:mode})}catch(_warn2){__appObserve(_warn2,"report.prefetch.schedule.warn")}}
 }
 var cachedEntry=state.pageCache[String(requestedPage)],currentTime=Date.now?Date.now():+new Date;
-if(cachedEntry&&cachedEntry.contract==="report-track-page-cache-v1"&&cachedEntry.expiresAt>currentTime){
+if(!manualFresh&&cachedEntry&&cachedEntry.contract==="report-track-page-cache-v1"&&cachedEntry.expiresAt>currentTime){
 var cachedSeq=Math.max(0,Number(state.requestSeq||0)||0)+1;
 return state.requestSeq=cachedSeq,state.activeRequestKey=requestKey,state.loading=!1,commitEntry(cachedEntry,cachedSeq),schedulePrefetch(cachedEntry),Promise.resolve({
 stale:!1,cached:!0,requestSeq:cachedSeq,requestKey:requestKey,rows:cachedEntry.rows.slice()
 })
 }
 var pendingPrefetch=state.pagePrefetch[String(requestedPage)];
-if(pendingPrefetch){
+if(!manualFresh&&pendingPrefetch){
 var prefetchSeq=Math.max(0,Number(state.requestSeq||0)||0)+1;
 state.requestSeq=prefetchSeq,state.activeRequestKey=requestKey,state.loading=!0;
 return Promise.resolve(pendingPrefetch).then(function(entry){
