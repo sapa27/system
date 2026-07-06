@@ -276,10 +276,13 @@
     "releaseGateMustPass": true,
     "writeSchemaContractCoveredByReleaseGate": true,
     "syncFrontendPartialsMode": "strict-check-before-gate",
-    "vercelBuildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
+    "vercelBuildCommand": "npm run build",
     "contractFreezeGate": "tools/phaseN_legacy_transport_gate.py",
     "strictByDefault": true,
-    "transportGateMustPass": true
+    "transportGateMustPass": true,
+    "packageBuildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
+    "vercelBuildCommandMaxChars": 256,
+    "vercelBuildDelegatesToPackageBuild": true
   },
   "compatibilityGateLedger": {
     "status": "compacted-into-production-current-contract-ledger",
@@ -499,12 +502,12 @@
     "owner": "package.json + vercel.json",
     "task": "pin-vercel-node-runtime-and-align-build-command",
     "rootCause": "Vercel warned that engines node >=18 can auto-upgrade on future major Node releases; project-level build command logs still showed the legacy --check command, so repository build command is aligned with that exact command while keeping generated mirror self-heal support.",
-    "fix": "package.json engines pinned to node 20.x; package/vercel buildCommand aligned to the exact Vercel command with sync_frontend_partials.py --check; sync tool still self-heals generated mirrors when VERCEL env is present.",
+    "fix": "package.json engines pinned to node 20.x; vercel.json buildCommand now delegates to npm run build to satisfy the Vercel 256-character schema limit; package.json build script keeps the strict production gate sequence.",
     "apiAdded": false,
     "filesAdded": false,
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false,
-    "buildVerified": "exact Vercel command + npm run build"
+    "buildVerified": "npm run build + vercel.json schema-safe buildCommand"
   },
   "vercelDeterministicBuildLedger": {
     "owner": "tools/generate_vercel_env.py + tools/sync_frontend_partials.py",
@@ -515,8 +518,9 @@
     "filesAdded": false,
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false,
-    "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
-    "status": "current-strict-production-build"
+    "buildCommand": "npm run build",
+    "status": "current-strict-production-build",
+    "packageBuildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
   },
   "productionCurrentLedger": {
     "vercelScopedSourceGateLedger": {
@@ -528,13 +532,15 @@
       "filesAdded": false,
       "uiLayoutDomIdsChanged": false,
       "businessLogicChanged": false,
-      "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+      "buildCommand": "npm run build",
+      "packageBuildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
     }
   },
   "vercelBuildUnblockLedger": {
     "status": "superseded-by-strict-production-current-build",
     "strictBuildRequired": true,
-    "activeBuildContract": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+    "activeBuildContract": "npm run build",
+    "packageBuildContract": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
   },
   "contractFreeze": {
     "stamp": "production-contract-freeze-current-2026-07-06",
@@ -1022,6 +1028,22 @@
     ],
     "maxGasIndexBytes": 274500,
     "maxStaticIndexBytes": 197500,
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "businessLogicChanged": false
+  },
+  "vercelBuildCommandLengthLedger": {
+    "owner": "vercel.json + package.json + tools/phaseN_legacy_transport_gate.py",
+    "task": "schema-safe-vercel-build-command",
+    "rootCause": "vercel.json buildCommand was 275 characters, exceeding Vercel schema limit of 256 characters, so validation failed before the build command could run.",
+    "fix": "Keep the strict gate chain in package.json scripts.build and set vercel.json buildCommand to npm run build.",
+    "oldBuildCommandChars": 275,
+    "newBuildCommand": "npm run build",
+    "newBuildCommandChars": 13,
+    "maxAllowedChars": 256,
     "noApiContractChange": true,
     "noNewFiles": true,
     "noDeletedFiles": true,
