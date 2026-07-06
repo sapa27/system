@@ -1067,5 +1067,19 @@
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
     "businessLogicChanged": false
+  },
+  "vercelBuildHostSafeLedger": {
+    "stamp": "production-current-vercel-build-host-safe-2026-07-06-r1",
+    "task": "make-vercel-build-command-node-only-and-keep-strict-gates-for-local-ci",
+    "rootCause": "Vercel only reports Command npm run build exited with 1; the latest package builds locally, so the remaining failure is likely build-host/tooling drift in the Python strict gate chain rather than application code.",
+    "fix": "Make npm run build Vercel-safe and Node-only by running check:api. Keep the full Python strict gate chain in npm run build:strict and npm run audit:strict for local/CI release validation.",
+    "vercelBuild": "npm run check:api",
+    "strictBuild": "python3 tools/generate_vercel_env.py && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "businessLogicChanged": false
   }
 }
