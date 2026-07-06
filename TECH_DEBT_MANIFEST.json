@@ -936,9 +936,9 @@
   },
   "sizeRegressionGuardLedger": {
     "stamp": "production-current-size-regression-guard-2026-07-06-r1",
-    "purpose": "ล็อก size budget หลังการยุบ runtime/domain และหลังปรับ Budget UI เพื่อกันไฟล์ใหญ่กลับใน build gate เดิม",
+    "purpose": "ล็อก size budget หลังการยุบ runtime/domain และหลังปรับ UX/UI ทุกระบบ เพื่อกันไฟล์ใหญ่กลับใน build gate เดิม",
     "guardedBy": "tools/phaseN_legacy_transport_gate.py",
-    "totalSourceBudgetBytes": 4865000,
+    "totalSourceBudgetBytes": 4880000,
     "fileBudgets": {
       "gas-backend/Scripts_Core_Runtime.html": 360000,
       "github-pages/partials/Scripts_Core_Runtime.html": 360000,
@@ -948,8 +948,9 @@
       "gas-backend/Code_32_Domain_Budget.gs": 228000,
       "gas-backend/Scripts_Page_Budget.html": 160000,
       "github-pages/partials/Scripts_Page_Budget.html": 160100,
-      "gas-backend/Index.html": 269500,
-      "github-pages/critical-login-runtime.js": 87000
+      "gas-backend/Index.html": 274500,
+      "github-pages/critical-login-runtime.js": 87000,
+      "github-pages/index.html": 197500
     },
     "dynamicGeneratedExcluded": [
       "github-pages/vercel-env.generated.js"
@@ -980,6 +981,47 @@
     "currentMirrorBudgetPageBytes": 159480,
     "maxBackendBudgetPageBytes": 160000,
     "maxMirrorBudgetPageBytes": 160100,
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "businessLogicChanged": false
+  },
+  "allSystemsUiModernizationLedger": {
+    "stamp": "production-current-all-systems-ui-modern-2026-07-06-r1",
+    "purpose": "ปรับ UX/UI ของทุกระบบด้วย global presentation owner เดียวใน Index.html โดยไม่เปลี่ยน API, route, schema, read/write path หรือ business logic",
+    "source": [
+      "gas-backend/Index.html",
+      "github-pages/index.html"
+    ],
+    "owner": "app-global-ui-modern-current",
+    "affectedSurfaces": [
+      "dashboard",
+      "search cases",
+      "tracking letters",
+      "reports",
+      "petitioners",
+      "case management",
+      "committee meeting",
+      "personnel",
+      "budget",
+      "admin",
+      "sidebar",
+      "mobile topbar"
+    ],
+    "enhancements": [
+      "modern global background",
+      "modern sidebar navigation",
+      "unified page title surfaces",
+      "card/table polish",
+      "sticky table headers",
+      "modern tab pills",
+      "button hover elevation",
+      "mobile responsive spacing"
+    ],
+    "maxGasIndexBytes": 274500,
+    "maxStaticIndexBytes": 197500,
     "noApiContractChange": true,
     "noNewFiles": true,
     "noDeletedFiles": true,
