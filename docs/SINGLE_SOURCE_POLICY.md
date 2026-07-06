@@ -1,8 +1,8 @@
-# Phase N single-source, proxy-only, and size-gate policy
+# Production current single-source, proxy-only, and size-gate policy
 
 Editable canonical source is `gas-backend/`.
 
-Current release: `commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1`.
+Current release: `commission-v1.2-production-current-contract-freeze-2026-07-06-r1`.
 
 ## Canonical source rules
 
@@ -14,7 +14,7 @@ Current release: `commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1`.
 6. Keep one dashboard budget owner: `BudgetDomain` hydrates budget after dashboard first paint.
 7. Do not add APIs to work around slow pages. Optimize the existing route owner, cache, projection, and page hydration path instead.
 
-## Phase N transport policy
+## Production current transport policy
 
 The browser transport is **Vercel proxy-only**.
 
@@ -33,7 +33,7 @@ Forbidden legacy browser transports:
 - assumed bridge-ready fallback
 - direct `google.script.run` from GitHub Pages
 
-Backend compatibility endpoint `apiGithubBridgeCall` may remain temporarily for old deployments, but Phase N frontend code must not call it.
+Backend compatibility endpoint `apiGithubBridgeCall` may remain temporarily for old deployments, but Production current frontend code must not call it.
 
 ## Release gate commands
 
@@ -57,7 +57,7 @@ npm run build
 
 The current production hardening policy is a no-business-logic-change cleanup step. It does not add files, routes, APIs, or UI behavior. It only:
 
-1. aligns this policy document with the actual Phase N proxy-only runtime,
+1. aligns this policy document with the actual Production current proxy-only runtime,
 2. prevents legacy transport drift,
 3. prevents generated mirror drift,
 4. prevents write-schema drift, and

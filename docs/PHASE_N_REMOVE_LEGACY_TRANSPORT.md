@@ -1,8 +1,8 @@
-# Phase N — Remove legacy transport
+# Production current — Remove legacy transport
 
-Phase N makes the Vercel browser runtime proxy-only. The frontend no longer contains the legacy browser transports that previously caused timeout and callback issues.
+Production current makes the Vercel browser runtime proxy-only. The frontend no longer contains the legacy browser transports that previously caused timeout and callback issues.
 
-## Browser transport after Phase N
+## Browser transport after Production current
 
 - Login: `POST /api/login` → GAS `doPost` → `apiLogin`
 - Read/write: `POST /api/gas` → GAS `doPost` → `apiRouter(method, payload)`
@@ -27,4 +27,4 @@ python3 tools/sync_frontend_partials.py --check
 python3 tools/phaseN_legacy_transport_gate.py
 ```
 
-The gate fails if legacy browser transport functions return to `github-pages/github-gas-transport.js`, if release stamps drift, if generated mirrors drift, or if the Phase G/Phase I/Phase K safeguards are rolled back.
+The gate fails if legacy browser transport functions return to `github-pages/github-gas-transport.js`, if release stamps drift, if generated mirrors drift, or if the security/cache gate/single-source contract cleanup/write-schema unification safeguards are rolled back.
