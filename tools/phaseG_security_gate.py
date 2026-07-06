@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase G security gate for GitHub Pages ↔ GAS transport.
+"""security/cache gate security gate for GitHub Pages ↔ GAS transport.
 Fails if fast-login JSONP can still issue sessions or authenticated bridge reads can proceed from assumed iframe readiness.
 """
 from pathlib import Path
@@ -39,18 +39,18 @@ ok("fastLoginJsonp enforced false", "root.APP_CONFIG.fastLoginJsonp=!1" in compa
 ok("requireBridgeReadyMessage true", literal_true(app, "requireBridgeReadyMessage"), "bridge ready message must be required")
 ok("allowAssumedBridgeReady false", literal_false(app, "allowAssumedBridgeReady"), "assumed bridge readiness must be disabled")
 ok("bridgeLoadGraceMs zero", re.search(r"\bbridgeLoadGraceMs\s*[:=]\s*0\b", app) is not None, "iframe load grace must not mark bridge ready")
-ok("transport has no fast-login JSONP path", "__githubFastLogin=1" not in tr and "function runFastLoginJsonp" not in tr, "fast-login JSONP path must be removed in Phase N")
+ok("transport has no fast-login JSONP path", "__githubFastLogin=1" not in tr and "function runFastLoginJsonp" not in tr, "fast-login JSONP path must be removed in Production current")
 ok("transport never calls __githubFastLogin", "__githubFastLogin=1" not in tr, "frontend must not create fast-login JSONP script URL")
 ok("transport never assumes ready", "assumedReady=!0" not in compact(tr), "transport must not set bridgeClient.assumedReady=true")
-ok("legacy hidden bridge removed from Vercel transport", "GAS_IFRAME_TRANSPORT_READY" not in tr and "GAS_IFRAME_TRANSPORT_REQUEST" not in tr, "Phase N transport should not use browser bridge messages")
+ok("legacy hidden bridge removed from Vercel transport", "GAS_IFRAME_TRANSPORT_READY" not in tr and "GAS_IFRAME_TRANSPORT_REQUEST" not in tr, "Production current transport should not use browser bridge messages")
 fast_region = ""
 start = be.find("function _githubFastLoginIssueSession_")
 end = be.find("function doGet", start)
 if start >= 0 and end > start:
     fast_region = be[start:end]
 ok("backend fast-login endpoint disabled", "FAST_LOGIN_JSONP_DISABLED" in fast_region and "_issueLoginSession_" not in fast_region, "fast-login endpoint must not issue session")
-ok("public config exposes Phase G", "phaseGSecurityHardening:!0" in compact(be) and "fastLoginJsonp:!1" in compact(be), "GAS public config should show security state")
-ok("old Phase F stamp removed", "phaseF-techdebt-single-source-gate-2026-07-02-r1" not in (app + tr + be), "old release stamp must not remain in changed files")
+ok("public config exposes security/cache gate", "securityHardening:!0" in compact(be) and "fastLoginJsonp:!1" in compact(be), "GAS public config should show security state")
+ok("old dashboard read-model gate stamp removed", "phaseF-techdebt-single-source-gate-2026-07-02-r1" not in (app + tr + be), "old release stamp must not remain in changed files")
 
 report = {"ok": not errors, "checks": checks, "errors": errors}
 print(json.dumps(report, ensure_ascii=False, indent=2))
