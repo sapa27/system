@@ -4,7 +4,7 @@
   "release": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
   "releaseStamp": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
   "assetStamp": "asset-manifest-commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
-  "updatedAt": "2026-07-06T10:35:00+07:00",
+  "updatedAt": "2026-07-06T00:00:00+07:00",
   "releaseGate": "tools/phaseN_legacy_transport_gate.py",
   "transportMode": "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
   "singleSourcePolicy": "docs/SINGLE_SOURCE_POLICY.md",
@@ -945,12 +945,12 @@
     "stamp": "production-current-size-regression-guard-2026-07-06-r1",
     "purpose": "ล็อก size budget หลังการยุบ runtime/domain และหลังปรับ UX/UI ทุกระบบ เพื่อกันไฟล์ใหญ่กลับใน build gate เดิม",
     "guardedBy": "tools/phaseN_legacy_transport_gate.py",
-    "totalSourceBudgetBytes": 4883500,
+    "totalSourceBudgetBytes": 4890000,
     "fileBudgets": {
       "gas-backend/Scripts_Core_Runtime.html": 360000,
       "github-pages/partials/Scripts_Core_Runtime.html": 360000,
-      "gas-backend/Scripts_Page_Meeting.html": 243000,
-      "github-pages/partials/Scripts_Page_Meeting.html": 243100,
+      "gas-backend/Scripts_Page_Meeting.html": 245000,
+      "github-pages/partials/Scripts_Page_Meeting.html": 245100,
       "gas-backend/Code_30_Domain_Cases.gs": 327000,
       "gas-backend/Code_32_Domain_Budget.gs": 228000,
       "gas-backend/Scripts_Page_Budget.html": 160000,
@@ -1117,7 +1117,37 @@
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
     "businessLogicChanged": false,
-    "sizeRegressionBudgetBytes": 4883500,
+    "sizeRegressionBudgetBytes": 4890000,
     "reason": "accept mixed Thai/English receive numbers while retaining size regression guard"
+  },
+  "meetingAgendaAddRuntimeFixLedger": {
+    "stamp": "production-current-meeting-agenda-add-runtime-fix-2026-07-06-r1",
+    "task": "committee-meeting-agenda-add-direct-fallback",
+    "source": "gas-backend/Scripts_Page_Meeting.html",
+    "generatedMirror": "github-pages/partials/Scripts_Page_Meeting.html",
+    "symptom": "การประชุมคณะกรรมาธิการ > ฟอร์ม > ระเบียบวาระ 2/3/4 เปิดได้แล้วแต่ปุ่มเพิ่มรายการไม่เพิ่มแถวเมื่อ delegated event ไม่ทำงานหลังโหลด partial",
+    "fix": "เพิ่ม direct click fallback ให้ปุ่ม data-agenda-add, normalize agenda number, เปิด accordion pane อัตโนมัติก่อนเพิ่มแถว, และ enhance แถวใหม่ด้วย AppUi",
+    "maxBackendMeetingBytes": 245000,
+    "maxMirrorMeetingBytes": 245100,
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "businessLogicChanged": false
+  },
+  "caseReceiveNoAlphanumericDisplayFixLedger": {
+    "stamp": "production-current-case-receive-no-alphanumeric-display-fix-2026-07-06-r1",
+    "owner": "case-receive-no-display-current",
+    "examples": [
+      "กมธ. 1/2569",
+      "ABC 1/2569"
+    ],
+    "noApiContractChange": true,
+    "noNewApiRoutes": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewPhaseAdded": true,
+    "businessLogicChanged": false
   }
 }
