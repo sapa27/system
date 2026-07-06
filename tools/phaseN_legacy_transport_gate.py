@@ -238,7 +238,7 @@ def iter_scoped_source_files():
     for p in ROOT.rglob('*'):
         if is_scoped_source_file(p):
             yield p
-REQUIRED = ["vercel.json","package.json",".env.example","api/_gasProxyCommon.js","api/gas.js","api/login.js","api/public-config.js","github-pages/vercel-env.generated.js","tools/generate_vercel_env.py","tools/sync_frontend_partials.py","tools/phaseG_security_gate.py","tools/phaseN_legacy_transport_gate.py","docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.md","docs/SINGLE_SOURCE_POLICY.md","TECH_DEBT_MANIFEST.json"]
+REQUIRED = ["vercel.json","package.json",".env.example","api/_gasProxyCommon.js","api/gas.js","api/login.js","api/public-config.js","github-pages/vercel-env.generated.js","tools/generate_vercel_env.py","tools/phaseG_security_gate.py","tools/phaseN_legacy_transport_gate.py","docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.md","docs/SINGLE_SOURCE_POLICY.md","TECH_DEBT_MANIFEST.json"]
 errors=[]; checks=[]
 def read(rel:str)->str:
     p=ROOT/rel
@@ -435,6 +435,10 @@ def main():
     ok('Vercel buildCommand under schema limit', len(vercel_build_cmd) <= 256, f"{len(vercel_build_cmd)} chars: {vercel_build_cmd}")
     ok('Vercel build delegates to package build', vercel_build_cmd == 'npm run build', vercel_build_cmd)
     ok('package build runs Production current gate', 'phaseN_legacy_transport_gate.py' in package_build_cmd and 'COMMISSION_STRICT_GATES=1' in package_build_cmd and '--strict' in package_build_cmd, package_build_cmd)
+    obsolete_tool = ''.join(['sync', '_', 'frontend', '_', 'partials', '.py'])
+    scripts_blob = json.dumps(package.get('scripts',{}), ensure_ascii=False)
+    ok('package build is decoupled from obsolete mirror-sync helper', obsolete_tool not in package_build_cmd and obsolete_tool not in scripts_blob, 'package scripts must not reference obsolete mirror-sync helper')
+    ok('obsolete mirror-sync helper absent from tools directory', not (ROOT/'tools'/obsolete_tool).exists(), 'obsolete helper must be absent; mirror drift is checked by Production current gate')
     ok('package engines pins Vercel Node 24.x', str(package.get('engines',{}).get('node','')) == '24.x', str(package.get('engines',{}).get('node','')))
     ok('proxy functions exist', all((ROOT/'api'/f).exists() for f in ['gas.js','login.js','public-config.js','_gasProxyCommon.js']), 'api proxy files')
     ok('server GAS env used by proxy', 'process.env.GAS_WEB_APP_URL' in common, 'server env')
