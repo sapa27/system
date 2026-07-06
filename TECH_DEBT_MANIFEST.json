@@ -945,12 +945,12 @@
     "stamp": "production-current-size-regression-guard-2026-07-06-r1",
     "purpose": "ล็อก size budget หลังการยุบ runtime/domain และหลังปรับ UX/UI ทุกระบบ เพื่อกันไฟล์ใหญ่กลับใน build gate เดิม",
     "guardedBy": "tools/phaseN_legacy_transport_gate.py",
-    "totalSourceBudgetBytes": 4880000,
+    "totalSourceBudgetBytes": 4883500,
     "fileBudgets": {
       "gas-backend/Scripts_Core_Runtime.html": 360000,
       "github-pages/partials/Scripts_Core_Runtime.html": 360000,
-      "gas-backend/Scripts_Page_Meeting.html": 242500,
-      "github-pages/partials/Scripts_Page_Meeting.html": 242600,
+      "gas-backend/Scripts_Page_Meeting.html": 243000,
+      "github-pages/partials/Scripts_Page_Meeting.html": 243100,
       "gas-backend/Code_30_Domain_Cases.gs": 327000,
       "gas-backend/Code_32_Domain_Budget.gs": 228000,
       "gas-backend/Scripts_Page_Budget.html": 160000,
@@ -966,7 +966,8 @@
     "noDeletedFiles": true,
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
-    "noApiContractChange": true
+    "noApiContractChange": true,
+    "phase5TotalSourceBudgetBytes": 4883500
   },
   "budgetUiModernizationLedger": {
     "stamp": "production-current-budget-ui-modern-current-2026-07-06-r1",
@@ -1034,7 +1035,8 @@
     "noDeletedFiles": true,
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
-    "businessLogicChanged": false
+    "businessLogicChanged": false,
+    "totalSourceBudgetBytes": 4883500
   },
   "vercelBuildCommandLengthLedger": {
     "owner": "vercel.json + package.json + tools/phaseN_legacy_transport_gate.py",
@@ -1081,5 +1083,41 @@
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
     "businessLogicChanged": false
+  },
+  "searchMeetingRuntimeBugfixLedger": {
+    "stamp": "production-current-search-meeting-runtime-bugfix-2026-07-06-r1",
+    "task": "search-force-fresh-and-meeting-agenda-collapse-fallback",
+    "searchFix": "manual search clears page cache and calls apiSearchCasesLite with forceFresh/noCache/bypassCache",
+    "meetingFix": "native fallback toggles agenda 2/3/4 collapse when Bootstrap collapse is unavailable",
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "businessLogicChanged": false
+  },
+  "caseReceiveNoTextLedger": {
+    "stamp": "production-current-case-receive-no-text-2026-07-06-r1",
+    "scope": [
+      "gas-backend/Code_30_Domain_Cases.gs",
+      "gas-backend/Scripts_Core_Runtime.html",
+      "gas-backend/Scripts_Page_Meeting.html",
+      "gas-backend/Scripts_Page_ReportTrack.html",
+      "gas-backend/Index.html",
+      "github-pages/index.html"
+    ],
+    "supports": [
+      "กมธ. 1/2569",
+      "ABC 1/2569",
+      "265/2569"
+    ],
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "businessLogicChanged": false,
+    "sizeRegressionBudgetBytes": 4883500,
+    "reason": "accept mixed Thai/English receive numbers while retaining size regression guard"
   }
 }
