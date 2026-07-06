@@ -317,16 +317,17 @@ key:"status",label:"สถานะ"
 ],trackState={
 filter:"all",page:1,pageSize:20,rows:[],total:0,serverPaged:!0,offset:0
 };
+function applyTrackData_(data){data=data&&"object"==typeof data?data:{};var rows=rowsFrom(data);!rows.length&&Array.isArray(data.rows)&&(rows=data.rows),trackState.rows=applyTrackFilterRows(rows,trackState.filter),trackState.page=Math.max(1,Number(data.page||trackState.page||1)||1),trackState.pageSize=Math.max(1,Number(data.limit||data.pageSize||trackState.pageSize||25)||25);var backendFiltered=normalizeTrackFilter(data.filterType||data.type||trackState.filter)===normalizeTrackFilter(trackState.filter);return trackState.total=backendFiltered&&Number(data.totalRecords||data.total||trackState.rows.length)||trackState.rows.length,trackState.serverPaged=backendFiltered&&!1!==data.serverPaged&&(trackState.total>trackState.rows.length||trackState.page>1),trackState.offset=(trackState.page-1)*trackState.pageSize,renderTrack(),trackState.rows}
+function loadTrackFallback_(payload,primary,reason){return api("apiGetAllLettersWithCaseInfo",Object.assign({},payload||{},{forceFresh:!0,noCache:!0,bypassCache:!0,source:"track-page-letters-canonical-fallback-current",fallbackFrom:"apiGetTracking",fallbackReason:String(reason||"empty")})).then(function(res){var data=unwrap(res),rows=rowsFrom(data);return rows.length?(data.filterType=data.filterType||payload.filterType||trackState.filter,data.serverPaged=data.serverPaged!==!1,data.totalRecords=Number(data.totalRecords||data.total||rows.length)||rows.length,data.total=data.totalRecords,data.meta=Object.assign({},data.meta||{},{fallbackFrom:"apiGetTracking",fallbackReason:String(reason||"empty"),owner:"ReportTrack.apiGetAllLettersWithCaseInfo.fallback"}),data):primary}).catch(function(err){return reportTrackWarn("reportTrack.trackingFallback",err,{reason:reason}),primary})}
 root.loadTrackData=function(filter,page){
 filter&&(trackState.filter=normalizeTrackFilter(filter)),trackState.page=Math.max(1,Number(page||trackState.page||1)||1),setTrackFilterButton(trackState.filter);
-var tbody=byId("track-tbody");
-return tbody&&(root.AppPageKit&&root.AppPageKit.setTableState?root.AppPageKit.setTableState(tbody,TRACK_HEADERS.length,"กำลังโหลดข้อมูลติดตามหนังสือ...","text-center text-muted p-4"):setHtml(tbody,'<tr><td colspan="'+TRACK_HEADERS.length+'" class="text-center text-muted p-4">กำลังโหลดข้อมูลติดตามหนังสือ...</td></tr>')),api("apiGetTracking",{
-filterType:trackState.filter,page:trackState.page,limit:trackState.pageSize||25,sortBy:"dueDate",sortDir:"asc",forceFresh:!1,noCache:!1,bypassCache:!1,cacheTtlSeconds:180,serverPaged:!0,source:"track-page-status-filter-cache-first-current"
-}).then(function(res){
+var tbody=byId("track-tbody"),trackPayload={filterType:trackState.filter,page:trackState.page,limit:trackState.pageSize||25,sortBy:"dueDate",sortDir:"asc",forceFresh:!1,noCache:!1,bypassCache:!1,cacheTtlSeconds:180,serverPaged:!0,source:"track-page-status-filter-cache-first-current"};
+return tbody&&(root.AppPageKit&&root.AppPageKit.setTableState?root.AppPageKit.setTableState(tbody,TRACK_HEADERS.length,"กำลังโหลดข้อมูลติดตามหนังสือ...","text-center text-muted p-4"):setHtml(tbody,'<tr><td colspan="'+TRACK_HEADERS.length+'" class="text-center text-muted p-4">กำลังโหลดข้อมูลติดตามหนังสือ...</td></tr>')),api("apiGetTracking",trackPayload).then(function(res){
 var data=unwrap(res),rows=rowsFrom(data);
-!rows.length&&Array.isArray(data.rows)&&(rows=data.rows),trackState.rows=applyTrackFilterRows(rows,trackState.filter),trackState.page=Math.max(1,Number(data.page||trackState.page||1)||1),trackState.pageSize=Math.max(1,Number(data.limit||data.pageSize||trackState.pageSize||25)||25);
-var backendFiltered=normalizeTrackFilter(data.filterType||data.type||trackState.filter)===normalizeTrackFilter(trackState.filter);
-return trackState.total=backendFiltered&&Number(data.totalRecords||data.total||trackState.rows.length)||trackState.rows.length,trackState.serverPaged=backendFiltered&&!1!==data.serverPaged&&(trackState.total>trackState.rows.length||trackState.page>1),trackState.offset=(trackState.page-1)*trackState.pageSize,renderTrack(),trackState.rows
+return rows.length?data:loadTrackFallback_(trackPayload,data,"empty-primary")
+}).catch(function(primaryErr){
+return loadTrackFallback_(trackPayload,{rows:[],totalRecords:0,total:0,page:trackState.page,limit:trackState.pageSize||25,filterType:trackState.filter,serverPaged:!1},"primary-error").then(function(data){var rows=rowsFrom(data);if(rows.length)return data;throw primaryErr})
+}).then(function(data){return applyTrackData_(data)
 }).catch(function(err){
 return tbody&&(root.AppPageKit&&root.AppPageKit.setTableState?root.AppPageKit.setTableState(tbody,TRACK_HEADERS.length,"โหลดข้อมูลติดตามหนังสือไม่สำเร็จ","text-center text-danger p-4"):setHtml(tbody,'<tr><td colspan="'+TRACK_HEADERS.length+'" class="text-center text-danger p-4">โหลดข้อมูลติดตามหนังสือไม่สำเร็จ</td></tr>')),notify("โหลดข้อมูลติดตามหนังสือไม่สำเร็จ",String(err&&err.message||err),"error"),[]
 })
@@ -453,6 +454,8 @@ return root.loadTrackData()
 return root.trackChangePage(attr(ctx,"data-page")||1)
 },exportToExcel:function(ctx){
 return root.exportToExcel(ctx)
+},printTrack:function(){
+return root.printTrack()
 }
 }),__appIsFn(root.AppPages.register)&&root.AppPages.register("track",{
 activate:function(){
@@ -474,9 +477,9 @@ typeof __appObserve==="function"&&__appObserve(_localPagerClick,"c6.SPR:565")
 var btn=ev.target&&ev.target.closest?ev.target.closest("#p-search [data-action],#p-report [data-action],#p-track [data-action]"):null;
 if(btn){
 var action=btn.getAttribute("data-action")||"",id=btn.getAttribute("data-case-id")||"",page=btn.getAttribute("data-page")||1;
-if(/^(searchChangePage|reportChangePage|trackChangePage|filterTrack|searchShowCase|searchEditCase|searchDeleteCase|exportToExcel|searchAll|loadReportData)$/.test(action))return(root.AppEvents&&__appIsFn(root.AppEvents.consume)?root.AppEvents.consume(ev,{key:"reportTrack.actions"}):(ev.preventDefault(),ev.stopPropagation())),"searchAll"===action?root.searchAll(1):"loadReportData"===action?root.loadReportData(1):"filterTrack"===action?root.filterTrack({
+if(/^(searchChangePage|reportChangePage|trackChangePage|filterTrack|printTrack|searchShowCase|searchEditCase|searchDeleteCase|exportToExcel|searchAll|loadReportData)$/.test(action))return(root.AppEvents&&__appIsFn(root.AppEvents.consume)?root.AppEvents.consume(ev,{key:"reportTrack.actions"}):(ev.preventDefault(),ev.stopPropagation())),"searchAll"===action?root.searchAll(1):"loadReportData"===action?root.loadReportData(1):"filterTrack"===action?root.filterTrack({
 target:btn
-}):"searchChangePage"===action?root.searchChangePage(page):"reportChangePage"===action?root.reportChangePage(page):"trackChangePage"===action?root.trackChangePage(page):"searchShowCase"===action?root.searchShowCase(id):"searchEditCase"===action?!!root.searchEditCase&&root.searchEditCase(id):"searchDeleteCase"===action?root.searchDeleteCase(id):"exportToExcel"===action?root.exportToExcel({
+}):"printTrack"===action?root.printTrack():"searchChangePage"===action?root.searchChangePage(page):"reportChangePage"===action?root.reportChangePage(page):"trackChangePage"===action?root.trackChangePage(page):"searchShowCase"===action?root.searchShowCase(id):"searchEditCase"===action?!!root.searchEditCase&&root.searchEditCase(id):"searchDeleteCase"===action?root.searchDeleteCase(id):"exportToExcel"===action?root.exportToExcel({
 target:btn
 }):void 0
 }
@@ -487,7 +490,7 @@ if(sel){
 var host=sel.closest("[data-report-local-pager]"),act=host&&host.getAttribute("data-report-local-pager")||"",n=Number(sel.value||20)||20;
 if("searchChangePage"===act)return searchState.pageSize=n,root.searchChangePage(1);
 if("reportChangePage"===act)return reportState.pageSize=n,root.reportChangePage(1);
-if("trackingChangePage"===act)return trackingState.pageSize=n,root.trackingChangePage(1)
+if("trackingChangePage"===act)return trackState.pageSize=n,root.trackingChangePage(1)
 }
 }
 catch(_localPagerChange){
