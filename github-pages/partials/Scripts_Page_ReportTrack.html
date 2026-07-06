@@ -1,3 +1,4 @@
+<!-- GENERATED MIRROR: edit gas-backend canonical; static mirror checked by tools/phaseN_legacy_transport_gate.py -->
 <script>
 !function(root){
 "use strict";
@@ -678,7 +679,9 @@ if(decimal)return decimal[1];
 var slash=raw.match(/^(\d+)\s*\/\s*((?:19|20|25)?\d{2})$/);
 if(slash)return slash[1]+"/"+slash[2];
 var dash=raw.match(/^(\d+)\s*[\-–—]\s*((?:19|20|25)?\d{2})$/);
-return dash?dash[1]+"/"+dash[2]:""
+if(dash)return dash[1]+"/"+dash[2];
+var text=raw.replace(/\s*\/\s*/g,"/").replace(/\s+/g," ").trim();
+return /\d/.test(text)?text:""
 }
 function pickManualNumber(row,keys){
 row=obj(row);
