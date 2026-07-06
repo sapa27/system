@@ -1,12 +1,12 @@
 {
-  "phase": "N",
+  "releaseTrack": "production-current",
   "ledgerModel": "production-current-single-ledger",
-  "release": "commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1",
-  "releaseStamp": "commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1",
-  "assetStamp": "asset-manifest-commission-v1.1-phaseN-remove-legacy-transport-2026-07-02-r1",
-  "updatedAt": "2026-07-05T19:45:00+07:00",
+  "release": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
+  "releaseStamp": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
+  "assetStamp": "asset-manifest-commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
+  "updatedAt": "2026-07-06T10:35:00+07:00",
   "releaseGate": "tools/phaseN_legacy_transport_gate.py",
-  "transportMode": "phaseN-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
+  "transportMode": "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
   "singleSourcePolicy": "docs/SINGLE_SOURCE_POLICY.md",
   "canonicalFrontendSource": "gas-backend/Scripts_*.html",
   "generatedMirror": "github-pages/partials/Scripts_*.html",
@@ -20,14 +20,32 @@
     "routeNamesChanged": false,
     "singleDoGet": true,
     "singleDoPost": true,
-    "singleBridgeCall": true
+    "singleBridgeCall": true,
+    "frozen": true,
+    "contractFreezeStamp": "production-contract-freeze-current-2026-07-06",
+    "routeCount": 108,
+    "activeRouteCount": 108,
+    "apiMethodCount": 108,
+    "publicRouteCount": 7,
+    "vercelApiFiles": [
+      "_gasProxyCommon.js",
+      "gas.js",
+      "login.js",
+      "public-config.js"
+    ],
+    "frontendProxyEndpoints": [
+      "/api/gas",
+      "/api/login",
+      "/api/public-config"
+    ],
+    "noAdditionalVercelApiFiles": true
   },
   "apiContractOwner": "gas-backend/Code_20_Router.gs::_apiRouteRegistry_",
   "writeSchemaOwner": "Code_20_Router.WRITE_SCHEMA_BY_METHOD",
   "writeRouteCount": 27,
   "writeSchemaCount": 27,
   "transportLedger": {
-    "mode": "phaseN-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
+    "mode": "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
     "vercelApiProxyOnly": true,
     "forbiddenPageScriptCalls": [
       "AppApi.call",
@@ -45,7 +63,7 @@
     "Utils.apiRunner",
     "google.script.run"
   ],
-  "phaseNLegacyTransportRemoved": true,
+  "legacyTransportRemoved": true,
   "legacyJsonpTransportRemoved": true,
   "legacyGasBridgeTransportRemoved": true,
   "legacyLoginPostIframeRemoved": true,
@@ -67,44 +85,44 @@
   },
   "sizeLedger": {
     "fileCount": 54,
-    "sourceBytes": 4839731,
+    "sourceBytes": 4862791,
     "manifestBeforeBytes": 17388,
     "knownLargestFiles": [
       {
         "path": "github-pages/partials/Scripts_Core_Runtime.html",
-        "bytes": 366648
+        "bytes": 359524
       },
       {
         "path": "gas-backend/Scripts_Core_Runtime.html",
-        "bytes": 366554
+        "bytes": 359430
       },
       {
         "path": "gas-backend/Code_30_Domain_Cases.gs",
-        "bytes": 332770
+        "bytes": 326356
       },
       {
         "path": "gas-backend/Index.html",
-        "bytes": 268987
+        "bytes": 268955
       },
       {
         "path": "github-pages/partials/Scripts_Page_Meeting.html",
-        "bytes": 247376
+        "bytes": 242205
       },
       {
         "path": "gas-backend/Scripts_Page_Meeting.html",
-        "bytes": 247282
+        "bytes": 242111
       },
       {
         "path": "gas-backend/Code_32_Domain_Budget.gs",
-        "bytes": 233225
+        "bytes": 227209
       },
       {
         "path": "gas-backend/Code_00_PlatformCore.gs",
-        "bytes": 225670
+        "bytes": 225635
       },
       {
         "path": "github-pages/index.html",
-        "bytes": 191893
+        "bytes": 191933
       },
       {
         "path": "github-pages/partials/Scripts_Page_People.html",
@@ -116,7 +134,11 @@
       },
       {
         "path": "github-pages/partials/Scripts_Page_Budget.html",
-        "bytes": 152135
+        "bytes": 159480
+      },
+      {
+        "path": "gas-backend/Scripts_Page_Budget.html",
+        "bytes": 159386
       }
     ],
     "nextSlimmingTargets": [
@@ -126,11 +148,11 @@
       "gas-backend/Code_32_Domain_Budget.gs",
       "TECH_DEBT_MANIFEST.json"
     ],
-    "manifestAfterBytes": 14096,
+    "manifestAfterBytes": 38013,
     "manifestReducedBytes": 10189,
     "task2RemovedGateWrapperFiles": 7,
     "task2BuildCommandDeduplicated": true,
-    "sourceFileCount": 53,
+    "sourceFileCount": 52,
     "task2RemainingToolFiles": 4,
     "task3RuntimeSlimmingCompleted": true,
     "task3NoNewApiRoutes": true,
@@ -175,9 +197,51 @@
     "task6BudgetPhysicalLedgerCompacted": true,
     "task6BudgetAliasArrayOwnerConstants": 25,
     "task6NetSourceReducedBytesFromTask5": 1234,
-    "phase5TotalSourceBytes": 4840287,
+    "phase5TotalSourceBytes": 4843445,
     "dashboardPageBytes": 110834,
-    "dashboardPartialBytes": 110928
+    "dashboardPartialBytes": 110928,
+    "phase5TotalSourceBudgetBytes": 4865000,
+    "criticalLoginRuntimeBudgetBytes": 87000,
+    "criticalLoginRuntimeBytesAfterStep5": 85893,
+    "meetingPageSlimmingCompleted": true,
+    "meetingPageNoNewApiRoutes": true,
+    "meetingPageNoNewFiles": true,
+    "meetingPageNoDeletedFiles": true,
+    "meetingPageUiUxPreserved": true,
+    "meetingPageBusinessLogicChanged": false,
+    "meetingPageBeforeBytesFromCoreRuntimeSlim": 247282,
+    "meetingPageAfterBytes": 242111,
+    "meetingPageReducedBytesFromCoreRuntimeSlim": 5171,
+    "meetingPageMirrorAfterBytes": 242205,
+    "meetingPageMirrorReducedBytesFromCoreRuntimeSlim": 5171,
+    "meetingPageMaxBackendBytes": 242500,
+    "meetingPageMaxMirrorBytes": 242600,
+    "casesDomainSlimmingCompleted": true,
+    "casesDomainNoNewApiRoutes": true,
+    "casesDomainNoNewFiles": true,
+    "casesDomainNoDeletedFiles": true,
+    "casesDomainUiUxPreserved": true,
+    "casesDomainBusinessLogicChanged": false,
+    "casesDomainBeforeBytesFromMeetingPageSlim": 332764,
+    "casesDomainAfterBytes": 326356,
+    "casesDomainReducedBytesFromMeetingPageSlim": 6408,
+    "casesDomainMaxBackendBytes": 327000,
+    "budgetDomainSlimmingCompleted": true,
+    "budgetDomainNoNewApiRoutes": true,
+    "budgetDomainNoNewFiles": true,
+    "budgetDomainNoDeletedFiles": true,
+    "budgetDomainUiUxPreserved": true,
+    "budgetDomainBusinessLogicChanged": false,
+    "budgetDomainBeforeBytesFromCasesDomainSlim": 233225,
+    "budgetDomainAfterBytes": 227209,
+    "budgetDomainReducedBytesFromCasesDomainSlim": 6016,
+    "budgetDomainMaxBackendBytes": 228000,
+    "budgetPageUiModernizationCompleted": true,
+    "budgetPageCanonicalBudgetBytes": 160000,
+    "budgetPageMirrorBudgetBytes": 160100,
+    "sizeRegressionGuardUpdated": true,
+    "noNewFiles": true,
+    "noNewApiRoutes": true
   },
   "currentDebtTargets": [
     {
@@ -189,8 +253,8 @@
     {
       "target": "meeting-page",
       "file": "gas-backend/Scripts_Page_Meeting.html",
-      "action": "task4 completed: delete action contract delegates to one production delete owner; save paths already single per tab; continue deep render/form dedup only with UI regression tests",
-      "status": "completed-action-owner-cleanup-contract-preserved"
+      "action": "production-current meeting page slimming completed: reused one CommitteeMeetingStandalonePrint date formatter for summary detail owner and compacted generated-safe browser script layout; no API/route/schema/UI contract change",
+      "status": "completed-meeting-page-slimming-contract-preserved"
     },
     {
       "target": "cases-domain",
@@ -201,8 +265,8 @@
     {
       "target": "budget-domain",
       "file": "gas-backend/Code_32_Domain_Budget.gs",
-      "action": "task6 completed: compacted BudgetDomain physical owner ledger and consolidated repeated Budget alias arrays into Code_32 constants while keeping BudgetDomain summary/dashboard/write owners and API names unchanged",
-      "status": "completed-budget-owner-lock-cleanup-contract-preserved"
+      "action": "production-current budget domain slimming completed: consolidated repeated warning, array fallback, object assign, hasOwnProperty, amount normalization and FY normalization boilerplate into one Code_32 helper owner set; retained BudgetDomain summary/dashboard/write owners and API names",
+      "status": "completed-budget-domain-helper-owner-slimming-contract-preserved"
     }
   ],
   "buildContract": {
@@ -211,20 +275,17 @@
     "securityGateMustPass": true,
     "releaseGateMustPass": true,
     "writeSchemaContractCoveredByReleaseGate": true,
-    "legacyTransportGateMustPass": true,
-    "syncFrontendPartialsMode": "self-heal-before-gate",
-    "vercelBuildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py && npm run check:api && python3 tools/phaseG_security_gate.py && python3 tools/phaseN_legacy_transport_gate.py"
+    "syncFrontendPartialsMode": "strict-check-before-gate",
+    "vercelBuildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
+    "contractFreezeGate": "tools/phaseN_legacy_transport_gate.py",
+    "strictByDefault": true,
+    "transportGateMustPass": true
   },
   "compatibilityGateLedger": {
-    "reason": "Existing release gate validates these historical contract stamps; retained as compact compatibility records only, not new work phases.",
+    "status": "compacted-into-production-current-contract-ledger",
+    "reason": "Historical compatibility records are no longer active release metadata; active contract freeze remains in contractFreeze and productionCurrent ledgers.",
     "newPhaseAdded": false,
-    "removedDuplicateWrapperFiles": true,
-    "task3RuntimeContractBlocksPreserved": true,
-    "task4MeetingActionContractDelegated": true,
-    "task5Code30AliasArrayOwnerCleanup": true,
-    "task5Code30ContractBlocksPreserved": true,
-    "task6BudgetDomainOwnerCleanup": true,
-    "task6BudgetContractBlocksPreserved": true
+    "noApiContractChange": true
   },
   "phaseERuntimeConsolidation": {
     "stamp": "phaseE-runtime-consolidation-current",
@@ -276,24 +337,31 @@
     "securityGateOwner": "tools/phaseG_security_gate.py",
     "buildGateSequence": [
       "tools/generate_vercel_env.py",
-      "tools/sync_frontend_partials.py",
+      "tools/sync_frontend_partials.py --strict-check",
       "npm run check:api",
-      "tools/phaseG_security_gate.py",
-      "tools/phaseN_legacy_transport_gate.py"
+      "tools/phaseG_security_gate.py --strict",
+      "tools/phaseN_legacy_transport_gate.py --strict"
     ],
-    "removedCompatibilityWrappers": [
-      "tools/phaseF_release_gate.py",
-      "tools/phaseH_release_gate.py",
-      "tools/phaseI_contract_gate.py",
-      "tools/phaseJ_runtime_slimming_gate.py",
-      "tools/phaseK_write_schema_gate.py",
-      "tools/phaseL_vercel_foundation_gate.py",
-      "tools/phaseM_vercel_proxy_gate.py"
-    ],
+    "removedCompatibilityWrappers": [],
     "writeSchemaCheckedBy": "tools/phaseN_legacy_transport_gate.py",
     "noNewPhaseAdded": true,
     "noNewApiRoutes": true,
-    "noNewFiles": true
+    "noNewFiles": true,
+    "contractFreezeStamp": "production-contract-freeze-current-2026-07-06",
+    "frozenApiMethodCount": 108,
+    "frozenWriteMethodCount": 27,
+    "frozenVercelApiFiles": [
+      "_gasProxyCommon.js",
+      "gas.js",
+      "login.js",
+      "public-config.js"
+    ],
+    "retiredGateFilesRemoved": true,
+    "retiredGates": [],
+    "activeGateOwners": [
+      "tools/phaseG_security_gate.py",
+      "tools/phaseN_legacy_transport_gate.py"
+    ]
   },
   "meetingActionLedger": {
     "owner": "gas-backend/Scripts_Page_Meeting.html",
@@ -330,7 +398,16 @@
     "noNewApiRoutes": true,
     "noNewFiles": true,
     "uiUxPreserved": true,
-    "businessLogicChanged": false
+    "businessLogicChanged": false,
+    "currentBackendCasesBytesAfterHelperOwnerSlim": 326356,
+    "helperOwnerSlimmingCompleted": true,
+    "helperOwners": [
+      "_c30S_",
+      "_c30W_",
+      "_c30A_",
+      "_c30O_",
+      "_c30H_"
+    ]
   },
   "budgetDomainCleanupLedger": {
     "owner": "gas-backend/Code_32_Domain_Budget.gs",
@@ -392,14 +469,14 @@
   "vercelBuildEnvHardeningLedger": {
     "owner": "tools/generate_vercel_env.py",
     "task": "vercel-build-sanitize-stale-public-env-tokens",
-    "rootCause": "Vercel preview/project URLs or public env values can contain legacy Phase M/F release tokens; those tokens are written to vercel-env.generated.js and Phase N gate exits 1.",
-    "fix": "release/asset stamps are deterministic Phase N constants and all public env-derived values are sanitized before writing generated config; same-origin proxy defaults remain /api/gas, /api/login, /api/public-config.",
-    "forbiddenLegacyTokens": "legacy Phase M/F release tokens sanitized from public generated env values",
+    "rootCause": "Vercel preview/project URLs or public env values can contain legacy previous Vercel proxy migration/F release tokens; those tokens are written to vercel-env.generated.js and Production current gate exits 1.",
+    "fix": "release/asset stamps are deterministic Production current constants and all public env-derived values are sanitized before writing generated config; same-origin proxy defaults remain /api/gas, /api/login, /api/public-config.",
+    "forbiddenLegacyTokens": "legacy previous Vercel proxy migration/F release tokens sanitized from public generated env values",
     "apiAdded": false,
     "filesAdded": false,
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false,
-    "buildVerified": "npm run build with stale Phase M/F URL/env simulation"
+    "buildVerified": "npm run build with stale previous Vercel proxy migration/F URL/env simulation"
   },
   "vercelBuildSelfHealLedger": {
     "owner": "package.json + vercel.json",
@@ -433,34 +510,481 @@
     "owner": "tools/generate_vercel_env.py + tools/sync_frontend_partials.py",
     "task": "deterministic-vercel-build-exit1-hardening",
     "rootCause": "Vercel build command can still exit 1 when dynamic public env values or generated mirror byte drift enter the checked build path.",
-    "fix": "Generated public Vercel config is deterministic and no longer copies Vercel/public env values; sync_frontend_partials.py --check is build-safe and regenerates mirrors from gas-backend canonical source, while --strict-check remains available for local audits.",
+    "fix": "Generated public Vercel config is deterministic; strict mirror check and strict gates are now the active production build path.",
     "apiAdded": false,
     "filesAdded": false,
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false,
-    "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --check && npm run check:api && python3 tools/phaseG_security_gate.py && python3 tools/phaseN_legacy_transport_gate.py"
+    "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
+    "status": "current-strict-production-build"
   },
   "productionCurrentLedger": {
     "vercelScopedSourceGateLedger": {
       "owner": "tools/phaseN_legacy_transport_gate.py",
-      "task": "scope-phaseN-gate-to-shipped-source-only",
-      "rootCause": "Vercel build hosts can add environment artifacts such as .git, .vercel, node_modules, cache, or package-manager files; the previous Phase N gate scanned ROOT.rglob(*) so valid source could fail only on Vercel.",
-      "fix": "Phase N gate now scans only the shipped source scope: api, docs, gas-backend, github-pages, tools, and required root files; dynamic generated public env and host artifacts are excluded from size and legacy-token scans.",
+      "task": "scope-production-current-gate-to-shipped-source-only",
+      "rootCause": "Vercel build hosts can add environment artifacts such as .git, .vercel, node_modules, cache, or package-manager files; the previous Production current gate scanned ROOT.rglob(*) so valid source could fail only on Vercel.",
+      "fix": "Production current gate scans only the shipped source scope: api, docs, gas-backend, github-pages, tools, and required root files; dynamic generated public env and host artifacts are excluded from deterministic source-size gate.",
       "apiAdded": false,
       "filesAdded": false,
       "uiLayoutDomIdsChanged": false,
       "businessLogicChanged": false,
-      "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --check && npm run check:api && python3 tools/phaseG_security_gate.py && python3 tools/phaseN_legacy_transport_gate.py"
+      "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
     }
   },
   "vercelBuildUnblockLedger": {
-    "owner": "tools/phaseG_security_gate.py + tools/phaseN_legacy_transport_gate.py + package.json check:api",
-    "task": "vercel-build-host-nonblocking-gates-with-strict-local-audit",
-    "rootCause": "Vercel deployment summary still showed exit 1 without detailed stage output; local source command passed, so failure is likely build-host/environment/project-command drift. Production build now reports gate findings without blocking deploy on Vercel while strict local audit remains available.",
-    "fix": "On Vercel/CI only, Phase G/Phase N gate errors are converted to non-blocking JSON warnings; API syntax check is non-blocking only on Vercel/CI; COMMISSION_STRICT_GATES=1 or npm run audit:strict restores blocking gate behavior.",
-    "apiAdded": false,
-    "filesAdded": false,
-    "uiLayoutDomIdsChanged": false,
+    "status": "superseded-by-strict-production-current-build",
+    "strictBuildRequired": true,
+    "activeBuildContract": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+  },
+  "contractFreeze": {
+    "stamp": "production-contract-freeze-current-2026-07-06",
+    "owner": "tools/phaseN_legacy_transport_gate.py + gas-backend/Code_20_Router.gs::_apiRouteRegistry_",
+    "purpose": "Freeze current production API/transport/write-schema contract before deeper clean-code consolidation.",
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "routeCount": 108,
+    "writeRouteCount": 27,
+    "writeSchemaCount": 27,
+    "publicRouteCount": 7,
+    "frontendProxyEndpoints": [
+      "/api/gas",
+      "/api/login",
+      "/api/public-config"
+    ],
+    "vercelApiFiles": [
+      "_gasProxyCommon.js",
+      "gas.js",
+      "login.js",
+      "public-config.js"
+    ],
+    "gasEntryPoints": {
+      "doGet": 1,
+      "doPost": 1,
+      "apiGithubBridgeCallCompatibility": 1,
+      "apiGithubBridgePingCompatibility": 1
+    },
+    "transportOwner": "Vercel API proxy only; browser runtime must not add JSONP, hidden bridge, or login iframe transport.",
+    "routeRegistryOwner": "gas-backend/Code_20_Router.gs::_apiRouteRegistry_",
+    "writeSchemaOwner": "gas-backend/Code_20_Router.gs::_routerPhaseKWriteSchemaByMethod_",
+    "apiMethods": [
+      "apiLogin",
+      "apiSessionResume",
+      "apiLogout",
+      "apiSessionCheck",
+      "getDeferredInclude",
+      "apiBootstrap",
+      "apiGetRouteContract",
+      "apiGetPhase0ContractGate",
+      "apiGetPhase1Contract",
+      "apiGetPhase2Contract",
+      "apiGetClientDataContract",
+      "apiGetAppTerminology",
+      "apiGetPhase5ReleaseReadiness",
+      "apiIssueActionToken",
+      "apiSaveCase",
+      "apiDeleteCase",
+      "apiGetCases",
+      "apiGetCaseQuickSummary",
+      "apiGetCaseReportOptions",
+      "apiGetCaseContext",
+      "apiGetCanonicalCaseBundle",
+      "apiGetPhase4QaGate",
+      "apiSearchCasesLite",
+      "apiGetCaseReportExportRows",
+      "apiGetPetitioners",
+      "apiGetPetitionerRelatedCounts",
+      "apiSavePetitioner",
+      "apiDeletePetitioner",
+      "apiGetPersonnelComms",
+      "apiGetPersonnelOps",
+      "apiGetPersonnelStaffs",
+      "apiGetPersonnelSubcommittees",
+      "apiGetPersonnelDirectoryBundle",
+      "apiGetPeoplePageBundle",
+      "apiGetSalarySettings",
+      "apiSavePersonnelComm",
+      "apiSavePersonnelOp",
+      "apiSavePersonnelStaff",
+      "apiSavePersonnelSubcommittee",
+      "apiDeletePersonnelComm",
+      "apiDeletePersonnelOp",
+      "apiDeletePersonnelStaff",
+      "apiDeletePersonnelSubcommittee",
+      "apiGetMeetingLookupOptions",
+      "apiGetMeetingHistory",
+      "apiListCommitteeMeetings",
+      "apiGetCommitteeMeetingSystem",
+      "apiGetCommitteeMeetingSystemSpec",
+      "apiSearchMeetingAgendaCases",
+      "apiGetCommitteeMeetingPrintBundle",
+      "apiSaveCommitteeMeetingSystem",
+      "apiDeleteCommitteeMeetingSystem",
+      "apiSaveSalarySettings",
+      "apiSaveMeetingLog",
+      "apiDeleteMeetingLog",
+      "apiGetLetters",
+      "apiGetAllLettersWithCaseInfo",
+      "apiSaveLetter",
+      "apiDeleteLetter",
+      "apiAuditMeetingData",
+      "apiExportMeetingDuplicateAuditCsv",
+      "apiCleanupMeetingData",
+      "apiGetTracking",
+      "apiBudgetListByFY",
+      "apiBudgetListByFYFast",
+      "apiBudgetGetSummary",
+      "apiBudgetGetFiscalYears",
+      "apiBudgetGetSubcommitteeOptions",
+      "apiBudgetGetImportForEdit",
+      "apiBudgetGetTypeSummaryByFY",
+      "apiBudgetSaveImport",
+      "apiBudgetDeleteImport",
+      "apiGetDashboardBundle",
+      "apiGetThailandLocations",
+      "apiSearchLookup",
+      "apiSearch",
+      "apiAdminListUsers",
+      "apiAdminSaveUser",
+      "apiAdminDeleteUser",
+      "apiAdminListSubcommittees",
+      "apiAdminSaveSubcommittee",
+      "apiAdminDeleteSubcommittee",
+      "apiBudgetAdminListYearSettingsAll",
+      "apiBudgetAdminSaveYearSettingsRows",
+      "apiAiAssistantAsk",
+      "apiAiAssistantStartJob",
+      "apiAiAssistantGetJob",
+      "apiAiAssistantSummarizeCase",
+      "apiSuggestCaseStatus",
+      "apiSuggestCaseClassification",
+      "apiSemanticSearch",
+      "apiMeetingSmartSummary",
+      "apiDraftReplyLetter",
+      "apiExtractTrackingPdf",
+      "apiExtractDocumentPdf",
+      "apiGenerateExecutiveSummary",
+      "apiPredictOverdueRisk",
+      "apiPredictiveBudgeting",
+      "apiAnalyzePersonnelWorkload",
+      "apiAnalyzeWorkloadBottlenecks",
+      "apiRecommendWorkloadDistribution",
+      "apiCheckDuplicateCase",
+      "apiDetectBudgetAnomalies",
+      "apiGetDailyBriefing",
+      "apiGenerateBudgetTrendSummary",
+      "apiAiDashboardInsights",
+      "apiExtractMeetingAgendaPdf",
+      "apiChat"
+    ],
+    "writeMethods": [
+      "apiAdminDeleteSubcommittee",
+      "apiAdminDeleteUser",
+      "apiAdminSaveSubcommittee",
+      "apiAdminSaveUser",
+      "apiBudgetAdminSaveYearSettingsRows",
+      "apiBudgetDeleteImport",
+      "apiBudgetSaveImport",
+      "apiCleanupMeetingData",
+      "apiDeleteCase",
+      "apiDeleteCommitteeMeetingSystem",
+      "apiDeleteLetter",
+      "apiDeleteMeetingLog",
+      "apiDeletePersonnelComm",
+      "apiDeletePersonnelOp",
+      "apiDeletePersonnelStaff",
+      "apiDeletePersonnelSubcommittee",
+      "apiDeletePetitioner",
+      "apiSaveCase",
+      "apiSaveCommitteeMeetingSystem",
+      "apiSaveLetter",
+      "apiSaveMeetingLog",
+      "apiSavePersonnelComm",
+      "apiSavePersonnelOp",
+      "apiSavePersonnelStaff",
+      "apiSavePersonnelSubcommittee",
+      "apiSavePetitioner",
+      "apiSaveSalarySettings"
+    ],
+    "publicMethods": [
+      "apiGetPhase0ContractGate",
+      "apiGetPhase1Contract",
+      "apiGetPhase2Contract",
+      "apiGetRouteContract",
+      "apiLogin",
+      "apiSessionCheck",
+      "apiSessionResume"
+    ]
+  },
+  "version": "1.2.0-production-current",
+  "releaseAlignment": {
+    "enabled": true,
+    "packageVersion": "1.2.0-production-current",
+    "releaseStamp": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
+    "assetStamp": "asset-manifest-commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
+    "appliesTo": [
+      "package.json",
+      "TECH_DEBT_MANIFEST.json",
+      "tools/generate_vercel_env.py",
+      "tools/phaseN_legacy_transport_gate.py",
+      "api/_gasProxyCommon.js",
+      "github-pages/app-config.js",
+      "github-pages/vercel-env.generated.js",
+      "github-pages/index.html",
+      "github-pages/diagnostic.html",
+      "vercel.json"
+    ],
+    "noApiContractChange": true,
+    "contractFreezeStamp": "production-contract-freeze-current-2026-07-06"
+  },
+  "metadataCleanupLedger": {
+    "stamp": "production-current-metadata-cleanup-2026-07-06-r1",
+    "purpose": "Remove stale release/gate metadata references without changing API, routes, write schema, files, or business behavior.",
+    "removedStaleGateReferences": "obsolete standalone F/H/I/J/K/L/M gate file pointers removed from active metadata",
+    "activeGateOwner": "tools/phaseN_legacy_transport_gate.py",
+    "releaseTrack": "production-current",
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noNewPhaseAdded": true
+  },
+  "criticalRuntimeDuplicationCleanupLedger": {
+    "stamp": "production-current-critical-runtime-single-owner-2026-07-06-r1",
+    "purpose": "Prevent Vercel static frontend from loading both critical-login-runtime.js and Scripts_Critical_Login_Runtime as an upfront/deferred partial.",
+    "staticFrontendCriticalOwner": "github-pages/critical-login-runtime.js generated from gas-backend/Scripts_Critical_Login_Runtime.html",
+    "gasDirectCriticalOwner": "gas-backend/Scripts_Critical_Login_Runtime.html via includeProductionBundle_(appCritical)",
+    "vercelStaticAppCriticalBundleFiles": [],
+    "vercelStaticUpfrontScripts": [],
+    "gasAssetManifestUpfrontScripts": [],
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "generatedBy": "tools/sync_frontend_partials.py::critical_static_runtime",
+    "staticRuntimeBytesAfterStep5": 85893,
+    "previousStaticRuntimeBytesBeforeStep5": 94799
+  },
+  "criticalRuntimeGeneratedSourceLedger": {
+    "stamp": "production-current-critical-runtime-generated-source-2026-07-06-r1",
+    "purpose": "Remove hand-maintained duplicate static critical login runtime by generating github-pages/critical-login-runtime.js from the GAS canonical critical runtime plus a tiny Vercel async core loader tail.",
+    "canonicalSource": "gas-backend/Scripts_Critical_Login_Runtime.html",
+    "generatedStaticTarget": "github-pages/critical-login-runtime.js",
+    "syncOwner": "tools/sync_frontend_partials.py",
+    "strictGateOwner": "tools/phaseN_legacy_transport_gate.py",
+    "previousStaticCriticalRuntimeBytes": 94799,
+    "currentStaticCriticalRuntimeBytes": 85893,
+    "bytesReduced": 8906,
+    "maxStaticCriticalRuntimeBytes": 87000,
+    "keepsVercelStaticSingleOwner": true,
+    "keepsGasDirectInlineOwner": true,
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true
+  },
+  "coreRuntimeSlimmingLedger": {
+    "stamp": "production-current-core-runtime-facade-slim-2026-07-06-r1",
+    "purpose": "Slim Scripts_Core_Runtime browser contract/diagnostic facade while keeping runtime API, AppPageController, AppPerformanceGate, print/table/page owners, API contract and UI/UX behavior intact.",
+    "source": "gas-backend/Scripts_Core_Runtime.html",
+    "generatedMirror": "github-pages/partials/Scripts_Core_Runtime.html",
+    "slimmedScriptId": "app-production-runtime-contract-lock",
+    "previousBackendCoreRuntimeBytes": 366548,
+    "targetBackendCoreRuntimeBytes": 360000,
+    "keptPublicOwners": [
+      "AppContractGate",
+      "AppProductionContract",
+      "AppPerformanceGate",
+      "AppPageController",
+      "AppLiveSmoke",
+      "AppProductionVerification",
+      "AppPhase5RuntimeTelemetry"
+    ],
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "currentBackendCoreRuntimeBytes": 359430,
+    "currentMirrorCoreRuntimeBytes": 359524,
+    "bytesReducedFromStep5": 7118,
+    "maxBackendCoreRuntimeBytes": 360000,
+    "maxMirrorCoreRuntimeBytes": 360000,
+    "slimmedSecondaryScripts": [
+      "app-safe-html-lockdown-current",
+      "app-observability-owner-current",
+      "app-official-table-format-standard-current7",
+      "appconfig-config-driven-ui-current"
+    ]
+  },
+  "meetingPageSlimmingLedger": {
+    "stamp": "production-current-meeting-page-slim-2026-07-06-r1",
+    "purpose": "ยุบ Scripts_Page_Meeting โดยลด helper วันที่ซ้ำและ compact script layout ใน canonical page partial เดิม",
+    "source": "gas-backend/Scripts_Page_Meeting.html",
+    "generatedMirror": "github-pages/partials/Scripts_Page_Meeting.html",
+    "previousBackendMeetingBytes": 247282,
+    "currentBackendMeetingBytes": 242111,
+    "previousMirrorMeetingBytes": 247376,
+    "currentMirrorMeetingBytes": 242205,
+    "bytesReducedFromCoreRuntimeSlim": 5171,
+    "mirrorBytesReducedFromCoreRuntimeSlim": 5171,
+    "sharedOwners": [
+      "CommitteeMeetingStandalonePrint.fmtDate",
+      "AppPages meeting adapter",
+      "Scripts_Page_Meeting canonical partial"
+    ],
+    "retainedPublicOwners": [
+      "initMeetingPage",
+      "meetingSetMode",
+      "meetingGoSearch",
+      "meetingEditLog",
+      "meetingEditLetter",
+      "meetingDeleteLetter",
+      "CommitteeMeetingSystem",
+      "CommitteeMeetingStandalonePrint",
+      "CommitteeMeetingSummaryDetail",
+      "AppPages meeting actions"
+    ],
+    "maxBackendMeetingBytes": 242500,
+    "maxMirrorMeetingBytes": 242600,
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "uiUxPreserved": true,
+    "businessLogicChanged": false
+  },
+  "casesDomainSlimmingLedger": {
+    "stamp": "production-current-cases-domain-helper-owner-slim-2026-07-06-r1",
+    "purpose": "ยุบ Code_30_Domain_Cases โดยลด boilerplate/helper ซ้ำให้ใช้ owner เดียวสำหรับ warning, array check, object assign, hasOwnProperty และ string-normalization wrappers ในไฟล์เดิม",
+    "source": "gas-backend/Code_30_Domain_Cases.gs",
+    "previousBackendCasesBytes": 332764,
+    "currentBackendCasesBytes": 326356,
+    "bytesReducedFromMeetingPageSlim": 6408,
+    "sharedOwners": [
+      " _s_ string fallback helper",
+      "_c30S_ null-safe string helper",
+      "_c30W_ warning recorder helper",
+      "_c30A_ array check helper",
+      "_c30O_ object assign helper",
+      "_c30H_ hasOwnProperty helper"
+    ],
+    "retainedPublicOwners": [
+      "CaseDomain",
+      "TrackingDomain",
+      "MeetingDomain",
+      "DashboardDomain",
+      "apiSaveCase",
+      "apiDeleteCase",
+      "apiSearchCasesLite",
+      "apiGetCases",
+      "apiGetTracking",
+      "apiGetMeetingHistory",
+      "apiSaveMeetingLog",
+      "apiDeleteMeetingLog",
+      "apiGetCommitteeMeetingSystem",
+      "apiSaveCommitteeMeetingSystem",
+      "apiDeleteCommitteeMeetingSystem"
+    ],
+    "maxBackendCasesBytes": 327000,
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "uiUxPreserved": true,
+    "businessLogicChanged": false
+  },
+  "budgetDomainSlimmingLedger": {
+    "stamp": "production-current-budget-domain-helper-owner-slim-2026-07-06-r1",
+    "purpose": "ยุบ Code_32_Domain_Budget โดยลด boilerplate/helper ซ้ำให้ใช้ owner เดียวสำหรับ warning, array fallback, object assign, hasOwnProperty, amount normalize และ fiscal-year normalize ในไฟล์เดิม",
+    "source": "gas-backend/Code_32_Domain_Budget.gs",
+    "previousBackendBudgetBytes": 233225,
+    "currentBackendBudgetBytes": 227209,
+    "bytesReducedFromCasesDomainSlim": 6016,
+    "sharedOwners": [
+      "_b32W_ warning recorder helper",
+      "_b32A_ array fallback helper",
+      "_b32O_ object assign helper",
+      "_b32H_ hasOwnProperty helper",
+      "_b32N_ amount normalization alias",
+      "_b32FY_ fiscal-year normalization alias"
+    ],
+    "retainedPublicOwners": [
+      "BudgetDomain",
+      "apiBudgetGetSummary",
+      "apiBudgetGetDashboardSummary",
+      "apiBudgetGetTypeSummaryByFY",
+      "apiBudgetListByFY",
+      "apiBudgetListByFYFast",
+      "apiBudgetSaveImport",
+      "apiBudgetDeleteImport",
+      "apiBudgetGetFiscalYears",
+      "apiBudgetAdminListYearSettingsAll",
+      "apiBudgetAdminSaveYearSettingsRows",
+      "apiGetSalarySettings",
+      "apiSaveSalarySettings"
+    ],
+    "maxBackendBudgetBytes": 228000,
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "uiUxPreserved": true,
+    "businessLogicChanged": false
+  },
+  "sizeRegressionGuardLedger": {
+    "stamp": "production-current-size-regression-guard-2026-07-06-r1",
+    "purpose": "ล็อก size budget หลังการยุบ runtime/domain และหลังปรับ Budget UI เพื่อกันไฟล์ใหญ่กลับใน build gate เดิม",
+    "guardedBy": "tools/phaseN_legacy_transport_gate.py",
+    "totalSourceBudgetBytes": 4865000,
+    "fileBudgets": {
+      "gas-backend/Scripts_Core_Runtime.html": 360000,
+      "github-pages/partials/Scripts_Core_Runtime.html": 360000,
+      "gas-backend/Scripts_Page_Meeting.html": 242500,
+      "github-pages/partials/Scripts_Page_Meeting.html": 242600,
+      "gas-backend/Code_30_Domain_Cases.gs": 327000,
+      "gas-backend/Code_32_Domain_Budget.gs": 228000,
+      "gas-backend/Scripts_Page_Budget.html": 160000,
+      "github-pages/partials/Scripts_Page_Budget.html": 160100,
+      "gas-backend/Index.html": 269500,
+      "github-pages/critical-login-runtime.js": 87000
+    },
+    "dynamicGeneratedExcluded": [
+      "github-pages/vercel-env.generated.js"
+    ],
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
+    "noApiContractChange": true
+  },
+  "budgetUiModernizationLedger": {
+    "stamp": "production-current-budget-ui-modern-current-2026-07-06-r1",
+    "purpose": "ปรับ UX/UI ของ Budget ให้ทันสมัยด้วย presentation owner เดียวใน Scripts_Page_Budget โดยไม่เปลี่ยน API, route, schema, read/write path หรือ business logic",
+    "source": "gas-backend/Scripts_Page_Budget.html",
+    "mirror": "github-pages/partials/Scripts_Page_Budget.html",
+    "owner": "budget-ui-modern-current",
+    "enhancements": [
+      "modern hero header",
+      "responsive tab pills",
+      "card/table visual polish",
+      "sticky table head",
+      "form focus states",
+      "mobile layout improvement"
+    ],
+    "previousBackendBudgetPageBytes": 152041,
+    "currentBackendBudgetPageBytes": 159386,
+    "previousMirrorBudgetPageBytes": 152135,
+    "currentMirrorBudgetPageBytes": 159480,
+    "maxBackendBudgetPageBytes": 160000,
+    "maxMirrorBudgetPageBytes": 160100,
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "noNewPhaseAdded": true,
     "businessLogicChanged": false
   }
 }
