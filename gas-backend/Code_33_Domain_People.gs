@@ -1564,7 +1564,7 @@ return PeopleDomain.getPageBundle(p||{
 }
 function _peopleInvalidatePersonnelDomains_(reason){
 try{
-_appIsFnName_("_cA")&&(_cA("personnel"),_cA("dashboard"))
+_appIsFnName_("_AppCacheInvalidateDomain_")&&(_AppCacheInvalidateDomain_("personnel"),_AppCacheInvalidateDomain_("dashboard"))
 }
 catch(_cacheErr){
 _appIsFnName_("_recordWarning_")?_recordWarning_("ec",_cacheErr):_appIsFnName_("_logWarn_")?_logWarn_("ec",{
