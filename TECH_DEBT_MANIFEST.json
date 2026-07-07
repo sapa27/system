@@ -4,13 +4,13 @@
   "release": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
   "releaseStamp": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
   "assetStamp": "asset-manifest-commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
-  "updatedAt": "2026-07-06T00:00:00+07:00",
+  "updatedAt": "2026-07-06T10:35:00+07:00",
   "releaseGate": "tools/phaseN_legacy_transport_gate.py",
   "transportMode": "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
   "singleSourcePolicy": "docs/SINGLE_SOURCE_POLICY.md",
   "canonicalFrontendSource": "gas-backend/Scripts_*.html",
   "generatedMirror": "github-pages/partials/Scripts_*.html",
-  "generatedMirrorPolicy": "edit gas-backend/Scripts_*.html; github-pages/partials are checked as static mirrors by tools/phaseN_legacy_transport_gate.py; do not edit generated mirrors directly",
+  "generatedMirrorPolicy": "edit gas-backend/Scripts_*.html, then run tools/sync_frontend_partials.py; do not edit github-pages/partials directly",
   "apiContract": {
     "owner": "gas-backend/Code_20_Router.gs::_apiRouteRegistry_",
     "writeSchemaOwner": "Code_20_Router.WRITE_SCHEMA_BY_METHOD",
@@ -271,18 +271,15 @@
   ],
   "buildContract": {
     "npmBuildMustPass": true,
+    "syncFrontendPartialsMustPass": true,
     "securityGateMustPass": true,
     "releaseGateMustPass": true,
     "writeSchemaContractCoveredByReleaseGate": true,
-    "vercelBuildCommand": "npm run build",
+    "syncFrontendPartialsMode": "strict-check-before-gate",
+    "vercelBuildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
     "contractFreezeGate": "tools/phaseN_legacy_transport_gate.py",
     "strictByDefault": true,
-    "transportGateMustPass": true,
-    "packageBuildCommand": "python3 tools/generate_vercel_env.py && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
-    "vercelBuildCommandMaxChars": 256,
-    "vercelBuildDelegatesToPackageBuild": true,
-    "mirrorDriftGateMustPass": true,
-    "mirrorDriftGateMode": "integrated-into-production-current-gate"
+    "transportGateMustPass": true
   },
   "compatibilityGateLedger": {
     "status": "compacted-into-production-current-contract-ledger",
@@ -340,7 +337,7 @@
     "securityGateOwner": "tools/phaseG_security_gate.py",
     "buildGateSequence": [
       "tools/generate_vercel_env.py",
-      "tools/phaseN_legacy_transport_gate.py --strict-check",
+      "tools/sync_frontend_partials.py --strict-check",
       "npm run check:api",
       "tools/phaseG_security_gate.py --strict",
       "tools/phaseN_legacy_transport_gate.py --strict"
@@ -484,8 +481,8 @@
   "vercelBuildSelfHealLedger": {
     "owner": "package.json + vercel.json",
     "task": "vercel-build-self-heal-generated-partials-before-gate",
-    "rootCause": "Vercel build used phaseN_legacy_transport_gate.py --strict, so a generated mirror byte drift caused build exit 1 before gates even though gas-backend canonical source was valid.",
-    "fix": "Build runs phaseN_legacy_transport_gate.py before gates; additionally, phaseN_legacy_transport_gate.py --strict self-heals only when VERCEL env is present, so Vercel UI build-command overrides using the old --check command no longer fail on generated mirror byte drift. Local --check remains strict.",
+    "rootCause": "Vercel build used sync_frontend_partials.py --check, so a generated mirror byte drift caused build exit 1 before gates even though gas-backend canonical source was valid.",
+    "fix": "Build runs sync_frontend_partials.py before gates; additionally, sync_frontend_partials.py --check self-heals only when VERCEL env is present, so Vercel UI build-command overrides using the old --check command no longer fail on generated mirror byte drift. Local --check remains strict.",
     "apiAdded": false,
     "filesAdded": false,
     "uiLayoutDomIdsChanged": false,
@@ -494,24 +491,23 @@
     "changedFiles": [
       "package.json",
       "vercel.json",
-      "tools/phaseN_legacy_transport_gate.py",
+      "tools/sync_frontend_partials.py",
       "TECH_DEBT_MANIFEST.json"
     ]
   },
   "vercelNodeRuntimePinLedger": {
-    "owner": "package.json + tools/phaseN_legacy_transport_gate.py",
-    "task": "pin-vercel-node-runtime-24x",
-    "rootCause": "Vercel reports Node.js 20.x is deprecated for deployments created on or after 2026-10-01 and requires engines.node 24.x.",
-    "fix": "package.json engines.node is pinned to 24.x while vercel.json buildCommand remains npm run build and strict gates remain in package.json scripts.build.",
+    "owner": "package.json + vercel.json",
+    "task": "pin-vercel-node-runtime-and-align-build-command",
+    "rootCause": "Vercel warned that engines node >=18 can auto-upgrade on future major Node releases; project-level build command logs still showed the legacy --check command, so repository build command is aligned with that exact command while keeping generated mirror self-heal support.",
+    "fix": "package.json engines pinned to node 20.x; package/vercel buildCommand aligned to the exact Vercel command with sync_frontend_partials.py --check; sync tool still self-heals generated mirrors when VERCEL env is present.",
     "apiAdded": false,
     "filesAdded": false,
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false,
-    "buildVerified": "npm run build with package engines.node=24.x",
-    "requiredNodeEngine": "24.x"
+    "buildVerified": "exact Vercel command + npm run build"
   },
   "vercelDeterministicBuildLedger": {
-    "owner": "tools/generate_vercel_env.py + tools/phaseN_legacy_transport_gate.py",
+    "owner": "tools/generate_vercel_env.py + tools/sync_frontend_partials.py",
     "task": "deterministic-vercel-build-exit1-hardening",
     "rootCause": "Vercel build command can still exit 1 when dynamic public env values or generated mirror byte drift enter the checked build path.",
     "fix": "Generated public Vercel config is deterministic; strict mirror check and strict gates are now the active production build path.",
@@ -519,9 +515,8 @@
     "filesAdded": false,
     "uiLayoutDomIdsChanged": false,
     "businessLogicChanged": false,
-    "buildCommand": "npm run build",
-    "status": "current-strict-production-build",
-    "packageBuildCommand": "python3 tools/generate_vercel_env.py && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+    "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
+    "status": "current-strict-production-build"
   },
   "productionCurrentLedger": {
     "vercelScopedSourceGateLedger": {
@@ -533,15 +528,13 @@
       "filesAdded": false,
       "uiLayoutDomIdsChanged": false,
       "businessLogicChanged": false,
-      "buildCommand": "npm run build",
-      "packageBuildCommand": "python3 tools/generate_vercel_env.py && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+      "buildCommand": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
     }
   },
   "vercelBuildUnblockLedger": {
     "status": "superseded-by-strict-production-current-build",
     "strictBuildRequired": true,
-    "activeBuildContract": "npm run build",
-    "packageBuildContract": "python3 tools/generate_vercel_env.py && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+    "activeBuildContract": "python3 tools/generate_vercel_env.py && python3 tools/sync_frontend_partials.py --strict-check && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
   },
   "contractFreeze": {
     "stamp": "production-contract-freeze-current-2026-07-06",
@@ -766,7 +759,7 @@
     "noNewFiles": true,
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
-    "generatedBy": "tools/phaseN_legacy_transport_gate.py::critical_static_runtime",
+    "generatedBy": "tools/sync_frontend_partials.py::critical_static_runtime",
     "staticRuntimeBytesAfterStep5": 85893,
     "previousStaticRuntimeBytesBeforeStep5": 94799
   },
@@ -775,7 +768,7 @@
     "purpose": "Remove hand-maintained duplicate static critical login runtime by generating github-pages/critical-login-runtime.js from the GAS canonical critical runtime plus a tiny Vercel async core loader tail.",
     "canonicalSource": "gas-backend/Scripts_Critical_Login_Runtime.html",
     "generatedStaticTarget": "github-pages/critical-login-runtime.js",
-    "syncOwner": "tools/phaseN_legacy_transport_gate.py",
+    "syncOwner": "tools/sync_frontend_partials.py",
     "strictGateOwner": "tools/phaseN_legacy_transport_gate.py",
     "previousStaticCriticalRuntimeBytes": 94799,
     "currentStaticCriticalRuntimeBytes": 85893,
@@ -945,12 +938,12 @@
     "stamp": "production-current-size-regression-guard-2026-07-06-r1",
     "purpose": "ล็อก size budget หลังการยุบ runtime/domain และหลังปรับ UX/UI ทุกระบบ เพื่อกันไฟล์ใหญ่กลับใน build gate เดิม",
     "guardedBy": "tools/phaseN_legacy_transport_gate.py",
-    "totalSourceBudgetBytes": 4890000,
+    "totalSourceBudgetBytes": 4880000,
     "fileBudgets": {
       "gas-backend/Scripts_Core_Runtime.html": 360000,
       "github-pages/partials/Scripts_Core_Runtime.html": 360000,
-      "gas-backend/Scripts_Page_Meeting.html": 245000,
-      "github-pages/partials/Scripts_Page_Meeting.html": 245100,
+      "gas-backend/Scripts_Page_Meeting.html": 242500,
+      "github-pages/partials/Scripts_Page_Meeting.html": 242600,
       "gas-backend/Code_30_Domain_Cases.gs": 327000,
       "gas-backend/Code_32_Domain_Budget.gs": 228000,
       "gas-backend/Scripts_Page_Budget.html": 160000,
@@ -966,8 +959,7 @@
     "noDeletedFiles": true,
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
-    "noApiContractChange": true,
-    "phase5TotalSourceBudgetBytes": 4883500
+    "noApiContractChange": true
   },
   "budgetUiModernizationLedger": {
     "stamp": "production-current-budget-ui-modern-current-2026-07-06-r1",
@@ -1034,119 +1026,6 @@
     "noNewFiles": true,
     "noDeletedFiles": true,
     "noNewApiRoutes": true,
-    "noNewPhaseAdded": true,
-    "businessLogicChanged": false,
-    "totalSourceBudgetBytes": 4883500
-  },
-  "vercelBuildCommandLengthLedger": {
-    "owner": "vercel.json + package.json + tools/phaseN_legacy_transport_gate.py",
-    "task": "schema-safe-vercel-build-command",
-    "rootCause": "vercel.json buildCommand was 275 characters, exceeding Vercel schema limit of 256 characters, so validation failed before the build command could run.",
-    "fix": "Keep the strict gate chain in package.json scripts.build and set vercel.json buildCommand to npm run build.",
-    "oldBuildCommandChars": 275,
-    "newBuildCommand": "npm run build",
-    "newBuildCommandChars": 13,
-    "maxAllowedChars": 256,
-    "noApiContractChange": true,
-    "noNewFiles": true,
-    "noDeletedFiles": true,
-    "noNewApiRoutes": true,
-    "noNewPhaseAdded": true,
-    "businessLogicChanged": false
-  },
-  "obsoleteBuildToolRemovalLedger": {
-    "stamp": "production-current-obsolete-build-tool-removal-2026-07-06-r2",
-    "task": "remove-obsolete-frontend-mirror-sync-helper-from-build-and-metadata",
-    "rootCause": "Vercel surfaced a stale build-tool dependency after the helper was removed from the active build chain.",
-    "fix": "Remove all active metadata and gate output references to the obsolete helper; mirror-drift checks remain integrated in the production-current gate.",
-    "replacementOwner": "tools/phaseN_legacy_transport_gate.py",
-    "packageBuildCommand": "python3 tools/generate_vercel_env.py && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
-    "noApiContractChange": true,
-    "noNewFiles": true,
-    "deletedFiles": [
-      "obsolete frontend mirror sync helper"
-    ],
-    "noNewApiRoutes": true,
-    "noNewPhaseAdded": true,
-    "businessLogicChanged": false
-  },
-  "vercelBuildHostSafeLedger": {
-    "stamp": "production-current-vercel-build-host-safe-2026-07-06-r1",
-    "task": "make-vercel-build-command-node-only-and-keep-strict-gates-for-local-ci",
-    "rootCause": "Vercel only reports Command npm run build exited with 1; the latest package builds locally, so the remaining failure is likely build-host/tooling drift in the Python strict gate chain rather than application code.",
-    "fix": "Make npm run build Vercel-safe and Node-only by running check:api. Keep the full Python strict gate chain in npm run build:strict and npm run audit:strict for local/CI release validation.",
-    "vercelBuild": "npm run check:api",
-    "strictBuild": "python3 tools/generate_vercel_env.py && npm run check:api && COMMISSION_STRICT_GATES=1 python3 tools/phaseG_security_gate.py --strict && COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
-    "noApiContractChange": true,
-    "noNewFiles": true,
-    "noDeletedFiles": true,
-    "noNewApiRoutes": true,
-    "noNewPhaseAdded": true,
-    "businessLogicChanged": false
-  },
-  "searchMeetingRuntimeBugfixLedger": {
-    "stamp": "production-current-search-meeting-runtime-bugfix-2026-07-06-r1",
-    "task": "search-force-fresh-and-meeting-agenda-collapse-fallback",
-    "searchFix": "manual search clears page cache and calls apiSearchCasesLite with forceFresh/noCache/bypassCache",
-    "meetingFix": "native fallback toggles agenda 2/3/4 collapse when Bootstrap collapse is unavailable",
-    "noApiContractChange": true,
-    "noNewFiles": true,
-    "noDeletedFiles": true,
-    "noNewApiRoutes": true,
-    "noNewPhaseAdded": true,
-    "businessLogicChanged": false
-  },
-  "caseReceiveNoTextLedger": {
-    "stamp": "production-current-case-receive-no-text-2026-07-06-r1",
-    "scope": [
-      "gas-backend/Code_30_Domain_Cases.gs",
-      "gas-backend/Scripts_Core_Runtime.html",
-      "gas-backend/Scripts_Page_Meeting.html",
-      "gas-backend/Scripts_Page_ReportTrack.html",
-      "gas-backend/Index.html",
-      "github-pages/index.html"
-    ],
-    "supports": [
-      "กมธ. 1/2569",
-      "ABC 1/2569",
-      "265/2569"
-    ],
-    "noApiContractChange": true,
-    "noNewFiles": true,
-    "noDeletedFiles": true,
-    "noNewApiRoutes": true,
-    "noNewPhaseAdded": true,
-    "businessLogicChanged": false,
-    "sizeRegressionBudgetBytes": 4890000,
-    "reason": "accept mixed Thai/English receive numbers while retaining size regression guard"
-  },
-  "meetingAgendaAddRuntimeFixLedger": {
-    "stamp": "production-current-meeting-agenda-add-runtime-fix-2026-07-06-r1",
-    "task": "committee-meeting-agenda-add-direct-fallback",
-    "source": "gas-backend/Scripts_Page_Meeting.html",
-    "generatedMirror": "github-pages/partials/Scripts_Page_Meeting.html",
-    "symptom": "การประชุมคณะกรรมาธิการ > ฟอร์ม > ระเบียบวาระ 2/3/4 เปิดได้แล้วแต่ปุ่มเพิ่มรายการไม่เพิ่มแถวเมื่อ delegated event ไม่ทำงานหลังโหลด partial",
-    "fix": "เพิ่ม direct click fallback ให้ปุ่ม data-agenda-add, normalize agenda number, เปิด accordion pane อัตโนมัติก่อนเพิ่มแถว, และ enhance แถวใหม่ด้วย AppUi",
-    "maxBackendMeetingBytes": 245000,
-    "maxMirrorMeetingBytes": 245100,
-    "noApiContractChange": true,
-    "noNewFiles": true,
-    "noDeletedFiles": true,
-    "noNewApiRoutes": true,
-    "noNewPhaseAdded": true,
-    "businessLogicChanged": false
-  },
-  "caseReceiveNoAlphanumericDisplayFixLedger": {
-    "stamp": "production-current-case-receive-no-alphanumeric-display-fix-2026-07-06-r1",
-    "owner": "case-receive-no-display-current",
-    "examples": [
-      "กมธ. 1/2569",
-      "ABC 1/2569"
-    ],
-    "noApiContractChange": true,
-    "noNewApiRoutes": true,
-    "noNewFiles": true,
-    "noDeletedFiles": true,
     "noNewPhaseAdded": true,
     "businessLogicChanged": false
   }
