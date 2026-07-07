@@ -8,7 +8,7 @@ Current release: `commission-v1.2-production-current-contract-freeze-2026-07-06-
 
 1. Edit backend `.gs` files and canonical `gas-backend/Scripts_*.html` files only.
 2. Treat `github-pages/partials/Scripts_*.html` as generated mirrors.
-3. Do not hand-edit generated mirrors. Run `python3 tools/phaseN_legacy_transport_gate.py` after changing canonical scripts, then verify with `python3 tools/phaseN_legacy_transport_gate.py --check`.
+3. Do not hand-edit generated mirrors. Run `python3 tools/sync_frontend_partials.py` after changing canonical scripts, then verify with `python3 tools/sync_frontend_partials.py --check`.
 4. Keep one API owner: `gas-backend/Code_20_Router.gs::_apiRouteRegistry_()` derives backend/client contract checks.
 5. Keep one write-schema owner: `Code_20_Router.WRITE_SCHEMA_BY_METHOD` / `_routerPhaseKWriteSchemaByMethod_()`.
 6. Keep one dashboard budget owner: `BudgetDomain` hydrates budget after dashboard first paint.
@@ -41,7 +41,7 @@ Before packaging or deployment, run:
 
 ```bash
 python3 tools/generate_vercel_env.py
-python3 tools/phaseN_legacy_transport_gate.py --check
+python3 tools/sync_frontend_partials.py --check
 npm run check:api
 python3 tools/phaseG_security_gate.py
 python3 tools/phaseN_legacy_transport_gate.py

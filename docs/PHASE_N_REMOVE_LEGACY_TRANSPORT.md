@@ -23,7 +23,7 @@ GAS backend compatibility endpoints remain in the backend file for old deploymen
 Run:
 
 ```bash
-python3 tools/phaseN_legacy_transport_gate.py --check
+python3 tools/sync_frontend_partials.py --check
 python3 tools/phaseN_legacy_transport_gate.py
 ```
 
