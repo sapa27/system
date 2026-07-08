@@ -443,7 +443,7 @@ def check_owner_consolidation_contract(manifest, platform, router, transport, co
     ok('Router remains single route/write owner', 'function _apiRouteRegistry_' in router and 'WRITE_SCHEMA_BY_METHOD' in router and 'function apiRouter' in router, 'Code_20_Router must own route registry, write schemas, and apiRouter')
     ok('Platform remains single GAS entry owner', platform.count('function doGet(') == 1 and platform.count('function doPost(') == 1 and platform.count('function apiGithubBridgeCall(') == 1, 'doGet/doPost/apiGithubBridgeCall must remain single')
     ok('Domain owners remain anchored', all(token in alltext for token in ['CaseDomain', 'TrackingDomain', 'MeetingDomain', 'DashboardDomain', 'BudgetDomain', 'PeopleDomain']), 'domain owner globals must remain present')
-    ok('Frontend transport remains one proxy owner', 'function runVercelApiProxy' in transport and 'function runVercelLoginProxy' in transport and 'root.AppTransport.run' in transport and '/api/gas' in transport and '/api/login' in transport, 'AppTransport must own frontend transport through Vercel proxy')
+    ok('Frontend transport remains one owner', 'function runVercelApiProxy' in transport and 'function runVercelLoginProxy' in transport and 'function runGasDirectTransport' in transport and 'root.AppTransport.run' in transport and '/api/gas' in transport and '/api/login' in transport, 'AppTransport must own frontend transport through Vercel proxy plus GAS direct when hosted in Apps Script')
     forbidden_hits = []
     page_scope_paths = list((ROOT/'gas-backend').glob('Scripts_Page_*.html')) + list((ROOT/'github-pages'/'partials').glob('Scripts_Page_*.html'))
     for path in page_scope_paths:
@@ -475,7 +475,7 @@ def check_legacy_fallback_cleanup_contract(manifest, platform, app, transport, c
     ok('required compatibility entrypoints retained after fallback cleanup', platform.count('function doGet(') == 1 and platform.count('function doPost(') == 1 and platform.count('function apiGithubBridgeCall(') == 1, 'required GAS compatibility entrypoints must remain single')
     crit = compact(critical_runtime + static_critical)
     ok('critical runtime fallback is router-only when direct GAS method missing', 'apiRouter' in crit and 'google.script.run' in crit and 'serverfunction' in crit.lower().replace(' ',''), 'GAS direct fallback must route through apiRouter rather than adding direct facade APIs')
-    ok('browser transport stays Vercel proxy only after fallback cleanup', '/api/gas' in transport and '/api/login' in transport and '__githubFastLogin' not in transport and 'document.createElement("iframe")' not in compact(transport), 'browser transport must not reintroduce JSONP or hidden bridge transport')
+    ok('browser transport stays Vercel proxy with GAS direct fallback after cleanup', '/api/gas' in transport and '/api/login' in transport and 'function runGasDirectTransport' in transport and '__githubFastLogin' not in transport and 'document.createElement("iframe")' not in compact(transport), 'browser transport must not reintroduce JSONP or hidden bridge transport')
 
 
 def check_performance_debt_contract(manifest, transport, core_runtime):
@@ -508,9 +508,8 @@ def check_quality_gate_contract(manifest, router, transport, common, gas_api, lo
     ok('Technical debt Phase 10 quality gate preserves contracts', rules_ok, 'quality gate hardening must not alter API, files, UI, business rules, routes, or write schema')
     smoke_methods = ['apiSearchCasesLite','apiGetTracking','apiGetDashboardBundle','apiListCommitteeMeetings','apiBudgetGetSummary','apiGetPeoplePageBundle']
     ok('Quality gate critical smoke API methods remain routed', all(method in router for method in smoke_methods), 'router must keep critical read methods: ' + ', '.join(smoke_methods))
-    client_gas_fallback_tokens = ['body.clientGasWebAppUrl||body.gasWebAppUrl','clientGasWebAppUrl:clientGasWebAppUrl()','gasWebAppUrl='+ 'encodeURIComponent(clientGas)','NEXT_PUBLIC_GAS_WEB_APP_URL||fallback','gasUrl(clientGasWebAppUrl','gasUrl(clientGas)']
-    client_gas_fallback_blob = '\n'.join([transport, gas_api, login_api, public_config_api, common])
-    ok('Quality gate Vercel server GAS env only', 'process.env.GAS_WEB_APP_URL||process.env.VERCEL_GAS_WEB_APP_URL||""' in common and 'clientGasWebAppUrl:clientGasWebAppUrl()' not in transport and 'body.clientGasWebAppUrl||body.gasWebAppUrl' not in gas_api and 'body.clientGasWebAppUrl||body.gasWebAppUrl' not in login_api and 'searchParams.get("gasWebAppUrl")' not in public_config_api and not any(token in client_gas_fallback_blob for token in client_gas_fallback_tokens), 'Vercel proxy must use server GAS_WEB_APP_URL/VERCEL_GAS_WEB_APP_URL only; client-supplied GAS URL fallback is forbidden')
+    ok('Quality gate Vercel proxy uses server env only', 'process.env.GAS_WEB_APP_URL' in common and 'process.env.VERCEL_GAS_WEB_APP_URL' in common and 'NEXT_PUBLIC_GAS_WEB_APP_URL' not in common and 'body.clientGasWebAppUrl||body.gasWebAppUrl' not in gas_api and 'body.clientGasWebAppUrl||body.gasWebAppUrl' not in login_api and 'searchParams.get("gasWebAppUrl")' not in public_config_api, 'Vercel proxy must not accept client supplied GAS URL')
+    ok('Quality gate GAS direct AppTransport installed', 'function gasDirectAvailable()' in transport and 'function runGasDirectTransport' in transport and 'apiGithubBridgeCall' in transport and 'google.script.run' in transport, 'GAS-hosted app must call existing apiGithubBridgeCall/apiRouter through google.script.run')
     crit = compact(critical_runtime + '\n' + static_critical)
     ok('Quality gate GAS direct fallback routes through apiRouter', 'apiRouter' in crit and 'google.script.run' in crit and ('serverfunction' in crit.lower() or 'server function' in (critical_runtime + static_critical).lower()), 'GAS direct runtime must route missing direct functions through apiRouter')
     dash_c = compact(dashboard_page)
@@ -549,7 +548,7 @@ def main():
     ok('obsolete mirror-sync helper absent from tools directory', not (ROOT/'tools'/obsolete_tool).exists(), 'obsolete helper must be absent; mirror drift is checked by Production current gate')
     ok('package engines pins Vercel Node 24.x', str(package.get('engines',{}).get('node','')) == '24.x', str(package.get('engines',{}).get('node','')))
     ok('proxy functions exist', all((ROOT/'api'/f).exists() for f in ['gas.js','login.js','public-config.js','_gasProxyCommon.js']), 'api proxy files')
-    ok('server GAS env used by proxy', 'process.env.GAS_WEB_APP_URL||process.env.VERCEL_GAS_WEB_APP_URL||""' in common and 'NEXT_PUBLIC_GAS_WEB_APP_URL' not in common and '||fallback' not in common, 'server env only')
+    ok('server GAS env used by proxy', 'process.env.GAS_WEB_APP_URL' in common, 'server env')
     ok('Production current header used by proxy', 'X-Production-Vercel-Proxy' in common and 'X-Phase-M-Vercel-Proxy' not in common, 'proxy header')
     ok('Vercel env production-current release track', '"releaseTrack":"production-current"' in generated and '"legacyTransportRemoved":true' in generated, 'generated env metadata')
     ok('index uses Production current assets', RELEASE in index and MODE in index, 'index script stamps')
