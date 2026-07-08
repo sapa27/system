@@ -1578,5 +1578,14 @@
         "referenceUsed": "New folder(2).zip compared only"
       }
     }
-  ]
+  ],
+  "authRouteBlankFixLedger": {
+    "stamp": "runtime-authroutefix-2026-07-08-r12",
+    "owner": "plain-dom-auth-route-lifecycle",
+    "rootCause": "critical login showed main shell before ensureCore and dashboard route host mount completed; plain DOM router no longer has Vue router-view first paint",
+    "fix": "defer shell reveal in bootMainUi and __APP_MARK_MAIN_SHELL_READY__ until safeApplyRoute mounts dashboard/page host",
+    "noApiContractChange": true,
+    "noNewFiles": true,
+    "noRollback": true
+  }
 }
