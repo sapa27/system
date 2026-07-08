@@ -1551,6 +1551,11 @@
         "gas-backend/Index.html",
         "github-pages/index.html"
       ]
+    },
+    {
+      "date": "2026-07-08",
+      "phase": "FLOWJSONFIX",
+      "summary": "Rewrite shared DOM route tick and GAS/Vercel transport owner: no Vue.nextTick dependency for route activation, GAS direct uses apiRouter, Vercel requires GAS /exec JSON response."
     }
   ]
 }
