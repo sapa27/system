@@ -200,6 +200,20 @@ PHASE5_DYNAMIC_GENERATED_FILES = {
     # let dynamic deploy metadata trip the deterministic source-size gate.
     "github-pages/vercel-env.generated.js",
 }
+
+OWNER_CONSOLIDATION_STAMP = "technical-debt-owner-consolidation-2026-07-07-r1"
+LEGACY_FALLBACK_CLEANUP_STAMP = "technical-debt-phase7-legacy-fallback-cleanup-2026-07-07-r1"
+PERFORMANCE_DEBT_STAMP = "technical-debt-phase8-performance-debt-current"
+UIUX_DEBT_STAMP = "technical-debt-phase9-uiux-debt-current"
+QUALITY_GATE_STAMP = "technical-debt-phase10-quality-gate-current"
+OWNER_CONSOLIDATION_REQUIRED_KEYS = [
+    "apiRouteRegistry", "writeSchema", "apiBoundary", "platformEntry",
+    "sheetRepository", "authSession", "casesSearchReportTracking", "budget",
+    "people", "frontendTransport", "coreRuntime", "uiTokens", "generatedPartials",
+]
+OWNER_CONSOLIDATION_FORBIDDEN_PAGE_CALLS = [
+    "google.script.run", "Utils.apiRunner", "AppPageController.api"
+]
 PHASE5_NEXT_SLIMMING_TARGETS = {
     # Informational next-step targets; not enforced in Phase 5.
     "gas-backend/Scripts_Core_Runtime.html": 340000,
@@ -417,6 +431,97 @@ def check_admin_user_facade_contract(root: pathlib.Path) -> None:
     if 'apiDeletePetitioner:["people","petitioner","case","dashboard"]' not in platform:
         fail("Phase 5 petitioner writes must invalidate petitioner/case/dashboard cache")
 
+
+
+def check_owner_consolidation_contract(manifest, platform, router, transport, common, core_runtime, gas_index, static_index, alltext):
+    ledger = manifest.get('technicalDebtOwnerConsolidationLedger') if isinstance(manifest, dict) else None
+    ok('Technical debt owner consolidation ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == OWNER_CONSOLIDATION_STAMP, 'TECH_DEBT_MANIFEST must lock Phase 1 owner matrix')
+    owners = ledger.get('owners', {}) if isinstance(ledger, dict) else {}
+    ok('Technical debt owner matrix complete', isinstance(owners, dict) and all(k in owners for k in OWNER_CONSOLIDATION_REQUIRED_KEYS), 'missing owner keys: ' + ','.join([k for k in OWNER_CONSOLIDATION_REQUIRED_KEYS if k not in owners]))
+    rules = ledger.get('rules', {}) if isinstance(ledger, dict) else {}
+    ok('Technical debt owner consolidation preserves contracts', rules.get('noNewApiRoutes') is True and rules.get('noNewFiles') is True and rules.get('businessLogicChanged') is False and rules.get('uiUxChanged') is False, 'owner consolidation must be metadata/gate only')
+    ok('Router remains single route/write owner', 'function _apiRouteRegistry_' in router and 'WRITE_SCHEMA_BY_METHOD' in router and 'function apiRouter' in router, 'Code_20_Router must own route registry, write schemas, and apiRouter')
+    ok('Platform remains single GAS entry owner', platform.count('function doGet(') == 1 and platform.count('function doPost(') == 1 and platform.count('function apiGithubBridgeCall(') == 1, 'doGet/doPost/apiGithubBridgeCall must remain single')
+    ok('Domain owners remain anchored', all(token in alltext for token in ['CaseDomain', 'TrackingDomain', 'MeetingDomain', 'DashboardDomain', 'BudgetDomain', 'PeopleDomain']), 'domain owner globals must remain present')
+    ok('Frontend transport remains one proxy owner', 'function runVercelApiProxy' in transport and 'function runVercelLoginProxy' in transport and 'root.AppTransport.run' in transport and '/api/gas' in transport and '/api/login' in transport, 'AppTransport must own frontend transport through Vercel proxy')
+    forbidden_hits = []
+    page_scope_paths = list((ROOT/'gas-backend').glob('Scripts_Page_*.html')) + list((ROOT/'github-pages'/'partials').glob('Scripts_Page_*.html'))
+    for path in page_scope_paths:
+        text = path.read_text(encoding='utf-8', errors='ignore')
+        rel = path.relative_to(ROOT).as_posix()
+        for token in OWNER_CONSOLIDATION_FORBIDDEN_PAGE_CALLS:
+            if token in text:
+                forbidden_hits.append(rel + ':' + token)
+    ok('Page scripts do not own transport', not forbidden_hits, ', '.join(forbidden_hits[:8]))
+    ok('Core runtime remains UI/cache/lifecycle owner', all(token in core_runtime for token in ['AppRuntime', 'AppStore', 'AppPageKit', 'app:write-cache-invalidated', 'app:data-mutated']), 'core runtime must retain canonical runtime/cache/write-refresh owners')
+    ok('UI token owner remains in indexes', 'app-global-ui-modern-current' in gas_index and 'app-global-ui-modern-current' in static_index, 'Index files must own UI tokens')
+    ok('Vercel API file owner set frozen', sorted([p.name for p in (ROOT/'api').glob('*.js')]) == FROZEN_VERCEL_API_FILES, 'api folder must not add a second backend/proxy owner')
+
+
+def check_legacy_fallback_cleanup_contract(manifest, platform, app, transport, critical_runtime, static_critical):
+    ledger = manifest.get('technicalDebtLegacyFallbackLedger') if isinstance(manifest, dict) else None
+    ok('Technical debt legacy/fallback cleanup ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == LEGACY_FALLBACK_CLEANUP_STAMP, 'TECH_DEBT_MANIFEST must record Phase 7 legacy/fallback cleanup')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewApiRoutes') is True and ledger.get('noNewFiles') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False
+    ok('Technical debt legacy/fallback cleanup preserves contracts', rules_ok, 'legacy/fallback cleanup must not alter API, files, UI, business rules, routes, or write schema')
+    app_c = compact(app)
+    duplicate_patterns = [
+        'vercelApiProxyEnabled:!0,vercelApiProxyEnabled:!0',
+        'releaseGate:"tools/phaseN_legacy_transport_gate.py",releaseGate:"tools/phaseN_legacy_transport_gate.py"',
+        'vercelEnvBuildTool:"tools/generate_vercel_env.py",releaseGate:"tools/phaseN_legacy_transport_gate.py",vercelEnvBuildTool:"tools/generate_vercel_env.py"',
+        'root.APP_CONFIG.vercelApiProxyEnabled=!0,root.APP_CONFIG.vercelApiProxyEnabled=!0',
+        'root.APP_CONFIG.releaseGate="tools/phaseN_legacy_transport_gate.py",root.APP_CONFIG.releaseGate="tools/phaseN_legacy_transport_gate.py"',
+    ]
+    ok('app-config duplicate legacy/proxy flags removed', not any(p in app_c for p in duplicate_patterns), 'app-config must not carry duplicate releaseGate/vercelApiProxyEnabled/vercelEnvBuildTool assignments')
+    ok('required compatibility entrypoints retained after fallback cleanup', platform.count('function doGet(') == 1 and platform.count('function doPost(') == 1 and platform.count('function apiGithubBridgeCall(') == 1, 'required GAS compatibility entrypoints must remain single')
+    crit = compact(critical_runtime + static_critical)
+    ok('critical runtime fallback is router-only when direct GAS method missing', 'apiRouter' in crit and 'google.script.run' in crit and 'serverfunction' in crit.lower().replace(' ',''), 'GAS direct fallback must route through apiRouter rather than adding direct facade APIs')
+    ok('browser transport stays Vercel proxy only after fallback cleanup', '/api/gas' in transport and '/api/login' in transport and '__githubFastLogin' not in transport and 'document.createElement("iframe")' not in compact(transport), 'browser transport must not reintroduce JSONP or hidden bridge transport')
+
+
+def check_performance_debt_contract(manifest, transport, core_runtime):
+    ledger = manifest.get('technicalDebtPerformanceDebtLedger') if isinstance(manifest, dict) else None
+    ok('Technical debt performance debt ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == PERFORMANCE_DEBT_STAMP, 'TECH_DEBT_MANIFEST must record Phase 8 performance debt cleanup')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewApiRoutes') is True and ledger.get('noNewFiles') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False
+    ok('Technical debt performance cleanup preserves contracts', rules_ok, 'performance cleanup must not alter API, files, UI, business rules, routes, or write schema')
+    t_c = compact(transport)
+    c_c = compact(core_runtime)
+    ok('AppTransport partial asset single-flight installed', 'assetInFlight=Object.create(null)' in transport and 'if(assetInFlight[file])returnassetInFlight[file]' in t_c and 'assetInFlight[file]=tryAt(0).then' in t_c, 'static partial loader must dedupe concurrent fetchFile calls')
+    ok('AppTransport public config single-flight installed', 'publicConfigInFlight=null' in transport and 'if(publicConfigInFlight)returnpublicConfigInFlight' in t_c and 'publicConfigInFlight=fetchJsonWithTimeout' in t_c, 'public config load must dedupe concurrent calls')
+    ok('AppTransport performance status exposes asset inflight metrics', 'assetCacheEntries:Object.keys(cache).length' in t_c and 'assetInFlight:Object.keys(assetInFlight).length' in t_c and 'publicConfigInFlight:!!publicConfigInFlight' in t_c, 'transport status must expose cache/in-flight performance diagnostics')
+    ok('AppCacheDebtOwner refresh coalescing installed', 'timers={}' in core_runtime and 'function schedule(p,d,why,ms)' in core_runtime and 'pendingRefresh:Object.keys(timers)' in core_runtime and 'dirty-coalesced' in core_runtime, 'dirty page refreshes must be coalesced to avoid duplicate post-write reloads')
+
+
+def check_uiux_debt_contract(manifest, gas_index, static_index):
+    ledger = manifest.get('technicalDebtUiUxDebtLedger') if isinstance(manifest, dict) else None
+    ok('Technical debt UI/UX debt ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == UIUX_DEBT_STAMP, 'TECH_DEBT_MANIFEST must record Phase 9 UI/UX debt cleanup')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewApiRoutes') is True and ledger.get('noNewFiles') is True and ledger.get('businessLogicChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False and ledger.get('uiUxImproved') is True
+    ok('Technical debt UI/UX cleanup preserves contracts', rules_ok, 'UI/UX cleanup must not alter API, files, business rules, routes, or write schema')
+    required=['/*td-p9-uiux*/','เลื่อนซ้าย-ขวาเพื่อดูข้อมูลเพิ่มเติม','prefers-reduced-motion:reduce','-webkit-overflow-scrolling:touch','.mobile-topbar-title-wrap']
+    ok('Mobile UI/UX responsive guard installed in canonical index', all(x in gas_index for x in required), 'canonical Index must contain Phase 9 mobile UI/UX guard')
+    ok('Mobile UI/UX responsive guard installed in static index', all(x in static_index for x in required), 'static index must contain Phase 9 mobile UI/UX guard')
+
+
+def check_quality_gate_contract(manifest, router, transport, common, gas_api, login_api, public_config_api, critical_runtime, static_critical, dashboard_page, reporttrack_page, meeting_page, app_index_bootstrap):
+    ledger = manifest.get('technicalDebtQualityGateLedger') if isinstance(manifest, dict) else None
+    ok('Technical debt Phase 10 quality gate ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == QUALITY_GATE_STAMP, 'TECH_DEBT_MANIFEST must record Phase 10 quality gate hardening')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewApiRoutes') is True and ledger.get('noNewFiles') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False
+    ok('Technical debt Phase 10 quality gate preserves contracts', rules_ok, 'quality gate hardening must not alter API, files, UI, business rules, routes, or write schema')
+    smoke_methods = ['apiSearchCasesLite','apiGetTracking','apiGetDashboardBundle','apiListCommitteeMeetings','apiBudgetGetSummary','apiGetPeoplePageBundle']
+    ok('Quality gate critical smoke API methods remain routed', all(method in router for method in smoke_methods), 'router must keep critical read methods: ' + ', '.join(smoke_methods))
+    client_gas_fallback_tokens = ['body.clientGasWebAppUrl||body.gasWebAppUrl','clientGasWebAppUrl:clientGasWebAppUrl()','gasWebAppUrl='+ 'encodeURIComponent(clientGas)','NEXT_PUBLIC_GAS_WEB_APP_URL||fallback','gasUrl(clientGasWebAppUrl','gasUrl(clientGas)']
+    client_gas_fallback_blob = '\n'.join([transport, gas_api, login_api, public_config_api, common])
+    ok('Quality gate Vercel server GAS env only', 'process.env.GAS_WEB_APP_URL||process.env.VERCEL_GAS_WEB_APP_URL||""' in common and 'clientGasWebAppUrl:clientGasWebAppUrl()' not in transport and 'body.clientGasWebAppUrl||body.gasWebAppUrl' not in gas_api and 'body.clientGasWebAppUrl||body.gasWebAppUrl' not in login_api and 'searchParams.get("gasWebAppUrl")' not in public_config_api and not any(token in client_gas_fallback_blob for token in client_gas_fallback_tokens), 'Vercel proxy must use server GAS_WEB_APP_URL/VERCEL_GAS_WEB_APP_URL only; client-supplied GAS URL fallback is forbidden')
+    crit = compact(critical_runtime + '\n' + static_critical)
+    ok('Quality gate GAS direct fallback routes through apiRouter', 'apiRouter' in crit and 'google.script.run' in crit and ('serverfunction' in crit.lower() or 'server function' in (critical_runtime + static_critical).lower()), 'GAS direct runtime must route missing direct functions through apiRouter')
+    dash_c = compact(dashboard_page)
+    ok('Quality gate Dashboard write invalidation installed', all(token in dashboard_page for token in ['dashboardCacheEpoch','markDashboardDirty','app:data-mutated','app:write-cache-invalidated']) and 'forceFresh' in dashboard_page and 'state.__dirtyAfterWrite' in dashboard_page, 'Dashboard must mark dirty and force fresh after write/cache invalidation')
+    report_c = compact(reporttrack_page)
+    ok('Quality gate Search/Report force-fresh installed', ('forceFresh:!0' in report_c or 'forceFresh:true' in report_c) and ('noCache:!0' in report_c or 'noCache:true' in report_c) and ('bypassCache:!0' in report_c or 'bypassCache:true' in report_c) and ('cacheTtlMs=0' in report_c or 'cacheTtlSeconds:0' in report_c), 'Search/Report/Track manual loads must bypass stale page/proxy cache')
+    meet_c = compact(meeting_page)
+    ok('Quality gate committee meeting form recovery installed', 'CommitteeMeetingSystem' in meeting_page and 'committee-meeting-form-panel' in meeting_page and 'committee-meeting-form-body' in meeting_page and 'ensureCommitteeMeetingFormVisible' in meeting_page and 'setTimeout(function(){run(n+1)},80)' in meet_c, 'Committee meeting page must retry activate and force form visible when DOM mounts late')
+    ok('Quality gate route template HTML mounts as DOM fragment', 'createContextualFragment' in app_index_bootstrap and 'createContextualFragment' in meeting_page and 'createContextualFragment' in critical_runtime, 'route/template fallback must mount HTML as contextual fragments, not unsafe text')
+    ok('Quality gate mirror sync and static critical remain guarded', not mirror_in_sync() and critical_static_runtime_in_sync(), 'generated partial mirrors and critical-login-runtime.js must remain synced to GAS canonical sources')
+
 def main():
     for rel in REQUIRED: ok(f"required file {rel}", (ROOT/rel).exists(), rel)
     alltext=all_source_text(); platform=read('gas-backend/Code_00_PlatformCore.gs'); router=read('gas-backend/Code_20_Router.gs'); app=read('github-pages/app-config.js'); transport=read('github-pages/github-gas-transport.js'); generated=read('github-pages/vercel-env.generated.js'); common=read('api/_gasProxyCommon.js'); index=read('github-pages/index.html'); diag=read('github-pages/diagnostic.html')
@@ -444,7 +549,7 @@ def main():
     ok('obsolete mirror-sync helper absent from tools directory', not (ROOT/'tools'/obsolete_tool).exists(), 'obsolete helper must be absent; mirror drift is checked by Production current gate')
     ok('package engines pins Vercel Node 24.x', str(package.get('engines',{}).get('node','')) == '24.x', str(package.get('engines',{}).get('node','')))
     ok('proxy functions exist', all((ROOT/'api'/f).exists() for f in ['gas.js','login.js','public-config.js','_gasProxyCommon.js']), 'api proxy files')
-    ok('server GAS env used by proxy', 'process.env.GAS_WEB_APP_URL' in common, 'server env')
+    ok('server GAS env used by proxy', 'process.env.GAS_WEB_APP_URL||process.env.VERCEL_GAS_WEB_APP_URL||""' in common and 'NEXT_PUBLIC_GAS_WEB_APP_URL' not in common and '||fallback' not in common, 'server env only')
     ok('Production current header used by proxy', 'X-Production-Vercel-Proxy' in common and 'X-Phase-M-Vercel-Proxy' not in common, 'proxy header')
     ok('Vercel env production-current release track', '"releaseTrack":"production-current"' in generated and '"legacyTransportRemoved":true' in generated, 'generated env metadata')
     ok('index uses Production current assets', RELEASE in index and MODE in index, 'index script stamps')
@@ -628,6 +733,10 @@ def main():
     ok('Phase 7 keeps direct router re-entry guard while cleanup progresses', 'writeGateway-direct-router-reentry' in platform and 'ROUTER_WRITE_BOUNDARY_REQUIRED' in platform and 'directRouterReentryGuardRetained:!0' in platform, 'direct legacy write calls must still be safely routed through apiRouter during cleanup')
     ok('manifest Phase 7 transitional fallback cleanup', isinstance(manifest.get('phase7TransitionalFallbackCleanup'), dict) and manifest.get('phase7TransitionalFallbackCleanup',{}).get('stamp')=='phase7-transitional-fallback-cleanup-current', 'manifest must record Phase 7 fallback cleanup')
     ok('manifest Phase 8 runtime page performance', isinstance(manifest.get('phase8RuntimePagePerformance'), dict) and manifest.get('phase8RuntimePagePerformance',{}).get('stamp')=='phase8-runtime-page-performance-current', 'manifest must record Phase 8 runtime/page performance contract')
+    check_owner_consolidation_contract(manifest, platform, router, transport, common, core_runtime, gas_index, static_index, alltext)
+    check_legacy_fallback_cleanup_contract(manifest, platform, app, transport, read('gas-backend/Scripts_Critical_Login_Runtime.html'), read('github-pages/critical-login-runtime.js'))
+    check_performance_debt_contract(manifest, transport, core_runtime)
+    check_uiux_debt_contract(manifest, gas_index, static_index)
     check_admin_user_facade_contract(ROOT)
     report={'ok':not errors,'releaseTrack':'production-current','release':RELEASE,'transportMode':MODE,'checks':checks,'errors':errors,'writeRouteCount':len(write_methods),'schemaMethodCount':len(schemas),'phase5SizeBudgets':size_rows,'phase5TotalSourceBytes':source_total,'phase5TotalSourceBudget':PHASE5_TOTAL_SOURCE_BUDGET,'phase5DynamicGeneratedFilesExcluded':sorted(PHASE5_DYNAMIC_GENERATED_FILES),'phase5NextSlimmingTargets':PHASE5_NEXT_SLIMMING_TARGETS}
     print(json.dumps(report, ensure_ascii=False, indent=2))
