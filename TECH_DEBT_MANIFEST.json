@@ -1557,5 +1557,26 @@
       "phase": "FLOWJSONFIX",
       "summary": "Rewrite shared DOM route tick and GAS/Vercel transport owner: no Vue.nextTick dependency for route activation, GAS direct uses apiRouter, Vercel requires GAS /exec JSON response."
     }
+  ],
+  "entries": [
+    {
+      "id": "CORE_FLOWFIX_R11",
+      "date": "2026-07-08",
+      "owner": "runtime-core-flow",
+      "summary": "Fix Scripts_Core_Runtime leaked local R reference and force plain DOM Vue shim to prevent k.push/_k.push compiler path; keeps GAS data lifecycle on direct transport.",
+      "files": [
+        "gas-backend/Scripts_Core_Runtime.html",
+        "github-pages/partials/Scripts_Core_Runtime.html",
+        "github-pages/app-index-bootstrap.js",
+        "gas-backend/Index.html",
+        "github-pages/index.html"
+      ],
+      "rules": {
+        "noNewApi": true,
+        "noNewFile": true,
+        "noRollback": true,
+        "referenceUsed": "New folder(2).zip compared only"
+      }
+    }
   ]
 }
