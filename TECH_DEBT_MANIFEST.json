@@ -1372,5 +1372,43 @@
       "npm run build",
       "npm run audit:strict"
     ]
-  }
+  },
+  "runtimeBootRecoveryLedger": {
+    "stamp": "runtime-boot-recovery-gas-direct-static-router-2026-07-08-r1",
+    "problem": "Vercel failed login with _k.push is not a function because Vue compiled the large root HTML template; GAS login succeeded but post-login data/pages did not load because deferred includes were requested without auth and static local partial loading was selected before GAS direct include.",
+    "fix": [
+      "preserve static DOM shell and mount Vue lifecycle bridge on hidden node",
+      "mount route page templates with createContextualFragment into a plain DOM route host",
+      "route getDeferredInclude through google.script.run when GAS-hosted",
+      "attach memory token/csrf to deferred include requests after login"
+    ],
+    "noNewApiRoutes": true,
+    "noNewFiles": true,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false
+  },
+  "runtimeFixes": [
+    {
+      "id": "runtime-datafix-2026-07-08-r3",
+      "type": "runtime-stability-fix",
+      "summary": "Stop GAS inline Vue root template compilation, direct GAS getDeferredInclude loading, and Vercel critical asset cache staleness.",
+      "files": [
+        "gas-backend/Index.html",
+        "gas-backend/Scripts_Critical_Login_Runtime.html",
+        "github-pages/critical-login-runtime.js",
+        "github-pages/partials/Scripts_Critical_Login_Runtime.html",
+        "github-pages/index.html"
+      ],
+      "noNewApi": true,
+      "noNewFile": true,
+      "verified": [
+        "node --check github-pages/app-index-bootstrap.js",
+        "node --check github-pages/critical-login-runtime.js",
+        "npm run build",
+        "npm run audit:strict"
+      ]
+    }
+  ]
 }
