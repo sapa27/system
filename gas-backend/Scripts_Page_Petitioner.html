@@ -1,4 +1,3 @@
-<!-- GENERATED MIRROR: edit gas-backend canonical; static mirror checked by tools/phaseN_legacy_transport_gate.py -->
 <script>
 !function(){
 "use strict";
@@ -682,7 +681,7 @@ rows.forEach(function(r,index){
 var tr=document.createElement("tr");
 appendTextCell(tr,r.seq||index+1,"text-center"),appendTextCell(tr,r.name,"fw-bold text-primary"),appendTextCell(tr,formatPetitionerPhone(r.phone)||"-","text-center");
 var tdAddress=document.createElement("td");
-tdAddress.className="text-wrap",tdAddress.style.minWidth="260px",tdAddress.textContent=text(r.address||r.addressLine||"-"),tr.appendChild(tdAddress);
+tdAddress.className="text-wrap petitioner-address-cell",tdAddress.style.minWidth="300px";var displayAddr=canonicalPetitionerAddress(r);tdAddress.textContent=text(displayAddr.address||r.address||r.addressLine||"-");tdAddress.setAttribute("data-address-standard","full");tr.appendChild(tdAddress);
 var tdCount=document.createElement("td");
 tdCount.className="text-center";
 var badge=document.createElement("span");
