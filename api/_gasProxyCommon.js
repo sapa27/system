@@ -1,9 +1,9 @@
 "use strict";
 
-const RELEASE_STAMP = "commission-v1.2-hotfix-budget-summary-2026-07-09-r13";
+const RELEASE_STAMP = "commission-v1.2-production-current-contract-freeze-2026-07-06-r1";
 const MAX_BODY_BYTES = 1048576;
-const DEFAULT_PROXY_TIMEOUT_MS = Number(process.env.GAS_PROXY_TIMEOUT_MS || 9000) || 9000;
-const MAX_PROXY_TIMEOUT_MS = Number(process.env.GAS_PROXY_MAX_TIMEOUT_MS || 25000) || 25000;
+const DEFAULT_PROXY_TIMEOUT_MS = 55000;
+const MAX_PROXY_TIMEOUT_MS = 55000;
 
 function header(res, key, value) {
   try { res.setHeader(key, value); } catch (_) {}
