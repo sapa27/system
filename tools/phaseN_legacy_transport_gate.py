@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "commission-v1.2-meeting-direct-fallback-2026-07-09-r16"
-ASSET = "asset-manifest-commission-v1.2-meeting-direct-fallback-2026-07-09-r16"
+RELEASE = "commission-v1.2-budget-append-safe-2026-07-09-r17"
+ASSET = "asset-manifest-commission-v1.2-budget-append-safe-2026-07-09-r17"
 VERSION = "1.2.0-production-current"
 MODE = "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
 SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
@@ -901,11 +901,14 @@ def check_ai_meeting_budget_stability_contract(manifest, docs_policy):
         rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
         ok('Core slice helper is deterministic in ' + rel, 'Function.call.bind(Array.prototype[_$27])' not in text and '__sl=function(a,start)' in text, 'Core runtime must not bind Array.prototype using a token declared later')
         ok('Core appendChildren rejects parent/ancestor append in ' + rel, 'e&&e!==t&&!(e.contains&&e.contains(t))&&t[_$g](e)' in text, 'appendChildren must prevent HierarchyRequestError')
+        ok('Core AppPageSlim appendChildren rejects parent/ancestor append in ' + rel, 'function __p10(e){var t=__p1(e)||e;if(!t)return t;for(var a=1;a<arguments.length;a++){var p=arguments[a];_$I(p)?p[_$18](function(e){e&&e!==t&&!(e.contains&&e.contains(t))&&t[_$g](e)}):p&&p!==t&&!(p.contains&&p.contains(t))&&t[_$g](p)}return t}' in text, 'AppPageSlim.appendChildren must not append a parent into its child')
+        ok('Core AppDom.mount rejects parent/ancestor append in ' + rel, 'n2&&n2!==a2&&!(n2.contains&&n2.contains(a2))&&a2[_$g](n2)' in text, 'AppDom.mount must reject parent/ancestor append')
     budget_files = [ROOT/'gas-backend'/'Scripts_Page_Budget.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Budget.html']
     for path in budget_files:
         text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
         rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
         ok('Budget dynamic form uses direct safe render in ' + rel, 'data-budget-direct-render","dynamic-form-safe' in text and 'Budget.dynamicForm.prePhase1HtmlOwner' not in text, 'Budget dynamic form must avoid renderer append recursion')
+        ok('Budget page uses local safe appendChildren instead of unsafe imported helper in ' + rel, '},i=function(t){' in text and '},i=e.appendChildren||function(t){' not in text, 'Budget page must not use stale AppPageSlim.appendChildren implementation')
         ok('Budget footer relocation has ancestor guard in ' + rel, 'target!==host&&!(host.contains&&host.contains(target))&&target.appendChild(host)' in text, 'Budget footer must not append a parent into its child')
         ok('Budget seminar row append has ancestor guard in ' + rel, 'o!==a&&!(o.contains&&o.contains(a))&&a.appendChild(o)' in text, 'Budget seminar row append must reject parent/ancestor append')
     meeting_files = [ROOT/'gas-backend'/'Scripts_Page_Meeting.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Meeting.html']
