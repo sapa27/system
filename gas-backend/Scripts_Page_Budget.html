@@ -76,14 +76,13 @@ e.firstChild;
 return e
 },i=e.appendChildren||function(t){
 if(!t)return t;
-function safe(n){return!!(n&&n.nodeType&&n!==t&&!(n.contains&&n.contains(t)))}
 for(var e=1;
 e<arguments.length;
 e++){
 var n=arguments[e];
 n&&($aa(n)?n.forEach(function(e){
-safe(e)&&t.appendChild(e)
-}):safe(n)&&t.appendChild(n))
+e&&e!==t&&!(e.contains&&e.contains(t))&&t.appendChild(e)
+}):n!==t&&!(n.contains&&n.contains(t))&&t.appendChild(n))
 }
 return t
 },u=t.AppStore||t.GlobalStore||null,d=e.getStoreReader?e.getStoreReader():e.storeGet||function(t,e){
@@ -455,7 +454,7 @@ c.className="text-end mt-2";
 var m=document.createElement("button");
 m.type="button",m.className="btn btn-outline-danger btn-sm",m.setAttribute("data-action","removeBudgetSeminarRow");
 var p=document.createElement("i");
-return p.className="fas fa-trash me-1",m.appendChild(p),m.appendChild(document.createTextNode("ลบรายการ")),c.appendChild(m),o.appendChild(c),a.appendChild(o),e.enhanceThaiDateInputs&&e.enhanceThaiDateInputs(o),Promise.resolve(B()).then(function(e){
+return p.className="fas fa-trash me-1",m.appendChild(p),m.appendChild(document.createTextNode("ลบรายการ")),c.appendChild(m),o.appendChild(c),o!==a&&!(o.contains&&o.contains(a))&&a.appendChild(o),e.enhanceThaiDateInputs&&e.enhanceThaiDateInputs(o),Promise.resolve(B()).then(function(e){
 return $fn(t.bindBudgetLocationAutoSelects)&&t.bindBudgetLocationAutoSelects(o),e
 },function(e){
 throw $fn(t.bindBudgetLocationAutoSelects)&&t.bindBudgetLocationAutoSelects(o),e
@@ -2028,8 +2027,8 @@ var f=y($B33);
 g+=w($B54,$B33,[$B16,$B0,$B5,$B17,$B7,$B4,$B13,"อื่น ๆ"],$B65),g+='<div class="col-md-6 d-flex align-items-end"><div class="small text-muted">เลือกประเภทรายการเพื่อแสดงฟอร์มกรอกข้อมูลเฉพาะประเภท ระบบจะนำเฉพาะผลรวมไปบันทึกใน supportCost / amount</div></div>',g+=v($B78,$B78,$B66,$B64," readonly"),g+=v($B9,$B9,$B66,$B64," readonly"),f||(g+='<div class="col-12"><div class="alert alert-light border text-center mb-0">กรุณาเลือกประเภทรายการส่งเสริมเพื่อกรอกข้อมูล</div></div>')
 }
 n&&(g+='<div class="col-12"><label class="fw-bold">หมายเหตุ</label><textarea id="budget-note" class="form-control" rows="2"></textarea></div>'),!(g+="</div>")&&n&&(g='<div class="alert alert-warning mb-0">ไม่พบแบบฟอร์มสำหรับประเภทรายการนี้ กรุณาตรวจสอบชื่อประเภทรายการ</div>');
-var htmlSetter=t.AppDom&&($fn(t.AppDom.renderHtml)?t.AppDom.renderHtml:$fn(t.AppDom.setTrustedHtml)?t.AppDom.setTrustedHtml:$fn(t.AppDom.setHtml)?t.AppDom.setHtml:null)||($fn(t.safeSetInnerHTML)?t.safeSetInnerHTML:null)||($fn(e.setHtml)?e.setHtml:null);
-i.innerHTML=String(g||"");i.setAttribute&&i.setAttribute("data-budget-direct-render","dynamic-form-safe");
+i.innerHTML=String(g||"");
+i.setAttribute&&i.setAttribute("data-budget-direct-render","dynamic-form-safe");
 t.__budgetLastRenderedEntryType=n;
 t.__budgetRenderEntryTypeForm=$;
 e.enhanceThaiDateInputs&&e.enhanceThaiDateInputs(i),$fn(t.ensureDatePickerAssets)&&Promise.resolve(t.ensureDatePickerAssets()).then(function(){
