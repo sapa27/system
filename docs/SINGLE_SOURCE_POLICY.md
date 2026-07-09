@@ -2,7 +2,7 @@
 
 Editable canonical source is `gas-backend/`.
 
-Current release: `commission-v1.2-production-current-contract-freeze-2026-07-06-r1`.
+Current release: `commission-v1.2-hotfix-track-meeting-2026-07-09-r12`.
 
 ## Canonical source rules
 
