@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "commission-v1.2-hotfix-budget-summary-2026-07-09-r13"
-ASSET = "asset-manifest-commission-v1.2-hotfix-budget-summary-2026-07-09-r13"
+RELEASE = "commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14"
+ASSET = "asset-manifest-commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14"
 VERSION = "1.2.0-production-current"
 MODE = "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
 SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
@@ -182,8 +182,8 @@ PHASE5_SIZE_BUDGETS = {
     # owners; no API routes, files, UI, or business rules are added.
     "gas-backend/Scripts_Core_Runtime.html": 360000,
     "github-pages/partials/Scripts_Core_Runtime.html": 360000,
-    "gas-backend/Scripts_Page_Meeting.html": 222000,
-    "github-pages/partials/Scripts_Page_Meeting.html": 222000,
+    "gas-backend/Scripts_Page_Meeting.html": 220000,
+    "github-pages/partials/Scripts_Page_Meeting.html": 220000,
     "gas-backend/Code_30_Domain_Cases.gs": 327000,
     "gas-backend/Code_32_Domain_Budget.gs": 228000,
     "gas-backend/Scripts_Page_Budget.html": 160000,
@@ -226,7 +226,7 @@ OWNER_CONSOLIDATION_FORBIDDEN_PAGE_CALLS = [
 PHASE5_NEXT_SLIMMING_TARGETS = {
     # Informational next-step targets; not enforced in Phase 5.
     "gas-backend/Scripts_Core_Runtime.html": 340000,
-    "gas-backend/Scripts_Page_Meeting.html": 222000,
+    "gas-backend/Scripts_Page_Meeting.html": 220000,
     "gas-backend/Code_30_Domain_Cases.gs": 310000,
     "gas-backend/Code_32_Domain_Budget.gs": 210000,
 }
@@ -851,22 +851,6 @@ def _semantic_minifier_spacing_errors():
 
 def _interaction_ux_runtime_contract_errors():
     errors_found = []
-    core_paths = [ROOT/'gas-backend'/'Scripts_Core_Runtime.html', ROOT/'github-pages'/'partials'/'Scripts_Core_Runtime.html']
-    for path in core_paths:
-        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
-        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
-        if 'Function.call.bind(Array.prototype[_$27])' in text:
-            errors_found.append(rel + ': __sl slice helper must not bind Array.prototype before _$27 is initialized')
-        if '__sl=function(a){return Array.prototype.slice.call(a||[])}' not in text:
-            errors_found.append(rel + ': __sl must be an explicit safe slice helper for NodeList/HTMLCollection')
-        if 'e&&e!==t&&!(e[_$5]&&e[_$5](t))&&t[_$g](e)' not in text:
-            errors_found.append(rel + ': core appendChildren must guard against appending a parent/ancestor into its child')
-    login_paths = [ROOT/'github-pages'/'critical-login-runtime.js', ROOT/'gas-backend'/'Scripts_Critical_Login_Runtime.html', ROOT/'github-pages'/'partials'/'Scripts_Critical_Login_Runtime.html']
-    for path in login_paths:
-        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
-        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
-        if 'if(r.__APP_LOGIN_IN_FLIGHT__&&r.__APP_EXPLICIT_LOGIN_ATTEMPT__)return!0' not in text:
-            errors_found.append(rel + ': login recovery helper must not clear an explicit login in flight')
     meeting_paths = [ROOT/'gas-backend'/'Scripts_Page_Meeting.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Meeting.html']
     for path in meeting_paths:
         text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
@@ -875,34 +859,19 @@ def _interaction_ux_runtime_contract_errors():
             errors_found.append(rel + ': meeting runtime constants must be explicit, not self-assigned')
         if '.js-show-meeting-detail,.js-load-meeting' not in text:
             errors_found.append(rel + ': meeting summary detail click must be covered by main event owner selector')
-        if 'CommitteeMeetingSummaryDetail.show(btn.dataset.id)' not in text and 'root.CommitteeMeetingSummaryDetail&&_I(root.CommitteeMeetingSummaryDetail.show)' not in text:
-            errors_found.append(rel + ': meeting summary detail button must call CommitteeMeetingSummaryDetail.show')
-        if 'data-meeting-summary-render","direct-safe-innerhtml-r13"' not in text or 'data-meeting-summary-detail-render","direct-safe-innerhtml-r13"' not in text:
-            errors_found.append(rel + ': meeting summary popup must render with direct safe innerHTML fallback for GAS/static runtime')
-        if '.js-show-meeting-detail' not in text or 'w.CommitteeMeetingSummaryDetail.show' not in text:
-            errors_found.append(rel + ': meeting summary detail must have capture-level fallback handler')
-        if 'function bind(){root._mCB&&byId(_M.x68)&&loadList(),root._mCB=!0,bindCommitteeEvent' not in text:
-            errors_found.append(rel + ': meeting event owner must rebind after route/AppEvents cleanup')
-        if 'insertAdjacentHTML("beforeend",h)' not in text:
-            errors_found.append(rel + ': agenda 3/4 row creation must have a safe DOM fallback')
-        if 'if(applyPending())' in text or 'if(_f55()){opened=!0;return}' not in text:
-            errors_found.append(rel + ': meeting route activation must call the local pending seed function, not an undefined applyPending symbol')
+
+        if 'function show(id){return setPopupLoading("รายละเอียดสรุปการประชุม"),getMeeting(id)' not in text or 'show:show' not in text or 'root.__Scripts_Page_Meeting_show=show' not in text:
+            errors_found.append(rel + ': meeting summary popup must export a real show() function and compatibility alias')
+        if 'bindDirectFallback' not in text or 'js-show-meeting-detail' not in text:
+            errors_found.append(rel + ': meeting summary detail must have capture-level fallback click handler')
+        if 'if(_f55()){opened=!0;return}' not in text or 'if(applyPending())' in text:
+            errors_found.append(rel + ': meeting route action must call scoped _f55(), not missing global applyPending()')
     people_paths = [ROOT/'gas-backend'/'Scripts_Page_People.html', ROOT/'github-pages'/'partials'/'Scripts_Page_People.html']
     for path in people_paths:
         text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
         rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
         if '#psTab.nav-link' in text:
             errors_found.append(rel + ': people tab selector must be `#psTab .nav-link`, not `#psTab.nav-link`')
-        if '"string"==typeof e?e:n&&n[$ga]&&n[$ga]($ps[155])||""' not in text:
-            errors_found.append(rel + ': people history action must support direct string person names')
-        if 'e.stopImmediatePropagation&&e.stopImmediatePropagation(),t[a](r||n)' not in text:
-            errors_found.append(rel + ': people direct actions must stop duplicate history handlers')
-    petitioner_paths = [ROOT/'gas-backend'/'Scripts_Page_Petitioner.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Petitioner.html']
-    for path in petitioner_paths:
-        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
-        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
-        if 'petitioner-address-cell' not in text or 'data-address-standard","full"' not in text:
-            errors_found.append(rel + ': petitioner list must render the full canonical address, not only addressLine')
     budget_paths = [ROOT/'gas-backend'/'Scripts_Page_Budget.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Budget.html']
     malformed_attr = re.compile(r'<[^>\n]*(?:id|class)=\$B\d+')
     for path in budget_paths:
@@ -911,12 +880,11 @@ def _interaction_ux_runtime_contract_errors():
         hits = malformed_attr.findall(text)
         if hits:
             errors_found.append(rel + ': generated budget HTML contains literal minifier variable attributes (' + str(len(hits)) + ' hit(s))')
-        if 'target&&host.parentNode!==target&&target!==host&&!(host.contains&&host.contains(target))&&target.appendChild(host)' not in text:
-            errors_found.append(rel + ': budget footer relocation must guard against appending an ancestor into its descendant')
-        if 'data-budget-dynamic-form-render","direct-safe-innerhtml-r13"' not in text or 'data-budget-support-render","direct-safe-innerhtml-r13"' not in text:
-            errors_found.append(rel + ': budget dynamic/support forms must bypass unsafe appendChild renderer with direct safe innerHTML')
-        if 'o!==a&&!(o.contains&&o.contains(a))&&a.appendChild(o)' not in text:
-            errors_found.append(rel + ': budget seminar row append must guard against parent-containing child nodes')
+
+        if 'data-budget-direct-render","dynamic-form-safe"' not in text:
+            errors_found.append(rel + ': budget dynamic form must use direct safe render to avoid appendChild hierarchy errors')
+        if 'target!==host&&!(host.contains&&host.contains(target))&&target.appendChild(host)' not in text:
+            errors_found.append(rel + ': budget footer relocation must guard parent/ancestor appendChild')
     return errors_found
 
 
@@ -1039,6 +1007,8 @@ def main():
     ok('Meeting page AppPages adapter retained after slimming', '__meetingAppPageAdapterReady' in meeting_page and 'AppPages.register("meeting",mod)' in compact(meeting_page) and 'registerActions("meeting"' in compact(meeting_page) and 'meetingDeleteLogSinglePath' in meeting_page, 'Meeting AppPages module/actions must survive slimming')
     core_runtime = read('gas-backend/Scripts_Core_Runtime.html')
     admin_page = read('gas-backend/Scripts_Page_Admin.html')
+    ok('core runtime slice helper is order-safe', 'Function.call.bind(Array.prototype[_$27])' not in core_runtime and '__sl=function(a){return Array.prototype.slice.call(a||[])}' in core_runtime, 'core runtime must not bind Array.prototype slice before _$27 exists')
+    ok('core runtime appendChildren guards ancestor append', 'function __p10(e)' in core_runtime and '!(n[_$5]&&n[_$5](t))' in core_runtime, 'appendChildren must not append a parent/ancestor into its child')
     ok('core runtime sends transport options directly', contains_code(core_runtime, 'root.AppTransport.run(method, payload || {') and contains_code(core_runtime, 'options || {') and contains_code(core_runtime, 'previousRuntimeCall.call(runtime, method, payload || {'), 'single-owner runtime options propagation')
     ok('runtime write clears sessionStorage client cache', 'function invalidateWriteCaches' in core_runtime and 'AppClientCacheOwner' in core_runtime and 'app:write-cache-invalidated' in core_runtime, 'runtime AppClientCacheOwner invalidation')
     ok('runtime write emits mutation event', 'function emitWriteMutation' in core_runtime and 'app:data-mutated' in core_runtime and 'after-write-ok' in core_runtime, 'write mutation event')

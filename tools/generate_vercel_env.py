@@ -5,8 +5,8 @@ import json
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "github-pages" / "vercel-env.generated.js"
-RELEASE = "commission-v1.2-hotfix-budget-summary-2026-07-09-r13"
-ASSET = "asset-manifest-commission-v1.2-hotfix-budget-summary-2026-07-09-r13"
+RELEASE = "commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14"
+ASSET = "asset-manifest-commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14"
 VERSION = "1.2.0-production-current"
 
 
