@@ -4,7 +4,7 @@
   "release": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
   "releaseStamp": "commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
   "assetStamp": "asset-manifest-commission-v1.2-production-current-contract-freeze-2026-07-06-r1",
-  "updatedAt": "2026-07-08T12:20:00+07:00",
+  "updatedAt": "2026-07-08T00:00:00+07:00",
   "releaseGate": "tools/phaseN_legacy_transport_gate.py",
   "transportMode": "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
   "singleSourcePolicy": "docs/SINGLE_SOURCE_POLICY.md",
@@ -84,7 +84,7 @@
     "loginViaVercelProxy": true
   },
   "sizeLedger": {
-    "fileCount": 54,
+    "fileCount": 53,
     "sourceBytes": 4862791,
     "manifestBeforeBytes": 17388,
     "knownLargestFiles": [
@@ -152,7 +152,7 @@
     "manifestReducedBytes": 10189,
     "task2RemovedGateWrapperFiles": 7,
     "task2BuildCommandDeduplicated": true,
-    "sourceFileCount": 52,
+    "sourceFileCount": 53,
     "task2RemainingToolFiles": 4,
     "task3RuntimeSlimmingCompleted": true,
     "task3NoNewApiRoutes": true,
@@ -241,7 +241,17 @@
     "budgetPageMirrorBudgetBytes": 160100,
     "sizeRegressionGuardUpdated": true,
     "noNewFiles": true,
-    "noNewApiRoutes": true
+    "noNewApiRoutes": true,
+    "phase3CacheDataFreshnessCompleted": true,
+    "phase3NoNewApiRoutes": true,
+    "phase3NoNewFiles": true,
+    "phase3UiUxChanged": false,
+    "phase3BusinessLogicChanged": false,
+    "phase3TotalSourceBytes": 4729937,
+    "phase3CoreRuntimeBytes": 336322,
+    "phase3CoreRuntimeMirrorBytes": 336322,
+    "phase3BudgetPageBytes": 144398,
+    "phase3BudgetPageMirrorBytes": 144501
   },
   "currentDebtTargets": [
     {
@@ -835,9 +845,9 @@
     "source": "gas-backend/Scripts_Page_Meeting.html",
     "generatedMirror": "github-pages/partials/Scripts_Page_Meeting.html",
     "previousBackendMeetingBytes": 247282,
-    "currentBackendMeetingBytes": 242111,
+    "currentBackendMeetingBytes": 219185,
     "previousMirrorMeetingBytes": 247376,
-    "currentMirrorMeetingBytes": 242205,
+    "currentMirrorMeetingBytes": 219185,
     "bytesReducedFromCoreRuntimeSlim": 5171,
     "mirrorBytesReducedFromCoreRuntimeSlim": 5171,
     "sharedOwners": [
@@ -857,15 +867,19 @@
       "CommitteeMeetingSummaryDetail",
       "AppPages meeting actions"
     ],
-    "maxBackendMeetingBytes": 242500,
-    "maxMirrorMeetingBytes": 242600,
+    "maxBackendMeetingBytes": 220000,
+    "maxMirrorMeetingBytes": 220000,
     "noApiContractChange": true,
     "noNewFiles": true,
     "noDeletedFiles": true,
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
     "uiUxPreserved": true,
-    "businessLogicChanged": false
+    "businessLogicChanged": false,
+    "phase2RuntimeSlimmingApplied": true,
+    "phase2RuntimeSlimmingStamp": "production-current-phase2-runtime-slimming-2026-07-08-r1",
+    "phase2Technique": "literal alias compaction inside the existing meeting partial; retained public owners, event owners, API methods, UI labels, and business rules",
+    "uiUxChanged": false
   },
   "casesDomainSlimmingLedger": {
     "stamp": "production-current-cases-domain-helper-owner-slim-2026-07-06-r1",
@@ -955,8 +969,8 @@
     "fileBudgets": {
       "gas-backend/Scripts_Core_Runtime.html": 360000,
       "github-pages/partials/Scripts_Core_Runtime.html": 360000,
-      "gas-backend/Scripts_Page_Meeting.html": 242500,
-      "github-pages/partials/Scripts_Page_Meeting.html": 242600,
+      "gas-backend/Scripts_Page_Meeting.html": 220000,
+      "github-pages/partials/Scripts_Page_Meeting.html": 220000,
       "gas-backend/Code_30_Domain_Cases.gs": 327000,
       "gas-backend/Code_32_Domain_Budget.gs": 228000,
       "gas-backend/Scripts_Page_Budget.html": 160000,
@@ -972,7 +986,10 @@
     "noDeletedFiles": true,
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
-    "noApiContractChange": true
+    "noApiContractChange": true,
+    "phase2RuntimeSlimmingApplied": true,
+    "phase2RuntimeSlimmingStamp": "production-current-phase2-runtime-slimming-2026-07-08-r1",
+    "currentScopedSourceBytes": 4714593
   },
   "budgetUiModernizationLedger": {
     "stamp": "production-current-budget-ui-modern-current-2026-07-06-r1",
@@ -1033,14 +1050,15 @@
       "button hover elevation",
       "mobile responsive spacing"
     ],
-    "maxGasIndexBytes": 274500,
-    "maxStaticIndexBytes": 197500,
+    "maxGasIndexBytes": 281000,
+    "maxStaticIndexBytes": 203000,
     "noApiContractChange": true,
     "noNewFiles": true,
     "noDeletedFiles": true,
     "noNewApiRoutes": true,
     "noNewPhaseAdded": true,
-    "businessLogicChanged": false
+    "businessLogicChanged": false,
+    "phase5UiUxBudgetAdjusted": true
   },
   "vercelBuildCommandLengthLedger": {
     "owner": "vercel.json + package.json + tools/phaseN_legacy_transport_gate.py",
@@ -1523,6 +1541,17 @@
         "no new file",
         "shared runtime not single-page patch"
       ]
+    },
+    {
+      "phase": "Phase 2",
+      "stamp": "production-current-phase2-runtime-slimming-2026-07-08-r1",
+      "summary": "Slimmed Scripts_Page_Meeting canonical and mirror under 220 KB with literal alias compaction; no API, write schema, UI/UX, or business rule changes.",
+      "backendMeetingBytes": 219185,
+      "mirrorMeetingBytes": 219185,
+      "noNewFiles": true,
+      "noApiContractChange": true,
+      "businessLogicChanged": false,
+      "uiUxChanged": false
     }
   ],
   "runtimeFixLedger": [
@@ -1587,5 +1616,380 @@
     "noApiContractChange": true,
     "noNewFiles": true,
     "noRollback": true
+  },
+  "runtimeCoreFlowFixLedger": {
+    "stamp": "runtime-coreflow-root-alias-route-order-2026-07-08-r13",
+    "sourceCompared": "New folder(2).zip",
+    "rootCause": [
+      "Scripts_Core_Runtime contained standalone script blocks using R.* without local R binding",
+      "plain DOM route flow showed shell before mounting dashboard host",
+      "Vercel static files reused old r12 cache-bust after bootstrap changes"
+    ],
+    "noRollback": true,
+    "noNewApi": true,
+    "noNewFiles": true,
+    "businessLogicChanged": false
+  },
+  "changeLog": [
+    {
+      "stamp": "realfix-backend-global-collision-2026-07-08-r14",
+      "area": "GAS backend global namespace",
+      "files": [
+        "gas-backend/Code_00_PlatformCore.gs"
+      ],
+      "rootCause": "GAS shares a global namespace across .gs files. Minified Code_00 symbols _k/_j and short helpers collided with Code_30_Domain_Cases.gs function names; _k was overwritten by function _k(), causing _k.push is not a function and blocking API data loads.",
+      "fix": "Renamed Code_00 internal backend-boundary/cache symbols to unique platform-prefixed names. No API, UI, or business rule changes.",
+      "noRollback": true,
+      "noNewApi": true,
+      "noNewFiles": true
+    },
+    {
+      "date": "2026-07-08",
+      "id": "phase10-quality-gate-stability-archfix-review-r2",
+      "summary": "Hardened Vercel proxy env URL normalization, timeout cap, Buffer JSON body parsing, public-config envelope, generated env duplication, and release artifact cleanliness.",
+      "noNewApi": true,
+      "noNewSourceFiles": true,
+      "validated": [
+        "npm run build",
+        "npm run audit:strict"
+      ]
+    }
+  ],
+  "backendNamespaceAndPlainRouteFlowFixLedger": {
+    "stamp": "backend-namespace-plain-route-flowfix-2026-07-08-r14",
+    "policy": "Use uploaded reference files only for differential diagnosis. Do not rollback production-current code wholesale, do not add APIs, and do not add files.",
+    "rootCause": [
+      "Google Apps Script shares one global scope across all .gs files. Short/minified globals such as _k can collide with platform boundary variables and surface as k.push/_k.push is not a function.",
+      "Code_30_Domain_Cases retained a top-level function _k for meeting agenda number normalization, leaving the same collision surface that previously broke backend API execution.",
+      "After removing Vue mount to avoid frontend compiler crashes, route activation must explicitly reload page runtime and call page data activators when global activator functions are not present on first pass."
+    ],
+    "fixes": [
+      "Rename Code_30_Domain_Cases top-level _k to _caseMeetingAgendaNumberText_ and update every caller.",
+      "Replace route activation flow with a centralized plain-DOM activator that retries page-script execution before calling loadDash/searchAll/loadTrackData/initBudgetPage/etc.",
+      "Add a strict GAS global namespace collision gate to prevent _k/k.push/global var-function collisions from returning."
+    ],
+    "filesChanged": [
+      "gas-backend/Code_30_Domain_Cases.gs",
+      "github-pages/app-index-bootstrap.js",
+      "gas-backend/Index.html",
+      "github-pages/index.html",
+      "tools/phaseN_legacy_transport_gate.py",
+      "TECH_DEBT_MANIFEST.json"
+    ],
+    "validation": [
+      "node --check github-pages/app-index-bootstrap.js",
+      "python3 -m py_compile tools/phaseN_legacy_transport_gate.py",
+      "npm run build",
+      "npm run audit:strict"
+    ],
+    "invariants": {
+      "noWholeFileRevert": true,
+      "noNewApi": true,
+      "noNewFile": true,
+      "preserveBusinessRules": true,
+      "preserveUiStructure": true
+    }
+  },
+  "phase10QualityGateStabilityArchfixReview": {
+    "stamp": "phase10-quality-gate-stability-archfix-review-2026-07-08-r2",
+    "owner": "Principal System Architect review",
+    "rootCauses": [
+      "Vercel proxy accepted raw GAS_WEB_APP_URL without normalizing quoted values or /exec/ trailing slash, causing valid deployments to be rejected as GAS_WEB_APP_URL_INVALID.",
+      "Proxy timeout accepted oversized client/body timeoutMs values beyond the Vercel function budget, risking platform-killed requests without a deterministic JSON error envelope.",
+      "readJsonBody treated Buffer-like req.body as a plain object in some Node/Vercel parser modes, risking METHOD_REQUIRED even when a valid JSON body was posted.",
+      "Generated Vercel public env output repeated vercelApiProxyEnabled in APP_DEPLOY_RELEASE metadata.",
+      "Packaged ZIP included Python __pycache__ bytecode, which is not source and can create noisy diffs/release artifacts."
+    ],
+    "fixes": [
+      "Rewrote api/_gasProxyCommon.js into explicit stable proxy helpers: normalizeGasWebAppUrl, normalizeTimeoutMs, Buffer-safe JSON body parsing, bounded timeout meta, and consistent error envelope.",
+      "Rewrote api/public-config.js to reuse normalized URL/timeout policy and align /exec-only validation wording.",
+      "Fixed tools/generate_vercel_env.py and regenerated github-pages/vercel-env.generated.js without duplicate proxy metadata.",
+      "Extended tools/phaseN_legacy_transport_gate.py with guards for __pycache__ absence, proxy URL/timeout hardening, Buffer body parsing, and duplicate generated proxy metadata.",
+      "Removed tools/__pycache__ from the deliverable tree."
+    ],
+    "contractPreserved": true,
+    "newApiAdded": false,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "uiUxChanged": false,
+    "businessLogicChanged": false,
+    "newSourceFilesAdded": false,
+    "deletedNonSourceArtifacts": [
+      "tools/__pycache__/phaseN_legacy_transport_gate.cpython-313.pyc"
+    ],
+    "validatedBy": [
+      "npm run build",
+      "npm run audit:strict",
+      "node --check all Vercel API proxy files"
+    ]
+  },
+  "phase1ProductionReleaseDisciplineLedger": {
+    "stamp": "production-current-phase1-release-discipline-2026-07-08-r1",
+    "owner": "release-discipline-and-quality-gate",
+    "scope": "Phase 1 — Production Release Discipline",
+    "vercelBuildCommand": "npm run build",
+    "vercelBuildIsHostSafe": true,
+    "productionReleaseGate": "npm run audit:strict",
+    "releaseCheckScript": "npm run release:check",
+    "deployCheckScript": "npm run deploy:check",
+    "predeployProductionScript": "npm run predeploy:production",
+    "requiresStrictGates": true,
+    "strictGateEnvironment": "COMMISSION_STRICT_GATES=1",
+    "requiredGateCommands": [
+      "npm run check:api",
+      "python3 tools/phaseG_security_gate.py --strict",
+      "python3 tools/phaseN_legacy_transport_gate.py --strict"
+    ],
+    "forbiddenProductionShortcut": "npm run build only",
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "notes": "Vercel build stays lightweight to satisfy host limits; production deployment is blocked by explicit strict audit/release check before packaging or promotion."
+  },
+  "phase2RuntimeSlimmingLedger": {
+    "stamp": "production-current-phase2-runtime-slimming-2026-07-08-r1",
+    "owner": "runtime-slimming-and-size-budget",
+    "scope": "Phase 2 — Runtime Slimming",
+    "source": "gas-backend/Scripts_Page_Meeting.html",
+    "generatedMirror": "github-pages/partials/Scripts_Page_Meeting.html",
+    "baselineBackendMeetingBytes": 221871,
+    "baselineMirrorMeetingBytes": 221871,
+    "currentBackendMeetingBytes": 219185,
+    "currentMirrorMeetingBytes": 219185,
+    "backendBytesReduced": 2686,
+    "mirrorBytesReduced": 2686,
+    "maxBackendMeetingBytes": 220000,
+    "maxMirrorMeetingBytes": 220000,
+    "technique": "Compacted repeated meeting runtime literals into top-level constants and reused existing _M aliases inside the same canonical partial; no route, write schema, DOM id, UI label, or business rule was changed.",
+    "retainedPublicOwners": [
+      "initMeetingPage",
+      "meetingSetMode",
+      "meetingGoSearch",
+      "meetingEditLog",
+      "meetingEditLetter",
+      "meetingDeleteLetter",
+      "CommitteeMeetingSystem",
+      "CommitteeMeetingStandalonePrint",
+      "CommitteeMeetingSummaryDetail",
+      "AppPages meeting actions"
+    ],
+    "releaseGate": "npm run audit:strict",
+    "strictGate": "tools/phaseN_legacy_transport_gate.py --strict",
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "noApiContractChange": true,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "canonicalMirrorInSync": true,
+    "currentScopedSourceBytes": 4714593,
+    "notes": "Phase 2 keeps Vercel build lightweight while tightening the production strict gate size budget for the meeting page from ~242 KB to 220 KB."
+  },
+  "phase3CacheDataFreshnessLedger": {
+    "stamp": "production-current-phase3-cache-data-freshness-2026-07-08-r1",
+    "owner": "AppDataFreshnessOwner + AppClientCacheOwner epoch key",
+    "runtimeFiles": [
+      "gas-backend/Scripts_Core_Runtime.html",
+      "github-pages/partials/Scripts_Core_Runtime.html"
+    ],
+    "budgetPageFiles": [
+      "gas-backend/Scripts_Page_Budget.html",
+      "github-pages/partials/Scripts_Page_Budget.html"
+    ],
+    "clientCacheEpochKeyed": true,
+    "writeMutationEvents": [
+      "app:data-mutated",
+      "app:write-cache-invalidated",
+      "app:data-freshness-changed"
+    ],
+    "visibleRefreshTargets": [
+      "search/report/track existing invalidation",
+      "dashboard existing dirty reload",
+      "budget phase3 freshness reload"
+    ],
+    "noNewFiles": true,
+    "noDeletedFiles": true,
+    "noNewApiRoutes": true,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "uiUxChanged": false,
+    "businessLogicChanged": false,
+    "productionReleaseGate": "npm run audit:strict"
+  },
+  "phase4WriteDeleteReliabilityLedger": {
+    "stamp": "production-current-phase4-write-delete-reliability-2026-07-08-r1",
+    "owner": "Code_00_PlatformCore.Phase4WriteDeleteReliability + Code_20_Router.Phase4WriteDeleteReliability",
+    "goal": "Lock write/delete reliability for all production write routes with standard response envelope, writeGateway metadata, schema/csrf contract, and deterministic cache invalidation.",
+    "writeRouteCount": 27,
+    "writeSchemaCount": 27,
+    "criticalDeleteInvalidationLocked": true,
+    "standardEnvelope": "ok/data/msg/error/meta",
+    "productionReleaseGate": "npm run audit:strict",
+    "requiresStrictGates": true,
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "notes": [
+      "Does not change sheet business rules or UI labels.",
+      "Adds contract metadata and gate coverage for write/delete response reliability.",
+      "Live GAS/Sheet QA is still required for data-specific failures."
+    ]
+  },
+  "phase5UiUxModernizationLedger": {
+    "stamp": "production-current-phase5-uiux-modernization-2026-07-08-r1",
+    "owner": "Index.AppPhase5UiUx + app-phase5-uiux CSS guard",
+    "goal": "Modernize the visible runtime shell with consistent touch targets, accessible table scroll regions, modal scrolling, focus rings, and loading/empty/error states while preserving all business rules and API contracts.",
+    "indexFiles": [
+      "gas-backend/Index.html",
+      "github-pages/index.html"
+    ],
+    "fixes": [
+      "Expanded legacy 5-digit #rgbAA CSS colors to standards-compliant #rrggbbAA values.",
+      "Installed AppPhase5UiUx owner to add non-invasive UI classes and accessibility attributes.",
+      "Standardized mobile table scroll hints, modal scrollability, focus-visible styling, and state surfaces."
+    ],
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "businessLogicChanged": false,
+    "uiUxImproved": true,
+    "domIdsChanged": false,
+    "productionReleaseGate": "npm run audit:strict",
+    "requiresStrictGates": true
+  },
+  "phase6StaticQaReadinessLedger": {
+    "stamp": "production-current-phase6-static-qa-readiness-2026-07-08-r1",
+    "owner": "tools/phaseN_legacy_transport_gate.py.Phase6StaticQaReadiness",
+    "goal": "Add a blocking static QA readiness gate for inline HTML JavaScript syntax and high-risk app-config duplicate-key drift before production deployment.",
+    "checks": [
+      "inline HTML JavaScript syntax across gas-backend, github-pages, and partials",
+      "high-risk app-config default keys remain single-owner",
+      "strict gate remains the production deployment gate"
+    ],
+    "fixes": [
+      "Removed duplicate releaseGate default entries from github-pages/app-config.js while keeping the canonical release gate value.",
+      "Extended the production current strict gate to catch future syntax drift in embedded script blocks."
+    ],
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "productionReleaseGate": "npm run audit:strict",
+    "requiresStrictGates": true,
+    "liveGasSheetQaStillRequired": true,
+    "notes": [
+      "This phase does not execute live GAS or mutate Google Sheets.",
+      "It prevents hidden frontend script syntax errors and config-owner drift from passing release audit."
+    ]
+  },
+  "staticConfigAssignmentGuardLedger": {
+    "stamp": "production-current-static-config-assignment-guard-2026-07-08-r1",
+    "owner": "github-pages/app-config.js + tools/phaseN_legacy_transport_gate.py",
+    "goal": "Remove duplicate runtime assignment of high-risk APP_CONFIG release-gate fields and block future app-config assignment drift before production deployment.",
+    "rootCause": [
+      "Phase 6 checked duplicate keys inside the defaults object only, but root.APP_CONFIG.releaseGate was still assigned twice after Object.assign.",
+      "Duplicate release-gate assignment is not a runtime crash, but it weakens single-owner configuration discipline and can hide future drift."
+    ],
+    "fixes": [
+      "Keep a single root.APP_CONFIG.releaseGate runtime assignment.",
+      "Add strict gate for high-risk root.APP_CONFIG runtime assignment duplicates."
+    ],
+    "filesChanged": [
+      "github-pages/app-config.js",
+      "tools/phaseN_legacy_transport_gate.py",
+      "TECH_DEBT_MANIFEST.json",
+      "docs/SINGLE_SOURCE_POLICY.md",
+      "docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.md"
+    ],
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "apiContractCount": 108,
+    "writeRouteCount": 27,
+    "productionReleaseGate": "npm run audit:strict"
+  },
+  "deployReleaseSinglePublishGuardLedger": {
+    "stamp": "production-current-deploy-release-single-publish-2026-07-08-r1",
+    "owner": "github-pages/app-config.js + tools/phaseN_legacy_transport_gate.py",
+    "goal": "Publish APP_DEPLOY_RELEASE metadata from one runtime owner after app-config normalization, preventing stale or conflicting release metadata on Vercel frontend boot.",
+    "rootCause": [
+      "app-config.js published root.APP_DEPLOY_RELEASE twice: once before query/localStorage transport normalization and once again inside the try block.",
+      "The duplicate publisher was not a direct runtime crash, but it created a stale metadata window and weakened single-owner release/config discipline.",
+      "Earlier gates checked APP_CONFIG default and runtime assignments, but did not count root.APP_DEPLOY_RELEASE publishers."
+    ],
+    "fixes": [
+      "Converted APP_DEPLOY_RELEASE publication into publishDeployRelease() with one Object.assign owner.",
+      "Called publishDeployRelease() once after app-config query/localStorage normalization and catch handling.",
+      "Added a strict gate to require one APP_DEPLOY_RELEASE Object.assign owner and one publishDeployRelease runtime call."
+    ],
+    "filesChanged": [
+      "github-pages/app-config.js",
+      "tools/phaseN_legacy_transport_gate.py",
+      "TECH_DEBT_MANIFEST.json",
+      "docs/SINGLE_SOURCE_POLICY.md",
+      "docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.md"
+    ],
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "productionReleaseGate": "npm run audit:strict"
+  },
+  "deepSourceSyntaxGuardLedger": {
+    "stamp": "production-current-deep-source-syntax-guard-2026-07-08-r1",
+    "owner": "tools/phaseN_legacy_transport_gate.py.DeepSourceSyntaxGuard",
+    "goal": "Add a blocking strict gate that syntax-checks every GAS .gs source file, Vercel API JavaScript file, and github-pages JavaScript asset before production release, closing the previous gap where inline HTML script blocks were checked but standalone GAS/frontend source syntax was not fully covered by the release gate.",
+    "rootCause": [
+      "Earlier gates checked Vercel API files and inline HTML script blocks, but did not block production on every GAS .gs file and every github-pages/*.js runtime asset.",
+      "A syntax error in a GAS domain file or standalone frontend asset could pass npm run build and only appear during Apps Script deployment or browser boot.",
+      "The issue is release-risk rather than a current runtime crash; the uploaded source currently passes the new syntax gate."
+    ],
+    "checks": [
+      "node --check equivalent for gas-backend/*.gs after copying to temporary .js files",
+      "node --check for api/*.js",
+      "node --check for github-pages/*.js including app-config, transport, bootstrap, critical runtime, and generated env",
+      "keeps existing Phase 6 inline HTML JavaScript syntax gate in place",
+      "Vercel npm build now executes check:inline against github-pages/index.html, diagnostic.html, all github-pages/partials/*.html, and gas-backend/Scripts_*.html script blocks",
+      "Inline HTML runtime check blocks keyword-token minifier drift such as return$token and else$token before deployment"
+    ],
+    "fixes": [
+      "Extended the strict release gate with Deep Source Syntax Guard.",
+      "Added manifest and policy documentation so future releases cannot bypass standalone GAS/frontend source syntax checks.",
+      "Added npm check:inline and wired it into build, build:strict, and audit:strict without adding files or API routes.",
+      "Extended Phase N gate to require inline HTML runtime script validation during Vercel build."
+    ],
+    "filesChanged": [
+      "tools/phaseN_legacy_transport_gate.py",
+      "TECH_DEBT_MANIFEST.json",
+      "docs/SINGLE_SOURCE_POLICY.md",
+      "docs/PHASE_N_REMOVE_LEGACY_TRANSPORT.md"
+    ],
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "apiContractCount": 108,
+    "writeRouteCount": 27,
+    "productionReleaseGate": "npm run audit:strict",
+    "liveGasSheetQaStillRequired": true,
+    "productionBuildGate": "npm run build = check:api + check:frontend + check:inline"
   }
 }
