@@ -2,7 +2,7 @@
 
 Editable canonical source is `gas-backend/`.
 
-Current release: `commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14`.
+Current release: `commission-v1.2-ai-meeting-budget-stability-2026-07-09-r15`.
 
 ## Canonical source rules
 
@@ -157,3 +157,8 @@ Deep Source Syntax Guard coverage keywords: GAS .gs, github-pages/*.js.
 `npm run build` now executes `npm run check:inline` in addition to `check:api` and `check:frontend`. The inline check extracts executable `<script>` blocks from `github-pages/index.html`, `github-pages/diagnostic.html`, every `github-pages/partials/*.html` file, and every `gas-backend/Scripts_*.html` canonical partial, validates them with Node, and blocks keyword-token minifier drift such as `return$token` or `else$token` before Vercel deployment.
 
 This addendum adds no files, no API routes, no write-schema changes, no DOM-id changes, no UI labels, and no business-rule changes. It closes the deployment gap where inline partial scripts could parse incorrectly or contain semantic minifier drift while the standalone `.js` build checks still passed.
+
+
+## AI / Meeting / Budget Stability Guard — 2026-07-09 r15
+
+Production runtime must block semantic drift that syntax-only checks can miss. The release gate must verify that AI routes stay lazy/user-action/advisory-only, Meeting route activation does not call a missing global `applyPending()`, Meeting summary popup has a direct fallback click handler, Core `appendChildren` rejects parent/ancestor append, and Budget dynamic seminar forms render without reusing DOM nodes that can trigger `HierarchyRequestError`. This guard preserves the API contract, route names, write schema, and file count.
