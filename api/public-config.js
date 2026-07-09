@@ -86,3 +86,5 @@ module.exports = async function(req, res) {
     clearTimeout(timer);
   }
 };
+
+module.exports.config={maxDuration:60};
