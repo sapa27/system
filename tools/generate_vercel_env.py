@@ -45,7 +45,7 @@ def main() -> None:
         "root.__VERCEL_MIGRATION_CONFIG__=Object.freeze(cfg);"
         "root.APP_DEPLOY_RELEASE=Object.assign({},root.APP_DEPLOY_RELEASE||{},"
         "{stamp:cfg.releaseStamp,assetStamp:cfg.assetStamp,version:cfg.version,hostingTarget:cfg.hostingTarget,"
-        "vercelStaticFrontendReady:true,vercelApiProxyEnabled:true,vercelApiProxyEnabled:true,legacyTransportRemoved:true});"
+        "vercelStaticFrontendReady:true,vercelApiProxyEnabled:true,legacyTransportRemoved:true});"
         "})(window);\n"
     )
     OUT.parent.mkdir(parents=True, exist_ok=True)

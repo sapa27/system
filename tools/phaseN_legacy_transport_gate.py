@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from pathlib import Path
-import json, re, sys, pathlib, os, traceback
+import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = "commission-v1.2-production-current-contract-freeze-2026-07-06-r1"
 ASSET = "asset-manifest-commission-v1.2-production-current-contract-freeze-2026-07-06-r1"
@@ -182,14 +182,14 @@ PHASE5_SIZE_BUDGETS = {
     # owners; no API routes, files, UI, or business rules are added.
     "gas-backend/Scripts_Core_Runtime.html": 360000,
     "github-pages/partials/Scripts_Core_Runtime.html": 360000,
-    "gas-backend/Scripts_Page_Meeting.html": 242500,
-    "github-pages/partials/Scripts_Page_Meeting.html": 242600,
+    "gas-backend/Scripts_Page_Meeting.html": 220000,
+    "github-pages/partials/Scripts_Page_Meeting.html": 220000,
     "gas-backend/Code_30_Domain_Cases.gs": 327000,
     "gas-backend/Code_32_Domain_Budget.gs": 228000,
     "gas-backend/Scripts_Page_Budget.html": 160000,
     "github-pages/partials/Scripts_Page_Budget.html": 160100,
-    "gas-backend/Index.html": 274500,
-    "github-pages/index.html": 197500,
+    "gas-backend/Index.html": 281000,
+    "github-pages/index.html": 203000,
     "github-pages/critical-login-runtime.js": 87000,
 }
 PHASE5_TOTAL_SOURCE_BUDGET = 4880000
@@ -206,6 +206,15 @@ LEGACY_FALLBACK_CLEANUP_STAMP = "technical-debt-phase7-legacy-fallback-cleanup-2
 PERFORMANCE_DEBT_STAMP = "technical-debt-phase8-performance-debt-current"
 UIUX_DEBT_STAMP = "technical-debt-phase9-uiux-debt-current"
 QUALITY_GATE_STAMP = "technical-debt-phase10-quality-gate-current"
+PHASE1_RELEASE_DISCIPLINE_STAMP = "production-current-phase1-release-discipline-2026-07-08-r1"
+PHASE2_RUNTIME_SLIMMING_STAMP = "production-current-phase2-runtime-slimming-2026-07-08-r1"
+PHASE3_CACHE_DATA_FRESHNESS_STAMP = "production-current-phase3-cache-data-freshness-2026-07-08-r1"
+PHASE4_WRITE_DELETE_RELIABILITY_STAMP = "production-current-phase4-write-delete-reliability-2026-07-08-r1"
+PHASE5_UIUX_MODERNIZATION_STAMP = "production-current-phase5-uiux-modernization-2026-07-08-r1"
+PHASE6_STATIC_QA_READINESS_STAMP = "production-current-phase6-static-qa-readiness-2026-07-08-r1"
+STATIC_CONFIG_ASSIGNMENT_GUARD_STAMP = "production-current-static-config-assignment-guard-2026-07-08-r1"
+DEPLOY_RELEASE_SINGLE_PUBLISH_GUARD_STAMP = "production-current-deploy-release-single-publish-2026-07-08-r1"
+DEEP_SOURCE_SYNTAX_GUARD_STAMP = "production-current-deep-source-syntax-guard-2026-07-08-r1"
 OWNER_CONSOLIDATION_REQUIRED_KEYS = [
     "apiRouteRegistry", "writeSchema", "apiBoundary", "platformEntry",
     "sheetRepository", "authSession", "casesSearchReportTracking", "budget",
@@ -521,9 +530,419 @@ def check_quality_gate_contract(manifest, router, transport, common, gas_api, lo
     ok('Quality gate route template HTML mounts as DOM fragment', 'createContextualFragment' in app_index_bootstrap and 'createContextualFragment' in meeting_page and 'createContextualFragment' in critical_runtime, 'route/template fallback must mount HTML as contextual fragments, not unsafe text')
     ok('Quality gate mirror sync and static critical remain guarded', not mirror_in_sync() and critical_static_runtime_in_sync(), 'generated partial mirrors and critical-login-runtime.js must remain synced to GAS canonical sources')
 
+
+
+def check_phase1_release_discipline_contract(manifest, package, vercel, docs_policy):
+    ledger = manifest.get('phase1ProductionReleaseDisciplineLedger') if isinstance(manifest, dict) else None
+    scripts = package.get('scripts', {}) if isinstance(package, dict) else {}
+    build_cmd = str(scripts.get('build', ''))
+    audit_cmd = str(scripts.get('audit:strict', ''))
+    release_cmd = str(scripts.get('release:check', ''))
+    deploy_cmd = str(scripts.get('deploy:check', ''))
+    predeploy_cmd = str(scripts.get('predeploy:production', ''))
+    ok('Phase 1 production release discipline ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == PHASE1_RELEASE_DISCIPLINE_STAMP, 'TECH_DEBT_MANIFEST must record Phase 1 release discipline')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewFiles') is True and ledger.get('noNewApiRoutes') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False
+    ok('Phase 1 release discipline preserves contracts', rules_ok, 'release discipline must not alter files, API routes, UI, business rules, route names, or write schema')
+    ok('Phase 1 Vercel build remains host-safe', vercel.get('buildCommand') == 'npm run build' and build_cmd == 'npm run check:api', 'Vercel build must stay short and non-strict; production gate is separate')
+    ok('Phase 1 strict audit is blocking-capable', 'COMMISSION_STRICT_GATES=1' in audit_cmd and '--strict' in audit_cmd and 'phaseG_security_gate.py' in audit_cmd and 'phaseN_legacy_transport_gate.py' in audit_cmd, audit_cmd)
+    ok('Phase 1 production release aliases installed', release_cmd == 'npm run audit:strict' and deploy_cmd == 'npm run audit:strict' and predeploy_cmd == 'npm run audit:strict', json.dumps({'release:check': release_cmd, 'deploy:check': deploy_cmd, 'predeploy:production': predeploy_cmd}, ensure_ascii=False))
+    docs_required = [
+        'npm run build` is intentionally Vercel-host safe',
+        'not** the final production release gate',
+        'npm run audit:strict',
+        'npm run release:check',
+        'do not promote a ZIP that has only passed `npm run build`',
+    ]
+    ok('Phase 1 release policy documented', all(token in docs_policy for token in docs_required) and 'or simply:' not in docs_policy, 'docs/SINGLE_SOURCE_POLICY.md must state audit:strict is the production gate and must not present npm run build as sufficient')
+    ok('Phase 1 manifest release gate names strict audit', isinstance(ledger, dict) and ledger.get('productionReleaseGate') == 'npm run audit:strict' and ledger.get('requiresStrictGates') is True and ledger.get('forbiddenProductionShortcut') == 'npm run build only', 'manifest ledger must block build-only production promotion')
+
+
+
+
+def check_phase3_cache_data_freshness_contract(manifest, core_runtime, budget_page, docs_policy):
+    ledger = manifest.get('phase3CacheDataFreshnessLedger') if isinstance(manifest, dict) else None
+    core_c = compact(core_runtime)
+    budget_c = compact(budget_page)
+    ok('Phase 3 cache/data freshness ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == PHASE3_CACHE_DATA_FRESHNESS_STAMP, 'TECH_DEBT_MANIFEST must record Phase 3 cache/data freshness')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewFiles') is True and ledger.get('noNewApiRoutes') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False
+    ok('Phase 3 cache freshness preserves contracts', rules_ok, 'Phase 3 must not alter files, API routes, UI, business rules, route names, or write schema')
+    ok('Phase 3 AppDataFreshnessOwner installed', 'AppDataFreshnessOwner' in core_runtime and PHASE3_CACHE_DATA_FRESHNESS_STAMP in core_runtime and 'app:data-freshness-changed' in core_runtime, 'core runtime must expose freshness owner and event')
+    ok('Phase 3 client cache key includes freshness/write epoch', 'epoch=String(Math.max(Number(root.__APP_WRITE_CACHE_EPOCH__||0)||0,Number(root.__APP_DATA_FRESHNESS_EPOCH__||0)||0))' in core_c, 'client cache key must change after write/freshness epoch')
+    ok('Phase 3 write events advance freshness owner', 'app:data-mutated' in core_runtime and 'app:write-cache-invalidated' in core_runtime and '.touch' in core_runtime, 'write/cache events must advance freshness owner')
+    ok('Phase 3 budget external mutation refresh installed', 'budgetCURRENTBBindFreshnessEvents' in budget_page and 'phase3-freshness' in budget_page and 'app:data-freshness-changed' in budget_page, 'budget page must mark visible views dirty after external write/cache events')
+    ok('Phase 3 documentation installed', PHASE3_CACHE_DATA_FRESHNESS_STAMP in docs_policy and 'Cache/Data Freshness' in docs_policy and 'npm run audit:strict' in docs_policy, 'SINGLE_SOURCE_POLICY must document Phase 3 freshness and strict release gate')
+
+
+def check_phase4_write_delete_reliability_contract(manifest, platform, router, docs_policy):
+    ledger = manifest.get('phase4WriteDeleteReliabilityLedger') if isinstance(manifest, dict) else None
+    platform_c = compact(platform)
+    router_c = compact(router)
+    ok('Phase 4 write/delete reliability ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == PHASE4_WRITE_DELETE_RELIABILITY_STAMP, 'TECH_DEBT_MANIFEST must record Phase 4 write/delete reliability')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewFiles') is True and ledger.get('noNewApiRoutes') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False and ledger.get('writeRouteCount') == 27
+    ok('Phase 4 write/delete reliability preserves contracts', rules_ok, 'Phase 4 must not alter files, API routes, UI, business rules, route names, or write schema')
+    ok('Phase 4 platform reliability owner installed', 'APP_PHASE4_WRITE_DELETE_RELIABILITY_CONTRACT' in platform and PHASE4_WRITE_DELETE_RELIABILITY_STAMP in platform and 'function _platformPhase4WriteDeleteReliabilityStatus_' in platform and 'function _platformPhase4WriteDeleteReliabilityForMethod_' in platform, 'platform must expose Phase 4 write/delete reliability contract')
+    ok('Phase 4 writeGateway attaches reliability metadata', 'meta.phase4WriteDeleteReliabilityStamp=APP_PHASE4_WRITE_DELETE_RELIABILITY_CONTRACT.stamp' in platform_c and 'meta.phase4WriteDeleteReliabilityContract=_platformPhase4WriteDeleteReliabilityForMethod_' in platform_c and 'phase4WriteDeleteReliabilityContract:_platformPhase4WriteDeleteReliabilityForMethod_' in platform_c, 'writeGateway success/error envelopes must attach Phase 4 reliability metadata')
+    ok('Phase 4 router reliability status installed', 'ROUTER_PHASE4_WRITE_DELETE_RELIABILITY_STAMP' in router and 'function _routerPhase4WriteDeleteReliabilityStatus_' in router and 'phase4WriteDeleteReliability:_routerPhase4WriteDeleteReliabilityStatus_(registry)' in router_c, 'api route contract must expose Phase 4 write/delete reliability status')
+    critical_tokens = ['apiDeleteCase:["case","dashboard"]','apiDeleteMeetingLog:["meeting","dashboard"]','apiDeleteLetter:["letters","tracking","dashboard"]','apiDeletePetitioner:["people","petitioner","case","dashboard"]','apiBudgetDeleteImport:["budget","dashboard"]','apiAdminDeleteUser:["admin-users","admin"]']
+    ok('Phase 4 critical delete invalidation matrix locked', all(token in router for token in critical_tokens) and all(token in platform for token in critical_tokens), 'critical delete routes must keep deterministic invalidation targets')
+    ok('Phase 4 documentation installed', PHASE4_WRITE_DELETE_RELIABILITY_STAMP in docs_policy and 'Write/Delete Reliability' in docs_policy and '27 write APIs' in docs_policy and 'npm run audit:strict' in docs_policy, 'SINGLE_SOURCE_POLICY must document Phase 4 reliability and strict release gate')
+
+
+
+def _five_digit_css_hex_tokens(html: str):
+    tokens=[]
+    for block in re.findall(r"<style[^>]*>([\s\S]*?)</style>", html or "", flags=re.I):
+        for m in re.finditer(r"#[0-9a-fA-F]{5}\b", block):
+            tokens.append(m.group(0))
+    return tokens
+
+def _duplicate_html_ids(html: str):
+    counts = {}
+    for m in re.finditer(r"\bid\s*=\s*(['\"])(.*?)\1", html or "", re.I | re.S):
+        value = (m.group(2) or '').strip()
+        if value:
+            counts[value] = counts.get(value, 0) + 1
+    return sorted([key for key, value in counts.items() if value > 1])
+
+def check_phase5_uiux_modernization_contract(manifest, gas_index, static_index, docs_policy):
+    ledger = manifest.get('phase5UiUxModernizationLedger') if isinstance(manifest, dict) else None
+    ok('Phase 5 UI/UX modernization ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == PHASE5_UIUX_MODERNIZATION_STAMP, 'TECH_DEBT_MANIFEST must record Phase 5 UI/UX modernization')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewFiles') is True and ledger.get('noNewApiRoutes') is True and ledger.get('businessLogicChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False and ledger.get('uiUxImproved') is True and ledger.get('domIdsChanged') is False
+    ok('Phase 5 UI/UX modernization preserves contracts', rules_ok, 'Phase 5 may improve UI but must not alter files, API routes, business rules, route names, write schema, or DOM ids')
+    required = ['app-phase5-uiux-modernization', 'AppPhase5UiUx', PHASE5_UIUX_MODERNIZATION_STAMP, 'phase5-table-scroll-region', 'modal-dialog-scrollable', 'aria-label","ตารางข้อมูล เลื่อนซ้ายขวาเพื่อดูข้อมูลเพิ่มเติม']
+    ok('Phase 5 UI owner installed in canonical index', all(token in gas_index for token in required), 'canonical Index must install AppPhase5UiUx owner and mobile/table/modal guards')
+    ok('Phase 5 UI owner installed in static index', all(token in static_index for token in required), 'static index must install AppPhase5UiUx owner and mobile/table/modal guards')
+    bad_gas = _five_digit_css_hex_tokens(gas_index)
+    bad_static = _five_digit_css_hex_tokens(static_index)
+    ok('Phase 5 CSS color tokens are standards-compliant in indexes', not bad_gas and not bad_static, '5-digit #rgbAA tokens must be expanded to #rrggbbAA: gas=' + ','.join(sorted(set(bad_gas))) + ' static=' + ','.join(sorted(set(bad_static))))
+    dup_gas = _duplicate_html_ids(gas_index)
+    dup_static = _duplicate_html_ids(static_index)
+    ok('Phase 5 DOM ids are unique in indexes', not dup_gas and not dup_static, 'duplicate ids: gas=' + ','.join(dup_gas) + ' static=' + ','.join(dup_static))
+    ok('Phase 5 UI/UX documentation installed', PHASE5_UIUX_MODERNIZATION_STAMP in docs_policy and 'UI/UX Modernization' in docs_policy and 'AppPhase5UiUx' in docs_policy and 'npm run audit:strict' in docs_policy, 'SINGLE_SOURCE_POLICY must document Phase 5 UI/UX modernization and strict release gate')
+
+def _script_type_from_attrs(attrs: str) -> str:
+    m = re.search(r"\btype\s*=\s*(['\"])(.*?)\1", attrs or '', re.I | re.S)
+    return (m.group(2) if m else '').strip().lower()
+
+def _inline_script_syntax_errors():
+    errors_found = []
+    node = shutil.which('node')
+    if not node:
+        return ['node runtime not found for inline HTML script syntax check']
+    html_paths = sorted(list((ROOT/'gas-backend').glob('*.html')) + list((ROOT/'github-pages').glob('*.html')) + list((ROOT/'github-pages'/'partials').glob('*.html')))
+    skip_types = {'text/x-template', 'text/html', 'application/json', 'application/ld+json'}
+    with tempfile.TemporaryDirectory(prefix='commission_html_js_') as tmp:
+        tmp_path = Path(tmp)
+        for path in html_paths:
+            text = path.read_text(encoding='utf-8', errors='ignore')
+            rel = path.relative_to(ROOT).as_posix()
+            for idx, match in enumerate(re.finditer(r'<script\b([^>]*)>([\s\S]*?)</script>', text, re.I), 1):
+                attrs = match.group(1) or ''
+                code = match.group(2) or ''
+                script_type = _script_type_from_attrs(attrs)
+                if script_type in skip_types:
+                    continue
+                if re.search(r'\bsrc\s*=', attrs, re.I) and not code.strip():
+                    continue
+                cleaned = re.sub(r'<\?!=?[\s\S]*?\?>', 'undefined', code)
+                if not cleaned.strip():
+                    continue
+                temp_file = tmp_path / (rel.replace('/', '__').replace('\\', '__') + f'__script{idx}.js')
+                temp_file.write_text(cleaned, encoding='utf-8')
+                result = subprocess.run([node, '--check', str(temp_file)], capture_output=True, text=True)
+                if result.returncode != 0:
+                    msg = (result.stderr or result.stdout or '').strip().splitlines()
+                    errors_found.append(rel + f':script{idx}: ' + (' | '.join(msg[:3]) if msg else 'node --check failed'))
+    return errors_found
+
+def _extract_object_body_after_assignment(text: str, name: str) -> str:
+    marker = name + '={'
+    start = (text or '').find(marker)
+    if start < 0:
+        return ''
+    i = start + len(name) + 1
+    depth = 0
+    in_str = None
+    esc = False
+    for j in range(i, len(text)):
+        ch = text[j]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == '\\':
+                esc = True
+            elif ch == in_str:
+                in_str = None
+            continue
+        if ch in ('"', "'", '`'):
+            in_str = ch
+            continue
+        if ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                return text[i + 1:j]
+    return ''
+
+def _top_level_key_counts(object_body: str):
+    counts = {}
+    depth = 0
+    in_str = None
+    esc = False
+    i = 0
+    while i < len(object_body):
+        ch = object_body[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == '\\':
+                esc = True
+            elif ch == in_str:
+                in_str = None
+            i += 1
+            continue
+        if ch in ('"', "'", '`'):
+            in_str = ch
+            i += 1
+            continue
+        if ch in '{[(':
+            depth += 1
+            i += 1
+            continue
+        if ch in '}])':
+            depth -= 1
+            i += 1
+            continue
+        if depth == 0:
+            m = re.match(r'\s*([A-Za-z_$][\w$]*)\s*:', object_body[i:])
+            if m:
+                key = m.group(1)
+                counts[key] = counts.get(key, 0) + 1
+                i += m.end()
+                continue
+        i += 1
+    return counts
+
+def check_phase6_static_qa_readiness_contract(manifest, app, docs_policy):
+    ledger = manifest.get('phase6StaticQaReadinessLedger') if isinstance(manifest, dict) else None
+    ok('Phase 6 static QA/readiness ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == PHASE6_STATIC_QA_READINESS_STAMP, 'TECH_DEBT_MANIFEST must record Phase 6 static QA readiness')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewFiles') is True and ledger.get('noNewApiRoutes') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False
+    ok('Phase 6 static QA/readiness preserves contracts', rules_ok, 'Phase 6 must not alter files, API routes, UI, business rules, route names, or write schema')
+    script_errors = _inline_script_syntax_errors()
+    ok('Phase 6 inline HTML JavaScript syntax gate', not script_errors, '; '.join(script_errors[:8]))
+    defaults_body = _extract_object_body_after_assignment(app, 'defaults')
+    counts = _top_level_key_counts(defaults_body)
+    high_risk_keys = ['releaseGate', 'vercelEnvBuildTool', 'vercelApiProxyEnabled', 'transportMode', 'hostingTarget', 'readJsonpApi', 'loginFormPost']
+    duplicated = [key + '=' + str(counts.get(key, 0)) for key in high_risk_keys if counts.get(key, 0) > 1]
+    ok('Phase 6 app-config high-risk default keys are single-owner', not duplicated, ', '.join(duplicated))
+    ok('Phase 6 documentation installed', PHASE6_STATIC_QA_READINESS_STAMP in docs_policy and 'Static QA Readiness' in docs_policy and 'inline HTML JavaScript syntax' in docs_policy, 'SINGLE_SOURCE_POLICY must document Phase 6 static QA readiness gate')
+
+
+def check_static_config_assignment_guard_contract(manifest, app, docs_policy):
+    ledger = manifest.get('staticConfigAssignmentGuardLedger') if isinstance(manifest, dict) else None
+    ok('Static config assignment guard ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == STATIC_CONFIG_ASSIGNMENT_GUARD_STAMP, 'TECH_DEBT_MANIFEST must record static config assignment guard')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewFiles') is True and ledger.get('noNewApiRoutes') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False
+    ok('Static config assignment guard preserves contracts', rules_ok, 'config assignment cleanup must not alter files, API routes, UI, business rules, route names, or write schema')
+    runtime_counts = {}
+    for key in re.findall(r'root\.APP_CONFIG\.([A-Za-z_$][\w$]*)\s*=', app or ''):
+        runtime_counts[key] = runtime_counts.get(key, 0) + 1
+    duplicate_release_gate = runtime_counts.get('releaseGate', 0)
+    ok('app-config releaseGate runtime assignment is single-owner', duplicate_release_gate == 1, 'root.APP_CONFIG.releaseGate assignment count=' + str(duplicate_release_gate))
+    hard_single_owner = ['releaseGate', 'hostingTarget', 'loginFormPost', 'readJsonpApi', 'legacyTransportRemoved', 'legacyJsonpTransportRemoved', 'legacyGasBridgeTransportRemoved', 'legacyLoginPostIframeRemoved']
+    duplicated = [key + '=' + str(runtime_counts.get(key, 0)) for key in hard_single_owner if runtime_counts.get(key, 0) > 1]
+    ok('app-config high-risk runtime assignments are single-owner', not duplicated, ', '.join(duplicated))
+    ok('Static config assignment guard documentation installed', STATIC_CONFIG_ASSIGNMENT_GUARD_STAMP in docs_policy and 'Static Config Assignment Guard' in docs_policy, 'SINGLE_SOURCE_POLICY must document static config assignment guard')
+    deploy_ledger = manifest.get('deployReleaseSinglePublishGuardLedger') if isinstance(manifest, dict) else None
+    ok('Deploy release single-publish guard ledger installed', isinstance(deploy_ledger, dict) and deploy_ledger.get('stamp') == DEPLOY_RELEASE_SINGLE_PUBLISH_GUARD_STAMP, 'TECH_DEBT_MANIFEST must record deploy release single-publish guard')
+    deploy_rules_ok = isinstance(deploy_ledger, dict) and deploy_ledger.get('noNewFiles') is True and deploy_ledger.get('noNewApiRoutes') is True and deploy_ledger.get('businessLogicChanged') is False and deploy_ledger.get('uiUxChanged') is False and deploy_ledger.get('routeNamesChanged') is False and deploy_ledger.get('writeSchemaChanged') is False
+    ok('Deploy release single-publish guard preserves contracts', deploy_rules_ok, 'deploy release publisher cleanup must not alter files, API routes, UI, business rules, route names, or write schema')
+    deploy_assignments = len(re.findall(r'root\.APP_DEPLOY_RELEASE\s*=\s*Object\.assign', app or ''))
+    publish_defs = len(re.findall(r'function\s+publishDeployRelease\s*\(', app or ''))
+    publish_calls = len(re.findall(r'(?<!function\s)publishDeployRelease\s*\(', app or ''))
+    ok('app-config APP_DEPLOY_RELEASE Object.assign is single-owner', deploy_assignments == 1, 'root.APP_DEPLOY_RELEASE Object.assign count=' + str(deploy_assignments))
+    ok('app-config deploy release publisher is single-call', publish_defs == 1 and publish_calls == 1, 'publishDeployRelease definitions=' + str(publish_defs) + ' calls=' + str(publish_calls))
+    ok('Deploy release single-publish guard documentation installed', DEPLOY_RELEASE_SINGLE_PUBLISH_GUARD_STAMP in docs_policy and 'Deploy Release Single-Publish Guard' in docs_policy, 'SINGLE_SOURCE_POLICY must document deploy release single-publish guard')
+
+def _top_level_symbols(text: str):
+    depth=0; in_str=None; esc=False; line=False; block=False; depth_at=[0]*(len(text)+1); i=0
+    while i < len(text):
+        depth_at[i]=depth
+        ch=text[i]; nxt=text[i+1] if i+1 < len(text) else ''
+        if line:
+            if ch == '\n': line=False
+            i += 1; continue
+        if block:
+            if ch == '*' and nxt == '/': block=False; i += 2; continue
+            i += 1; continue
+        if in_str:
+            if esc: esc=False
+            elif ch == '\\': esc=True
+            elif ch == in_str: in_str=None
+            i += 1; continue
+        if ch == '/' and nxt == '/': line=True; i += 2; continue
+        if ch == '/' and nxt == '*': block=True; i += 2; continue
+        if ch in ('"', "'", '`'): in_str=ch; i += 1; continue
+        if ch == '{': depth += 1
+        elif ch == '}': depth -= 1
+        i += 1
+    out=[]
+    for m in re.finditer(r'function\s+([A-Za-z_$][\w$]*)\s*\(', text or ''):
+        if depth_at[m.start()] == 0: out.append((m.group(1),'function'))
+    for m in re.finditer(r'\b(?:var|let|const)\s+([^;\n]+)', text or ''):
+        if depth_at[m.start()] != 0: continue
+        for part in m.group(1).split(','):
+            mm=re.match(r'\s*([A-Za-z_$][\w$]*)\b', part)
+            if mm: out.append((mm.group(1),'var'))
+    return out
+
+
+def _node_check_source_file(path: Path, suffix: str = None) -> str:
+    node = shutil.which('node')
+    if not node:
+        return 'node runtime not found'
+    suffix = suffix or path.suffix or '.js'
+    with tempfile.TemporaryDirectory(prefix='commission_source_syntax_') as tmp:
+        temp = Path(tmp) / ('source' + suffix)
+        temp.write_text(path.read_text(encoding='utf-8', errors='ignore'), encoding='utf-8')
+        result = subprocess.run([node, '--check', str(temp)], capture_output=True, text=True)
+        if result.returncode == 0:
+            return ''
+        msg = (result.stderr or result.stdout or '').strip().splitlines()
+        return ' | '.join(msg[:3]) if msg else 'node --check failed'
+
+
+def _deep_source_syntax_errors():
+    errors_found = []
+    source_paths = []
+    source_paths.extend(sorted((ROOT/'gas-backend').glob('*.gs')))
+    source_paths.extend(sorted((ROOT/'api').glob('*.js')))
+    source_paths.extend(sorted((ROOT/'github-pages').glob('*.js')))
+    for path in source_paths:
+        rel = path.relative_to(ROOT).as_posix()
+        suffix = '.js' if path.suffix == '.gs' else path.suffix
+        err = _node_check_source_file(path, suffix=suffix)
+        if err:
+            errors_found.append(rel + ': ' + err)
+    return errors_found
+
+
+def _semantic_minifier_spacing_errors():
+    errors_found = []
+    source_roots = [ROOT/'gas-backend', ROOT/'github-pages', ROOT/'api']
+    token_rules = [
+        ('return', re.compile(r'\breturn(?=[$_][A-Za-z0-9_$])'), 'expected `return $token` or `return _token`'),
+        ('else', re.compile(r'\belse(?=[$_][A-Za-z0-9_$])'), 'expected `else if($token...)` or a separated `else` block'),
+    ]
+    for root in source_roots:
+        if not root.exists():
+            continue
+        for path in sorted(root.rglob('*')):
+            if not path.is_file() or path.suffix.lower() not in {'.html', '.js', '.gs'}:
+                continue
+            text = path.read_text(encoding='utf-8', errors='ignore')
+            rel = path.relative_to(ROOT).as_posix()
+            for keyword, token_re, hint in token_rules:
+                hits = list(token_re.finditer(text))
+                if hits:
+                    errors_found.append(f"{rel}: {keyword} keyword glued to minifier token ({len(hits)} hit(s)); {hint}")
+    return errors_found
+
+
+def _interaction_ux_runtime_contract_errors():
+    errors_found = []
+    core_paths = [ROOT/'gas-backend'/'Scripts_Core_Runtime.html', ROOT/'github-pages'/'partials'/'Scripts_Core_Runtime.html']
+    for path in core_paths:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        if 'Function.call.bind(Array.prototype[_$27])' in text:
+            errors_found.append(rel + ': __sl slice helper must not bind Array.prototype before _$27 is initialized')
+        if '__sl=function(a){return Array.prototype.slice.call(a||[])}' not in text:
+            errors_found.append(rel + ': __sl must be an explicit safe slice helper for NodeList/HTMLCollection')
+    login_paths = [ROOT/'github-pages'/'critical-login-runtime.js', ROOT/'gas-backend'/'Scripts_Critical_Login_Runtime.html', ROOT/'github-pages'/'partials'/'Scripts_Critical_Login_Runtime.html']
+    for path in login_paths:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        if 'if(r.__APP_LOGIN_IN_FLIGHT__&&r.__APP_EXPLICIT_LOGIN_ATTEMPT__)return!0' not in text:
+            errors_found.append(rel + ': login recovery helper must not clear an explicit login in flight')
+    meeting_paths = [ROOT/'gas-backend'/'Scripts_Page_Meeting.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Meeting.html']
+    for path in meeting_paths:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        if 'var _Z0=_Z0' in text:
+            errors_found.append(rel + ': meeting runtime constants must be explicit, not self-assigned')
+        if '.js-show-meeting-detail,.js-load-meeting' not in text:
+            errors_found.append(rel + ': meeting summary detail click must be covered by main event owner selector')
+        if 'CommitteeMeetingSummaryDetail.show(btn.dataset.id)' not in text:
+            errors_found.append(rel + ': meeting summary detail button must call CommitteeMeetingSummaryDetail.show')
+        if 'function bind(){root._mCB&&byId(_M.x68)&&loadList(),root._mCB=!0,bindCommitteeEvent' not in text:
+            errors_found.append(rel + ': meeting event owner must rebind after route/AppEvents cleanup')
+        if 'insertAdjacentHTML("beforeend",h)' not in text:
+            errors_found.append(rel + ': agenda 3/4 row creation must have a safe DOM fallback')
+    people_paths = [ROOT/'gas-backend'/'Scripts_Page_People.html', ROOT/'github-pages'/'partials'/'Scripts_Page_People.html']
+    for path in people_paths:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        if '#psTab.nav-link' in text:
+            errors_found.append(rel + ': people tab selector must be `#psTab .nav-link`, not `#psTab.nav-link`')
+        if '"string"==typeof e?e:n&&n[$ga]&&n[$ga]($ps[155])||""' not in text:
+            errors_found.append(rel + ': people history action must support direct string person names')
+        if 'e.stopImmediatePropagation&&e.stopImmediatePropagation(),t[a](r||n)' not in text:
+            errors_found.append(rel + ': people direct actions must stop duplicate history handlers')
+    petitioner_paths = [ROOT/'gas-backend'/'Scripts_Page_Petitioner.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Petitioner.html']
+    for path in petitioner_paths:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        if 'petitioner-address-cell' not in text or 'data-address-standard","full"' not in text:
+            errors_found.append(rel + ': petitioner list must render the full canonical address, not only addressLine')
+    budget_paths = [ROOT/'gas-backend'/'Scripts_Page_Budget.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Budget.html']
+    malformed_attr = re.compile(r'<[^>\n]*(?:id|class)=\$B\d+')
+    for path in budget_paths:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        hits = malformed_attr.findall(text)
+        if hits:
+            errors_found.append(rel + ': generated budget HTML contains literal minifier variable attributes (' + str(len(hits)) + ' hit(s))')
+    return errors_found
+
+
+def check_deep_source_syntax_guard_contract(manifest, docs_policy):
+    ledger = manifest.get('deepSourceSyntaxGuardLedger') if isinstance(manifest, dict) else None
+    ok('Deep source syntax guard ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == DEEP_SOURCE_SYNTAX_GUARD_STAMP, 'TECH_DEBT_MANIFEST must record deep source syntax guard')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewFiles') is True and ledger.get('noNewApiRoutes') is True and ledger.get('businessLogicChanged') is False and ledger.get('uiUxChanged') is False and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False
+    ok('Deep source syntax guard preserves contracts', rules_ok, 'deep syntax guard must not alter files, API routes, UI, business rules, route names, or write schema')
+    syntax_errors = _deep_source_syntax_errors()
+    ok('Deep source syntax gate checks GAS and frontend JS', not syntax_errors, '; '.join(syntax_errors[:8]))
+    minifier_spacing_errors = _semantic_minifier_spacing_errors()
+    ok('Deep source semantic gate rejects keyword-token minifier spacing drift', not minifier_spacing_errors, '; '.join(minifier_spacing_errors[:8]))
+    interaction_ux_errors = _interaction_ux_runtime_contract_errors()
+    ok('Interaction UX runtime contract prevents meeting, people, and budget regressions', not interaction_ux_errors, '; '.join(interaction_ux_errors[:8]))
+    ok('Deep source syntax guard documentation installed', DEEP_SOURCE_SYNTAX_GUARD_STAMP in docs_policy and 'Deep Source Syntax Guard' in docs_policy and 'GAS .gs' in docs_policy and 'github-pages/*.js' in docs_policy, 'SINGLE_SOURCE_POLICY must document deep source syntax guard')
+
+def check_gas_global_namespace_gate():
+    exact_forbidden = [r'\b_k\s*\.\s*push\s*\(', r'\bk\s*\.\s*push\s*\(', r'function\s+_k\s*\(', r'\bvar\s+_k\b']
+    by_name={}
+    for p in (ROOT/'gas-backend').glob('*.gs'):
+        text=p.read_text(encoding='utf-8', errors='ignore')
+        rel=p.relative_to(ROOT).as_posix()
+        for pat in exact_forbidden:
+            if re.search(pat, text):
+                fail(f'GAS global namespace collision token forbidden in {rel}: {pat}')
+        for name, kind in _top_level_symbols(text):
+            by_name.setdefault(name, []).append((rel, kind))
+    allowed_shared={'__APP_GLOBAL__','AppDomain','AppInfra','AppSecurity','AppBackendMiddleware'}
+    for name, hits in sorted(by_name.items()):
+        files={h[0] for h in hits}; kinds={h[1] for h in hits}
+        if name in allowed_shared:
+            continue
+        if len(files) > 1 and 'function' in kinds:
+            fail('GAS global function name collision: '+name+' -> '+', '.join(sorted({f+':'+k for f,k in hits})))
+        if len(kinds) > 1 and len(files) > 1:
+            fail('GAS global var/function collision: '+name+' -> '+', '.join(sorted({f+':'+k for f,k in hits})))
+
 def main():
     for rel in REQUIRED: ok(f"required file {rel}", (ROOT/rel).exists(), rel)
-    alltext=all_source_text(); platform=read('gas-backend/Code_00_PlatformCore.gs'); router=read('gas-backend/Code_20_Router.gs'); app=read('github-pages/app-config.js'); transport=read('github-pages/github-gas-transport.js'); generated=read('github-pages/vercel-env.generated.js'); common=read('api/_gasProxyCommon.js'); index=read('github-pages/index.html'); diag=read('github-pages/diagnostic.html')
+    alltext=all_source_text(); docs_policy=read('docs/SINGLE_SOURCE_POLICY.md'); platform=read('gas-backend/Code_00_PlatformCore.gs'); router=read('gas-backend/Code_20_Router.gs'); app=read('github-pages/app-config.js'); transport=read('github-pages/github-gas-transport.js'); generated=read('github-pages/vercel-env.generated.js'); common=read('api/_gasProxyCommon.js'); index=read('github-pages/index.html'); diag=read('github-pages/diagnostic.html')
     vercel_text=read('vercel.json'); vercel=json.loads(vercel_text or '{}'); package=json.loads(read('package.json') or '{}'); manifest=json.loads(read('TECH_DEBT_MANIFEST.json') or '{}')
     ok('doGet single', platform.count('function doGet(')==1, str(platform.count('function doGet(')))
     ok('doPost single', platform.count('function doPost(')==1, str(platform.count('function doPost(')))
@@ -540,18 +959,33 @@ def main():
     ok('Vercel build delegates to package build', vercel_build_cmd == 'npm run build', vercel_build_cmd)
     package_scripts = package.get('scripts',{})
     package_strict_cmd = str(package_scripts.get('build:strict') or package_scripts.get('audit:strict') or '')
-    ok('package build is Vercel host safe', package_build_cmd == 'npm run check:api' and 'python' not in package_build_cmd.lower(), package_build_cmd)
-    ok('strict audit runs Production current gate', 'phaseN_legacy_transport_gate.py' in package_strict_cmd and 'phaseG_security_gate.py' in package_strict_cmd and 'COMMISSION_STRICT_GATES=1' in package_strict_cmd and '--strict' in package_strict_cmd, package_strict_cmd)
+    ok('package build is Vercel host safe', package_build_cmd == 'npm run check:api && npm run check:frontend && npm run check:inline' and 'python' not in package_build_cmd.lower(), package_build_cmd)
+    ok('package build checks frontend static runtime syntax', str(package_scripts.get('check:frontend','')).count('node --check github-pages/') >= 7 and 'github-pages/github-gas-transport.js' in str(package_scripts.get('check:frontend','')), str(package_scripts.get('check:frontend','')))
+    inline_cmd = str(package_scripts.get('check:inline',''))
+    ok('package build checks inline HTML runtime scripts', 'github-pages/partials' in inline_cmd and 'gas-backend' in inline_cmd and 'new Function(body)' in inline_cmd and 'keyword-token drift' in inline_cmd and 'npm run check:inline' in package_build_cmd, inline_cmd)
+    ok('strict audit runs Production current gate', 'phaseN_legacy_transport_gate.py' in package_strict_cmd and 'phaseG_security_gate.py' in package_strict_cmd and 'COMMISSION_STRICT_GATES=1' in package_strict_cmd and '--strict' in package_strict_cmd and 'npm run check:frontend' in package_strict_cmd and 'npm run check:inline' in package_strict_cmd, package_strict_cmd)
     obsolete_tool = ''.join(['sync', '_', 'frontend', '_', 'partials', '.py'])
     scripts_blob = json.dumps(package.get('scripts',{}), ensure_ascii=False)
     ok('package build is decoupled from obsolete mirror-sync helper', obsolete_tool not in package_build_cmd and obsolete_tool not in scripts_blob, 'package scripts must not reference obsolete mirror-sync helper')
     ok('obsolete mirror-sync helper absent from tools directory', not (ROOT/'tools'/obsolete_tool).exists(), 'obsolete helper must be absent; mirror drift is checked by Production current gate')
+    pycache_hits = [x.relative_to(ROOT).as_posix() for x in ROOT.rglob('__pycache__') if x.is_dir()]
+    ok('packaged source tree excludes Python bytecode cache folders', not pycache_hits, ', '.join(pycache_hits))
     ok('package engines pins Vercel Node 24.x', str(package.get('engines',{}).get('node','')) == '24.x', str(package.get('engines',{}).get('node','')))
     ok('proxy functions exist', all((ROOT/'api'/f).exists() for f in ['gas.js','login.js','public-config.js','_gasProxyCommon.js']), 'api proxy files')
     ok('server GAS env used by proxy', 'process.env.GAS_WEB_APP_URL' in common, 'server env')
+    ok('proxy normalizes quoted/slashed GAS URL and clamps timeout', 'function normalizeGasWebAppUrl' in common and 'function normalizeTimeoutMs' in common and 'MAX_PROXY_TIMEOUT_MS' in common and 'timeoutMs: effectiveTimeoutMs' in common, 'proxy URL/timeout hardening')
+    ok('proxy body parser accepts Buffer without losing method/payload', 'Buffer.isBuffer(req.body)' in common and 'parseJsonText(Buffer.from(req.body).toString("utf8"))' in common, 'Vercel body parser hardening')
+    ok('proxy body normalizer accepts loose payload keys', 'loosePayload = Object.assign({}, body)' in common and '["method", "action", "request", "timeoutMs", "releaseStamp", "source", "bridge", "requestId"].forEach' in common, 'Vercel proxy must preserve raw username/password or query fields when caller sends method + loose fields')
     ok('Production current header used by proxy', 'X-Production-Vercel-Proxy' in common and 'X-Phase-M-Vercel-Proxy' not in common, 'proxy header')
     ok('Vercel env production-current release track', '"releaseTrack":"production-current"' in generated and '"legacyTransportRemoved":true' in generated, 'generated env metadata')
+    ok('Vercel generated env has no duplicate proxy flag assignment', generated.count('vercelApiProxyEnabled:true') == 1, str(generated.count('vercelApiProxyEnabled:true')))
     ok('index uses Production current assets', RELEASE in index and MODE in index, 'index script stamps')
+    stale_static_assets = []
+    for m in re.finditer(r'<script\s+src="([^"]+)"', index):
+        src = m.group(1)
+        if src.startswith('./') and ('?v=' in src or '&v=' in src) and RELEASE not in src:
+            stale_static_assets.append(src)
+    ok('static runtime script cache-bust stamps match Production current release', not stale_static_assets, ', '.join(stale_static_assets))
     ok('diagnostic uses Production current assets', RELEASE in diag and MODE in diag, 'diagnostic script stamps')
     ok('app-config proxy only flags', contains_code(app, 'legacyTransportRemoved: true') and contains_code(app, 'readJsonpApi: false') and contains_code(app, 'publicJsonpReadMethods: []') and contains_code(app, 'loginFormPost: false'), 'app-config Production current flags')
     ok('transport is proxy only', 'function runVercelApiProxy' in transport and 'function runVercelLoginProxy' in transport and 'function runReadWithPolicy' in transport, 'proxy funcs')
@@ -575,16 +1009,17 @@ def main():
     ok('manifest records critical runtime duplication cleanup', isinstance(manifest.get('criticalRuntimeDuplicationCleanupLedger'), dict) and manifest.get('criticalRuntimeDuplicationCleanupLedger',{}).get('stamp')=='production-current-critical-runtime-single-owner-2026-07-06-r1' and manifest.get('criticalRuntimeDuplicationCleanupLedger',{}).get('noApiContractChange') is True, 'TECH_DEBT_MANIFEST must record step 4 cleanup without API contract change')
     ok('manifest records critical runtime generated source cleanup', isinstance(manifest.get('criticalRuntimeGeneratedSourceLedger'), dict) and manifest.get('criticalRuntimeGeneratedSourceLedger',{}).get('stamp')=='production-current-critical-runtime-generated-source-2026-07-06-r1' and manifest.get('criticalRuntimeGeneratedSourceLedger',{}).get('maxStaticCriticalRuntimeBytes')==87000 and manifest.get('criticalRuntimeGeneratedSourceLedger',{}).get('noApiContractChange') is True, 'TECH_DEBT_MANIFEST must record generated-source cleanup without API contract change')
     ok('manifest records Core Runtime slimming cleanup', isinstance(manifest.get('coreRuntimeSlimmingLedger'), dict) and manifest.get('coreRuntimeSlimmingLedger',{}).get('stamp')=='production-current-core-runtime-facade-slim-2026-07-06-r1' and manifest.get('coreRuntimeSlimmingLedger',{}).get('maxBackendCoreRuntimeBytes')==360000 and manifest.get('coreRuntimeSlimmingLedger',{}).get('noApiContractChange') is True, 'TECH_DEBT_MANIFEST must record Core Runtime slimming without API contract change')
-    ok('manifest records Meeting page slimming cleanup', isinstance(manifest.get('meetingPageSlimmingLedger'), dict) and manifest.get('meetingPageSlimmingLedger',{}).get('stamp')=='production-current-meeting-page-slim-2026-07-06-r1' and manifest.get('meetingPageSlimmingLedger',{}).get('maxBackendMeetingBytes')==242500 and manifest.get('meetingPageSlimmingLedger',{}).get('maxMirrorMeetingBytes')==242600 and manifest.get('meetingPageSlimmingLedger',{}).get('noApiContractChange') is True, 'TECH_DEBT_MANIFEST must record Meeting page slimming without API contract change')
+    ok('manifest records Meeting page slimming cleanup', isinstance(manifest.get('meetingPageSlimmingLedger'), dict) and manifest.get('meetingPageSlimmingLedger',{}).get('stamp')=='production-current-meeting-page-slim-2026-07-06-r1' and manifest.get('meetingPageSlimmingLedger',{}).get('maxBackendMeetingBytes')==220000 and manifest.get('meetingPageSlimmingLedger',{}).get('maxMirrorMeetingBytes')==220000 and manifest.get('meetingPageSlimmingLedger',{}).get('noApiContractChange') is True, 'TECH_DEBT_MANIFEST must record Meeting page slimming without API contract change')
+    ok('manifest records Phase 2 runtime slimming release gate', isinstance(manifest.get('phase2RuntimeSlimmingLedger'), dict) and manifest.get('phase2RuntimeSlimmingLedger',{}).get('stamp')==PHASE2_RUNTIME_SLIMMING_STAMP and manifest.get('phase2RuntimeSlimmingLedger',{}).get('maxBackendMeetingBytes')==220000 and manifest.get('phase2RuntimeSlimmingLedger',{}).get('maxMirrorMeetingBytes')==220000 and manifest.get('phase2RuntimeSlimmingLedger',{}).get('noApiContractChange') is True and manifest.get('phase2RuntimeSlimmingLedger',{}).get('businessLogicChanged') is False, 'TECH_DEBT_MANIFEST must record Phase 2 runtime slimming without API/business rule changes')
     ok('manifest records Cases domain slimming cleanup', isinstance(manifest.get('casesDomainSlimmingLedger'), dict) and manifest.get('casesDomainSlimmingLedger',{}).get('stamp')=='production-current-cases-domain-helper-owner-slim-2026-07-06-r1' and manifest.get('casesDomainSlimmingLedger',{}).get('maxBackendCasesBytes')==327000 and manifest.get('casesDomainSlimmingLedger',{}).get('noApiContractChange') is True and manifest.get('casesDomainSlimmingLedger',{}).get('businessLogicChanged') is False, 'TECH_DEBT_MANIFEST must record Cases domain helper-owner slimming without API contract change')
     ok('manifest records Budget domain slimming cleanup', isinstance(manifest.get('budgetDomainSlimmingLedger'), dict) and manifest.get('budgetDomainSlimmingLedger',{}).get('stamp')=='production-current-budget-domain-helper-owner-slim-2026-07-06-r1' and manifest.get('budgetDomainSlimmingLedger',{}).get('maxBackendBudgetBytes')==228000 and manifest.get('budgetDomainSlimmingLedger',{}).get('noApiContractChange') is True and manifest.get('budgetDomainSlimmingLedger',{}).get('businessLogicChanged') is False, 'TECH_DEBT_MANIFEST must record Budget domain helper-owner slimming without API contract change')
     ok('manifest records source size regression guard', isinstance(manifest.get('sizeRegressionGuardLedger'), dict) and manifest.get('sizeRegressionGuardLedger',{}).get('stamp')=='production-current-size-regression-guard-2026-07-06-r1' and manifest.get('sizeRegressionGuardLedger',{}).get('totalSourceBudgetBytes')==PHASE5_TOTAL_SOURCE_BUDGET and manifest.get('sizeRegressionGuardLedger',{}).get('noNewFiles') is True and manifest.get('sizeRegressionGuardLedger',{}).get('noNewApiRoutes') is True, 'TECH_DEBT_MANIFEST must record source size regression guard')
     ok('manifest records Vercel Node 24 runtime pin', isinstance(manifest.get('vercelNodeRuntimePinLedger'), dict) and manifest.get('vercelNodeRuntimePinLedger',{}).get('requiredNodeEngine')=='24.x' and manifest.get('vercelNodeRuntimePinLedger',{}).get('businessLogicChanged') is False, 'TECH_DEBT_MANIFEST must record Node 24.x runtime pin without API or business logic change')
     ok('manifest records Vercel build host safe split', isinstance(manifest.get('vercelBuildHostSafeLedger'), dict) and manifest.get('vercelBuildHostSafeLedger',{}).get('stamp')=='production-current-vercel-build-host-safe-2026-07-06-r1' and manifest.get('vercelBuildHostSafeLedger',{}).get('vercelBuild')=='npm run check:api' and manifest.get('vercelBuildHostSafeLedger',{}).get('noApiContractChange') is True and manifest.get('vercelBuildHostSafeLedger',{}).get('businessLogicChanged') is False, 'TECH_DEBT_MANIFEST must record Vercel-safe build split without API or business logic change')
     ok('manifest records Budget UI modernization', isinstance(manifest.get('budgetUiModernizationLedger'), dict) and manifest.get('budgetUiModernizationLedger',{}).get('stamp')=='production-current-budget-ui-modern-current-2026-07-06-r1' and manifest.get('budgetUiModernizationLedger',{}).get('noApiContractChange') is True and manifest.get('budgetUiModernizationLedger',{}).get('businessLogicChanged') is False and manifest.get('budgetUiModernizationLedger',{}).get('maxBackendBudgetPageBytes')==160000 and manifest.get('budgetUiModernizationLedger',{}).get('maxMirrorBudgetPageBytes')==160100, 'TECH_DEBT_MANIFEST must record Budget UI modernization without API or business logic change')
-    ok('manifest records all systems UI modernization', isinstance(manifest.get('allSystemsUiModernizationLedger'), dict) and manifest.get('allSystemsUiModernizationLedger',{}).get('stamp')=='production-current-all-systems-ui-modern-2026-07-06-r1' and manifest.get('allSystemsUiModernizationLedger',{}).get('owner')=='app-global-ui-modern-current' and manifest.get('allSystemsUiModernizationLedger',{}).get('noApiContractChange') is True and manifest.get('allSystemsUiModernizationLedger',{}).get('businessLogicChanged') is False and manifest.get('allSystemsUiModernizationLedger',{}).get('maxGasIndexBytes')==274500 and manifest.get('allSystemsUiModernizationLedger',{}).get('maxStaticIndexBytes')==197500, 'TECH_DEBT_MANIFEST must record all-systems UI modernization without API or business logic change')
+    ok('manifest records all systems UI modernization', isinstance(manifest.get('allSystemsUiModernizationLedger'), dict) and manifest.get('allSystemsUiModernizationLedger',{}).get('stamp')=='production-current-all-systems-ui-modern-2026-07-06-r1' and manifest.get('allSystemsUiModernizationLedger',{}).get('owner')=='app-global-ui-modern-current' and manifest.get('allSystemsUiModernizationLedger',{}).get('noApiContractChange') is True and manifest.get('allSystemsUiModernizationLedger',{}).get('businessLogicChanged') is False and manifest.get('allSystemsUiModernizationLedger',{}).get('maxGasIndexBytes')==281000 and manifest.get('allSystemsUiModernizationLedger',{}).get('maxStaticIndexBytes')==203000, 'TECH_DEBT_MANIFEST must record all-systems UI modernization without API or business logic change')
     static_index = read('github-pages/index.html')
-    ok('all systems UI owner installed in both indexes', all(token in gas_index and token in static_index for token in ['app-global-ui-modern-current','--ui-modern-blue','#p-search','#p-track','#p-report','#p-petitioner','#p-meeting','#p-committee-meeting','#p-personnel','#p-budget','#p-admin']) and len(gas_index.encode('utf-8')) <= 274500 and len(static_index.encode('utf-8')) <= 197500, 'global UI owner must style every major system page in GAS and static indexes and remain under size budget')
+    ok('all systems UI owner installed in both indexes', all(token in gas_index and token in static_index for token in ['app-global-ui-modern-current','--ui-modern-blue','#p-search','#p-track','#p-report','#p-petitioner','#p-meeting','#p-committee-meeting','#p-personnel','#p-budget','#p-admin']) and len(gas_index.encode('utf-8')) <= PHASE5_SIZE_BUDGETS['gas-backend/Index.html'] and len(static_index.encode('utf-8')) <= PHASE5_SIZE_BUDGETS['github-pages/index.html'], 'global UI owner must style every major system page in GAS and static indexes and remain under size budget')
     meeting_page = read('gas-backend/Scripts_Page_Meeting.html')
     ok('Meeting page reuses one committee meeting date formatter', 'fmtDate:fmtDate' in meeting_page and 'var owner=root.CommitteeMeetingStandalonePrint' in meeting_page and 'owner&&__appIsFn(owner.fmtDate)?owner.fmtDate(v)' in compact(meeting_page), 'CommitteeMeetingSummaryDetail must reuse CommitteeMeetingStandalonePrint.fmtDate instead of carrying a second date parser')
     ok('Meeting page AppPages adapter retained after slimming', '__meetingAppPageAdapterReady' in meeting_page and 'AppPages.register("meeting",mod)' in compact(meeting_page) and 'registerActions("meeting"' in compact(meeting_page) and 'meetingDeleteLogSinglePath' in meeting_page, 'Meeting AppPages module/actions must survive slimming')
@@ -736,8 +1171,14 @@ def main():
     check_legacy_fallback_cleanup_contract(manifest, platform, app, transport, read('gas-backend/Scripts_Critical_Login_Runtime.html'), read('github-pages/critical-login-runtime.js'))
     check_performance_debt_contract(manifest, transport, core_runtime)
     check_uiux_debt_contract(manifest, gas_index, static_index)
+    check_phase4_write_delete_reliability_contract(manifest, platform, router, docs_policy)
+    check_phase5_uiux_modernization_contract(manifest, gas_index, static_index, docs_policy)
+    check_phase6_static_qa_readiness_contract(manifest, app, docs_policy)
+    check_static_config_assignment_guard_contract(manifest, app, docs_policy)
+    check_deep_source_syntax_guard_contract(manifest, docs_policy)
     check_admin_user_facade_contract(ROOT)
-    report={'ok':not errors,'releaseTrack':'production-current','release':RELEASE,'transportMode':MODE,'checks':checks,'errors':errors,'writeRouteCount':len(write_methods),'schemaMethodCount':len(schemas),'phase5SizeBudgets':size_rows,'phase5TotalSourceBytes':source_total,'phase5TotalSourceBudget':PHASE5_TOTAL_SOURCE_BUDGET,'phase5DynamicGeneratedFilesExcluded':sorted(PHASE5_DYNAMIC_GENERATED_FILES),'phase5NextSlimmingTargets':PHASE5_NEXT_SLIMMING_TARGETS}
+    check_gas_global_namespace_gate()
+    report={'ok':not errors,'releaseTrack':'production-current','release':RELEASE,'transportMode':MODE,'checks':checks,'errors':errors,'writeRouteCount':len(write_methods),'schemaMethodCount':len(schemas),'phase5SizeBudgets':size_rows,'phase5TotalSourceBytes':source_total,'phase5TotalSourceBudget':PHASE5_TOTAL_SOURCE_BUDGET,'phase5DynamicGeneratedFilesExcluded':sorted(PHASE5_DYNAMIC_GENERATED_FILES),'phase5NextSlimmingTargets':PHASE5_NEXT_SLIMMING_TARGETS,'phase6StaticQaReadinessStamp':PHASE6_STATIC_QA_READINESS_STAMP,'staticConfigAssignmentGuardStamp':STATIC_CONFIG_ASSIGNMENT_GUARD_STAMP,'deployReleaseSinglePublishGuardStamp':DEPLOY_RELEASE_SINGLE_PUBLISH_GUARD_STAMP,'deepSourceSyntaxGuardStamp':DEEP_SOURCE_SYNTAX_GUARD_STAMP}
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if errors:
         if _vercel_nonblocking_gate():
