@@ -2,7 +2,7 @@
 
 Editable canonical source is `gas-backend/`.
 
-Current release: `commission-v1.2-hotfix-budget-summary-2026-07-09-r13`.
+Current release: `commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14`.
 
 ## Canonical source rules
 
