@@ -500,7 +500,7 @@ total:total,pageSize:pageSize,page:page,action:action||"budgetFooterPage",kind:k
 };
 try{
 var body=r($B8===footerKind?"budget-type-summary-body-final":$B76),table=body&&body.closest?body.closest("table"):null,shell=table&&table.closest?table.closest(".app-table-scroll,.table-responsive,.app-table-shell,.app-table-responsive"):null,target=shell&&shell.parentNode?shell.parentNode:table&&table.parentNode?table.parentNode:host.parentNode;
-target&&host.parentNode!==target&&target.appendChild(host),host.classList&&host.classList.toggle("app-budget-type-summary-footer",$B8===footerKind),host.style.width="100%",host.style.maxWidth="100%",host.style.minWidth="",shell&&(shell.style.width="100%",shell.style.maxWidth="100%")
+target&&host.parentNode!==target&&target!==host&&!(host.contains&&host.contains(target))&&target.appendChild(host),host.classList&&host.classList.toggle("app-budget-type-summary-footer",$B8===footerKind),host.style.width="100%",host.style.maxWidth="100%",host.style.minWidth="",shell&&(shell.style.width="100%",shell.style.maxWidth="100%")
 }
 catch(_budgetFooterLayoutErr){
 budgetWarn("budget.standardFooter.layout",_budgetFooterLayoutErr,optsPayload)
