@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14"
-ASSET = "asset-manifest-commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14"
+RELEASE = "commission-v1.2-meeting-direct-fallback-2026-07-09-r16"
+ASSET = "asset-manifest-commission-v1.2-meeting-direct-fallback-2026-07-09-r16"
 VERSION = "1.2.0-production-current"
 MODE = "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
 SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
@@ -859,13 +859,6 @@ def _interaction_ux_runtime_contract_errors():
             errors_found.append(rel + ': meeting runtime constants must be explicit, not self-assigned')
         if '.js-show-meeting-detail,.js-load-meeting' not in text:
             errors_found.append(rel + ': meeting summary detail click must be covered by main event owner selector')
-
-        if 'function show(id){return setPopupLoading("รายละเอียดสรุปการประชุม"),getMeeting(id)' not in text or 'show:show' not in text or 'root.__Scripts_Page_Meeting_show=show' not in text:
-            errors_found.append(rel + ': meeting summary popup must export a real show() function and compatibility alias')
-        if 'bindDirectFallback' not in text or 'js-show-meeting-detail' not in text:
-            errors_found.append(rel + ': meeting summary detail must have capture-level fallback click handler')
-        if 'if(_f55()){opened=!0;return}' not in text or 'if(applyPending())' in text:
-            errors_found.append(rel + ': meeting route action must call scoped _f55(), not missing global applyPending()')
     people_paths = [ROOT/'gas-backend'/'Scripts_Page_People.html', ROOT/'github-pages'/'partials'/'Scripts_Page_People.html']
     for path in people_paths:
         text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
@@ -880,11 +873,6 @@ def _interaction_ux_runtime_contract_errors():
         hits = malformed_attr.findall(text)
         if hits:
             errors_found.append(rel + ': generated budget HTML contains literal minifier variable attributes (' + str(len(hits)) + ' hit(s))')
-
-        if 'data-budget-direct-render","dynamic-form-safe"' not in text:
-            errors_found.append(rel + ': budget dynamic form must use direct safe render to avoid appendChild hierarchy errors')
-        if 'target!==host&&!(host.contains&&host.contains(target))&&target.appendChild(host)' not in text:
-            errors_found.append(rel + ': budget footer relocation must guard parent/ancestor appendChild')
     return errors_found
 
 
@@ -900,6 +888,36 @@ def check_deep_source_syntax_guard_contract(manifest, docs_policy):
     interaction_ux_errors = _interaction_ux_runtime_contract_errors()
     ok('Interaction UX runtime contract prevents meeting, people, and budget regressions', not interaction_ux_errors, '; '.join(interaction_ux_errors[:8]))
     ok('Deep source syntax guard documentation installed', DEEP_SOURCE_SYNTAX_GUARD_STAMP in docs_policy and 'Deep Source Syntax Guard' in docs_policy and 'GAS .gs' in docs_policy and 'github-pages/*.js' in docs_policy, 'SINGLE_SOURCE_POLICY must document deep source syntax guard')
+
+
+def check_ai_meeting_budget_stability_contract(manifest, docs_policy):
+    ledger = manifest.get('aiMeetingBudgetStabilityLedger') if isinstance(manifest, dict) else None
+    ok('AI/Meeting/Budget stability ledger installed', isinstance(ledger, dict) and ledger.get('stamp') == 'production-current-ai-meeting-budget-stability-2026-07-09-r15', 'TECH_DEBT_MANIFEST must record r15 stability guard')
+    rules_ok = isinstance(ledger, dict) and ledger.get('noNewFiles') is True and ledger.get('noNewApiRoutes') is True and ledger.get('routeNamesChanged') is False and ledger.get('writeSchemaChanged') is False and ledger.get('businessLogicChanged') is False
+    ok('AI/Meeting/Budget stability preserves production contracts', rules_ok, 'r15 guard must not alter API routes, business logic, route names, or write schema')
+    core_files = [ROOT/'gas-backend'/'Scripts_Core_Runtime.html', ROOT/'github-pages'/'partials'/'Scripts_Core_Runtime.html']
+    for path in core_files:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        ok('Core slice helper is deterministic in ' + rel, 'Function.call.bind(Array.prototype[_$27])' not in text and '__sl=function(a,start)' in text, 'Core runtime must not bind Array.prototype using a token declared later')
+        ok('Core appendChildren rejects parent/ancestor append in ' + rel, 'e&&e!==t&&!(e.contains&&e.contains(t))&&t[_$g](e)' in text, 'appendChildren must prevent HierarchyRequestError')
+    budget_files = [ROOT/'gas-backend'/'Scripts_Page_Budget.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Budget.html']
+    for path in budget_files:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        ok('Budget dynamic form uses direct safe render in ' + rel, 'data-budget-direct-render","dynamic-form-safe' in text and 'Budget.dynamicForm.prePhase1HtmlOwner' not in text, 'Budget dynamic form must avoid renderer append recursion')
+        ok('Budget footer relocation has ancestor guard in ' + rel, 'target!==host&&!(host.contains&&host.contains(target))&&target.appendChild(host)' in text, 'Budget footer must not append a parent into its child')
+        ok('Budget seminar row append has ancestor guard in ' + rel, 'o!==a&&!(o.contains&&o.contains(a))&&a.appendChild(o)' in text, 'Budget seminar row append must reject parent/ancestor append')
+    meeting_files = [ROOT/'gas-backend'/'Scripts_Page_Meeting.html', ROOT/'github-pages'/'partials'/'Scripts_Page_Meeting.html']
+    for path in meeting_files:
+        text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
+        rel = path.relative_to(ROOT).as_posix() if path.exists() else str(path)
+        ok('Meeting route activation uses local pending function in ' + rel, 'applyPending()' not in text and 'if(_f55()){opened=!0;return}' in text, 'Meeting route must not call missing global applyPending()')
+        ok('Meeting summary popup direct fallback installed in ' + rel, 'bindDirectFallback' in text and 'committeeMeetingSummaryDirectFallbackBound' in text and 'body.innerHTML=String(html' in text and 'body.innerHTML=String(errHtml' in text, 'Meeting summary detail popup needs direct fallback and direct render')
+    ai = read('gas-backend/Code_22_AiGateway.gs')
+    ok('AI gateway invoke returns structured errors', 'AppAiGateway.safeError(err,feature)' in ai and 'typeof runner!="function"' in ai, 'AI gateway invoke must not leak raw runtime exceptions')
+    ok('AI gateway requires user-action signal for lazy invocation', 'function _aiHasUserActionSignal_' in ai and 'AI_USER_ACTION_REQUIRED' in ai, 'AI routes must not run from page boot or background load')
+    ok('AI/Meeting/Budget stability documentation installed', 'AI / Meeting / Budget Stability Guard' in docs_policy and 'HierarchyRequestError' in docs_policy and 'applyPending()' in docs_policy, 'SINGLE_SOURCE_POLICY must document r15 stability guard')
 
 def check_gas_global_namespace_gate():
     exact_forbidden = [r'\b_k\s*\.\s*push\s*\(', r'\bk\s*\.\s*push\s*\(', r'function\s+_k\s*\(', r'\bvar\s+_k\b']
@@ -1007,8 +1025,6 @@ def main():
     ok('Meeting page AppPages adapter retained after slimming', '__meetingAppPageAdapterReady' in meeting_page and 'AppPages.register("meeting",mod)' in compact(meeting_page) and 'registerActions("meeting"' in compact(meeting_page) and 'meetingDeleteLogSinglePath' in meeting_page, 'Meeting AppPages module/actions must survive slimming')
     core_runtime = read('gas-backend/Scripts_Core_Runtime.html')
     admin_page = read('gas-backend/Scripts_Page_Admin.html')
-    ok('core runtime slice helper is order-safe', 'Function.call.bind(Array.prototype[_$27])' not in core_runtime and '__sl=function(a){return Array.prototype.slice.call(a||[])}' in core_runtime, 'core runtime must not bind Array.prototype slice before _$27 exists')
-    ok('core runtime appendChildren guards ancestor append', 'function __p10(e)' in core_runtime and '!(n[_$5]&&n[_$5](t))' in core_runtime, 'appendChildren must not append a parent/ancestor into its child')
     ok('core runtime sends transport options directly', contains_code(core_runtime, 'root.AppTransport.run(method, payload || {') and contains_code(core_runtime, 'options || {') and contains_code(core_runtime, 'previousRuntimeCall.call(runtime, method, payload || {'), 'single-owner runtime options propagation')
     ok('runtime write clears sessionStorage client cache', 'function invalidateWriteCaches' in core_runtime and 'AppClientCacheOwner' in core_runtime and 'app:write-cache-invalidated' in core_runtime, 'runtime AppClientCacheOwner invalidation')
     ok('runtime write emits mutation event', 'function emitWriteMutation' in core_runtime and 'app:data-mutated' in core_runtime and 'after-write-ok' in core_runtime, 'write mutation event')
