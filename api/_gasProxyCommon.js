@@ -1,6 +1,6 @@
 "use strict";
 
-const RELEASE_STAMP = "commission-v1.2-hotfix-track-meeting-2026-07-09-r12";
+const RELEASE_STAMP = "commission-v1.2-hotfix-budget-summary-2026-07-09-r13";
 const MAX_BODY_BYTES = 1048576;
 const DEFAULT_PROXY_TIMEOUT_MS = Number(process.env.GAS_PROXY_TIMEOUT_MS || 9000) || 9000;
 const MAX_PROXY_TIMEOUT_MS = Number(process.env.GAS_PROXY_MAX_TIMEOUT_MS || 25000) || 25000;
