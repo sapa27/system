@@ -1,9 +1,9 @@
 {
   "releaseTrack": "production-current",
   "ledgerModel": "production-current-single-ledger",
-  "release": "commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14",
-  "releaseStamp": "commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14",
-  "assetStamp": "asset-manifest-commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14",
+  "release": "commission-v1.2-meeting-direct-fallback-2026-07-09-r16",
+  "releaseStamp": "commission-v1.2-meeting-direct-fallback-2026-07-09-r16",
+  "assetStamp": "asset-manifest-commission-v1.2-meeting-direct-fallback-2026-07-09-r16",
   "updatedAt": "2026-07-08T00:00:00+07:00",
   "releaseGate": "tools/phaseN_legacy_transport_gate.py",
   "transportMode": "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
@@ -743,8 +743,8 @@
   "releaseAlignment": {
     "enabled": true,
     "packageVersion": "1.2.0-production-current",
-    "releaseStamp": "commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14",
-    "assetStamp": "asset-manifest-commission-v1.2-hotfix-meeting-summary-stability-2026-07-09-r14",
+    "releaseStamp": "commission-v1.2-meeting-direct-fallback-2026-07-09-r16",
+    "assetStamp": "asset-manifest-commission-v1.2-meeting-direct-fallback-2026-07-09-r16",
     "appliesTo": [
       "package.json",
       "TECH_DEBT_MANIFEST.json",
@@ -1991,5 +1991,41 @@
     "productionReleaseGate": "npm run audit:strict",
     "liveGasSheetQaStillRequired": true,
     "productionBuildGate": "npm run build = check:api + check:frontend + check:inline"
+  },
+  "aiMeetingBudgetStabilityLedger": {
+    "stamp": "production-current-ai-meeting-budget-stability-2026-07-09-r15",
+    "owner": "Code_22_AiGateway.gs + Scripts_Page_Meeting.html + Scripts_Page_Budget.html + Scripts_Core_Runtime.html + phaseN gate",
+    "goal": "Block future AI/minifier/runtime drift that causes Meeting summary, Budget dynamic seminar form, and AI route failures after deploy.",
+    "rootCause": [
+      "AI and runtime code had no explicit user-action guard for some paths; minified helpers could remain syntactically valid but semantically broken.",
+      "Meeting route activation still referenced applyPending() without local scope.",
+      "Budget dynamic form could reuse DOM renderers that append a parent into its descendant."
+    ],
+    "fixes": [
+      "Make Core slice helper deterministic and appendChildren reject parent/ancestor append.",
+      "Render Budget dynamic form directly and guard seminar row/footer append operations.",
+      "Replace Meeting applyPending() with local _f55(), add direct summary popup fallback, and direct render popup body.",
+      "Make AppAiGateway.invoke return structured safe errors and require user-action signal in lazy AI assertion.",
+      "Add Phase N guard for AI/Meeting/Budget stability drift."
+    ],
+    "filesChanged": [
+      "gas-backend/Code_22_AiGateway.gs",
+      "gas-backend/Scripts_Core_Runtime.html",
+      "github-pages/partials/Scripts_Core_Runtime.html",
+      "gas-backend/Scripts_Page_Budget.html",
+      "github-pages/partials/Scripts_Page_Budget.html",
+      "gas-backend/Scripts_Page_Meeting.html",
+      "github-pages/partials/Scripts_Page_Meeting.html",
+      "tools/phaseN_legacy_transport_gate.py",
+      "TECH_DEBT_MANIFEST.json",
+      "docs/SINGLE_SOURCE_POLICY.md"
+    ],
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "businessLogicChanged": false,
+    "uiUxChanged": false,
+    "productionReleaseGate": "npm run audit:strict"
   }
 }
