@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "commission-v1.2-hotfix-track-meeting-2026-07-09-r12"
-ASSET = "asset-manifest-commission-v1.2-hotfix-track-meeting-2026-07-09-r12"
+RELEASE = "commission-v1.2-hotfix-budget-summary-2026-07-09-r13"
+ASSET = "asset-manifest-commission-v1.2-hotfix-budget-summary-2026-07-09-r13"
 VERSION = "1.2.0-production-current"
 MODE = "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
 SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
@@ -859,6 +859,8 @@ def _interaction_ux_runtime_contract_errors():
             errors_found.append(rel + ': __sl slice helper must not bind Array.prototype before _$27 is initialized')
         if '__sl=function(a){return Array.prototype.slice.call(a||[])}' not in text:
             errors_found.append(rel + ': __sl must be an explicit safe slice helper for NodeList/HTMLCollection')
+        if 'e&&e!==t&&!(e[_$5]&&e[_$5](t))&&t[_$g](e)' not in text:
+            errors_found.append(rel + ': core appendChildren must guard against appending a parent/ancestor into its child')
     login_paths = [ROOT/'github-pages'/'critical-login-runtime.js', ROOT/'gas-backend'/'Scripts_Critical_Login_Runtime.html', ROOT/'github-pages'/'partials'/'Scripts_Critical_Login_Runtime.html']
     for path in login_paths:
         text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
@@ -875,6 +877,10 @@ def _interaction_ux_runtime_contract_errors():
             errors_found.append(rel + ': meeting summary detail click must be covered by main event owner selector')
         if 'CommitteeMeetingSummaryDetail.show(btn.dataset.id)' not in text and 'root.CommitteeMeetingSummaryDetail&&_I(root.CommitteeMeetingSummaryDetail.show)' not in text:
             errors_found.append(rel + ': meeting summary detail button must call CommitteeMeetingSummaryDetail.show')
+        if 'data-meeting-summary-render","direct-safe-innerhtml-r13"' not in text or 'data-meeting-summary-detail-render","direct-safe-innerhtml-r13"' not in text:
+            errors_found.append(rel + ': meeting summary popup must render with direct safe innerHTML fallback for GAS/static runtime')
+        if '.js-show-meeting-detail' not in text or 'w.CommitteeMeetingSummaryDetail.show' not in text:
+            errors_found.append(rel + ': meeting summary detail must have capture-level fallback handler')
         if 'function bind(){root._mCB&&byId(_M.x68)&&loadList(),root._mCB=!0,bindCommitteeEvent' not in text:
             errors_found.append(rel + ': meeting event owner must rebind after route/AppEvents cleanup')
         if 'insertAdjacentHTML("beforeend",h)' not in text:
@@ -907,6 +913,10 @@ def _interaction_ux_runtime_contract_errors():
             errors_found.append(rel + ': generated budget HTML contains literal minifier variable attributes (' + str(len(hits)) + ' hit(s))')
         if 'target&&host.parentNode!==target&&target!==host&&!(host.contains&&host.contains(target))&&target.appendChild(host)' not in text:
             errors_found.append(rel + ': budget footer relocation must guard against appending an ancestor into its descendant')
+        if 'data-budget-dynamic-form-render","direct-safe-innerhtml-r13"' not in text or 'data-budget-support-render","direct-safe-innerhtml-r13"' not in text:
+            errors_found.append(rel + ': budget dynamic/support forms must bypass unsafe appendChild renderer with direct safe innerHTML')
+        if 'o!==a&&!(o.contains&&o.contains(a))&&a.appendChild(o)' not in text:
+            errors_found.append(rel + ': budget seminar row append must guard against parent-containing child nodes')
     return errors_found
 
 
