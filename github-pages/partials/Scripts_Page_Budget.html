@@ -75,7 +75,8 @@ for(;
 e.firstChild;
 )e.removeChild(e.firstChild);
 return e
-},i=e.appendChildren||function(t){
+},i=function(t){
+t=r(t)||t;
 if(!t)return t;
 for(var e=1;
 e<arguments.length;
