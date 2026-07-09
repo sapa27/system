@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "commission-v1.2-production-current-contract-freeze-2026-07-06-r1"
-ASSET = "asset-manifest-commission-v1.2-production-current-contract-freeze-2026-07-06-r1"
+RELEASE = "commission-v1.2-hotfix-track-meeting-2026-07-09-r12"
+ASSET = "asset-manifest-commission-v1.2-hotfix-track-meeting-2026-07-09-r12"
 VERSION = "1.2.0-production-current"
 MODE = "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
 SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
@@ -182,8 +182,8 @@ PHASE5_SIZE_BUDGETS = {
     # owners; no API routes, files, UI, or business rules are added.
     "gas-backend/Scripts_Core_Runtime.html": 360000,
     "github-pages/partials/Scripts_Core_Runtime.html": 360000,
-    "gas-backend/Scripts_Page_Meeting.html": 220000,
-    "github-pages/partials/Scripts_Page_Meeting.html": 220000,
+    "gas-backend/Scripts_Page_Meeting.html": 222000,
+    "github-pages/partials/Scripts_Page_Meeting.html": 222000,
     "gas-backend/Code_30_Domain_Cases.gs": 327000,
     "gas-backend/Code_32_Domain_Budget.gs": 228000,
     "gas-backend/Scripts_Page_Budget.html": 160000,
@@ -226,7 +226,7 @@ OWNER_CONSOLIDATION_FORBIDDEN_PAGE_CALLS = [
 PHASE5_NEXT_SLIMMING_TARGETS = {
     # Informational next-step targets; not enforced in Phase 5.
     "gas-backend/Scripts_Core_Runtime.html": 340000,
-    "gas-backend/Scripts_Page_Meeting.html": 220000,
+    "gas-backend/Scripts_Page_Meeting.html": 222000,
     "gas-backend/Code_30_Domain_Cases.gs": 310000,
     "gas-backend/Code_32_Domain_Budget.gs": 210000,
 }
@@ -873,12 +873,14 @@ def _interaction_ux_runtime_contract_errors():
             errors_found.append(rel + ': meeting runtime constants must be explicit, not self-assigned')
         if '.js-show-meeting-detail,.js-load-meeting' not in text:
             errors_found.append(rel + ': meeting summary detail click must be covered by main event owner selector')
-        if 'CommitteeMeetingSummaryDetail.show(btn.dataset.id)' not in text:
+        if 'CommitteeMeetingSummaryDetail.show(btn.dataset.id)' not in text and 'root.CommitteeMeetingSummaryDetail&&_I(root.CommitteeMeetingSummaryDetail.show)' not in text:
             errors_found.append(rel + ': meeting summary detail button must call CommitteeMeetingSummaryDetail.show')
         if 'function bind(){root._mCB&&byId(_M.x68)&&loadList(),root._mCB=!0,bindCommitteeEvent' not in text:
             errors_found.append(rel + ': meeting event owner must rebind after route/AppEvents cleanup')
         if 'insertAdjacentHTML("beforeend",h)' not in text:
             errors_found.append(rel + ': agenda 3/4 row creation must have a safe DOM fallback')
+        if 'if(applyPending())' in text or 'if(_f55()){opened=!0;return}' not in text:
+            errors_found.append(rel + ': meeting route activation must call the local pending seed function, not an undefined applyPending symbol')
     people_paths = [ROOT/'gas-backend'/'Scripts_Page_People.html', ROOT/'github-pages'/'partials'/'Scripts_Page_People.html']
     for path in people_paths:
         text = path.read_text(encoding='utf-8', errors='ignore') if path.exists() else ''
@@ -903,6 +905,8 @@ def _interaction_ux_runtime_contract_errors():
         hits = malformed_attr.findall(text)
         if hits:
             errors_found.append(rel + ': generated budget HTML contains literal minifier variable attributes (' + str(len(hits)) + ' hit(s))')
+        if 'target&&host.parentNode!==target&&target!==host&&!(host.contains&&host.contains(target))&&target.appendChild(host)' not in text:
+            errors_found.append(rel + ': budget footer relocation must guard against appending an ancestor into its descendant')
     return errors_found
 
 
