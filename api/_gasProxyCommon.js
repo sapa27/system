@@ -1,6 +1,6 @@
 "use strict";
 
-const RELEASE_STAMP = "commission-v1.2-production-current-contract-freeze-2026-07-06-r1";
+const RELEASE_STAMP = "commission-v1.2-ai-meeting-budget-stability-2026-07-09-r15";
 const MAX_BODY_BYTES = 1048576;
 const DEFAULT_PROXY_TIMEOUT_MS = 55000;
 const MAX_PROXY_TIMEOUT_MS = 55000;
