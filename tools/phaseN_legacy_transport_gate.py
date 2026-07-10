@@ -3,12 +3,15 @@
 from __future__ import annotations
 from pathlib import Path
 import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil, hashlib
+import importlib.util
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "commission-v1.2-deep-stability-hardening-2026-07-10-r20"
-ASSET = "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20"
+RELEASE = "commission-v1.2-gas-hosted-production-2026-07-10-r27"
+ASSET = "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r27"
 VERSION = "1.2.0-production-current"
-MODE = "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
+MODE = "production-gas-hosted-google-script-run-api-router"
+VERCEL_MODE = "production-vercel-proxy-only"
+P2_LONG_TERM_STABILITY_STAMP = "production-stability-hardening-r25"
 SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
 CRITICAL_APIS = [
     "apiBudgetGetSummary",
@@ -30,7 +33,7 @@ CHARACTERIZATION_FREEZE_STAMP = "production-current-characterization-contract-fr
 CHARACTERIZATION_ROUTE_SHA256 = "de5c16d36b912ec4267787e225ec029b77c5fb0bd0052781e6f9d51e4afc9f89"
 CHARACTERIZATION_WRITE_SCHEMA_SHA256 = "a62622facc8e9c97ebfca4bd3bf081597a2bd3fcdbaef1fffefa5ef8f9ed475b"
 CHARACTERIZATION_PROXY_ALLOWLIST_SHA256 = "3ae9aa68719b1ea7925c7b1013b4e4396e9683e7476fa2cf625af1a7627227c4"
-CHARACTERIZATION_UI_TEMPLATE_SHA256 = "2b0f0d99315dd3e76a9de561450405748111e40f07be8c6fb9b7e7c90c700879"
+CHARACTERIZATION_UI_TEMPLATE_SHA256 = "76dcadd48639fd1f7876a90ea9cf51d07cf5a8eb2709bbee34ab6a6b1773d518"
 CHARACTERIZATION_UI_TEMPLATE_COUNT = 11
 CHARACTERIZATION_PAGE_API_FOOTPRINTS = {
     "Scripts_Core_Runtime.html": (51, "2d9debccd4cfe036fedd7cd437412174cc8d90c9e5ed8f297006de0fc24779a9"),
@@ -445,79 +448,28 @@ def mirror_in_sync():
     return drift
 
 
-CRITICAL_STATIC_TAIL = r"""
-(function(root) {
-    "use strict"; if (!root.__APP_ASYNC_RUNTIME_LOADER__) {
-      let isFn = function(v) {
-        return typeof v == "function"
-      },
-      authenticated = function() {
-        try {
-          return!!(store && store.get && store.get("auth.token", "") || root.AppStore && root.AppStore.get && root.AppStore.get("auth.token",
-              ""))
-        } catch (_e) {
-          return!1
-        }
-      },
-      needsCore = function() {
-        var h = String(root.location && root.location.hash || ""); return authenticated() || !!h && h !== "#/login" && h !== "#/"
-      },
-      idle = function(fn) {
-        return(root.requestIdleCallback || function(cb) {
-            return setTimeout(cb, 1)
-          })(fn, {
-            timeout: 1600
-          })
-      },
-      ensure = function(reason) {
-        try {
-          if (root.AppCritical && isFn(root.AppCritical.ensureCoreRuntime))return Promise.resolve(root.AppCritical.ensureCoreRuntime({
-                reason: reason || "async-index"
-              }))
-        } catch (e) {
-          try {
-            root.__appObserve && root.__appObserve(e, "index.asyncRuntime.ensure")
-          } catch (_ignore) {
-          }
-        }
-        return Promise.resolve(!1)
-      }; root.__APP_ASYNC_RUNTIME_LOADER__ = !0; var store = root.AppStore || null; root.AppAsyncRuntimeLoader = {
-        owner: "Index.html:async-runtime-loader-current",
-        ensureCoreRuntime: ensure,
-        needsCoreRuntime: needsCore,
-        schedule: function(reason) {
-          return idle(function() {
-              needsCore() && ensure(reason || "idle-auth-route")
-            }),
-          !0
-        }
-      },
-      document.addEventListener("DOMContentLoaded", function() {
-          root.AppAsyncRuntimeLoader.schedule("dom-ready")
-        }, {
-          once: !0
-        })
-    }
-  })(typeof window != "undefined" ? window: typeof globalThis != "undefined" ? globalThis: this);
-"""
-
-
-def _critical_static_from_canonical(html: str) -> str:
-    html = re.sub(r"<!--.*?-->", "", html or "", flags=re.S)
-    html = re.sub(r"<script[^>]*>", "", html, flags=re.I)
-    html = re.sub(r"</script>", "", html, flags=re.I)
-    lines = [line.rstrip() for line in html.splitlines() if line.strip()]
-    return "\n".join(lines).strip() + "\n" + CRITICAL_STATIC_TAIL
+def _generated_expected_artifact(relative_path: str):
+    generator_path = ROOT / "tools" / "generate_vercel_env.py"
+    if not generator_path.exists():
+        return None
+    try:
+        spec = importlib.util.spec_from_file_location("commission_generate_vercel_env", generator_path)
+        if spec is None or spec.loader is None:
+            return None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        target = ROOT / relative_path
+        return module._expected_outputs().get(target)
+    except Exception:
+        return None
 
 
 def critical_static_runtime_in_sync():
-    src = ROOT / "gas-backend" / "Scripts_Critical_Login_Runtime.html"
     dst = ROOT / "github-pages" / "critical-login-runtime.js"
-    if not src.exists() or not dst.exists():
+    expected = _generated_expected_artifact("github-pages/critical-login-runtime.js")
+    if not dst.exists() or expected is None:
         return False
-    return dst.read_text(encoding="utf-8", errors="ignore") == _critical_static_from_canonical(
-        src.read_text(encoding="utf-8", errors="ignore")
-    )
+    return dst.read_text(encoding="utf-8", errors="ignore") == expected
 
 
 
@@ -1084,21 +1036,22 @@ def check_legacy_fallback_cleanup_contract(
         "required GAS compatibility entrypoints must remain single",
     )
     ok(
-        "legacy GAS transport endpoints are disabled stubs",
+        "legacy JSONP and hidden bridge endpoints remain disabled",
         "LEGACY_TRANSPORT_DISABLED" in platform
         and "function _legacyDoGetDisabled_" in platform
-        and contains_code(platform, "function _b7(e){return _legacyDoGetDisabled_(e)}")
-        and "google.script.run" not in platform,
-        "legacy bridge/jsonp/fast-login behavior must be disabled in PlatformCore",
+        and "function _b7(e)" in platform
+        and "return _legacyDoGetDisabled_(e)" in platform,
+        "legacy JSONP/hidden-bridge/fast-login endpoints must remain disabled while the canonical GAS UI uses google.script.run",
     )
     crit = compact(critical_runtime + static_critical)
     ok(
-        "critical runtime fallback is Vercel proxy only",
-        "/api/login" in crit
-        and "/api/gas" in crit
-        and "fetch(" in crit
-        and "google.script.run" not in crit,
-        "critical login runtime must not own GAS direct fallback; it must use Vercel proxy only",
+        "critical runtime owns GAS-hosted direct transport",
+        "production-gas-hosted-google-script-run-api-router" in crit
+        and ".apiRouter({" in crit
+        and "GAS_HOST_RUNTIME_REQUIRED" in crit
+        and "resolveCriticalProxyEndpoint_" not in crit
+        and "VERCEL_FRONTEND_REQUIRED" not in crit,
+        "critical runtime must call the canonical apiRouter through google.script.run when hosted by GAS",
     )
     ok(
         "browser transport stays Vercel proxy only after cleanup",
@@ -2275,7 +2228,7 @@ def check_current_final_consistency_contract(manifest, package, docs_policy):
         "Current final consistency documentation installed",
         CURRENT_FINAL_CONSISTENCY_STAMP in docs_policy
         and "Current Final Consistency Lock" in docs_policy
-        and "53 files" in docs_policy
+        and ("53 files" in docs_policy or "43 source files / 53 build files" in docs_policy)
         and "108 methods" in docs_policy
         and "27" in docs_policy,
         "SINGLE_SOURCE_POLICY must document current final consistency lock",
@@ -3219,6 +3172,43 @@ def check_step4_router_canonical_resolver_consolidation(manifest, package, docs_
 
 
 def check_step5_proxy_origin_guard(manifest, package, docs_policy, platform, common, transport, app, generated):
+    step7 = manifest.get("step7GasHostedProductionRewrite") if isinstance(manifest, dict) else None
+    if isinstance(step7, dict):
+        critical = read("gas-backend/Scripts_Critical_Login_Runtime.html")
+        critical_mirror = re.sub(r"^<!-- GENERATED MIRROR:[\s\S]*?-->\s*", "", read("github-pages/partials/Scripts_Critical_Login_Runtime.html"))
+        do_get_start = platform.index("function doGet(e)") if "function doGet(e)" in platform else -1
+        do_get_end = platform.index("function _bp(e)", do_get_start) if do_get_start >= 0 and "function _bp(e)" in platform[do_get_start:] else -1
+        do_get_block = platform[do_get_start:do_get_end] if do_get_start >= 0 and do_get_end > do_get_start else ""
+        ok(
+            "Step 7 GAS-hosted production ledger installed",
+            step7.get("hostingOwner") == "Google Apps Script HtmlService Web App"
+            and step7.get("newApiRoutes") == 0
+            and step7.get("newFiles") == 0,
+            "manifest must record the GAS-hosted production owner without adding routes or files",
+        )
+        ok(
+            "Step 7 GAS doGet renders the production UI",
+            "renderVue3App_(e)" in do_get_block
+            and "_renderVercelFrontendEntry_" not in platform
+            and "_productionFrontendEntryUrl_" not in platform,
+            "normal GAS /exec must render Index.html through renderVue3App_",
+        )
+        ok(
+            "Step 7 browser transport invokes canonical apiRouter through google.script.run",
+            ".apiRouter({" in critical
+            and "production-gas-hosted-google-script-run-api-router" in critical
+            and "resolveCriticalProxyEndpoint_" not in critical
+            and "VERCEL_FRONTEND_REQUIRED" not in critical
+            and critical == critical_mirror
+            and critical_static_runtime_in_sync(),
+            "critical canonical/generated/static runtime must use one GAS direct transport owner",
+        )
+        return {
+            "stamp": step7.get("stamp", ""),
+            "gasBackendUiDisabled": False,
+            "gasHosted": True,
+            "transport": "google.script.run.apiRouter",
+        }
     ledger = manifest.get("step5ProxyOriginAndHtmlResponseGuard") if isinstance(manifest, dict) else None
     scripts = package.get("scripts", {}) if isinstance(package, dict) else {}
     critical = read("gas-backend/Scripts_Critical_Login_Runtime.html")
@@ -3516,13 +3506,23 @@ def check_step6_runtime_bootstrap_meeting_rewrite(manifest, package, docs_policy
         app_config_smoke.get("ok") is True,
         json.dumps(app_config_smoke, ensure_ascii=False),
     )
+    step7_active = isinstance(manifest.get("step7GasHostedProductionRewrite"), dict)
     ok(
-        "Step 6 critical origin guard is lexical in all runtime copies",
-        all("function isGoogleHostedFrontend_()" in value for value in [critical, critical_mirror, critical_static])
-        and all(not re.search(r"[,}]\s*function\s+isGoogleHostedFrontend_\s*\(", value) for value in [critical, critical_mirror, critical_static])
+        "Step 6/7 critical transport owner is lexical in all runtime copies",
+        (
+            step7_active
+            and all("function criticalGasRunner_()" in value for value in [critical, critical_mirror, critical_static])
+            and all(".apiRouter({" in value for value in [critical, critical_mirror, critical_static])
+            and all("resolveCriticalProxyEndpoint_" not in value for value in [critical, critical_mirror, critical_static])
+        )
+        or (
+            not step7_active
+            and all("function isGoogleHostedFrontend_()" in value for value in [critical, critical_mirror, critical_static])
+            and all(not re.search(r"[,}]\s*function\s+isGoogleHostedFrontend_\s*\(", value) for value in [critical, critical_mirror, critical_static])
+        )
         and critical == critical_mirror
         and critical_static_runtime_in_sync(),
-        "critical Google-origin guard must be declared in scope and generated copies must be exact",
+        "critical transport owner must be lexical and generated copies must be exact",
     )
     stale_cache_aliases = ["cacheKey: cacheKey", "readCache: readCache", "writeCache: writeCache"]
     ok(
@@ -3603,6 +3603,169 @@ def check_step6_runtime_bootstrap_meeting_rewrite(manifest, package, docs_policy
         "inlineFavicon": True,
     }
 
+
+def _p2_vercel_transport_execution_smoke(app_source, transport_source):
+    app_json = json.dumps(app_source, ensure_ascii=False)
+    transport_json = json.dumps(transport_source, ensure_ascii=False)
+    javascript = r'''const vm = require("vm");
+const appSource = APP_SOURCE;
+const transportSource = TRANSPORT_SOURCE;
+const storage = Object.create(null);
+const noop = function() {};
+const document = {
+  readyState: "loading",
+  addEventListener: noop,
+  querySelectorAll: () => [],
+  querySelector: () => null,
+  getElementById: () => null,
+  createElement: () => ({ setAttribute: noop, getAttribute: () => "", style: {}, dataset: {} }),
+  body: { appendChild: noop },
+  documentElement: {}
+};
+const root = {
+  document,
+  location: { search: "", hostname: "production.example.vercel.app", href: "https://production.example.vercel.app/" },
+  localStorage: {
+    getItem: key => Object.prototype.hasOwnProperty.call(storage, key) ? storage[key] : null,
+    setItem: (key, value) => { storage[key] = String(value); },
+    removeItem: key => { delete storage[key]; }
+  },
+  console,
+  Promise,
+  setTimeout,
+  clearTimeout,
+  URL,
+  URLSearchParams
+};
+root.window = root;
+root.globalThis = root;
+const context = vm.createContext({
+  window: root,
+  globalThis: root,
+  document,
+  console,
+  Promise,
+  setTimeout,
+  clearTimeout,
+  URL,
+  URLSearchParams,
+  AbortController,
+  fetch: () => Promise.reject(new Error("FETCH_NOT_EXPECTED_DURING_BOOT_SMOKE"))
+});
+vm.runInContext(appSource, context, { filename: "app-config.js" });
+vm.runInContext(transportSource, context, { filename: "github-gas-transport.js" });
+if (!root.AppTransport || typeof root.AppTransport.runtimeOwnerStatus !== "function") throw new Error("RUNTIME_OWNER_STATUS_MISSING");
+const healthy = root.AppTransport.runtimeOwnerStatus();
+if (!healthy.ok) throw new Error("VERCEL_RUNTIME_OWNER_UNHEALTHY:" + JSON.stringify(healthy));
+root.AppTransport.assertRuntimeOwner("smoke");
+root.AppTransport.__gasHostedDirect = true;
+const drift = root.AppTransport.runtimeOwnerStatus();
+if (drift.ok || !drift.errors.includes("GAS_DIRECT_OWNER_ACTIVE_ON_VERCEL")) throw new Error("OWNER_DRIFT_NOT_DETECTED");
+let blocked = false;
+try { root.AppTransport.assertRuntimeOwner("tamper-smoke"); } catch (e) { blocked = e && e.code === "APP_RUNTIME_OWNER_MISMATCH"; }
+if (!blocked) throw new Error("OWNER_DRIFT_NOT_BLOCKED");
+console.log(JSON.stringify({ ok: true, healthy, driftDetected: true, failClosed: true }));
+'''.replace('APP_SOURCE', app_json).replace('TRANSPORT_SOURCE', transport_json)
+    return _run_step6_node_smoke("p2-vercel-transport-owner", javascript)
+
+
+def check_p2_long_term_stability(manifest, package, docs_policy, app, transport, vercel, core_runtime):
+    ledger = manifest.get("p2LongTermStability") if isinstance(manifest, dict) else None
+    scripts = package.get("scripts", {}) if isinstance(package, dict) else {}
+    critical = read("gas-backend/Scripts_Critical_Login_Runtime.html")
+    critical_mirror = re.sub(r"^<!-- GENERATED MIRROR:[\s\S]*?-->\s*", "", read("github-pages/partials/Scripts_Critical_Login_Runtime.html"))
+    meeting = read("gas-backend/Scripts_Page_Meeting.html")
+    meeting_mirror = re.sub(r"^<!-- GENERATED MIRROR:[\s\S]*?-->\s*", "", read("github-pages/partials/Scripts_Page_Meeting.html"))
+    diagnostic = read("github-pages/diagnostic.html")
+    smoke = _p2_vercel_transport_execution_smoke(app, transport)
+    js_cache = ""
+    for group in vercel.get("headers", []) if isinstance(vercel, dict) else []:
+        if group.get("source") == "/(.*).js":
+            for header in group.get("headers", []):
+                if str(header.get("key", "")).lower() == "cache-control":
+                    js_cache = str(header.get("value", ""))
+
+    ok(
+        "P2 long-term stability ledger installed",
+        isinstance(ledger, dict)
+        and ledger.get("stamp") == P2_LONG_TERM_STABILITY_STAMP
+        and ledger.get("noNewFiles") is True
+        and ledger.get("noNewApiRoutes") is True
+        and ledger.get("spreadsheetSchemaChanged") is False
+        and ledger.get("businessRulesChanged") is False,
+        "manifest must record the frozen P2 stability scope",
+    )
+    ok(
+        "P2 Vercel transport owner execution smoke passes",
+        smoke.get("ok") is True,
+        json.dumps(smoke, ensure_ascii=False),
+    )
+    ok(
+        "P2 GAS critical runtime has fail-closed owner health",
+        all(token in critical for token in [
+            "p2RuntimeHealthSnapshot_",
+            "AppRuntimeHealth",
+            "runtimeOwnerStatus",
+            "assertRuntimeOwner",
+            "APP_RUNTIME_OWNER_MISMATCH",
+            "login.runtimeHealth.blocked",
+        ])
+        and critical == critical_mirror
+        and critical_static_runtime_in_sync(),
+        "GAS owner health must execute before login and all generated copies must match",
+    )
+    ok(
+        "P2 meeting read failures cannot render as empty data",
+        "function assertMeetingReadPayload(data, method)" in meeting
+        and "data.degraded === true" in meeting
+        and "data.apiDegraded === true" in meeting
+        and "data.loadOk === false" in meeting
+        and "MEETING_READ_DEGRADED" in meeting
+        and 'assertMeetingReadPayload(data, "apiListCommitteeMeetings")' in meeting
+        and 'assertMeetingReadPayload(unwrap(res) || {}, "apiGetCommitteeMeetingSystem")' in meeting
+        and meeting == meeting_mirror,
+        "meeting list/detail must reject degraded payloads explicitly",
+    )
+    ok(
+        "P2 core read recovery fails closed by default",
+        "allowDegradedReadRecovery === !0" in core_runtime
+        and "if (allowDegraded)return degradedApiData" in core_runtime
+        and "if (err instanceof Error)throw err" in core_runtime,
+        "read errors may degrade only under explicit opt-in",
+    )
+    ok(
+        "P2 boot-critical JavaScript cache requires revalidation",
+        bool(re.search(r"no-cache|max-age=0|no-store", js_cache, re.I))
+        and "stale-while-revalidate" not in js_cache.lower(),
+        js_cache,
+    )
+    ok(
+        "P2 diagnostic verifies owner, release and boot assets",
+        all(token in diagnostic for token in [
+            "runtimeOwnerStatus",
+            "assertRuntimeOwner",
+            "releaseStatus",
+            "BOOT_ASSET_STALE_CACHE_POLICY",
+            "critical-login-runtime.js",
+            "app-index-bootstrap.js",
+        ]),
+        "diagnostic.html must expose deploy-time and browser-runtime checks",
+    )
+    ok(
+        "P2 release and blocking command documented",
+        scripts.get("test:p2-stability") == "COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+        and "P2 — Long-term Runtime Stability" in docs_policy
+        and "npm run test:p2-stability" in docs_policy,
+        "package and policy must expose the blocking P2 gate",
+    )
+    return {
+        "stamp": P2_LONG_TERM_STABILITY_STAMP,
+        "vercelTransportExecutionSmoke": smoke,
+        "gasRuntimeOwnerFailClosed": True,
+        "meetingDegradedPayloadVisible": True,
+        "bootCriticalJsCacheControl": js_cache,
+        "release": RELEASE,
+    }
 
 def main():
     for rel in REQUIRED:
@@ -3840,7 +4003,7 @@ def main():
     )
     ok(
         "index uses Production current assets",
-        RELEASE in index and MODE in index,
+        RELEASE in index and VERCEL_MODE in index,
         "index script stamps",
     )
     stale_static_assets = []
@@ -3855,7 +4018,7 @@ def main():
     )
     ok(
         "diagnostic uses Production current assets",
-        RELEASE in diag and MODE in diag,
+        RELEASE in diag and VERCEL_MODE in diag,
         "diagnostic script stamps",
     )
     ok(
@@ -4201,12 +4364,16 @@ def main():
         "write mutation event",
     )
     ok(
-        "runtime write refresh broker installed",
+        "runtime write refresh has one canonical owner",
         "function installWriteRefreshBroker" in core_runtime
         and contains_code(core_runtime, "pages.refresh = function")
-        and "AppWriteRefreshBroker" in core_runtime
-        and "app:write-refresh-scheduled" in core_runtime,
-        "active page refresh after successful write",
+        and "current-write-refresh-delegated-r25" in core_runtime
+        and "AppDirtyRefreshOwner.Current" in core_runtime
+        and "root.AppDirtyRefreshOwner =" in core_runtime
+        and "function scheduleWriteRefresh" not in core_runtime
+        and "app:write-refresh-scheduled" not in core_runtime
+        and 'source: "AppWriteRefreshBroker"' not in core_runtime,
+        "AppDirtyRefreshOwner must be the only listener that refreshes pages after writes",
     )
     ok(
         "Phase E runtime consolidation facade installed",
@@ -4291,10 +4458,12 @@ def main():
         and "function runLoginPost" not in transport,
         "login path",
     )
+    critical_direct = read("gas-backend/Scripts_Critical_Login_Runtime.html")
     ok(
-        "AppTransport.ping uses proxy",
-        "apiGetRouteContract" in transport and "vercel-api-proxy-only-ping" in transport,
-        "ping path",
+        "AppTransport.ping uses canonical route contract",
+        ("apiGetRouteContract" in critical_direct and "gas-hosted-direct-ping" in critical_direct)
+        or ("apiGetRouteContract" in transport and "vercel-api-proxy-only-ping" in transport),
+        "ping must call apiGetRouteContract through the active transport owner",
     )
     ok(
         "fast-login disabled in backend",
@@ -5107,6 +5276,9 @@ def main():
     readable_source_rows = check_current_readable_source_contract(manifest, docs_policy)
     check_admin_user_facade_contract(ROOT)
     check_gas_global_namespace_gate()
+    p2_stability_report = check_p2_long_term_stability(
+        manifest, package, docs_policy, app, transport, vercel, core_runtime
+    )
     report = {
         "ok": not errors,
         "releaseTrack": "production-current",
@@ -5138,6 +5310,7 @@ def main():
         "step4RouterCanonicalResolverConsolidation": step4_router_consolidation_report,
         "step5ProxyOriginAndHtmlResponseGuard": step5_proxy_origin_guard_report,
         "step6RuntimeBootstrapMeetingSummaryRewrite": step6_runtime_bootstrap_meeting_report,
+        "p2LongTermStability": p2_stability_report,
         "readableSourceRows": readable_source_rows,
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
