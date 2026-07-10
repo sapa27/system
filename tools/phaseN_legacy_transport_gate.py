@@ -6,8 +6,8 @@ import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil, hash
 import importlib.util
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "commission-v1.2-gas-hosted-production-2026-07-10-r27"
-ASSET = "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r27"
+RELEASE = "commission-v1.2-gas-hosted-production-2026-07-10-r30"
+ASSET = "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r30"
 VERSION = "1.2.0-production-current"
 MODE = "production-gas-hosted-google-script-run-api-router"
 VERCEL_MODE = "production-vercel-proxy-only"
