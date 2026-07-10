@@ -2255,7 +2255,7 @@ var _M = {
         return
       }
       e.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = null;
-      e._mSK = Date.now ? Date.now() + 4000: 1;
+      e._mSK = Date.now ? Date.now() + 180: 1;
       e.__meetingEditCaseSilentLoading = {
       };
       if (e.AppStore && $meetingFn(e.AppStore.set)) {
@@ -4149,7 +4149,10 @@ var _M = {
       total: 0,
       meetings: [],
       itemsByMeetingId: {
-      }
+      },
+      initialized: !1,
+      initialLoadPromise: null,
+      loadingPromise: null
     },
     byId = Kit && Kit.byId || function(id) {
       return doc.getElementById(id)
@@ -4253,16 +4256,9 @@ var _M = {
           } catch (_activateViewErr) {
             $meetingObserve(_activateViewErr, "meeting.committee.activate.view")
           }
-          try {
-            clearForm()
-          } catch (_activateClearErr) {
-            $meetingObserve(_activateClearErr, "meeting.committee.activate.clear")
-          }
-          try {
-            loadList()
-          } catch (_activateLoadErr) {
-            $meetingObserve(_activateLoadErr, "meeting.committee.activate.load")
-          }
+          initializeCommitteeMeetingSystem().catch (function(_activateLoadErr) {
+              $meetingObserve(_activateLoadErr, "meeting.committee.activate.load")
+            });
           return!0
         }
         return run(0) || !0
@@ -4597,9 +4593,21 @@ var _M = {
       agenda4: collectAgenda(4)
     }
   }
+  function assertMeetingReadPayload(data, method) {
+    data = data || {};
+    if (data.degraded === true || data.apiDegraded === true || data.loadOk === false) {
+      var err = new Error(text(data.error || data.message || "โหลดข้อมูลการประชุมไม่สำเร็จ"));
+      err.code = text(data.errorCode || "MEETING_READ_DEGRADED");
+      err.errorCode = err.code;
+      err.method = method || "apiListCommitteeMeetings";
+      throw err;
+    }
+    return data;
+  }
   function renderList(data, options) {
     options = options || {
     };
+    data = assertMeetingReadPayload(data, "apiListCommitteeMeetings");
     var meetings =(data = data || {
       }).meetings || [],
     itemsByMeetingId = data.itemsByMeetingId || {
@@ -4619,23 +4627,52 @@ var _M = {
   }
   function loadList(options) {
     options = options || {};
+    if (listState.loadingPromise && options.forceReload !== !0)return listState.loadingPromise;
     var tbody = byId(_M.x11);
-    var payload = filterPayload({ forceFresh: options.forceFresh !== false });
+    var payload = filterPayload({ forceFresh: options.forceFresh === true });
     if (tbody) {
       setHtml(tbody, '<tr><td class="text-center text-muted p-3" colspan="4">กำลังโหลด...</td></tr>',
         "meeting.list.loading");
     }
     setHtml(_M.x51, '<div class="app-table-pager no-print"><div class="app-table-pager-left"><span class="app-table-pager-count">กำลังโหลดข้อมูล...</span></div></div>');
     hideDetail();
-    return api("apiListCommitteeMeetings", payload).then(function(res) {
-      var data = unwrap(res) || {};
-      return renderList(data);
-    }).catch(function(err) {
-      var message = esc(err && err.message || err || _M.T);
-      setHtml(_M.x11, '<tr><td class="text-center text-danger p-3" colspan="4">' + message + "</td></tr>");
-      setHtml(_M.x51, "");
-      throw err;
-    });
+    var request = api("apiListCommitteeMeetings", payload).then(function(res) {
+        var data = unwrap(res) || {};
+        return renderList(data)
+      }).catch (function(err) {
+        var message = esc(err && err.message || err || _M.T);
+        setHtml(_M.x11, '<tr><td class="text-center text-danger p-3" colspan="4">' + message + "</td></tr>"),
+        setHtml(_M.x51, "");
+        throw err
+      });
+    listState.loadingPromise = request;
+    request.then(function() {
+        listState.loadingPromise === request &&(listState.loadingPromise = null)
+      }, function() {
+        listState.loadingPromise === request &&(listState.loadingPromise = null)
+      });
+    return request
+  }
+  function initializeCommitteeMeetingSystem() {
+    if (listState.initialized)return listState.initialLoadPromise || Promise.resolve(!0);
+    listState.initialized = !0;
+    try {
+      clearForm()
+    } catch (_initialClearErr) {
+      $meetingObserve(_initialClearErr, "meeting.committee.initialize.clear")
+    }
+    var initial = Promise.resolve(loadList({
+          forceFresh: !1
+        })).then(function(value) {
+        listState.initialLoadPromise = null;
+        return value
+      }, function(err) {
+        listState.initialized = !1;
+        listState.initialLoadPromise = null;
+        throw err
+      });
+    listState.initialLoadPromise = initial;
+    return initial
   }
   function save(btn) {
     var payload = formPayload();
@@ -4660,7 +4697,9 @@ var _M = {
         }; return setVal(_M.x104, data.meetingId || payload.meeting.meetingId || ""),
         closeSwal(),
         notify("success", "บันทึกการประชุมคณะกรรมาธิการสำเร็จ"),
-        loadList().then(function() {
+        loadList({
+            forceFresh: !0
+          }).then(function() {
             return res
           })
       }).catch (function(err) {
@@ -4939,8 +4978,7 @@ var _M = {
       key): (doc.addEventListener(eventName, handler, options), !0)
   }
   function bind() {
-    if (root._mCB)return byId(_M.x68) && loadList(),
-    void 0;
+    if (root._mCB)return!0;
     root._mCB = !0,
     bindCommitteeEvent("click", function(ev) {
         var btn = ev.target && ev.target.closest ? ev.target.closest('[data-committee-meeting-form-toggle],#committee-agenda-accordion [data-bs-toggle="collapse"],[data-committee-meeting-view],[data-agenda-add],.js-remove,.js-search-case,.js-show-meeting-detail,.js-load-meeting,.js-delete-meeting,#committee-meeting-ai-agenda-btn,#committee-meeting-save-btn,#committee-meeting-new-btn,#committee-meeting-refresh-list-btn,#committee-meeting-search-list-btn,#committee-meeting-clear-filter-btn,.app-table-pager [data-action="committeeMeetingSummaryPage"]'): null; if (btn) {
@@ -4973,7 +5011,9 @@ var _M = {
           clearForm(),
           void 0; if ("committee-meeting-refresh-list-btn" === btn.id || "committee-meeting-search-list-btn" === btn.id)return ev.preventDefault(),
           listState.page = 1,
-          loadList(),
+          loadList({
+              forceFresh: "committee-meeting-refresh-list-btn" === btn.id
+            }),
           void 0; if ("committee-meeting-clear-filter-btn" === btn.id)return ev.preventDefault(),
           setVal(_M.x26, ""),
           setVal(_M.x21, ""),
@@ -4990,7 +5030,9 @@ var _M = {
                 meetingId: id
               }).then(function() {
                 notify("success", "ลบข้อมูลการประชุมสำเร็จ"),
-                loadList()
+                loadList({
+                    forceFresh: !0
+                  })
               }).catch (function(err) {
                 notify("error", errorText(err, "ลบข้อมูลการประชุมไม่สำเร็จ"))
               })
@@ -5023,7 +5065,9 @@ var _M = {
           btn = row && row.querySelector(".js-search-case"); btn &&(ev.preventDefault(), searchCase(btn))
         }
       }, !1, "meeting.committeeSystem.keydown"),
-    byId(_M.x68) &&(clearForm(), loadList())
+    byId(_M.x68) && initializeCommitteeMeetingSystem().catch (function(_bindLoadErr) {
+        $meetingObserve(_bindLoadErr, "meeting.committee.bind.load")
+      })
   }
 }
 (window, document);
@@ -5495,8 +5539,7 @@ var _M = {
         cacheTtlSeconds: 0,
         source: "committee-meeting-summary-detail-live-read"
       }).then(function(res) {
-        var data = unwrap(res) || {
-        }; if (data.meeting)return {
+        var data = assertMeetingReadPayload(unwrap(res) || {}, "apiGetCommitteeMeetingSystem"); if (data.meeting)return {
           meeting: data.meeting,
           items: data.items || []
         }; var direct = cacheModel(id); if (direct.meeting)return direct; throw new Error("ไม่พบข้อมูลการประชุม")
@@ -5655,15 +5698,22 @@ var _M = {
             "Escape" === ev.key && byId(_M.x43) && hidePopup()
           }
         }]);
-    var tb = byId(_M.x11);
-    tb && root.MutationObserver && new root.MutationObserver(enhanceRows).observe(tb, {
+    var tb = byId(_M.x11),
+    enhanceScheduled = !1; function scheduleEnhanceRows() {
+      if (enhanceScheduled)return; enhanceScheduled = !0; var run = function() {
+        enhanceScheduled = !1,
+        enhanceRows()
+      }; root.requestAnimationFrame ? root.requestAnimationFrame(run): root.setTimeout(run, 0)
+    }
+    tb && root.MutationObserver && new root.MutationObserver(scheduleEnhanceRows).observe(tb, {
         childList: !0,
         subtree: !0
       }),
-    enhanceRows()
+    scheduleEnhanceRows()
   }
   function bindDirectFallback() {
-    if (root.__committeeMeetingSummaryDirectFallbackBound)return;
+    if (root.AppMeetingEventOwner && $meetingFn(root.AppMeetingEventOwner.bind))return!1;
+    if (root.__committeeMeetingSummaryDirectFallbackBound)return!1;
     root.__committeeMeetingSummaryDirectFallbackBound = 1;
     doc.addEventListener("click", function(e) {
         var b = e.target && e.target.closest && e.target.closest(".js-show-meeting-detail,#committee-meeting-summary-popup-print,#committee-meeting-summary-popup-close,#committee-meeting-summary-popup-x"); if (!b)return; b.classList && b.classList.contains("js-show-meeting-detail") ?(e.preventDefault(),
@@ -6336,7 +6386,7 @@ var _M = {
     function _f43() {
       try {
         root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = null;
-        root._mSK = Date.now ? Date.now() + 4000: 1;
+        root._mSK = Date.now ? Date.now() + 180: 1;
         if (root.AppStore && isFn(root.AppStore.set)) {
           root.AppStore.set($meetingStoreEditSeed, null);
           root.AppStore.set("search.editSeed", null);
@@ -6378,19 +6428,14 @@ var _M = {
             var d = ev && ev.detail || {
             },
             id; if ("meeting" === txt(d.id || d.pageId || d.page || "").replace(/^\//, "")) {
-              var opened = !1; [0,
-                100,
-                350,
-                900,
-                1800,
-                3200].forEach(function(ms) {
-                  setTimeout(function() {
-                      if (_f55()) {
-                        opened = !0; return
-                      }
-                      opened ||(opened = !0, _f9())
-                    }, ms)
-                })
+              var opened = !1,
+              attempts = 0; function openOnce() {
+                if (opened)return; attempts += 1; if (_f55())return opened = !0,
+                void 0; if (attempts >= 2)return opened = !0,
+                _f9(),
+                void 0; root.setTimeout(openOnce, 120)
+              }
+              openOnce()
             }
           }
         }]),
