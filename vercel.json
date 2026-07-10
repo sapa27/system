@@ -50,7 +50,7 @@
         },
         {
           "key": "X-Production-Vercel-Proxy",
-          "value": "commission-v1.2-gas-hosted-production-2026-07-10-r27; contract-freeze=production-current-2026-07-06"
+          "value": "commission-v1.2-gas-hosted-production-2026-07-10-r30; contract-freeze=production-current-2026-07-06"
         }
       ]
     },

@@ -1,9 +1,9 @@
 {
  "releaseTrack": "production-current",
  "ledgerModel": "production-current-single-ledger",
- "release": "commission-v1.2-gas-hosted-production-2026-07-10-r27",
- "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r27",
- "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r27",
+ "release": "commission-v1.2-gas-hosted-production-2026-07-10-r30",
+ "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r30",
+ "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r30",
  "updatedAt": "2026-07-10T00:00:00+07:00",
  "releaseGate": "tools/phaseN_legacy_transport_gate.py",
  "transportMode": "production-gas-hosted-google-script-run-api-router",
@@ -319,8 +319,8 @@
  "version": "1.2.0-production-current",
  "releaseAlignment": {
   "packageVersion": "1.2.0-production-current",
-  "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r27",
-  "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r27"
+  "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r30",
+  "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r30"
  },
  "criticalRuntimeDuplicationCleanupLedger": {
   "stamp": "production-current-critical-runtime-single-owner-2026-07-06-r1",
@@ -1058,7 +1058,7 @@
    "Code_30_Domain_Cases MeetingDomain canonical sheet read and summary bundle owner",
    "Code_00_PlatformCore GAS backend entry URL validator and manual-link renderer"
   ],
-  "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r27",
+  "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r30",
   "noNewFiles": true,
   "noNewApiRoutes": true,
   "routeNamesChanged": false,
@@ -1074,7 +1074,7 @@
  },
  "step7GasHostedProductionRewrite": {
   "stamp": "production-current-step7-gas-hosted-direct-2026-07-10-r1",
-  "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r27",
+  "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r30",
   "hostingOwner": "Google Apps Script HtmlService Web App",
   "browserTransportOwner": "gas-backend/Scripts_Critical_Login_Runtime.html::AppTransport.run",
   "serverEntryOwner": "gas-backend/Code_00_PlatformCore.gs::doGet -> renderVue3App_",
@@ -1115,7 +1115,7 @@
   "accessibilityMotionAndTouch": true
  },
  "singleSourceGeneration": {
-  "stamp": "production-current-index-runtime-single-source-r27",
+  "stamp": "production-current-index-runtime-single-source-r29",
   "canonicalOwners": [
    "gas-backend/Index.html",
    "gas-backend/Scripts_*.html"
