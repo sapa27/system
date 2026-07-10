@@ -5985,7 +5985,32 @@ try {
   };
   var o = pages.__actions || {
   };
-  pages.__actions = o,
+  pages.__actions = o;
+  var actionInFlight = pages.__actionInFlight || {
+  };
+  pages.__actionInFlight = actionInFlight;
+  function isProtectedAction(name) {
+    return /(?:save|delete|update|create|import|upload|submit|approve|reject|send|process|generate|extract|cleanup|migrate|revoke)/i.test(String(name || ""))
+  }
+  function actionKey(pageId, name, target) {
+    var suffix = "";
+    try {
+      suffix = target && __af(target[_$b]) ? target[_$b]("data-id") || target[_$b]("data-key") || target.id || "": ""
+    } catch (_e) {
+      suffix = ""
+    }
+    return normalize(pageId || "") + ":" + String(name || "") + ":" + String(suffix || "")
+  }
+  function setActionBusy(target, busy) {
+    if (!target || !__af(target[_$a]))return;
+    try {
+      target.disabled = !!busy,
+      target[_$a]("aria-busy", busy ? "true": "false"),
+      target[_$k] && target[_$k].toggle("is-loading", !!busy)
+    } catch (_e) {
+      __ao(_e, "action-busy")
+    }
+  }
   pages.registerActions = function(e, r, t) {
     if (!(e = normalize(e)))return null;
     r = r || {
@@ -6025,6 +6050,9 @@ try {
     if (!e.isFn(c))return!1;
     try {
       n && __af(n[_$0]) && n[_$0]();
+      var protectedAction = isProtectedAction(r),
+      busyKey = protectedAction ? actionKey(s, r, p ? t: null): "";
+      if (protectedAction && actionInFlight[busyKey])return actionInFlight[busyKey];
       var u = c({
           action: r,
           target: p ? t: null,
@@ -6033,6 +6061,15 @@ try {
           pageId: normalize(s),
           context: i
         });
+      if (protectedAction && u && __af(u.then)) {
+        setActionBusy(p ? t: null, !0);
+        var guarded = Promise.resolve(u)[_$21](function() {
+            delete actionInFlight[busyKey],
+            setActionBusy(p ? t: null, !1)
+          });
+        return actionInFlight[busyKey] = guarded,
+        guarded
+      }
       return void 0 === u || u
     } catch (e) {
       return __aR() && __af(__aR().reportError) && __aR().reportError("AppPages.dispatchAction." + r,
@@ -6056,6 +6093,9 @@ try {
   },
   pages.list = function() {
     return Object.keys(n).sort()
+  },
+  pages.current = function() {
+    return pages.__currentPage || a || ""
   },
   pages.listApis = function() {
     return Object.keys(p).sort()
@@ -6137,32 +6177,6 @@ try {
   };
   var c = pages.__pendingRefreshes || {
   };
-  function scheduleWriteRefresh(e, r, t, n) {
-    try {
-      var i = __aR() || {
-      },
-      run = function() {
-        return pages.refresh(e, {
-            source: "AppWriteRefreshBroker",
-            reason: n || "write-mutation",
-            method: r && r.method || "",
-            requestId: r && r.requestId || "",
-            cacheEpoch: r && r.cacheEpoch || 0,
-            forceFresh: !0,
-            noCache: !0,
-            bypassCache: !0
-          })
-      };
-      return i && __af(i.delay) ? i.delay("AppWriteRefreshBroker." + e + "." +(n || "write"), run, t || 0): setTimeout(run,
-        t || 0)
-    } catch (t) {
-      return __aR() && __af(__aR()[_$q]) && __aR()[_$q]("AppWriteRefreshBroker.schedule", t, {
-          pageId: e,
-          method: r && r.method || ""
-        }),
-      null
-    }
-  }
   pages.__pendingRefreshes = c,
   pages.refresh = function(e, r) {
     if (!(e = normalize(e || a || pages.__currentPage)))return Promise.resolve(!1);
@@ -6200,44 +6214,10 @@ try {
       })
   },
   function installWriteRefreshBroker() {
-    !document || pages.__writeRefreshBrokerReady ||(pages.__writeRefreshBrokerReady = !0, pages.__writeRefreshBrokerStamp = "phaseN-runtime-write-refresh-broker-current",
-      document[_$c]("app:data-mutated", function(e) {
-          var t = e && e.detail || {
-          },
-          n = String(t.method || ""),
-          i = normalize(a || pages.__currentPage ||(r && __af(r.get) ? r.get("ui.currentPage", ""): "")); if (n && t.ok && i) {
-            var p = function writeMethodAffectedPages(e) {
-              return e = String(e || ""),
-              /Budget|SalarySettings|YearSettings/i.test(e) ? ["budget",
-                "dashboard",
-                "people"]: /Personnel|People|Salary/i.test(e) ? ["people",
-                "budget"]: /Petitioner/i.test(e) ? ["petitioner",
-                "meeting"]: /CommitteeMeeting|MeetingLog|Letter/i.test(e) ? ["meeting",
-                "track",
-                "report",
-                "dashboard"]: /Case/i.test(e) ? ["meeting",
-                "search",
-                "track",
-                "report",
-                "dashboard"]: /Admin|User|Subcommittee/i.test(e) ? ["admin",
-                "people"]: []
-            }
-            (n); if (!(p[_$28](i) < 0)) {
-              var o = Date.now ? Date.now(): (new Date).getTime(),
-              s = pages.__writeRefreshState ||(pages.__writeRefreshState = {
-                }),
-              c = i + "|" + n; s[c] && o - s[c] < 700 ||(s[c] = o, scheduleWriteRefresh(i, t, 120, "after-write-fast-refresh"),
-                /^(apiBudget|apiSaveCase|apiDeleteCase|apiSaveMeetingLog|apiDeleteMeetingLog|apiSaveLetter|apiDeleteLetter)/i.test(n) && scheduleWriteRefresh(i,
-                  t, 1800, "after-write-reconcile-refresh"), emit("app:write-refresh-scheduled", {
-                    pageId: i,
-                    method: n,
-                    affectedPages: p,
-                    owner: "AppWriteRefreshBroker",
-                    stamp: pages.__writeRefreshBrokerStamp
-                  }))
-            }
-          }
-        }, !1))
+    if (!document || pages.__writeRefreshBrokerReady)return;
+    pages.__writeRefreshBrokerReady = !0,
+    pages.__writeRefreshBrokerStamp = "current-write-refresh-delegated-r25",
+    pages.__writeRefreshBrokerOwner = "AppDirtyRefreshOwner.Current"
   }
   (),
   root.AppLifecycle = {
@@ -9259,8 +9239,18 @@ try {
       }
     }
     function recoverReadApi(method, err, moduleName) {
-      if (isAuthRuntimeError(err) || isWriteApiMethod(method))throw err; return degradedApiData(method,
-        err, moduleName)
+      if (isAuthRuntimeError(err) || isWriteApiMethod(method))throw err;
+      var allowDegraded = !!(root.APP_CONFIG && root.APP_CONFIG.allowDegradedReadRecovery === !0);
+      if (allowDegraded)return degradedApiData(method, err, moduleName);
+      warn("runtime.api.readFailure", err, {
+        method: text(method),
+        moduleName: text(moduleName || "")
+      });
+      if (err instanceof Error)throw err;
+      var e2 = new Error(text(err && err.message || err || "โหลดข้อมูลไม่สำเร็จ"));
+      e2.code = text(err &&(err.code || err.errorCode) || "READ_API_FAILED");
+      e2.errorCode = e2.code; e2.method = text(method);
+      throw e2
     }
     function _q18(method, payload, options) {
       return method = text(method),
@@ -11798,12 +11788,10 @@ try {
       "dashboard"]: /CommitteeMeeting|MeetingLog|Letter/i.test(m) ? ["meeting",
       "track",
       "report",
-      "reportTrack",
       "dashboard"]: /Case/i.test(m) ? ["meeting",
       "search",
       "track",
       "report",
-      "reportTrack",
       "dashboard"]: /Admin|User|Subcommittee/i.test(m) ? ["admin",
       "people",
       "dashboard"]: ["dashboard"]
@@ -11988,6 +11976,7 @@ try {
     }
   }
   d.addEventListener("click", function(e) {
+      if (w.AppMeetingEventOwner && typeof w.AppMeetingEventOwner.bind === "function")return;
       var b = e.target && e.target.closest && e.target.closest('[data-committee-meeting-view],[data-committee-meeting-form-toggle],#committee-agenda-accordion [data-bs-toggle="collapse"],[data-agenda-add],.committee-agenda-row .js-remove,.js-show-meeting-detail'); if (!b)return; if (b.classList && b.classList.contains("js-show-meeting-detail")) {
         e.preventDefault(); e.stopPropagation && e.stopPropagation(); return w.CommitteeMeetingSummaryDetail && typeof w.CommitteeMeetingSummaryDetail.show === "function" && w.CommitteeMeetingSummaryDetail.show(b.getAttribute("data-id") || "")
       }

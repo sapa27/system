@@ -1,4 +1,3 @@
-<!-- GENERATED MIRROR: gas-backend/Scripts_Critical_Login_Runtime.html -->
 <script id="app-critical-foundation-consumer">
 (function(root) {
     "use strict"; var required = ["AppStore",
@@ -569,53 +568,139 @@ try {
         return promise;
       }
 
-      root2.AppTransport = {
-        __owner: "Scripts_Critical_Login_Runtime.html::gas-hosted-direct-transport",
-        __gasHostedDirect: true,
-        __vercelApiProxyOnly: false,
-        __legacyTransportRemoved: true,
-        transportMode: "production-gas-hosted-google-script-run-api-router",
-        run: runCriticalGasApi_,
-        clearApiCache: function() {
-          criticalGasInFlight = Object.create(null);
-          return true;
-        },
-        invalidateClientApiCache: function() {
-          criticalGasInFlight = Object.create(null);
-          return true;
-        },
-        clientCacheStatus: function() {
-          return {
-            ok: true,
-            owner: "backend-router-cache",
-            inFlightOwner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
-            readResponseCache: false,
-            sessionStorageReadCache: false,
-            cacheEntries: 0,
-            inFlight: Object.keys(criticalGasInFlight).length,
-            metrics: Object.assign({}, criticalGasMetrics)
+      function criticalGasHostAvailable_() {
+        var googleApi = root2.google && root2.google.script;
+        var runner = googleApi && googleApi.run;
+        return !!(runner && __appIsFn(runner.withSuccessHandler) && __appIsFn(runner.withFailureHandler));
+      }
+      var criticalExistingTransport_ = root2.AppTransport && typeof root2.AppTransport === "object" ? root2.AppTransport : null;
+      if (criticalGasHostAvailable_()) {
+        root2.AppTransport = {
+          __owner: "Scripts_Critical_Login_Runtime.html::gas-hosted-direct-transport",
+          __gasHostedDirect: true,
+          __vercelApiProxyOnly: false,
+          __legacyTransportRemoved: true,
+          transportMode: "production-gas-hosted-google-script-run-api-router",
+          run: runCriticalGasApi_,
+          clearApiCache: function() {
+            criticalGasInFlight = Object.create(null);
+            return true;
+          },
+          invalidateClientApiCache: function() {
+            criticalGasInFlight = Object.create(null);
+            return true;
+          },
+          clientCacheStatus: function() {
+            return {
+              ok: true,
+              owner: "backend-router-cache",
+              inFlightOwner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
+              readResponseCache: false,
+              sessionStorageReadCache: false,
+              cacheEntries: 0,
+              inFlight: Object.keys(criticalGasInFlight).length,
+              metrics: Object.assign({}, criticalGasMetrics)
+            };
+          },
+          runtimeOwnerStatus: function() {
+            var errors = [];
+            criticalGasHostAvailable_() || errors.push("GOOGLE_SCRIPT_RUN_NOT_READY");
+            root2.AppTransport.__gasHostedDirect === true || errors.push("GAS_DIRECT_OWNER_FLAG_MISSING");
+            root2.AppTransport.__vercelApiProxyOnly === true && errors.push("VERCEL_PROXY_OWNER_ACTIVE_ON_GAS");
+            root2.AppTransport.transportMode === "production-gas-hosted-google-script-run-api-router" || errors.push("GAS_TRANSPORT_MODE_MISMATCH");
+            return {
+              ok: !errors.length,
+              expectedOwner: "gas-google-script-run",
+              actualOwner: root2.AppTransport.__owner || "",
+              transportMode: root2.AppTransport.transportMode || "",
+              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r27",
+              errors: errors
+            };
+          },
+          assertRuntimeOwner: function(context) {
+            var status = root2.AppTransport.runtimeOwnerStatus();
+            if (status.ok) return status;
+            var err = new Error("Runtime/Transport ของ GAS ไม่พร้อมหรือไม่ตรง release กรุณาเปิด Web App deployment ล่าสุด");
+            err.code = "APP_RUNTIME_OWNER_MISMATCH";
+            err.errorCode = err.code;
+            err.context = context || "runtime-owner";
+            err.runtimeHealth = status;
+            throw err;
+          },
+          phase2Status: function() {
+            var health = root2.AppTransport.runtimeOwnerStatus();
+            return {
+              ok: health.ok,
+              transportMode: "production-gas-hosted-google-script-run-api-router",
+              owner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
+              gasHosted: true,
+              directApiRouter: true,
+              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r27",
+              runtimeHealth: health,
+              inFlight: Object.keys(criticalGasInFlight).length,
+              metrics: Object.assign({}, criticalGasMetrics)
+            };
+          },
+          ping: function() {
+            return runCriticalGasApi_("apiGetRouteContract", {
+              at: new Date().toISOString(),
+              transportMode: "gas-hosted-direct-ping"
+            }, {
+              timeoutMs: 30000
+            });
+          }
+        };
+      } else if (!criticalExistingTransport_ || !__appIsFn(criticalExistingTransport_.run)) {
+        root2.AppTransport = criticalExistingTransport_ || {};
+        root2.AppTransport.__owner = "Scripts_Critical_Login_Runtime.html::host-aware-unavailable-transport";
+        root2.AppTransport.__gasHostedDirect = false;
+        root2.AppTransport.__vercelApiProxyOnly = false;
+        root2.AppTransport.transportMode = "transport-owner-not-ready";
+        root2.AppTransport.run = function(method) {
+          var unavailable = new Error("Transport runtime ไม่พร้อมใช้งาน: " + txt(method || ""));
+          unavailable.code = "APP_TRANSPORT_NOT_READY";
+          unavailable.errorCode = unavailable.code;
+          return Promise.reject(unavailable);
+        };
+      }
+      function p2RuntimeHealthSnapshot_() {
+        var transport = root2.AppTransport || {};
+        var status;
+        try {
+          status = __appIsFn(transport.runtimeOwnerStatus) ? transport.runtimeOwnerStatus() : {
+            ok: __appIsFn(transport.run),
+            expectedOwner: criticalGasHostAvailable_() ? "gas-google-script-run" : "vercel-api-proxy",
+            actualOwner: transport.__owner || "",
+            transportMode: transport.transportMode || "",
+            errors: __appIsFn(transport.run) ? [] : ["APP_TRANSPORT_RUN_MISSING"]
           };
-        },
-        phase2Status: function() {
-          return {
-            ok: true,
-            transportMode: "production-gas-hosted-google-script-run-api-router",
-            owner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
-            gasHosted: true,
-            directApiRouter: true,
-            inFlight: Object.keys(criticalGasInFlight).length,
-            metrics: Object.assign({}, criticalGasMetrics)
-          };
-        },
-        ping: function() {
-          return runCriticalGasApi_("apiGetRouteContract", {
-            at: new Date().toISOString(),
-            transportMode: "gas-hosted-direct-ping"
-          }, {
-            timeoutMs: 30000
-          });
+        } catch (e) {
+          status = { ok: false, errors: [String(e && e.message || e)] };
         }
+        status.releaseStamp = "commission-v1.2-gas-hosted-production-2026-07-10-r27";
+        status.checkedAt = new Date().toISOString();
+        return status;
+      }
+      root2.AppRuntimeHealth = root2.AppRuntimeHealth || {};
+      root2.AppRuntimeHealth.snapshot = p2RuntimeHealthSnapshot_;
+      root2.AppRuntimeHealth.assert = function(context) {
+        if (root2.AppTransport && __appIsFn(root2.AppTransport.assertRuntimeOwner)) {
+          return root2.AppTransport.assertRuntimeOwner(context || "runtime-health");
+        }
+        var status = p2RuntimeHealthSnapshot_();
+        if (status.ok)return status;
+        var err = new Error("Runtime/Transport ไม่พร้อมใช้งานหรือเป็นคนละ release");
+        err.code = "APP_RUNTIME_OWNER_MISMATCH";
+        err.errorCode = err.code;
+        err.runtimeHealth = status;
+        throw err;
       };
+      root2.__APP_P2_BOOT_HEALTH__ = p2RuntimeHealthSnapshot_();
+      try {
+        root2.dispatchEvent && root2.dispatchEvent(new CustomEvent("app:runtime-health", { detail: root2.__APP_P2_BOOT_HEALTH__ }));
+      } catch (_runtimeHealthEventErr) {
+        __appObserve(_runtimeHealthEventErr, "p2.runtimeHealth.event");
+      }
       RT.rawRun = RT.rawRun || function(fn, args, options) {
         return root2.AppTransport.run(fn, args, options || {
           })
@@ -791,7 +876,40 @@ try {
       },
       htmlCache = {
       },
-      core = root2.__APP_CORE_RUNTIME_FILES__ && root2.__APP_CORE_RUNTIME_FILES__.slice() || bundle("appCore"); core.length ||(core = ["Scripts_Core_Runtime"]),
+      partialSessionPrefix = "__commission_runtime_partial_v1__:",
+      partialSessionStamp = txt(manifest().stamp || root2.APP_RELEASE_STAMP || root2.__APP_RELEASE_STAMP__ || "current").replace(/[^A-Za-z0-9_.:-]/g,
+        "_");
+      function sessionPartialKey(name) {
+        return partialSessionPrefix + partialSessionStamp + ":" + txt(name)
+      }
+      function sessionPartialEligible(name, html) {
+        name = txt(name); var size = txt(html).length; return!!size && size <= 12e5 &&(/^bundle:appCore$/i.test(name) || /^Scripts_(?:Core_Runtime|Page_)/.test(name))
+      }
+      function readSessionPartial(name) {
+        try {
+          if (!root2.sessionStorage)return ""; var value = root2.sessionStorage.getItem(sessionPartialKey(name)) || ""; return sessionPartialEligible(name,
+            value) ? value: ""
+        } catch (_sessionReadErr) {
+          return ""
+        }
+      }
+      function writeSessionPartial(name, html) {
+        try {
+          if (!root2.sessionStorage || !sessionPartialEligible(name, html))return!1; root2.sessionStorage.setItem(sessionPartialKey(name),
+            html); return!0
+        } catch (_sessionWriteErr) {
+          return!1
+        }
+      }
+      function pruneOldSessionPartials() {
+        try {
+          if (!root2.sessionStorage || root2.__APP_PARTIAL_SESSION_CACHE_PRUNED__)return; root2.__APP_PARTIAL_SESSION_CACHE_PRUNED__ = !0; for (var i = root2.sessionStorage.length - 1; i >= 0; i--) {
+            var key = root2.sessionStorage.key(i); key && key.indexOf(partialSessionPrefix) === 0 && key.indexOf(partialSessionPrefix + partialSessionStamp + ":") !== 0 && root2.sessionStorage.removeItem(key)
+          }
+        } catch (_sessionPruneErr) {
+        }
+      }
+      pruneOldSessionPartials(); var core = root2.__APP_CORE_RUNTIME_FILES__ && root2.__APP_CORE_RUNTIME_FILES__.slice() || bundle("appCore"); core.length ||(core = ["Scripts_Core_Runtime"]),
       root2.AppCritical = {
         ensureCoreRuntime: ensureCore,
         loadPartial,
@@ -1005,7 +1123,20 @@ try {
             } catch (_preloadDash) {
               __appObserve(_preloadDash, "ec")
             }
-            return routeDashboardCrit("boot-after-core")
+            var routed = routeDashboardCrit("boot-after-core"); try {
+              if (!root2.__APP_P1_MEETING_PARTIAL_WARMUP__) {
+                root2.__APP_P1_MEETING_PARTIAL_WARMUP__ = !0; var warm = function() {
+                  prefetchPartial("Scripts_Page_Meeting").catch (function(_warmErr) {
+                      return!1
+                    })
+                }; root2.requestIdleCallback ? root2.requestIdleCallback(warm, {
+                    timeout: 3500
+                  }): root2.setTimeout(warm, 1800)
+              }
+            } catch (_warmScheduleErr) {
+              __appObserve(_warmScheduleErr, "login.meetingWarmup")
+            }
+            return routed
           })
       },
       RT.afterLogout = RT.afterLogout || function() {
@@ -1629,7 +1760,8 @@ try {
     }
     function fetchPartialHtml(n) {
       if (!(n = txt(n).trim()))return Promise.reject(new Error("ไม่ได้ระบุชื่อ partial")); if (Object.prototype.hasOwnProperty.call(htmlCache,
-          n))return Promise.resolve(htmlCache[n]); var fetchKey = n + "::fetch"; return inflight[fetchKey] ||(inflight[fetchKey] = root2.AppApi.call("getDeferredInclude",
+          n))return Promise.resolve(htmlCache[n]); var sessionHit = readSessionPartial(n); if (sessionHit)return htmlCache[n] = sessionHit,
+      Promise.resolve(sessionHit); var fetchKey = n + "::fetch"; return inflight[fetchKey] ||(inflight[fetchKey] = root2.AppApi.call("getDeferredInclude",
           {
             name: n,
             token: txt(store.get("auth.token", "")),
@@ -1642,6 +1774,7 @@ try {
               msg = txt(r.msg || r.message || r.data && r.data.message || r.data && r.data.msg || code); throw new Error(code + ":" + msg)
             }
             var h = txt(r && r.html || r && r.data && r.data.html || r || ""); if (/^\s*[A-Z][A-Z0-9_]*(?:FAILED|ERROR)[A-Z0-9_]*\s*$/.test(h))throw new Error(h); return htmlCache[n] = h,
+            writeSessionPartial(n, h),
             delete inflight[fetchKey],
             h
           }, function(err) {
@@ -2464,7 +2597,19 @@ try {
     }
     function executeLogin(ev) {
       if (ev &&(ev.preventDefault && ev.preventDefault(), ev.stopPropagation && ev.stopPropagation(),
-          ev.stopImmediatePropagation && ev.stopImmediatePropagation()), root2.__APP_LOGIN_IN_FLIGHT__)return!1; var u = loginEl("username"),
+          ev.stopImmediatePropagation && ev.stopImmediatePropagation()), root2.__APP_LOGIN_IN_FLIGHT__)return!1;
+      try {
+        root2.AppRuntimeHealth && __appIsFn(root2.AppRuntimeHealth.assert) && root2.AppRuntimeHealth.assert("login-submit");
+      } catch (runtimeHealthError) {
+        var healthTarget = id("login-error-msg");
+        if (healthTarget) {
+          healthTarget.style.display = "block";
+          healthTarget.textContent = txt(runtimeHealthError && runtimeHealthError.message || "Runtime ไม่พร้อมใช้งาน");
+        }
+        try { RT.recordWarning && RT.recordWarning("login.runtimeHealth.blocked", runtimeHealthError, { health: runtimeHealthError.runtimeHealth || null }); } catch (_healthWarn) { __appObserve(_healthWarn, "login.runtimeHealth.warn"); }
+        return !1;
+      }
+      var u = loginEl("username"),
       p = loginEl("password"),
       un = txt(u && u.value).trim(),
       pw = txt(p && p.value),
