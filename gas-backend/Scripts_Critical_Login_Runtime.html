@@ -613,7 +613,7 @@ try {
               expectedOwner: "gas-google-script-run",
               actualOwner: root2.AppTransport.__owner || "",
               transportMode: root2.AppTransport.transportMode || "",
-              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r27",
+              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r28",
               errors: errors
             };
           },
@@ -635,7 +635,7 @@ try {
               owner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
               gasHosted: true,
               directApiRouter: true,
-              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r27",
+              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r28",
               runtimeHealth: health,
               inFlight: Object.keys(criticalGasInFlight).length,
               metrics: Object.assign({}, criticalGasMetrics)
@@ -677,7 +677,7 @@ try {
         } catch (e) {
           status = { ok: false, errors: [String(e && e.message || e)] };
         }
-        status.releaseStamp = "commission-v1.2-gas-hosted-production-2026-07-10-r27";
+        status.releaseStamp = "commission-v1.2-gas-hosted-production-2026-07-10-r28";
         status.checkedAt = new Date().toISOString();
         return status;
       }
@@ -1226,7 +1226,10 @@ try {
           function(ev) {
             var t = closest(ev.target, "[data-nav],[data-action],[data-bs-toggle]"); if (t) {
               var nav = t.getAttribute("data-nav"),
-              act = t.getAttribute("data-action"); if (nav) {
+              act = t.getAttribute("data-action"),
+              centralRouteOwnerReady = root2.__APP_DOM_ROUTE_CLICK_BOUND__ === !0;
+              if (centralRouteOwnerReady && (nav || t.getAttribute("data-bs-toggle") === "collapse"))return;
+              if (nav) {
                 ev.preventDefault(); var role = resolveNavRoleCrit(),
                 navKey = txt(nav).toLowerCase(); return role === "Viewer" && navKey !== "dash" && navKey !== "dashboard" && navKey !== "budget" && navKey !== "search" || role === "Staff" && navKey === "admin" ||(RT.clearUiBlocks && RT.clearUiBlocks("critical-nav-click",
                     {
@@ -1393,7 +1396,7 @@ try {
     }
     function applyPendingStaffMenuCrit(reason) {
       try {
-        Array.prototype.slice.call(doc.querySelectorAll("#side[data-nav]")).forEach(function(el) {
+        Array.prototype.slice.call(doc.querySelectorAll("#side [data-nav]")).forEach(function(el) {
             var nav = txt(el.getAttribute("data-nav")).toLowerCase(); setMenuVisibleCrit(el, nav !== "admin")
           }),
         setMenuVisibleCrit(doc.querySelector('#side [data-bs-target="#caseMenu"]'), !0); var caseMenu = id("caseMenu"); caseMenu && caseMenu.classList.add("show"),
@@ -1425,7 +1428,7 @@ try {
         var isAdmin =(role = normRoleCrit(role || rawRoleCrit() || "Viewer")) === "Admin",
         isStaff = role === "Staff",
         isViewer = role === "Viewer",
-        caseToggle; Array.prototype.slice.call(doc.querySelectorAll("#side[data-nav]")).forEach(function(el) {
+        caseToggle; Array.prototype.slice.call(doc.querySelectorAll("#side [data-nav]")).forEach(function(el) {
             var nav = txt(el.getAttribute("data-nav")).toLowerCase(),
             show; setMenuVisibleCrit(el, isAdmin || isStaff && nav !== "admin" || isViewer &&(nav === "dash" || nav === "dashboard" || nav === "budget" || nav === "search"))
           }),

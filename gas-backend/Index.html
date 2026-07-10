@@ -6080,8 +6080,8 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
           __appObserve(_pageChangingErr, "ec")
         }
         setShellMode(!0),
-        markSidebar(routeFromNav(id)); function finish(result) {
-          try {
+        markSidebar(routeFromNav(id)); function finish(result, emitActivatedEvent) {
+          if (emitActivatedEvent !== !1)try {
             document.dispatchEvent(new CustomEvent("app:page-activated", {
                   detail: {
                     id: id,
@@ -6096,8 +6096,27 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
           }
           return result
         }
+        function reportActivationFailure(err, stage) {
+          try {
+            var scope = document.getElementById(pageDomId(id));
+            scope && scope.setAttribute("data-page-load-error", "1");
+            window.AppRuntime && window.AppRuntime.showBanner && window.AppRuntime.showBanner("danger",
+              "โหลดข้อมูลหน้าไม่สำเร็จ กรุณากดเมนูอีกครั้ง", 5000);
+            window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.activationFailure." + id,
+              err, {
+                pageId: id,
+                stage: stage || "activation"
+              })
+          } catch (_activationFailureErr) {
+            __appObserve(_activationFailureErr, "route.activationFailure")
+          }
+          return!1
+        }
         function callNamed(name, arg) {
-          return __appIsFn(window[name]) ? window[name](arg): ensurePageScripts(id).then(function() {
+          if (__appIsFn(window[name]))return Promise.resolve().then(function() {
+              return window[name](arg)
+            });
+          return ensurePageScripts(id).then(function() {
               return __appIsFn(window[name]) ? window[name](arg): !1
             })
         }
@@ -6120,39 +6139,40 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
             }): callNamed("showPsTab", "comm"); if (id === "budget")return window.initBudgetPage ? window.initBudgetPage(): callNamed("showBudgetTab",
             "summary"); return id === "admin" ? callNamed("loadAdminData"): !0
         }
+        var lifecycleOwnsActivatedEvent = !1;
         return ensurePageTemplate(id).then(function(templateReady) {
             if (!templateReady)throw new Error("โหลด page template ไม่สำเร็จ: " + id);
             return ensurePageRuntimeReady(id)
           }).then(function(runtimeReady) {
             if (!runtimeReady)throw new Error("โหลด page runtime ไม่สำเร็จ: " + id);
-            return window.AppLifecycle && window.AppLifecycle.getPage && window.AppLifecycle.getPage(id) ? safeCall(function() {
-                return window.AppLifecycle.activate(id, {
-                    source: "router"
-                  })
-              }).then(function(result) {
-                return result === !1 ? fallback(): result
-              }).catch (function() {
-                return fallback()
-              }): fallback()
-          }).then(finish).catch (function(e) {
+            if (window.AppLifecycle && window.AppLifecycle.getPage && window.AppLifecycle.getPage(id)) {
+              lifecycleOwnsActivatedEvent = !0;
+              return safeCall(function() {
+                  return window.AppLifecycle.activate(id, {
+                      source: "router"
+                    })
+                }).then(function(result) {
+                  return result === !1 ? fallback(): result
+                }).catch (function() {
+                  return fallback()
+                })
+            }
+            return fallback()
+          }).then(function(result) {
+            return finish(result, !lifecycleOwnsActivatedEvent)
+          }).catch (function(e) {
             window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.moduleLoadRouteAlt",
               e, {
                 pageId: id
-              }); try {
-              document.dispatchEvent(new CustomEvent("app:page-activated", {
-                    detail: {
-                      id: id,
-                      pageId: id,
-                      source: "plain-route-current-degraded",
-                      degraded: !0,
-                      scope: phase8PageScope(id),
-                      phase8PageScope: !0
-                    }
-                  }))
-            } catch (_routeAltActivatedErr) {
-              __appObserve(_routeAltActivatedErr, "ec")
-            }
-            return!0
+              });
+            return Promise.resolve().then(function() {
+                return fallback()
+              }).then(function(result) {
+                return finish(result, !lifecycleOwnsActivatedEvent)
+              }).catch (function(fallbackErr) {
+                reportActivationFailure(fallbackErr || e, "fallback");
+                return finish(!1, !lifecycleOwnsActivatedEvent)
+              })
           }).finally(function() {
             releaseUiLock("route-activation-finally:" + id),
             document.documentElement.classList.remove("app-page-switching")
@@ -6270,7 +6290,7 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
                 __appObserve(_loginBindErr, "ec")
               }
             }), Promise.resolve(!0)): domNext(function() {
-            var id = navFromRoute(target); return Promise.resolve(runPageActivation(id)).catch (function(err) {
+            var id = navFromRoute(target); return Promise.resolve(schedulePageActivation(id, "apply-route:" + target)).catch (function(err) {
                 return releaseUiLock("route-activation-error:" + target),
                 window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.activation",
                   err, {
@@ -6524,7 +6544,7 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
         }
         var target = routeFromNav(id); return routeState.path !== target ? safeApplyRoute(target, !1,
           "nav:" + id): (domNext(function() {
-              return Promise.resolve(runPageActivation(id)).catch (function(err) {
+              return Promise.resolve(schedulePageActivation(id, "nav-same-route")).catch (function(err) {
                   return releaseUiLock("nav-same-route-error:" + id),
                   window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.navSameRouteActivation",
                     err, {
