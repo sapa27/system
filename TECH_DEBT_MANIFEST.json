@@ -1,9 +1,9 @@
 {
   "releaseTrack": "production-current",
   "ledgerModel": "production-current-single-ledger",
-  "release": "commission-v1.2-deep-stability-hardening-2026-07-10-r18",
-  "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r18",
-  "assetStamp": "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r18",
+  "release": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+  "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+  "assetStamp": "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
   "updatedAt": "2026-07-10T13:45:00+07:00",
   "releaseGate": "tools/phaseN_legacy_transport_gate.py",
   "transportMode": "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
@@ -319,8 +319,8 @@
   "version": "1.2.0-production-current",
   "releaseAlignment": {
     "packageVersion": "1.2.0-production-current",
-    "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r18",
-    "assetStamp": "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r18"
+    "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+    "assetStamp": "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20"
   },
   "criticalRuntimeDuplicationCleanupLedger": {
     "stamp": "production-current-critical-runtime-single-owner-2026-07-06-r1",
@@ -1025,7 +1025,7 @@
   "step5ProxyOriginAndHtmlResponseGuard": {
     "stamp": "production-current-step5-proxy-origin-html-guard-2026-07-10-r1",
     "rootCause": "GAS doGet still rendered a proxy-only frontend; relative /api/login and /api/gas resolved against Google-hosted origin and returned Google Workspace HTML instead of Vercel JSON",
-    "gasBackendEntryPolicy": "backend-only; redirect through VERCEL_FRONTEND_URL or show setup guidance",
+    "gasBackendEntryPolicy": "backend-only; validate VERCEL_FRONTEND_URL and show a manual link only; never auto-redirect",
     "frontendOriginGuard": "reject script.google.com, script.googleusercontent.com, docs.google.com, and googleusercontent.com as UI origins",
     "proxyNonJsonClassification": "identify Google Sign-in/Workspace HTML and return GAS_DEPLOYMENT_ACCESS_OR_URL_INVALID",
     "vercelEnvironmentRequired": "GAS_WEB_APP_URL must be the latest Apps Script Web App /exec URL",
@@ -1038,6 +1038,38 @@
     "spreadsheetSchemaChanged": false,
     "businessLogicChanged": false,
     "productionUiUxChanged": false,
-    "characterizationBaselinePreserved": true
+    "characterizationBaselinePreserved": true,
+    "connectionResetFailSafe": "reject Google/GAS hosts and remove location.replace so a bad property cannot force navigation to an unreachable domain"
+  },
+  "step6RuntimeBootstrapMeetingSummaryRewrite": {
+    "stamp": "production-current-step6-runtime-bootstrap-meeting-summary-rewrite-2026-07-10-r1",
+    "rootCauses": [
+      "app-config publishDeployRelease was a named function expression inside a comma chain and was not bound in the outer scope",
+      "Dashboard AiBridgeDiagnostics referenced removed cacheKey/readCache/writeCache helpers and aborted dynamic partial execution",
+      "critical Google-origin guard used the same unsafe comma-chain function-expression pattern",
+      "committee meeting summary sent cache-first flags and backend _z52 ignored fresh-read flags",
+      "GAS backend entry auto-redirect trusted any https URL and could navigate to an invalid, unreachable, or circular frontend destination"
+    ],
+    "rewrittenOwners": [
+      "github-pages/app-config.js bootstrap and deploy-release publisher",
+      "Scripts_Critical_Login_Runtime critical proxy origin owner",
+      "Scripts_Page_Dashboard AiBridgeDiagnostics owner",
+      "Scripts_Page_Meeting committee meeting list/detail owner",
+      "Code_30_Domain_Cases MeetingDomain canonical sheet read and summary bundle owner",
+      "Code_00_PlatformCore GAS backend entry URL validator and manual-link renderer"
+    ],
+    "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+    "noNewFiles": true,
+    "noNewApiRoutes": true,
+    "routeNamesChanged": false,
+    "routeMetadataChanged": false,
+    "writeSchemaChanged": false,
+    "spreadsheetSchemaChanged": false,
+    "businessRulesChanged": false,
+    "productionUiStructureChanged": false,
+    "characterizationBaselinePreserved": true,
+    "backendEntryAutoRedirectRemoved": true,
+    "backendEntryGoogleHostRejected": true,
+    "connectionResetFailSafe": true
   }
 }
