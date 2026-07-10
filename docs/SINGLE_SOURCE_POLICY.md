@@ -1,164 +1,200 @@
-# Production current single-source, proxy-only, and size-gate policy
+# Production Current Single Source Policy
 
-Editable canonical source is `gas-backend/`.
+## Current Single Owner Hard Lock
 
-Current release: `commission-v1.2-ai-meeting-budget-stability-2026-07-09-r15`.
+This package is locked to one active production owner per responsibility. This is the current production cleanup state, not a new release phase.
 
-## Canonical source rules
+| Responsibility | Active owner |
+|---|---|
+| Browser transport | `github-pages/github-gas-transport.js::AppTransport.run` |
+| Critical login transport | Vercel proxy only: `/api/login` and `/api/gas` |
+| Page API facade | `gas-backend/Scripts_Core_Runtime.html::AppPageKit.apiRunner` |
+| Index bootstrap API | `gas-backend/Index.html::IndexKit.api -> AppPageKit.apiRunner` |
+| Router/API contract | `gas-backend/Code_20_Router.gs::apiRouter / _apiRouteRegistry_` |
+| Write schema | `gas-backend/Code_20_Router.gs::_routerPhaseKWriteSchemaByMethod_` |
+| Client in-flight | `github-pages/github-gas-transport.js::AppTransport.inFlightOnly` |
+| Client read cache | backend/router cache only |
+| Dirty refresh | `gas-backend/Scripts_Core_Runtime.html::AppDirtyRefreshOwner` |
+| Write freshness | `gas-backend/Scripts_Core_Runtime.html::invalidateAfterWrite` |
+| Legacy GAS bridge/jsonp/fast-login | disabled-stub-only, returns `LEGACY_TRANSPORT_DISABLED` |
+| Generated mirror | `github-pages/partials/Scripts_*.html` mirrors `gas-backend/Scripts_*.html` only |
 
-1. Edit backend `.gs` files and canonical `gas-backend/Scripts_*.html` files only.
-2. Treat `github-pages/partials/Scripts_*.html` as generated mirrors.
-3. Do not hand-edit generated mirrors. Run `python3 tools/phaseN_legacy_transport_gate.py` after changing canonical scripts, then verify with `python3 tools/phaseN_legacy_transport_gate.py --check`.
-4. Keep one API owner: `gas-backend/Code_20_Router.gs::_apiRouteRegistry_()` derives backend/client contract checks.
-5. Keep one write-schema owner: `Code_20_Router.WRITE_SCHEMA_BY_METHOD` / `_routerPhaseKWriteSchemaByMethod_()`.
-6. Keep one dashboard budget owner: `BudgetDomain` hydrates budget after dashboard first paint.
-7. Do not add APIs to work around slow pages. Optimize the existing route owner, cache, projection, and page hydration path instead.
+## Hard rules
 
-## Production current transport policy
+- Do not add files.
+- Do not add API routes.
+- Do not add a new Phase.
+- Do not change route names or write schema.
+- Do not change DOM ids, UI/UX, or business rules.
+- Do not call `google.script.run` from the static or critical-login runtime.
+- Do not call internal API compatibility facades directly from page/bootstrap code; use `AppPageKit.apiRunner`.
+- Do not create browser read-response cache; frontend may only dedupe in-flight requests.
+- Page scripts may coalesce one UI render/load promise only; do not add page response caches, adjacent-page prefetch caches, sessionStorage response caches, or independent request-deduplication maps.
+- Search/Report, Budget, Dashboard, and AI page runtimes must use the backend/router cache plus `AppTransport.inFlightOnly`.
+- Do not recreate legacy browser cache owner aliases or stale cache-named helper functions.
+- Do not reactivate `__githubBridgeClient`, `__githubBridgeNamedRequest`, `__githubJsonpApi`, `__githubFastLogin`, or `apiGithubBridgeCall` as working transports.
 
-The browser transport is **Vercel proxy-only**.
+## Current owner cleanup note
 
-Allowed public frontend paths:
+legacy owner aliases removed. Historical compatibility ledgers may remain in `TECH_DEBT_MANIFEST.json` only for strict-gate compatibility and audit traceability; they are not active owners. Active ownership is the table above.
 
-- `/api/public-config`
-- `/api/login`
-- `/api/gas`
+## Build and release gates
 
-Forbidden legacy browser transports:
+- Vercel build: `npm run build`
+- Blocking release gate: `npm run audit:strict`
+- Gate owner: `tools/phaseN_legacy_transport_gate.py` as Production Current Gate
 
-- JSONP read transport
-- hidden GAS bridge iframe transport
-- login form POST iframe transport
-- fast-login JSONP session issuance
-- assumed bridge-ready fallback
-- direct `google.script.run` from GitHub Pages
+## Release discipline
 
-Backend compatibility endpoint `apiGithubBridgeCall` may remain temporarily for old deployments, but Production current frontend code must not call it.
+`npm run build` is intentionally Vercel-host safe and is **not** the final production release gate. Use `npm run audit:strict`, `npm run release:check`, `npm run deploy:check`, or `npm run predeploy:production` before promotion. Do not promote a ZIP that has only passed `npm run build`.
 
-## Phase 1 production release discipline
+## Historical gate compatibility labels retained for audit only
 
-`npm run build` is intentionally Vercel-host safe and only runs the Node syntax/API proxy check. It is **not** the final production release gate.
+These labels are not active owners; they are retained so the Production Current Gate can verify old fixes were not removed accidentally.
 
-Before packaging, promoting, or deploying a production ZIP, run the blocking strict audit:
+- Phase 2 — Transport Single Path Lock
+- Browser -> /api/login or /api/gas -> GAS apiRouter -> Domain
+- STATIC_GAS_DIRECT_DISABLED
+- production-current-phase3-cache-data-freshness-2026-07-08-r1 — Cache/Data Freshness — npm run audit:strict
+- production-current-phase4-write-delete-reliability-2026-07-08-r1 — Write/Delete Reliability — 27 write APIs — npm run audit:strict
+- production-current-phase5-uiux-modernization-2026-07-08-r1 — UI/UX Modernization — AppPhase5UiUx — npm run audit:strict
+- production-current-phase6-static-qa-readiness-2026-07-08-r1 — Static QA Readiness — inline HTML JavaScript syntax
+- production-current-static-config-assignment-guard-2026-07-08-r1 — Static Config Assignment Guard
+- production-current-deploy-release-single-publish-2026-07-08-r1 — Deploy Release Single-Publish Guard
+- production-current-phase4-generated-mirror-slimming-2026-07-09-r1 — Generated Mirror Slimming
+- phase6-manifest-gate-cleanup-2026-07-09-r1 — Manifest/Gate Cleanup — current contract plus compact ledger
+- production-current-final-consistency-lock-2026-07-10-r1 — Current Final Consistency Lock — 53 files — 108 methods — 27 write APIs
+- production-current-deep-source-syntax-guard-2026-07-08-r1 — Deep Source Syntax Guard — GAS .gs — github-pages/*.js
+- AI / Meeting / Budget Stability Guard — HierarchyRequestError — applyPending()
+- production-current-gate-consolidation-2026-07-10-r1 — Current Gate Consolidation — audit:strict — build:strict was removed as duplicate alias
+- production-current-semantic-owner-wording-cleanup-2026-07-10-r1 — Semantic Owner Wording Cleanup — no runtime/API/UI change
 
-```bash
-npm run audit:strict
-```
+## Single Owner Hard Lock Audit
 
-Equivalent release aliases are also available:
+Current production API ownership is `AppPageKit.apiRunner -> AppTransport.run -> /api/gas|/api/login -> apiRouter`. Internal compatibility bridge names may remain inside core/critical runtime only and must not be used by page/bootstrap code as an owner. PlatformCore metadata must identify `AppPageKit.apiRunner` as the production API owner.
+## Readable Source / No Minify Policy
 
-```bash
-npm run release:check
-npm run deploy:check
-npm run predeploy:production
-```
+Stamp: `production-current-readable-source-no-minify-2026-07-10-r1`
 
-The strict audit regenerates deterministic public env metadata, checks all Vercel API files, runs the security gate in strict mode, and runs the Production current contract/transport/size/mirror/write-schema gate in strict mode.
+- Do not minify canonical production source.
+- Maintain JavaScript, GAS, HTML embedded scripts, JSON, and Python as readable multi-line source.
+- Formatting may change whitespace only for runtime source; function names, API routes, DOM ids, write schema, Unicode/Thai identifiers, GAS template tokens, UI/UX, and business rules must remain unchanged.
+- `gas-backend/Scripts_*.html` remains canonical; generated mirrors must remain byte-equivalent after the generated mirror header is removed.
+- `tools/generate_vercel_env.py` must generate a readable multi-line `github-pages/vercel-env.generated.js`.
+- The readable-source gate uses line-count thresholds instead of requiring minified byte sizes.
 
-Production rule: do not promote a ZIP that has only passed `npm run build`. The ZIP must pass `npm run audit:strict` or one of the release aliases above.
+## Current Structure Remediation Lock
 
-## Production-current hardening policy
+Stamp: `production-current-structure-remediation-2026-07-10-r1`
 
-The current production hardening policy is a no-business-logic-change cleanup step. It does not add files, routes, APIs, or UI behavior. It only:
+- Page partial scripts are loaded once and activated many times; route changes must not force-execute a partial.
+- `__APP_PAGE_SCRIPT_PROMISES__` and `__APP_PAGE_LOAD_PROMISES__` are the only page-script coalescing owners.
+- Budget and People helper identifiers must remain page-scoped (`$budget*`, `$people*`) and must not reintroduce generic `$fn`/`$ob` globals.
+- Router dispatch resolves frozen API facade functions from `_routerCanonicalHandlerMap_`; production dispatch must not scan `globalThis` or `this`.
+- GAS and static `text/x-template` blocks must remain semantic mirrors; only the Parliament-logo hosting adapter may differ.
+- Vercel proxy transport failures preserve non-2xx HTTP status and no unused login-state cookie may be emitted.
+- CSP, HSTS, frame protection, and opener isolation headers are required.
 
-1. aligns this policy document with the actual Production current proxy-only runtime,
-2. prevents legacy transport drift,
-3. prevents generated mirror drift,
-4. prevents write-schema drift, and
-5. adds source-size budgets to stop runtime and domain files from growing again.
+## Current Deep Stability Hardening Lock
 
-Hard size budgets are regression guards, not the final slimming target. Phase 2 should reduce the largest files further while preserving the current UI/UX and business rules.
+Stamp: `production-current-deep-stability-hardening-2026-07-10-r18`
 
-## Current debt targets
-
-- Slim `gas-backend/Scripts_Core_Runtime.html` without adding files.
-- Slim `gas-backend/Scripts_Page_Meeting.html` without changing meeting UI/UX.
-- Deduplicate helper logic inside `gas-backend/Code_30_Domain_Cases.gs` without adding APIs.
-- Keep budget hydration owned by `BudgetDomain` only.
-- Keep generated mirrors synchronized from canonical source only.
-## Phase 2 Runtime Slimming Addendum (2026-07-08)
-
-Phase 2 tightens the runtime size budget without changing API names, write schema, UI labels, DOM IDs, or business rules. The canonical meeting page partial remains `gas-backend/Scripts_Page_Meeting.html`; the static mirror remains `github-pages/partials/Scripts_Page_Meeting.html`.
-
-Production release must continue to use `npm run audit:strict`. The strict gate now enforces the meeting page canonical and mirror at **220,000 bytes** each, replacing the older ~242 KB guard.
-
-Do not re-expand repeated meeting literals or edit the mirror directly. Any future meeting-page change must keep the canonical and mirror under the Phase 2 budget and preserve the existing public owners such as `initMeetingPage`, `meetingEditLog`, `CommitteeMeetingSystem`, and `AppPages` meeting actions.
-
-
-
-## Phase 3 — Cache/Data Freshness (production-current-phase3-cache-data-freshness-2026-07-08-r1)
-
-- Read caches remain allowed only when they are keyed by the current freshness/write epoch.
-- Any successful write/delete must invalidate client read caches and advance `AppDataFreshnessOwner`.
-- Search, report, tracking, dashboard, and budget visible refreshes must bypass stale cache after user refresh or mutation.
-- Production release must continue to pass `npm run audit:strict`; `npm run build` is not the final production gate.
-- This phase does not add API routes, files, write schema entries, or business-rule changes.
-
-
-## Phase 4 — Write/Delete Reliability (`production-current-phase4-write-delete-reliability-2026-07-08-r1`)
-
-Production write/delete reliability is locked by `Code_00_PlatformCore.Phase4WriteDeleteReliability` and `Code_20_Router.Phase4WriteDeleteReliability`. The 27 write APIs must remain in the frozen write schema, must be router-owned, must require CSRF metadata, must pass through `writeGateway_`, and must return a standard `ok/data/msg/error/meta` envelope with deterministic cache invalidation metadata. Critical delete routes must keep their dashboard/search/tracking refresh targets. Run `npm run audit:strict` before promoting production; `npm run build` alone is not a production release gate.
-
-## Phase 5 — UI/UX Modernization (`production-current-phase5-uiux-modernization-2026-07-08-r1`)
-
-Phase 5 modernizes the visible runtime shell without changing API routes, write schema, sheet business rules, DOM IDs, or data ownership. The canonical and static indexes install a small `AppPhase5UiUx` owner that standardizes touch targets, focus-visible rings, mobile modal scrolling, table scroll regions, and loading/empty/error surfaces. This phase also fixes legacy compressed 5-digit CSS color tokens in the index files so modern card, sidebar, login, and mobile styles render consistently across browsers.
-
-Production release remains blocked by `npm run audit:strict`; `npm run build` alone is not a production release gate.
+- Vercel Function request/response payloads must remain below the platform 4.5 MB boundary.
+- PDF uploads through `/api/gas` use a 3 MB raw-file limit because base64 expansion and the JSON envelope increase request size.
+- Non-PDF API payloads remain limited to 1 MB.
+- A page-script timeout must preserve the original in-flight owner; it must not permit a second owner while the first load is still running.
+- Route activation must not report success when its page template or runtime failed to load.
+- User-controlled external links must validate the URL scheme and use `rel="noopener noreferrer"` with `_blank`.
+- `/api/public-config` and `/api/gas` preserve upstream HTTP transport failures.
+- GAS public-config objects must not contain duplicate property keys.
 
 
-## Phase 6 — Static QA Readiness
+## Current Accessibility and Dynamic DOM Performance Lock — 2026-07-10
 
-Production release must continue to pass `npm run audit:strict`. Phase 6 adds a blocking static QA readiness layer inside `tools/phaseN_legacy_transport_gate.py` to catch hidden regressions that `node --check api/*.js` cannot see.
+- `AppAccessibility` must batch the actual added DOM scopes; a single mutation must not trigger an unconditional full-document scan.
+- Critical login controls must receive accessible names before the deferred core runtime is available.
+- Forms must not use `javascript:` action URLs.
+- Links opened with `target="_blank"` must carry `noopener noreferrer`.
+- Images without alternative text must be repaired by the canonical accessibility owner without changing existing DOM IDs or business behavior.
+- These rules are enforced by `npm run check:architecture`.
 
-Required checks:
-- inline HTML JavaScript syntax in `gas-backend`, `github-pages`, and `github-pages/partials`
-- high-risk `APP_CONFIG` default keys such as `releaseGate`, `transportMode`, `hostingTarget`, `readJsonpApi`, and `loginFormPost` must remain single-owner
-- no new files, no new API routes, no route-name changes, no write-schema changes, no business-rule changes, and no UI/UX changes in this phase
+## Characterization Test and Contract Freeze
 
-Stamp: `production-current-phase6-static-qa-readiness-2026-07-08-r1`.
+Stamp: `production-current-characterization-contract-freeze-2026-07-10-r1`
 
-## Static Config Assignment Guard (`production-current-static-config-assignment-guard-2026-07-08-r1`)
+This is Step 1 of the consolidation refactor and is not a new Phase. It records the current semantic behavior boundary before any owner, alias, fallback, or runtime cleanup.
 
-This follow-up stability pass closes a hidden app-config drift gap that Phase 6 did not fully cover. Phase 6 checks duplicate keys inside the `defaults` object; the strict gate now also checks high-risk `root.APP_CONFIG.*` runtime assignments after `Object.assign`.
+- Run `npm run test:characterization` before and after every consolidation change.
+- The baseline locks 108 ordered route records including role, domain, flags, cache entity, and limit metadata.
+- The baseline locks all 27 write-validation schemas including validation codes, Thai messages, accepted fields, and nested payload paths.
+- The Vercel proxy allowlist must remain identical to the router contract and in the same order.
+- Each canonical page script has a frozen API-method footprint; a page may not silently gain or lose an API dependency.
+- The full application UI markup, including the initial shell and all eleven `text/x-template` templates, is locked by a whitespace-insensitive semantic hash, so DOM structure, IDs, controls, labels, and UI/UX cannot drift during Clean Code work.
+- Single-owner anchors are locked for `AppTransport.run`, `AppPageKit.apiRunner`, `apiRouter`, the write-schema owner, `AppDirtyRefreshOwner`, and `invalidateAfterWrite`.
+- The gate adds no source file, API route, Spreadsheet schema, UI/UX behavior, or business-rule change.
+- A baseline update is permitted only after an intentional contract change is separately approved and documented; it must never be changed merely to make a failing refactor pass.
 
-Production rules:
-- `root.APP_CONFIG.releaseGate` must have exactly one runtime owner assignment.
-- high-risk runtime assignments such as `hostingTarget`, `loginFormPost`, `readJsonpApi`, and legacy transport flags must remain single-owner.
-- this guard changes no API routes, files, write schema, DOM IDs, UI behavior, or business rules.
-- production promotion remains blocked by `npm run audit:strict`.
+## Step 2 — Runtime Metadata Slimming
 
-## Deploy Release Single-Publish Guard
+`Scripts_Core_Runtime.html` remains the canonical runtime source. Step 2 removes only duplicate or write-only diagnostic metadata that had no internal caller, while retaining executable owner locks, runtime facades, API paths, UI templates, and business behavior. The generated partial must remain byte-identical to the canonical file.
 
-Stamp: `production-current-deploy-release-single-publish-2026-07-08-r1`
-
-`github-pages/app-config.js` must publish `root.APP_DEPLOY_RELEASE` from one owner only. The release metadata publisher runs after APP_CONFIG normalization so transport mode, hosting target, and legacy-removal flags cannot be stale during frontend bootstrap. Production release remains blocked unless `npm run audit:strict` verifies one `root.APP_DEPLOY_RELEASE = Object.assign(...)` owner and one `publishDeployRelease()` runtime call.
-
-This guard does not add files, API routes, write schema, UI labels, DOM ids, or business-rule changes.
-
-## Deep Source Syntax Guard — production-current-deep-source-syntax-guard-2026-07-08-r1
-
-Production release must not rely only on `npm run build` or the inline HTML JavaScript syntax gate. The strict release gate now also syntax-checks standalone source assets line-by-line at source-file level:
-
-- `gas-backend/*.gs` is copied to temporary `.js` files and checked with `node --check` so Apps Script domain/router/platform syntax errors cannot pass unnoticed.
-- `api/*.js` remains checked by the API syntax gate.
-- `github-pages/*.js` is checked, including `app-config.js`, `github-gas-transport.js`, bootstrap assets, critical runtime, and `vercel-env.generated.js`.
-- Existing Phase 6 inline HTML JavaScript syntax checks remain required for `Index.html` and all `Scripts_*.html` partials.
-
-This guard does not add files, API routes, write schema, UI behavior, or business rules. It only blocks production release when source syntax is invalid. Production deployment still requires:
+Run the blocking verification with:
 
 ```bash
-npm run audit:strict
+npm run test:runtime-slimming
 ```
 
-Deep Source Syntax Guard coverage keywords: GAS .gs, github-pages/*.js.
+The gate rejects reintroduction of the removed metadata markers, runtime growth above 484,000 bytes, canonical/mirror drift, or loss of the retained owner and API anchors. The Step 1 characterization baseline continues to lock routes, write schema, page API footprints, owner paths, and UI markup.
 
-### Inline Runtime Build Gate Addendum (2026-07-09)
+## Step 3 — API Facade Consolidation
 
-`npm run build` now executes `npm run check:inline` in addition to `check:api` and `check:frontend`. The inline check extracts executable `<script>` blocks from `github-pages/index.html`, `github-pages/diagnostic.html`, every `github-pages/partials/*.html` file, and every `gas-backend/Scripts_*.html` canonical partial, validates them with Node, and blocks keyword-token minifier drift such as `return$token` or `else$token` before Vercel deployment.
+Stamp: `production-current-step3-api-facade-consolidation-2026-07-10-r1`
 
-This addendum adds no files, no API routes, no write-schema changes, no DOM-id changes, no UI labels, and no business-rule changes. It closes the deployment gap where inline partial scripts could parse incorrectly or contain semantic minifier drift while the standalone `.js` build checks still passed.
+Page and bootstrap code use one public API entry only: `AppPageKit.apiRunner`. `AppApi.call` remains an internal runtime and critical-login entry, and `AppRuntime.call` remains the internal transport pipeline before `AppTransport.run`.
 
+This step removes unused callback/module factories and short compatibility names (`getApiCaller`, `getApiTransport`, `requireApiTransport`, `getModuleApi`, `_q16`, `moduleApi`, `_q36`, `_q28`, `AppApi.module`, `AppUtil.apiRunner`, and global `apiCall`). Admin and People callers were rewritten to the canonical page facade, and the unused Budget module-API binding was deleted. No API method, route, write schema, DOM ID, UI/UX, Spreadsheet schema, or business rule changed.
 
-## AI / Meeting / Budget Stability Guard — 2026-07-09 r15
+Run the blocking verification with:
 
-Production runtime must block semantic drift that syntax-only checks can miss. The release gate must verify that AI routes stay lazy/user-action/advisory-only, Meeting route activation does not call a missing global `applyPending()`, Meeting summary popup has a direct fallback click handler, Core `appendChildren` rejects parent/ancestor append, and Budget dynamic seminar forms render without reusing DOM nodes that can trigger `HierarchyRequestError`. This guard preserves the API contract, route names, write schema, and file count.
+```bash
+npm run test:api-facade
+```
+
+The gate rejects reintroduction of removed API aliases, direct page calls through alternate facades, loss of `AppPageKit.apiRunner -> AppApi.call -> AppRuntime.call -> AppTransport.run`, canonical/generated mirror drift, or any Step 1 characterization-contract drift.
+
+## Step 4 — Router Canonical Resolver Consolidation
+
+Stamp: `production-current-step4-router-canonical-resolver-consolidation-2026-07-10-r1`
+
+The backend router now has one explicit handler map (`_routerCanonicalHandlerMap_`) and one production resolver (`_routerResolveCanonicalHandler_`). Contract checks, PlatformCore security diagnostics, `RouterPipeline.resolveHandler`, and `apiRouter` dispatch use this resolver/map directly. The compatibility functions `_ct`, `_cz`, `_routerBuildFacadeHandlerMap_`, `_explicitRouteHandlerMap_`, `_resolveGlobalFunction_`, `_buildApiRouteHandlers_`, `_apiRouteHandlers_`, and `_routerResolveRouteHandler_`, together with the duplicate `__API_ROUTE_HANDLERS_CACHE__`, are removed. Route names, route metadata, write schema, UI/UX, Spreadsheet schema, and business behavior remain frozen.
+
+Blocking command:
+
+```bash
+npm run test:router-consolidation
+```
+
+The gate rejects reintroduction of any removed router alias/cache, alternate dispatch resolution, mutable-global handler discovery, loss of the 108-route canonical map, or any Step 1 characterization-contract drift.
+
+## Step 5 — Proxy Origin and Google HTML Response Guard
+
+Stamp: `production-current-step5-proxy-origin-html-guard-2026-07-10-r1`
+
+The Production frontend is hosted by Vercel and the Apps Script Web App is backend-only. The previous backend `doGet()` still rendered the application shell, while the critical runtime used relative `/api/login` and `/api/gas` endpoints. Opening the GAS `/exec` URL therefore resolved those paths on a Google-hosted origin and returned a Google Workspace HTML page instead of JSON.
+
+The fix is fail-closed:
+
+- Normal GAS `doGet()` no longer renders the proxy-only frontend. It redirects to the HTTPS URL stored in the GAS Script Property `VERCEL_FRONTEND_URL`, or shows a configuration message when the property is absent.
+- Critical login and the canonical browser transport reject Google-hosted page origins before calling `/api/*`, returning `VERCEL_FRONTEND_REQUIRED` instead of attempting an invalid request.
+- The Vercel proxy classifies Google Sign-in/Workspace HTML as `GAS_DEPLOYMENT_ACCESS_OR_URL_INVALID` and records the final response URL/status without exposing credentials.
+- Vercel Environment Variable `GAS_WEB_APP_URL` must be the latest Apps Script Web App deployment URL ending in `/exec`; `/dev`, editor, spreadsheet, Drive, and deployment-management URLs are invalid.
+- Deploy the GAS Web App with an access policy that allows the Vercel server-side proxy to call it, then redeploy Vercel after changing environment variables.
+
+Blocking command:
+
+```bash
+npm run test:proxy-origin
+```
+
+The gate rejects restoration of GAS-hosted Production UI, removal of the Google-origin guard, reintroduction of the raw `invalid proxy response:<html>` error, or loss of Step 1 contract baselines.
+
