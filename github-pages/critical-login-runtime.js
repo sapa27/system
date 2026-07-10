@@ -432,7 +432,7 @@ try {
             el.disabled = !!on, el.setAttribute("aria-busy", on ? "true": "false"), el.textContent = on ? label || "กำลังเข้าสู่ระบบ": el.dataset.defaultText,
             !0)
         }
-      },
+      };
       function isGoogleHostedFrontend_() {
         var host = txt(root2.location && root2.location.hostname || "").toLowerCase();
         return /(^|\.)script\.google\.com$|(^|\.)script\.googleusercontent\.com$|(^|\.)docs\.google\.com$|(^|\.)googleusercontent\.com$/.test(host)
