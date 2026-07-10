@@ -5,8 +5,8 @@ from pathlib import Path
 import json, re, sys, pathlib, os, traceback, subprocess, tempfile, shutil, hashlib
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "commission-v1.2-deep-stability-hardening-2026-07-10-r18"
-ASSET = "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r18"
+RELEASE = "commission-v1.2-deep-stability-hardening-2026-07-10-r20"
+ASSET = "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20"
 VERSION = "1.2.0-production-current"
 MODE = "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe"
 SCHEMA_STAMP = "phaseK-write-schema-unification-2026-07-02-r1"
@@ -110,6 +110,7 @@ STEP4_FORBIDDEN_ROUTER_ALIASES = [
 STEP4_FORBIDDEN_ROUTER_CACHE = "__API_ROUTE_HANDLERS_CACHE__"
 
 STEP5_PROXY_ORIGIN_GUARD_STAMP = "production-current-step5-proxy-origin-html-guard-2026-07-10-r1"
+STEP6_RUNTIME_BOOTSTRAP_MEETING_STAMP = "production-current-step6-runtime-bootstrap-meeting-summary-rewrite-2026-07-10-r1"
 
 CHARACTERIZATION_OWNER_PATHS = {
     "frontendTransport": "github-pages/github-gas-transport.js::AppTransport.run",
@@ -3256,7 +3257,7 @@ def check_step5_proxy_origin_guard(manifest, package, docs_policy, platform, com
         and "VERCEL_FRONTEND_URL" in platform
         and "_renderVercelFrontendEntry_()" in do_get_block
         and "renderVue3App_(e)" not in do_get_block,
-        "normal GAS doGet must redirect/show backend guidance instead of rendering the Vercel-proxy-only UI",
+        "normal GAS doGet must show backend guidance instead of rendering the Vercel-proxy-only UI",
     )
     critical_guard_tokens = [
         "function isGoogleHostedFrontend_()",
@@ -3265,6 +3266,15 @@ def check_step5_proxy_origin_guard(manifest, package, docs_policy, platform, com
         "function criticalProxyResponseError_",
         "GAS_DEPLOYMENT_ACCESS_OR_URL_INVALID",
     ]
+    ok(
+        "Step 5 GAS backend entry cannot force connection-reset navigation",
+        "location.replace(" not in platform
+        and "ระบบจะไม่เปลี่ยนหน้าอัตโนมัติ" in platform
+        and 'target="_blank" rel="noopener noreferrer"' in platform
+        and "googleusercontent\\.com" in platform
+        and "VERCEL_FRONTEND_URL" in platform,
+        "backend entry must validate the host and expose a manual link without automatic navigation",
+    )
     ok(
         "Step 5 critical login rejects Google-hosted UI origins",
         all(token in critical for token in critical_guard_tokens)
@@ -3310,9 +3320,287 @@ def check_step5_proxy_origin_guard(manifest, package, docs_policy, platform, com
     return {
         "stamp": STEP5_PROXY_ORIGIN_GUARD_STAMP,
         "gasBackendUiDisabled": True,
-        "frontendRedirectProperty": "VERCEL_FRONTEND_URL",
+        "frontendEntryProperty": "VERCEL_FRONTEND_URL",
         "googleOriginGuard": True,
         "structuredGoogleHtmlError": "GAS_DEPLOYMENT_ACCESS_OR_URL_INVALID",
+    }
+
+
+def _run_step6_node_smoke(label, javascript):
+    """Run a deterministic JavaScript smoke test without adding project files."""
+    temp_path = None
+    try:
+        with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as handle:
+            handle.write(javascript)
+            temp_path = handle.name
+        proc = subprocess.run(
+            ["node", temp_path],
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=30,
+            check=False,
+        )
+        return {
+            "ok": proc.returncode == 0,
+            "label": label,
+            "stdout": (proc.stdout or "").strip()[-2000:],
+            "stderr": (proc.stderr or "").strip()[-2000:],
+            "returncode": proc.returncode,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "label": label,
+            "stdout": "",
+            "stderr": str(exc),
+            "returncode": -1,
+        }
+    finally:
+        if temp_path:
+            try:
+                Path(temp_path).unlink(missing_ok=True)
+            except Exception:
+                pass
+
+
+def _step6_app_config_execution_smoke(app_source):
+    source_json = json.dumps(app_source, ensure_ascii=False)
+    javascript = '''const vm = require("vm");
+const source = SOURCE_PLACEHOLDER;
+const storage = Object.create(null);
+const root = {
+  location: { search: "", hostname: "production.example.vercel.app", href: "https://production.example.vercel.app/" },
+  localStorage: {
+    getItem: key => Object.prototype.hasOwnProperty.call(storage, key) ? storage[key] : null,
+    setItem: (key, value) => { storage[key] = String(value); },
+    removeItem: key => { delete storage[key]; }
+  },
+  URLSearchParams,
+  console
+};
+root.window = root;
+root.globalThis = root;
+vm.runInContext(source, vm.createContext(root), { filename: "github-pages/app-config.js" });
+if (!root.APP_CONFIG || root.APP_CONFIG.vercelApiProxyEnabled !== true) {
+  throw new Error("APP_CONFIG_NOT_PUBLISHED");
+}
+if (!root.APP_DEPLOY_RELEASE || !root.APP_DEPLOY_RELEASE.stamp) {
+  throw new Error("APP_DEPLOY_RELEASE_NOT_PUBLISHED");
+}
+if (root.APP_DEPLOY_RELEASE.source !== "github-pages/app-config.js") {
+  throw new Error("APP_DEPLOY_RELEASE_SOURCE_INVALID");
+}
+console.log(JSON.stringify({ ok: true, stamp: root.APP_DEPLOY_RELEASE.stamp }));
+'''.replace('SOURCE_PLACEHOLDER', source_json)
+    return _run_step6_node_smoke("app-config-execution", javascript)
+
+
+def _step6_dashboard_execution_smoke(dashboard_source):
+    match = re.search(r"<script\b[^>]*>([\s\S]*?)</script>", dashboard_source, re.I)
+    script_source = match.group(1) if match else dashboard_source
+    source_json = json.dumps(script_source, ensure_ascii=False)
+    javascript = '''const vm = require("vm");
+const source = SOURCE_PLACEHOLDER;
+const noop = function() {};
+const element = {
+  value: "",
+  textContent: "",
+  dataset: {},
+  classList: { toggle: noop, add: noop, remove: noop, contains: () => false },
+  setAttribute: noop,
+  getAttribute: () => "",
+  closest: () => null,
+  querySelector: () => null,
+  querySelectorAll: () => [],
+  addEventListener: noop,
+  appendChild: noop
+};
+const document = {
+  addEventListener: noop,
+  querySelector: () => null,
+  querySelectorAll: () => [],
+  getElementById: () => null,
+  createElement: () => Object.assign({}, element),
+  body: element,
+  documentElement: element
+};
+const moduleKit = () => ({
+  byId: () => null,
+  text: value => value == null ? "" : String(value),
+  setTrustedHtml: noop,
+  setHtml: noop,
+  storeGet: (key, fallback) => fallback,
+  apiRunner: () => Promise.resolve({}),
+  moduleKit
+});
+const root = {
+  document,
+  console,
+  Promise,
+  setTimeout,
+  clearTimeout,
+  APP_CONFIG: {},
+  AppPageSlim: { moduleKit },
+  AppPageKit: { moduleKit, apiRunner: () => Promise.resolve({}) },
+  AppStore: { get: (key, fallback) => fallback },
+  AppPages: { register: noop },
+  AppEvents: { routeAction: noop },
+  AppRuntime: { recordWarning: noop },
+  Swal: null
+};
+root.window = root;
+root.globalThis = root;
+const context = {
+  window: root,
+  document,
+  console,
+  Promise,
+  setTimeout,
+  clearTimeout,
+  __appIsFn: value => typeof value === "function",
+  __appObserve: noop,
+  __Scripts_Core_Runtime_Html_C8_delay_2: () => Promise.resolve(),
+  appSwalFire: noop
+};
+vm.runInContext(source, vm.createContext(context), { filename: "Scripts_Page_Dashboard.html#app-ai-bridge-shared-owner" });
+if (!root.AiBridgeDiagnostics) throw new Error("AI_BRIDGE_DIAGNOSTICS_NOT_PUBLISHED");
+if (root.AiBridgeDiagnostics.clientReadCacheEnabled !== false) throw new Error("AI_CLIENT_CACHE_OWNER_RETURNED");
+if (Object.prototype.hasOwnProperty.call(root.AiBridgeDiagnostics, "cacheKey") ||
+    Object.prototype.hasOwnProperty.call(root.AiBridgeDiagnostics, "readCache") ||
+    Object.prototype.hasOwnProperty.call(root.AiBridgeDiagnostics, "writeCache")) {
+  throw new Error("AI_STALE_CACHE_ALIAS_RETURNED");
+}
+console.log(JSON.stringify({ ok: true, owner: root.AiBridgeDiagnostics.owner }));
+'''.replace('SOURCE_PLACEHOLDER', source_json)
+    return _run_step6_node_smoke("dashboard-execution", javascript)
+
+
+def check_step6_runtime_bootstrap_meeting_rewrite(manifest, package, docs_policy, app, vercel, gas_index, static_index):
+    ledger = manifest.get("step6RuntimeBootstrapMeetingSummaryRewrite") if isinstance(manifest, dict) else None
+    scripts = package.get("scripts", {}) if isinstance(package, dict) else {}
+    critical = read("gas-backend/Scripts_Critical_Login_Runtime.html")
+    mirror_header_re = re.compile(r"^<!-- GENERATED MIRROR:[\s\S]*?-->\s*")
+    critical_mirror = mirror_header_re.sub("", read("github-pages/partials/Scripts_Critical_Login_Runtime.html"))
+    critical_static = read("github-pages/critical-login-runtime.js")
+    dashboard = read("gas-backend/Scripts_Page_Dashboard.html")
+    dashboard_mirror = mirror_header_re.sub("", read("github-pages/partials/Scripts_Page_Dashboard.html"))
+    meeting = read("gas-backend/Scripts_Page_Meeting.html")
+    meeting_mirror = mirror_header_re.sub("", read("github-pages/partials/Scripts_Page_Meeting.html"))
+    cases = read("gas-backend/Code_30_Domain_Cases.gs")
+    csp = ""
+    for group in vercel.get("headers", []) if isinstance(vercel, dict) else []:
+        if group.get("source") == "/(.*)":
+            for header in group.get("headers", []):
+                if str(header.get("key", "")).lower() == "content-security-policy":
+                    csp = str(header.get("value", ""))
+
+    app_config_smoke = _step6_app_config_execution_smoke(app)
+    dashboard_smoke = _step6_dashboard_execution_smoke(dashboard)
+
+    ok(
+        "Step 6 runtime/bootstrap meeting rewrite ledger installed",
+        isinstance(ledger, dict) and ledger.get("stamp") == STEP6_RUNTIME_BOOTSTRAP_MEETING_STAMP,
+        "TECH_DEBT_MANIFEST must record the complete runtime/bootstrap and meeting-summary rewrite",
+    )
+    ok(
+        "Step 6 app-config deploy release publisher is lexical and executable",
+        "function publishDeployRelease()" in app
+        and "publishDeployRelease();" in app
+        and not re.search(r"[,}]\s*function\s+publishDeployRelease\s*\(", app)
+        and "root.APP_DEPLOY_RELEASE = Object.assign" in app,
+        "publishDeployRelease must be a real function declaration outside a comma-expression chain",
+    )
+    ok(
+        "Step 6 app-config executes and publishes the release contract",
+        app_config_smoke.get("ok") is True,
+        json.dumps(app_config_smoke, ensure_ascii=False),
+    )
+    ok(
+        "Step 6 critical origin guard is lexical in all runtime copies",
+        all("function isGoogleHostedFrontend_()" in value for value in [critical, critical_mirror, critical_static])
+        and all(not re.search(r"[,}]\s*function\s+isGoogleHostedFrontend_\s*\(", value) for value in [critical, critical_mirror, critical_static])
+        and critical == critical_mirror
+        and critical_static_runtime_in_sync(),
+        "critical Google-origin guard must be declared in scope and generated copies must be exact",
+    )
+    stale_cache_aliases = ["cacheKey: cacheKey", "readCache: readCache", "writeCache: writeCache"]
+    ok(
+        "Step 6 Dashboard bootstrap has no removed client-cache aliases",
+        all(token not in dashboard for token in stale_cache_aliases)
+        and "cacheMode: \"backend-router-cache-only\"" in dashboard
+        and "clientReadCacheEnabled: false" in dashboard
+        and dashboard == dashboard_mirror,
+        "AiBridgeDiagnostics must expose only live owners and must not reference deleted cache helpers",
+    )
+    ok(
+        "Step 6 Dashboard owner executes without stale cache ReferenceError",
+        dashboard_smoke.get("ok") is True,
+        json.dumps(dashboard_smoke, ensure_ascii=False),
+    )
+    ok(
+        "Step 6 meeting summary client requests canonical live data",
+        "committee-meeting-summary-live-read" in meeting
+        and "committee-meeting-list-cache-first" not in meeting
+        and "forceFresh: forceFresh" in meeting
+        and "noCache: forceFresh" in meeting
+        and "bypassCache: forceFresh" in meeting
+        and "committee-meeting-summary-detail-live-read" in meeting
+        and meeting == meeting_mirror,
+        "list, refresh, search, and detail paths must use the same fresh-data payload owner",
+    )
+    ok(
+        "Step 6 meeting backend honors fresh-read flags",
+        "function _z52(sheetName, includeDeleted, options)" in cases
+        and "options.forceFresh === !0 || options.noCache === !0 || options.bypassCache === !0" in cases
+        and "forceFresh: forceFresh" in cases
+        and "bypassRequestCache: forceFresh" in cases
+        and 'owner: "MeetingDomain.canonicalSheetRead"' in cases
+        and 'source: forceFresh ? "canonical-sheets-live" : "canonical-sheets-cache"' in cases,
+        "frontend freshness flags must reach _appDataServiceRead_ instead of being ignored",
+    )
+    ok(
+        "Step 6 CSP supports manifest and pinned CDN diagnostics",
+        "manifest-src 'self' data:" in csp
+        and "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com" in csp,
+        csp,
+    )
+    ok(
+        "Step 6 uses inline favicon without adding a file",
+        'rel="icon" type="image/svg+xml" href="data:image/svg+xml' in static_index
+        and 'rel="icon" type="image/svg+xml" href="data:image/svg+xml' in gas_index,
+        "both entry documents must avoid /favicon.ico 404 without creating a new asset",
+    )
+    ok(
+        "Step 6 preserves frozen contracts and project shape",
+        isinstance(ledger, dict)
+        and ledger.get("noNewFiles") is True
+        and ledger.get("noNewApiRoutes") is True
+        and ledger.get("routeNamesChanged") is False
+        and ledger.get("routeMetadataChanged") is False
+        and ledger.get("writeSchemaChanged") is False
+        and ledger.get("spreadsheetSchemaChanged") is False
+        and ledger.get("businessRulesChanged") is False
+        and ledger.get("productionUiStructureChanged") is False
+        and ledger.get("characterizationBaselinePreserved") is True,
+        "runtime failures and data freshness may be corrected without changing frozen semantics",
+    )
+    ok(
+        "Step 6 blocking command and policy documented",
+        scripts.get("test:runtime-bootstrap-meeting") == "COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+        and "Step 6 — Runtime Bootstrap and Meeting Summary Rewrite" in docs_policy
+        and "npm run test:runtime-bootstrap-meeting" in docs_policy,
+        "package and SINGLE_SOURCE_POLICY must expose the Step 6 blocking gate",
+    )
+    return {
+        "stamp": STEP6_RUNTIME_BOOTSTRAP_MEETING_STAMP,
+        "appConfigPublisherLexical": True,
+        "appConfigExecutionSmoke": app_config_smoke,
+        "dashboardExecutionSmoke": dashboard_smoke,
+        "dashboardStaleCacheAliases": [],
+        "meetingSummaryFreshRead": True,
+        "manifestSrcDataAllowed": True,
+        "inlineFavicon": True,
     }
 
 
@@ -4785,6 +5073,9 @@ def main():
     step5_proxy_origin_guard_report = check_step5_proxy_origin_guard(
         manifest, package, docs_policy, platform, common, transport, app, generated
     )
+    step6_runtime_bootstrap_meeting_report = check_step6_runtime_bootstrap_meeting_rewrite(
+        manifest, package, docs_policy, app, vercel, gas_index, static_index
+    )
     check_owner_consolidation_contract(
         manifest,
         platform,
@@ -4846,6 +5137,7 @@ def main():
         "step3ApiFacadeConsolidation": step3_api_facade_report,
         "step4RouterCanonicalResolverConsolidation": step4_router_consolidation_report,
         "step5ProxyOriginAndHtmlResponseGuard": step5_proxy_origin_guard_report,
+        "step6RuntimeBootstrapMeetingSummaryRewrite": step6_runtime_bootstrap_meeting_report,
         "readableSourceRows": readable_source_rows,
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
