@@ -4359,15 +4359,17 @@ var _M = {
   function disable(el, flag) {
     el &&(el.disabled = !!flag, el.classList.toggle("disabled", !!flag))
   }
-  function filterPayload() {
+  function filterPayload(options) {
+    options = options || {};
+    var forceFresh = options.forceFresh !== false;
     return {
       query: val(_M.x26),
       agendaNo: val(_M.x21),
-      forceFresh: !1,
-      noCache: !1,
-      bypassCache: !1,
-      cacheTtlSeconds: 600,
-      source: "committee-meeting-list-cache-first"
+      forceFresh: forceFresh,
+      noCache: forceFresh,
+      bypassCache: forceFresh,
+      cacheTtlSeconds: forceFresh ? 0 : 180,
+      source: forceFresh ? "committee-meeting-summary-live-read" : "committee-meeting-summary-cache-read"
     }
   }
   function agendaItemTitleForDisplay(item) {
@@ -4616,20 +4618,25 @@ var _M = {
     renderPagedRows(),
     data
   }
-  function loadList() {
+  function loadList(options) {
+    options = options || {};
     var tbody = byId(_M.x11);
-    return tbody && setHtml(tbody, '<tr><td class="text-center text-muted p-3" colspan="4">กำลังโหลด...</td></tr>',
-      "meeting.list.loading"),
-    setHtml(_M.x51, '<div class="app-table-pager no-print"><div class="app-table-pager-left"><span class="app-table-pager-count">กำลังโหลดข้อมูล...</span></div></div>'),
-    hideDetail(),
-    api("apiListCommitteeMeetings", filterPayload()).then(function(res) {
-        return renderList(unwrap(res) || {
-          })
-      }).catch (function(err) {
-        throw setHtml(_M.x11, '<tr><td class="text-center text-danger p-3" colspan="4">' + esc(err && err.message || err || _M.T) + "</td></tr>"),
-        setHtml(_M.x51, ""),
-        err
-      })
+    var payload = filterPayload({ forceFresh: options.forceFresh !== false });
+    if (tbody) {
+      setHtml(tbody, '<tr><td class="text-center text-muted p-3" colspan="4">กำลังโหลด...</td></tr>',
+        "meeting.list.loading");
+    }
+    setHtml(_M.x51, '<div class="app-table-pager no-print"><div class="app-table-pager-left"><span class="app-table-pager-count">กำลังโหลดข้อมูล...</span></div></div>');
+    hideDetail();
+    return api("apiListCommitteeMeetings", payload).then(function(res) {
+      var data = unwrap(res) || {};
+      return renderList(data);
+    }).catch(function(err) {
+      var message = esc(err && err.message || err || _M.T);
+      setHtml(_M.x11, '<tr><td class="text-center text-danger p-3" colspan="4">' + message + "</td></tr>");
+      setHtml(_M.x51, "");
+      throw err;
+    });
   }
   function save(btn) {
     var payload = formPayload();
@@ -4725,7 +4732,12 @@ var _M = {
   function editMeeting(id) {
     return showMeetingEditLoading(),
     api("apiGetCommitteeMeetingSystem", {
-        meetingId: id
+        meetingId: id,
+        forceFresh: true,
+        noCache: true,
+        bypassCache: true,
+        cacheTtlSeconds: 0,
+        source: "committee-meeting-summary-detail-live-read"
       }).then(function(res) {
         var data = unwrap(res) || {
         }; if (data.meeting)return loadToForm(data.meeting, data.items || []); var cache = root._mCC || {
@@ -5477,7 +5489,12 @@ var _M = {
   }
   function getMeeting(id) {
     return api("apiGetCommitteeMeetingSystem", {
-        meetingId: id
+        meetingId: id,
+        forceFresh: true,
+        noCache: true,
+        bypassCache: true,
+        cacheTtlSeconds: 0,
+        source: "committee-meeting-summary-detail-live-read"
       }).then(function(res) {
         var data = unwrap(res) || {
         }; if (data.meeting)return {
