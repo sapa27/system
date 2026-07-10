@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="th">
+<?var __logo=(typeof getAppLogoConfig_==='function'&&getAppLogoConfig_())||{};?>
 <head>
 <script>
 var DASHBOARD_BUNDLE_FAILED = "DASHBOARD_BUNDLE_FAILED", DASHBOARD_BUNDLE_LOAD_FAILED = "DASHBOARD_BUNDLE_LOAD_FAILED";
@@ -16,39 +17,1013 @@ window.DASHBOARD_BUNDLE_LOAD_FAILED = DASHBOARD_BUNDLE_LOAD_FAILED;
 <link rel="preconnect"href="https://fonts.googleapis.com">
 <link rel="preconnect"href="https://fonts.gstatic.com"crossorigin>
 <link rel="dns-prefetch"href="//upload.wikimedia.org">
-<link rel="preload"as="image"href="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22/%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C/text%3E%3C/svg%3E">
-<script src="./vercel-env.generated.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
-
-</script>
-<script src="./app-config.js?bridge=production-vercel-proxy-only&v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
-
-</script>
-<script src="./github-gas-transport.js?bridge=production-vercel-proxy-only&v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
-
-</script>
+<link rel="preload"as="image"href="<?!= __logo.png96 ?>">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"rel="stylesheet"crossorigin="anonymous"referrerpolicy="no-referrer">
-<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"crossorigin="anonymous"referrerpolicy="no-referrer">
-
-</script>
 <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"crossorigin="anonymous"referrerpolicy="no-referrer">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap"rel="stylesheet">
 
-<script src="./app-index-foundation-pre-vue.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
+<script id="app-central-utility-store-owner">
+(function(root) {
+    "use strict"; root = root ||(typeof window != "undefined" ? window: typeof globalThis != "undefined" ? globalThis: this); var OWNER = "SCR:central-utility-store-owner-current"; function isObj(v) {
+      return!!v && typeof v == "object" && !Array.isArray(v)
+    }
+    function text(v) {
+      return v == null ? "": String(v)
+    }
+    function isFn(v) {
+      return typeof v == "function"
+    }
+    function split(path) {
+      return text(path).split(".").map(function(x) {
+          return x.trim()
+        }).filter(Boolean)
+    }
+    function clone(v) {
+      try {
+        return v == null ? v: JSON.parse(JSON.stringify(v))
+      } catch (_e) {
+        return v
+      }
+    }
+    function getIn(obj, path, def) {
+      var p = split(path),
+      cur = obj,
+      i; for (i = 0; i < p.length; i++) {
+        if (!cur || typeof cur != "object" || !Object.prototype.hasOwnProperty.call(cur, p[i]))return def; cur = cur[p[i]]
+      }
+      return cur === void 0 ? def: cur
+    }
+    function setIn(obj, path, value) {
+      var p = split(path),
+      cur = obj,
+      i; if (!p.length)return value; for (i = 0; i < p.length - 1; i++)isObj(cur[p[i]]) ||(cur[p[i]] = {
+        }),
+      cur = cur[p[i]]; return cur[p[p.length - 1]] = value,
+      value
+    }
+    function emit(path, value) {
+      try {
+        root.document && root.document.dispatchEvent && root.document.dispatchEvent(new CustomEvent("app:state-changed",
+            {
+              detail: {
+                path,
+                value,
+                owner: OWNER
+              }
+            }))
+      } catch (_e) {
+        observe(_e, "store.emit")
+      }
+    }
+    function observe(err, topic, detail) {
+      try {
+        root.AppRuntime && isFn(root.AppRuntime.recordWarning) ? root.AppRuntime.recordWarning(topic || "app.warn",
+          err, detail || {
+          }): root.console && root.console.warn && root.console.warn("[AppWarn] " + text(topic || "app.warn"),
+          err, detail || "")
+      } catch (_ignore) {
+      }
+      return!1
+    }
+    var store = root.AppStore && root.AppStore.__canonicalStore ? root.AppStore: null; if (!store) {
+      var state = root.AppStore && root.AppStore.state || {
+      }; store = root.AppStore = root.AppStore || {
+      },
+      store.state = state,
+      store.__canonicalStore = !0,
+      store.__owner = store.__owner || OWNER,
+      store.has = store.has || function(path) {
+        return getIn(state, path, void 0) !== void 0
+      },
+      store.get = store.get || function(path, def) {
+        return getIn(state, path, def)
+      },
+      store.set = store.set || function(path, value) {
+        var out = setIn(state, path, clone(value)); return emit(path, out),
+        out
+      },
+      store.patch = store.patch || function(path, patch) {
+        var cur = getIn(state, path, {
+          }); return isObj(cur) ||(cur = {
+          }),
+        store.set(path, Object.assign({
+            }, cur, clone(patch) || {
+            }))
+      },
+      store.assign = store.assign || function(map) {
+        return Object.keys(map || {
+          }).forEach(function(k) {
+            store.set(k, map[k])
+          }),
+        store.snapshot()
+      },
+      store.remove = store.remove || function(path) {
+        var p = split(path),
+        cur = state,
+        i; if (!p.length)return!1; for (i = 0; i < p.length - 1; i++)if (cur = cur && cur[p[i]], !isObj(cur))return!1; return delete cur[p[p.length - 1]],
+        emit(path, void 0),
+        !0
+      },
+      store.reset = store.reset || function(path, fallbackValue) {
+        return path ?(store.remove(path), arguments.length > 1 ? store.set(path, fallbackValue): store.get(path,
+            fallbackValue)): (Object.keys(state).forEach(function(key) {
+              delete state[key]
+            }), emit("", state), store.snapshot())
+      },
+      store.snapshot = store.snapshot || function() {
+        return clone(state) || {
+        }
+      },
+      store.subscribe = store.subscribe || function() {
+        return function() {
+        }
+      }
+    }
+    var Runtime = root.AppRuntime = root.AppRuntime || {
+    }; Runtime.isFn = Runtime.isFn || isFn,
+    Runtime.text = Runtime.text || text,
+    Runtime.safeCall = Runtime.safeCall || function(fn) {
+      if (!isFn(fn))return null; try {
+        return fn.apply(null, Array.prototype.slice.call(arguments, 1))
+      } catch (e) {
+        return observe(e, "runtime.safeCall"),
+        null
+      }
+    },
+    Runtime.recordWarning = Runtime.recordWarning || observe; var Format = root.AppFormat = root.AppFormat || {
+    }; Format.text = Format.text || text,
+    Format.escapeHtml = Format.escapeHtml || function(v) {
+      return text(v).replace(/[&<>"']/g, function(ch) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+          }
+          [ch] || ch
+        })
+    },
+    Format.pad2 = Format.pad2 || function(v) {
+      var s = String(Math.abs(Number(v) || 0)); return s.length < 2 ? "0" + s: s
+    }; var Dom = root.AppDom = root.AppDom || {
+    }; Dom.byId = Dom.byId || function(target) {
+      return target && target.nodeType ? target: root.document && target ? root.document.getElementById(text(target)): null
+    },
+    Dom.setText = Dom.setText || function(target, value) {
+      var el = Dom.byId(target); return el &&(el.textContent = text(value)),
+      el
+    },
+    Dom.clear = Dom.clearNode = Dom.clearNode || function(target) {
+      var el = Dom.byId(target); if (!el)return null; for (; el.firstChild; )el.removeChild(el.firstChild); return el
+    },
+    Runtime.isObj = Runtime.isObj || isObj,
+    Runtime.clone = Runtime.clone || clone,
+    Runtime.getIn = Runtime.getIn || getIn,
+    Runtime.setIn = Runtime.setIn || setIn,
+    Runtime.emitState = Runtime.emitState || emit,
+    Runtime.observe = Runtime.observe || observe,
+    Runtime.clearNode = Runtime.clearNode || Dom.clearNode,
+    Runtime.warn = Runtime.warn || Runtime.recordWarning || observe; var Helpers = root.AppRuntimeHelpers = root.AppRuntimeHelpers || {
+    }; Object.assign(Helpers, {
+        owner: "SCR:RT1:AppRuntimeHelpers",
+        isFn,
+        isObj,
+        text,
+        splitPath: split,
+        clone,
+        getIn,
+        setIn,
+        emitState: emit,
+        observe,
+        warn: function(label, err, meta) {
+          return observe(err, label, meta)
+        },
+        byId: Dom.byId,
+        clearNode: Dom.clearNode,
+        storeGet: function(path, def) {
+          return store.get(path, def)
+        },
+        storeSet: function(path, value) {
+          return store.set(path, value)
+        }
+      }); var Safe = root.AppSafeHtml = root.AppSafeHtml || {
+    }; Safe.escapeHtml = Safe.escapeHtml || Format.escapeHtml,
+    Safe.sanitizeHtml = Safe.sanitizeHtml || function(html) {
+      return text(html).replace(/<script\b[\s\S]*?<\/script>/gi, "").replace(/\son[a-z]+\s*=\s*(["']).*?\1/gi,
+        "").replace(/(?:java|vb)script\s*:/gi, "blocked:")
+    },
+    root.ScriptsUtils = root.ScriptsUtils || {
+    },
+    Object.assign(root.ScriptsUtils, {
+        text: root.ScriptsUtils.text || Format.text,
+        esc: root.ScriptsUtils.esc || Format.escapeHtml,
+        escapeHtml: root.ScriptsUtils.escapeHtml || Format.escapeHtml,
+        byId: root.ScriptsUtils.byId || Dom.byId,
+        setText: root.ScriptsUtils.setText || Dom.setText,
+        storeGet: root.ScriptsUtils.storeGet || function(path, def) {
+          return store.get(path, def)
+        },
+        storeSet: root.ScriptsUtils.storeSet || function(path, value) {
+          return store.set(path, value)
+        },
+        isFn: root.ScriptsUtils.isFn || Helpers.isFn,
+        isObj: root.ScriptsUtils.isObj || Helpers.isObj,
+        clone: root.ScriptsUtils.clone || Helpers.clone,
+        getIn: root.ScriptsUtils.getIn || Helpers.getIn,
+        setIn: root.ScriptsUtils.setIn || Helpers.setIn,
+        clearNode: root.ScriptsUtils.clearNode || Helpers.clearNode,
+        warn: root.ScriptsUtils.warn || Helpers.warn,
+        observe: root.ScriptsUtils.observe || Helpers.observe,
+        rt1HelperOwner: "SCR:RT1:AppRuntimeHelpers"
+      }); var flagMap = {
+      __APP_LOGIN_IN_FLIGHT__: "runtime.flags.loginInFlight",
+      __APP_LOGOUT_IN_PROGRESS__: "runtime.flags.logoutInProgress",
+      __APP_SESSION_RESUME_DISABLED__: "runtime.flags.sessionResumeDisabled",
+      __APP_LOGGED_OUT_LOCK__: "runtime.flags.loggedOutLock",
+      __APP_SESSION_RESUME_IN_FLIGHT__: "runtime.flags.sessionResumeInFlight",
+      __APP_SESSION_RESUME_PROMISE__: "runtime.flags.sessionResumePromise",
+      __APP_SOFT_REAUTH_IN_PROGRESS__: "runtime.flags.softReauthInProgress",
+      __APP_EXPLICIT_LOGIN_ATTEMPT__: "runtime.flags.explicitLoginAttempt",
+      __APP_HIDE_LOGIN_ROUTE_ALT__: "runtime.flags.hideLoginRouteAlt",
+      __APP_PRESERVE_LOADING_SWAL_UNTIL: "runtime.flags.preserveLoadingSwalUntil"
+    }; Object.keys(flagMap).forEach(function(name) {
+        try {
+          var initial = root[name]; Object.defineProperty(root, name, {
+              configurable: !0,
+              enumerable: !1,
+              get: function() {
+                return store.get(flagMap[name], initial)
+              },
+              set: function(v) {
+                initial = v,
+                store.set(flagMap[name], v)
+              }
+            }),
+          initial !== void 0 && store.set(flagMap[name], initial)
+        } catch (e) {
+          observe(e, "store.flagBridge", {
+              name
+            })
+        }
+      }),
+    root.__appIsFn = isFn,
+    root.__appObserve = root.__appObserve || observe,
+    root.__APP_CENTRAL_UTILITY_STORE_OWNER__ = {
+      ok: !0,
+      owner: OWNER,
+      uiDomChanged: !1,
+      businessLogicChanged: !1
+    }
+  })(typeof window != "undefined" ? window: typeof globalThis != "undefined" ? globalThis: this);
+var __appIsFn = typeof window != "undefined" && window.__appIsFn || function(v) {
+  return typeof v == "function"
+}, __appObserve = typeof window != "undefined" && window.__appObserve || function() {
+  return!1
+};
+</script>
+<script id="app-single-owner-registry-bootstrap">
+(function(root) {
+    "use strict"; if (!root)return; var records = root.__APP_SINGLE_OWNER_RECORDS__ ||(root.__APP_SINGLE_OWNER_RECORDS__ = {
+      }),
+    conflicts = root.__APP_SINGLE_OWNER_CONFLICTS__ ||(root.__APP_SINGLE_OWNER_CONFLICTS__ = []); function clean(v) {
+      return String(v == null ? "": v).trim()
+    }
+    function ensure(name) {
+      return name = clean(name),
+      records[name] ||(records[name] = {
+          name,
+          bootstrapOwner: "",
+          productionOwner: "",
+          augmenters: [],
+          consumers: []
+        })
+    }
+    function uniquePush(list, value) {
+      return value = clean(value),
+      value && list.indexOf(value) < 0 && list.push(value),
+      list
+    }
+    function conflict(name, stage, current, incoming) {
+      var item = {
+        name: clean(name),
+        stage: clean(stage),
+        current: clean(current),
+        incoming: clean(incoming),
+        code: "SINGLE_OWNER_CONFLICT"
+      }; return conflicts.push(item),
+      item
+    }
+    var api = root.AppOwnerRegistry && typeof root.AppOwnerRegistry == "object" ? root.AppOwnerRegistry: {
+    }; api.claim = function(name, owner, options) {
+      options = options || {
+      }; var rec = ensure(name),
+      stage = clean(options.stage || "production"),
+      value = clean(owner); return stage === "bootstrap" ? rec.bootstrapOwner && rec.bootstrapOwner !== value ? conflict(name,
+        stage, rec.bootstrapOwner, value): rec.bootstrapOwner = value: stage === "augmentation" ? uniquePush(rec.augmenters,
+        value): rec.productionOwner && rec.productionOwner !== value ? conflict(name, "production", rec.productionOwner,
+        value): rec.productionOwner = value,
+      rec
+    },
+    api.promote = function(name, owner) {
+      return api.claim(name, owner, {
+          stage: "production"
+        })
+    },
+    api.consume = function(name, consumer) {
+      var rec = ensure(name); return uniquePush(rec.consumers, consumer),
+      rec
+    },
+    api.get = function(name) {
+      var rec = ensure(name); return {
+        name: rec.name,
+        bootstrapOwner: rec.bootstrapOwner,
+        productionOwner: rec.productionOwner,
+        augmenters: rec.augmenters.slice(),
+        consumers: rec.consumers.slice()
+      }
+    },
+    api.status = function() {
+      var copy = {
+      },
+      names = Object.keys(records).sort(); return names.forEach(function(name) {
+          copy[name] = api.get(name)
+        }),
+      {
+        ok: conflicts.length === 0,
+        owner: "Index.AppOwnerRegistry",
+        stamp: "p2-single-owner-registry-current",
+        conflicts: conflicts.slice(),
+        records: copy
+      }
+    },
+    api.assert = function() {
+      var status = api.status(); if (!status.ok)throw new Error("SINGLE_OWNER_CONFLICT: " + JSON.stringify(status.conflicts)); return status
+    },
+    root.AppOwnerRegistry = api,
+    root.__appSingleOwnerNs = root.__appSingleOwnerNs || function(name) {
+      name = clean(name); var current = root[name]; return(!current || typeof current != "object" || Array.isArray(current)) &&(current = {
+        }, root[name] = current),
+      current
+    },
+    ["AppStore",
+      "AppRuntime",
+      "AppFormat",
+      "AppDom",
+      "AppRuntimeHelpers",
+      "AppSafeHtml",
+      "ScriptsUtils"].forEach(function(name) {
+        api.claim(name, "Index.central-utility-store-owner", {
+            stage: "bootstrap"
+          })
+      }),
+    root.__APP_SINGLE_OWNER_REGISTRY_READY__ = !0
+  })(typeof window != "undefined" ? window: typeof globalThis != "undefined" ? globalThis: this);
+</script>
+<script id="appboot-global-state-owner">
+(function(root) {
+    "use strict"; if (root) {
+      var previous = root.AppBoot || {
+      },
+      flags = previous.flags || {
+      },
+      events = previous.events || [],
+      aliases = previous.aliases || previous.bridgedGlobals || {
+      },
+      exposed = previous.exposedGlobals || {
+      }; root.AppBoot = Object.assign(previous, {
+          __appBootGlobalStateOwner: !0,
+          owner: "Index.html:AppBoot namespace owner",
+          buildTag: "appboot-owner-current",
+          flags,
+          events,
+          aliases,
+          exposedGlobals: exposed,
+          setFlag,
+          getFlag,
+          capture,
+          emit,
+          exposeGlobal,
+          bridgeGlobal,
+          bridgeKnownGlobals,
+          audit: function() {
+            var names = []; try {
+              names = Object.keys(root).filter(function(k) {
+                  return k.indexOf("__APP_") === 0
+                }).sort()
+            } catch (_e) {
+              __appObserve(_e, "ec")
+            }
+            return {
+              ok: !0,
+              owner: "Index.html:AppBoot",
+              buildTag: "appboot-owner-current",
+              appGlobals: names.length,
+              captured: Object.keys(flags).length,
+              exposed: Object.keys(exposed).length,
+              uiDomChanged: !1,
+              businessLogicChanged: !1
+            }
+          }
+        }),
+      bridgeKnownGlobals()
+    }
+    function now() {
+      try {
+        return new Date().toISOString()
+      } catch (_e) {
+        return String(Date.now())
+      }
+    }
+    function key(name) {
+      return String(name || "").trim()
+    }
+    function hasOwn(obj, name) {
+      return Object.prototype.hasOwnProperty.call(obj, name)
+    }
+    function remember(name, value, meta) {
+      var k = key(name); return k &&(flags[k] = {
+          value,
+          meta: meta || null,
+          updatedAt: now()
+        }),
+      value
+    }
+    function setFlag(name, value, meta) {
+      var v = remember(name, value, meta || {
+          owner: "AppBoot"
+        }),
+      k = key(name); if (exposed[k])try {
+        root[k] = v
+      } catch (_e) {
+        __appObserve(_e, "ec")
+      }
+      return v
+    }
+    function getFlag(name, defaultValue) {
+      var k = key(name); return hasOwn(flags, k) ? flags[k].value: hasOwn(root, k) ? root[k]: defaultValue
+    }
+    function exposeGlobal(name, meta) {
+      var k = key(name); if (!k || exposed[k])return!1; remember(k, hasOwn(flags, k) ? flags[k].value: root[k],
+        Object.assign({
+            exposed: !0
+          }, meta || {
+          })); try {
+        return Object.defineProperty(root, k, {
+            configurable: !0,
+            enumerable: !0,
+            get: function() {
+              return flags[k] && flags[k].value
+            },
+            set: function(v) {
+              remember(k, v, Object.assign({
+                    exposed: !0,
+                    assigned: !0
+                  }, meta || {
+                  }))
+            }
+          }),
+        exposed[k] = !0,
+        aliases[k] = !0,
+        !0
+      } catch (_e) {
+        try {
+          return root[k] = flags[k].value,
+          exposed[k] = !0,
+          aliases[k] = !0,
+          !0
+        } catch (_e2) {
+          return typeof __appObserve == "function" && __appObserve(_e2, "ec"),
+          !1
+        }
+      }
+    }
+    function bridgeGlobal(name, meta) {
+      return exposeGlobal(name, Object.assign({
+            bridge: !0
+          }, meta || {
+          }))
+    }
+    function capture(prefix) {
+      prefix = String(prefix || "__APP_"); try {
+        Object.keys(root).forEach(function(k) {
+            k.indexOf(prefix) !== 0 || hasOwn(flags, k) || remember(k, root[k], {
+                captured: !0
+              })
+          })
+      } catch (_e) {
+        __appObserve(_e, "ec")
+      }
+      return flags
+    }
+    function emit(name, detail) {
+      var item = {
+        name: String(name || ""),
+        detail: detail || {
+        },
+        at: now()
+      }; events.push(item); try {
+        root.document && root.document.dispatchEvent(new CustomEvent("appboot:" + item.name, {
+              detail: item.detail
+            }))
+      } catch (_e) {
+        __appObserve(_e, "ec")
+      }
+      return item
+    }
+    function bridgeKnownGlobals() {
+      return["__APP_BOOTSTRAP__",
+        "__APP_ASSET_MANIFEST__",
+        "__APP_DEFERRED_SCRIPTS__",
+        "__APP_DEFERRED_TEMPLATES__",
+        "__APP_UPFRONT_INCLUDED_SCRIPTS__",
+        "__APP_CORE_RUNTIME_FILES__",
+        "__APP_MOUNT_INSTANT_SHELL__",
+        "__APP_CANONICAL_LOGOUT_CLICK_BRIDGE__",
+        "__APP_SET_SHELL_MODE__",
+        "__APP_UNLOCK_UI__",
+        "__APP_MARK_MAIN_SHELL_READY__",
+        "__APP_FORCE_LOGIN_VIEW__",
+        "__APP_SIDEBAR_NAV_CLICK_OWNER__",
+        "__APP_VUE_READY__",
+        "__APP_LOGGED_OUT_LOCK__",
+        "__APP_LOGOUT_IN_PROGRESS__",
+        "__APP_SESSION_RESUME_DISABLED__",
+        "__APP_VUE_CDN_STATE__",
+        "__APP_THAI_DATE_EARLY_ADAPTER__",
+        "__APP_PARLIAMENT_LOGO__"].forEach(function(k) {
+          bridgeGlobal(k, {
+              owner: "AppBoot.global-bridge"
+            })
+        }),
+      Object.keys(exposed).length
+    }
+  })(window);
+</script>
+
+<script>
+var __appIsFn = typeof window != "undefined" && window.__appIsFn || function(v) {
+  return typeof v == "function"
+};
+</script>
+<script id="app-index-domkit-owner">
+(function(root, doc) {
+    "use strict"; if (root) {
+      var Boot = root.AppBoot || null,
+      owner = "Index.html:AppIndexKit"; if (!(Boot && Boot.getFlag && Boot.getFlag("productionFinalBootstrapCurrent") && root.AppIndexKit && root.AppIndexKit.__singleOwner)) {
+        if (Boot && Boot.setFlag)Boot.setFlag("productionFinalBootstrapCurrent", !0, {
+            owner: "Index.production-bootstrap"
+          }); else {
+          if (root.__APP_PRODUCTION_FINAL_BOOTSTRAP_CURRENT__ && root.AppIndexKit && root.AppIndexKit.__singleOwner)return; root.__APP_PRODUCTION_FINAL_BOOTSTRAP_CURRENT__ = !0
+        }
+        var baseKit = root.AppPageKit || root.AppKit || {
+        },
+        text = baseKit && baseKit.text || function(value) {
+          return value == null ? "": String(value)
+        },
+        escapeHtml = function(value) {
+          return text(value).replace(/[&<>"']/g, function(c) {
+              return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+              }
+              [c] || c
+            })
+        },
+        byId = function(id) {
+          return id && id.nodeType ? id: typeof id == "string" && doc ? doc.getElementById(id): null
+        },
+        sanitizeHtml = function(html) {
+          return text(html).replace(/<\s*script\b[\s\S]*?<\s*\/\s*script\s*>/gi, "").replace(/\son[a-z0-9_:-]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,
+            "")
+        },
+        setText = function(target, value) {
+          var el = byId(target); return el &&(el.textContent = text(value)),
+          el
+        },
+        rowsFrom = function(response) {
+          for (var current = response, i = 0; i < 6; i++) {
+            if (Array.isArray(current))return current; if (!current || typeof current != "object")return[]; if (Array.isArray(current.rows))return current.rows; if (Array.isArray(current.items))return current.items; if (Array.isArray(current.records))return current.records; if (Array.isArray(current.data))return current.data; current = current.data || current.result || current.payload
+          }
+          return[]
+        },
+        storeGet = function(path, def) {
+          try {
+            return root.AppStore && __appIsFn(root.AppStore.get) ? root.AppStore.get(path, def): def
+          } catch (err) {
+            return observe(err, "IndexKit.storeGet"),
+            def
+          }
+        },
+        api = function(method, payload, scope, timeoutMs) {
+          var next = attachAuth(payload); return root.AppPageKit && __appIsFn(root.AppPageKit.apiRunner) ? root.AppPageKit.apiRunner(method,
+            next, {
+              moduleName: scope || "IndexKit",
+              timeoutMs: timeoutMs || 3e4
+            }): Promise.reject(new Error("AppPageKit.apiRunner ไม่พร้อมใช้งาน"))
+        },
+        delay = baseKit && baseKit.delay || function(label, fn, ms) {
+          typeof label == "function" &&(ms = fn, fn = label, label = "indexkit-delay"); var task = typeof fn == "function" ? fn: function() {
+          },
+          wait = Number(ms || 0); return root.AppRuntime && __appIsFn(root.AppRuntime.delay) ? root.AppRuntime.delay(String(label || "indexkit-delay"),
+            task, wait): root.setTimeout(task, wait)
+        },
+        kit = Object.assign(root.AppIndexKit || {
+          }, {
+            __singleOwner: !0,
+            owner,
+            buildTag: "index-kit-single-owner-current",
+            text,
+            byId,
+            escapeHtml,
+            esc: escapeHtml,
+            sanitizeHtml,
+            setTrustedHtml,
+            setHtml: setTrustedHtml,
+            renderHtml: setTrustedHtml,
+            renderTable: setTrustedHtml,
+            setText,
+            rowsFrom,
+            storeGet,
+            attachAuth,
+            api,
+            delay,
+            ready,
+            bootOnce,
+            normalizeRole,
+            hasDom,
+            contract,
+            assertContract,
+            audit: function() {
+              return {
+                ok: !0,
+                owner,
+                domCssChanged: !1,
+                uiUxChanged: !1,
+                businessLogicChanged: !1,
+                contractLoaded: !!contract()
+              }
+            }
+          }); root.AppIndexKit = kit,
+        root.AppProductionFinal = Object.assign(root.AppProductionFinal || {
+          }, {
+            buildTag: "production-final-bootstrap-current"
+          }, kit)
+      }
+    }
+    function observe(err, tag) {
+      try {
+        __appIsFn(root.__appObserve) ? root.__appObserve(err, tag || "IndexKit"): root.console && root.console.warn && root.console.warn(tag || "IndexKit",
+          err)
+      } catch (_ignore) {
+        return typeof __appObserve == "function" && __appObserve(_ignore, "ec"),
+        !1
+      }
+    }
+    function setTrustedHtml(target, html, options) {
+      var el = byId(target); return el ? root.safeSetInnerHTML ? root.safeSetInnerHTML(el, html, options || {
+          moduleName: "IndexKit"
+        }): (el.textContent = sanitizeHtml(html), el): null
+    }
+    function attachAuth(payload) {
+      var next = payload && typeof payload == "object" && !Array.isArray(payload) ? Object.assign({
+        }, payload): {
+      }; try {
+        var token = storeGet("auth.token", "") || "",
+        csrf = storeGet("auth.csrfToken", "") || ""; !token || next.token || next._token ||(next.token = String(token)),
+        csrf && !next.csrfToken &&(next.csrfToken = String(csrf), next.csrf = next.csrf || String(csrf),
+          next._csrf = next._csrf || String(csrf))
+      } catch (err) {
+        observe(err, "IndexKit.authPayload")
+      }
+      return next
+    }
+    function ready(fn) {
+      var run = typeof fn == "function" ? fn: function() {
+      }; return doc && doc.readyState === "loading" ?(doc.addEventListener("DOMContentLoaded", run, {
+            once: !0
+          }), !0): delay("index.ready", run, 0)
+    }
+    function bootOnce(flag, fn) {
+      var name = String(flag || "index.boot.once"),
+      canRun = !0; try {
+        if (Boot && Boot.getFlag && Boot.getFlag(name) &&(canRun = !1), canRun && Boot && Boot.setFlag)Boot.setFlag(name,
+          !0, {
+            owner
+          }); else if (canRun) {
+          var key = "__APP_" + name.replace(/[^A-Za-z0-9_]/g, "_").toUpperCase() + "__"; root[key] &&(canRun = !1),
+          root[key] = !0
+        }
+      } catch (err) {
+        observe(err, "IndexKit.bootOnce")
+      }
+      return!(!canRun || typeof fn != "function") && fn()
+    }
+    function normalizeRole(role) {
+      var raw = String(role == null ? "": role).trim(),
+      value = raw.toLowerCase().replace(/\s+/g, " "); return raw ? /^(admin|administrator|superadmin|super-admin|ผู้ดูแล|ผู้ดูแลระบบ)$/.test(value) || /ผู้ดูแลระบบ/.test(raw) ? "Admin": /^(viewer|view|read|readonly|read-only|guest|ผู้ดู|ผู้ใช้อ่านอย่างเดียว|อ่านอย่างเดียว)$/.test(value) || /อ่านอย่างเดียว/.test(raw) ? "Viewer": (/^(staff|officer|user|editor|operator)$/.test(value) || /(เจ้าหน้าที่|เลขานุการ|ฝ่ายเลขานุการ|ปฏิบัติการ)/.test(raw),
+        "Staff"): "Viewer"
+    }
+    function hasDom(id) {
+      return!!byId(id)
+    }
+    function contract() {
+      return root.__APP_INDEX_DOM_CONTRACT__ || null
+    }
+    function assertContract() {
+      var c = contract(); if (!c)return {
+        ok: !0,
+        reason: "contract-not-loaded-yet"
+      }; for (var ids = c.requiredIds || [], missing = [], i = 0; i < ids.length; i++)hasDom(ids[i]) || missing.push(ids[i]); return {
+        ok: missing.length === 0,
+        missing,
+        contract: c
+      }
+    }
+  })(window, document);
+</script>
+<script id="app-index-dom-contract-owner">
 
 </script>
-<script src="./app-index-foundation-after-vue.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
-
+<script>
+(function(root) {
+    var Boot = root.AppBoot || null; function bootSet(name, value, meta) {
+      return Boot && Boot.setFlag ?(Boot.setFlag(name, value, meta || {
+            owner: "Index.thai-date-early-adapter"
+          }), Boot.exposeGlobal && Boot.exposeGlobal(name, Object.assign({
+              owner: "Index.thai-date-early-adapter",
+              bridge: !0
+            }, meta || {
+            })), value): (root[name] = value, value)
+    }
+    function bootGet(name, defaultValue) {
+      try {
+        return Boot && Boot.getFlag ? Boot.getFlag(name, defaultValue): Object.prototype.hasOwnProperty.call(root,
+          name) ? root[name]: defaultValue
+      } catch (_e) {
+        return defaultValue
+      }
+    }
+    function enhance(scope) {
+      try {
+        var api = root.AppThaiDatePicker || root.AppDatePicker; if (api && typeof api.enhance == "function" && api.enhance !== enhance)return api.enhance(scope || document); var host = scope && scope.querySelectorAll ? scope: document; return!(!host || !host.querySelectorAll) &&(Array.prototype.forEach.call(host.querySelectorAll('input[data-thai-date],input.app-thai-date-input,input[placeholder*="วว/ดด/ปปปป"],input[placeholder*="วัน/เดือน/ปี"],input[type="date"]'),
+            function(input) {
+              try {
+                input.classList.add("app-thai-date-input"),
+                input.setAttribute("data-thai-date", "1"),
+                input.getAttribute("placeholder") || input.setAttribute("placeholder", "วว/ดด/ปปปป")
+              } catch (_e) {
+                typeof __appObserve == "function" && __appObserve(_e, "ec")
+              }
+            }), !0)
+      } catch (_e) {
+        return typeof __appObserve == "function" && __appObserve(_e, "ec"),
+        !1
+      }
+    }
+    bootGet("thaiDateEarlyAdapter", !1) ||(bootSet("thaiDateEarlyAdapter", !0, {
+          owner: "Index.thai-date-early-adapter"
+        }), bootSet("__APP_THAI_DATE_EARLY_ADAPTER__", {
+          owner: "Index:thai-date-early-adapter-current",
+          mode: "adapter-only-no-popover",
+          adapterOnly: !0,
+          canonicalTarget: "SCR:thai-date-canonical-single-owner-current",
+          installedAt: Date.now()
+        }, {
+          owner: "Index:thai-date-early-adapter-current"
+        }), root.ScriptsUtils = root.ScriptsUtils || {
+      }, enhance.__thaiDateEarlyAdapter = !0, enhance.__canonicalOwner = "Index:thai-date-early-adapter-current",
+      enhance.__adapterOnly = !0, root.enhanceThaiDateInputs = root.enhanceThaiDateInputs || enhance,
+      root.applyThaiDateHints = root.applyThaiDateHints || root.enhanceThaiDateInputs, root.ScriptsUtils.enhanceThaiDateInputs = root.ScriptsUtils.enhanceThaiDateInputs || root.enhanceThaiDateInputs,
+      root.ScriptsUtils.applyThaiDateHints = root.ScriptsUtils.applyThaiDateHints || root.applyThaiDateHints,
+      bootSet("__APP_UNLOCK_UI__", bootGet("__APP_UNLOCK_UI__", function() {
+            try {
+              document.documentElement.classList.remove("app-page-switching", "app-template-loading"),
+              document.body && document.body.classList.remove("app-page-switching", "app-template-loading",
+                "app-ui-unblocking"); var ov = document.getElementById("sidebar-overlay"); ov &&(ov.classList.remove("show"),
+                ov.setAttribute("aria-hidden", "true"), ov.style.display = "none")
+            } catch (_e) {
+              typeof __appObserve == "function" && __appObserve(_e, "ec")
+            }
+            return!0
+          }), {
+          owner: "Index.unlock-ui-early"
+        }))
+  })(window);
 </script>
 
 <script defer data-app-asset-policy="pinned-primary"src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8"crossorigin="anonymous"referrerpolicy="no-referrer">
 
 </script>
-<script src="./app-index-foundation-after-swal.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
-
+<script>
+(function(root) {
+    function safeAlertFire(a, b, c) {
+      var opts = a && typeof a == "object" ? a: {
+        title: a,
+        text: b,
+        icon: c
+      },
+      title = String(opts.title || opts.icon || "แจ้งเตือน"),
+      text = String(opts.text || opts.html || ""); try {
+        alert(text ? title +`
+          `+ text.replace(/<[^>]*>/g, " "): title)
+      } catch (_e) {
+        __appObserve(_e, "ec")
+      }
+      return Promise.resolve({
+          isConfirmed: !0,
+          isDenied: !1,
+          isDismissed: !1,
+          value: opts.inputValue || null
+        })
+    }
+    function sanitizeHtmlWithDom(html) {
+      var blockedTags = {
+        script: 1,
+        iframe: 1,
+        object: 1,
+        embed: 1,
+        link: 1,
+        meta: 1,
+        base: 1
+      },
+      safe = document.createElement("template"); safe.innerHTML = String(html || ""); var nodes = safe.content.querySelectorAll("*"); return Array.prototype.slice.call(nodes).forEach(function(node) {
+          var tag = String(node.tagName || "").toLowerCase(); if (blockedTags[tag])return node.remove(),
+          void 0; Array.prototype.slice.call(node.attributes || []).forEach(function(attr) {
+              var name = String(attr.name || "").toLowerCase(),
+              value = String(attr.value || ""); return /^on/i.test(name) || name === "srcdoc" || name === "formaction" || name === "xlink:href" ?(node.removeAttribute(attr.name),
+                void 0): name !== "href" && name !== "src" || !/^(javascript|vbscript|data\s*:\s*text\/html)/i.test(value.trim()) ?(name === "style" && /(expression\s*\(|javascript\s*:|url\s*\(\s*['"]?\s*javascript:)/i.test(value) && node.removeAttribute(attr.name),
+                void 0): (node.setAttribute(attr.name, "#"), void 0)
+            })
+        }),
+      safe.innerHTML
+    }
+    function sanitizeSwalOptions(input) {
+      var opts = input && typeof input == "object" ? Object.assign({
+        }, input): input; return opts && typeof opts == "object" && opts.html &&(opts.html = sanitizeHtmlWithDom(opts.html)),
+      opts && typeof opts == "object" && opts.trustedHtml && delete opts.trustedHtml,
+      opts
+    }
+    function sanitizeSwalArgs(args) {
+      return(args = Array.prototype.slice.call(args || [])).length === 1 ? args[0] = sanitizeSwalOptions(args[0]): args.length > 1 && typeof args[1] == "string" &&(args[1] = sanitizeHtmlWithDom(args[1])),
+      args
+    }
+    function installSafeSwalGuard() {
+      if (!root.Swal || typeof root.Swal.fire != "function" || root.Swal.__appSafeGuarded)return!1; var originalFire = root.Swal.fire.bind(root.Swal); return root.Swal.fire = function() {
+        return originalFire.apply(root.Swal, sanitizeSwalArgs(arguments))
+      },
+      root.Swal.__appSafeGuarded = !0,
+      !0
+    }
+    function safeDelay(fn, ms, label) {
+      var run = typeof fn == "function" ? fn: function() {
+      },
+      kit = root.AppIndexKit || root.AppProductionFinal; return kit && typeof kit.delay == "function" ? kit.delay(label || "critical.swal.guard",
+        run, ms || 0): root.setTimeout(run, ms || 0)
+    }
+    root.__swalSafeGuardInstalled ||(root.__swalSafeGuardInstalled = !0, root.Swal ?(typeof root.Swal.fire != "function" &&(root.Swal.fire = safeAlertFire),
+        typeof root.Swal.close != "function" &&(root.Swal.close = function() {
+          }), typeof root.Swal.showLoading != "function" &&(root.Swal.showLoading = function() {
+          })): root.Swal = {
+        __safeAlert: !0,
+        fire: safeAlertFire,
+        close: function() {
+        },
+        showLoading: function() {
+        }
+      }, root.__sanitizeHtmlWithDom = sanitizeHtmlWithDom, root.__sanitizeSwalOptions = sanitizeSwalOptions,
+      root.__sanitizeSwalArgs = sanitizeSwalArgs, root.appSwalFire = function() {
+        installSafeSwalGuard(); var args = sanitizeSwalArgs(arguments),
+        fire; return(root.Swal && typeof root.Swal.fire == "function" ? root.Swal.fire: safeAlertFire).apply(root.Swal || null,
+          args)
+      }, root.appSwalFire.__criticalSwalFacade = !0, root.appSwalFire.__appEarlyFacade = !0, installSafeSwalGuard(),
+      safeDelay(installSafeSwalGuard, 0, "critical.swal.ready0"), safeDelay(installSafeSwalGuard, 800,
+        "critical.swal.ready800"), document.readyState === "loading" ? document.addEventListener("DOMContentLoaded",
+        installSafeSwalGuard, {
+          once: !0
+        }): safeDelay(installSafeSwalGuard, 0, "critical.swal.domready"), root.addEventListener && root.addEventListener("load",
+        installSafeSwalGuard, {
+          once: !0
+        }))
+  })(window);
 </script>
 <meta name="theme-color"content="#001e3c">
+<script>
+window.APP_LOGO = window.APP_LOGO || <?!=JSON.stringify(__logo||{})?> || {
+};
+function appManifestIconType(src) {
+  src = String(src || '').trim().toLowerCase();
+  if (src.indexOf('data:image/svg+xml') === 0 || /\.svg(?:[?#]|$)/.test(src)) return 'image/svg+xml';
+  if (src.indexOf('data:image/webp') === 0 || /\.webp(?:[?#]|$)/.test(src)) return 'image/webp';
+  return 'image/png';
+}
+window.APP_PWA_MANIFEST = window.APP_PWA_MANIFEST || {
+  name: 'ระบบบริหารจัดการเรื่องพิจารณา',
+  short_name: 'Committee App',
+  start_url: './',
+  display: 'standalone',
+  background_color: '#001e3c',
+  theme_color: '#001e3c',
+  icons: [{
+      src: window.APP_LOGO.png192,
+      sizes: '192x192',
+      type: appManifestIconType(window.APP_LOGO.png192)
+    },
+    {
+      src: window.APP_LOGO.png512,
+      sizes: '512x512',
+      type: appManifestIconType(window.APP_LOGO.png512)
+    }]
+};
+try {
+  var manifestJson = JSON.stringify(window.APP_PWA_MANIFEST),
+  manifestHref = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(manifestJson),
+  manifestLink = document.createElement('link');
+  manifestLink.rel = 'manifest',
+  manifestLink.href = manifestHref,
+  document.head.appendChild(manifestLink)
+} catch (_e) {
+  typeof __appObserve === 'function' && __appObserve(_e, 'ec')
+}
+</script>
+<script>
+window.AppBoot && window.AppBoot.setFlag("__APP_ASSET_POLICY_CURRENT__", {
+    buildTag: "asset-manifest-current",
+    assetMode: "pinned-cdn-on-demand",
+    pinExactBuilds: !0,
+    allowFloatingMajorBuild: !1,
+    criticalPreload: ["logo",
+      "sweetalert2"],
+    onDemandExternalGroups: ["bootstrap",
+      "xlsx"],
+    policy: {
+      crossorigin: "anonymous",
+      referrerPolicy: "no-referrer"
+    }
+  }, {
+    owner: "Index.asset-hardening"
+  }), window.APP_EXTERNAL_ASSETS = window.APP_EXTERNAL_ASSETS || {
+  bootstrap: {
+    buildTag: "5.3.0",
+    onDemand: !0,
+    scripts: ["https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"]
+  },
+  xlsx: {
+    buildTag: "0.18.5",
+    onDemand: !0,
+    scripts: ["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"]
+  }
+};
+</script>
+<script>
+window.DEFAULT_LOGO = window.DEFAULT_LOGO ||(window.APP_LOGO &&(window.APP_LOGO.active || window.APP_LOGO.svg)) || '';
+window.LOGO_URL = <?!=JSON.stringify((typeof serverLogoUrl!=='undefined'&&serverLogoUrl)?serverLogoUrl:'')?> || window.DEFAULT_LOGO;
+window.currentLogoUrl = window.LOGO_URL || window.DEFAULT_LOGO;
+window.__SAFE_LOGO_URL__ = window.currentLogoUrl || window.DEFAULT_LOGO;
+</script>
 
-
+<script>
+(function(root) {
+    function logoSrc() {
+      var logo = root.APP_LOGO || {
+      }; return String(root.currentLogoUrl || root.LOGO_URL || root.__SAFE_LOGO_URL__ || logo.active || logo.png96 || logo.svg || "")
+    }
+    var __parliamentLogo = logoSrc(); function schedule() {
+      try {
+        root.patchParliamentLogo()
+      } catch (_e) {
+        __appObserve(_e, "ec")
+      }
+    }
+    function logoDelay(ms) {
+      return root.AppProductionFinal && typeof root.AppProductionFinal.delay == "function" ? root.AppProductionFinal.delay("logo.patch.retry",
+        schedule, ms): root.setTimeout(schedule, ms)
+    }
+    root.AppBoot.setFlag("__APP_PARLIAMENT_LOGO__", __parliamentLogo, {
+        owner: "Index.logo"
+      }),
+    root.patchParliamentLogo = root.patchParliamentLogo || function() {
+      var src = logoSrc(); if (!src)return!1; var nodes = document.querySelectorAll('[data-logo="parliament"],#login-logo-img,#side-logo-img,#mobile-topbar-logo,.print-logo-img'); return Array.prototype.forEach.call(nodes,
+        function(img) {
+          img && img.setAttribute &&(img.getAttribute("src") !== src && img.setAttribute("src", src),
+            img.onerror = function() {
+              this && this.getAttribute("src") !== src && this.setAttribute("src", src)
+            })
+        }),
+      !0
+    },
+    document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", schedule, {
+        once: !0
+      }): schedule(),
+    [250,
+      1e3].forEach(function(ms) {
+        logoDelay(ms)
+      })
+  })(window);
+</script>
 <style id="css-consolidated-production-final">
 :root{
   --app-primary:#061f3d;
@@ -3944,7 +4919,10 @@ html.app-phase5-uiux .modal-dialog-scrollable .modal-content{
   </style>
 </head>
 <body class="vue3-preserve-body">
-
+<script>
+window.__APP_BOOTSTRAP__ = <?!=bootstrapJson?>;
+window.__APP_ASSET_MANIFEST__ = <?!=(typeof assetManifestJson!=='undefined'&&assetManifestJson)?assetManifestJson:'{}'?>;
+</script>
 <a class="app-skip-link"href="#main">ข้ามไปยังเนื้อหาหลัก</a>
 <div id="app-live-region"class="app-live-region app-sr-only"role="status"aria-live="polite"aria-atomic="true"></div>
 
@@ -3953,7 +4931,7 @@ html.app-phase5-uiux .modal-dialog-scrollable .modal-content{
 <div class="app-boot-note text-center small mt-3">กำลังเตรียมระบบ หากหน้านี้ค้างอยู่กรุณาโหลดหน้าใหม่</div>
 </div>
 <script type="text/x-template"id="tpl-vue3-root">
-<div class="vue3-preserve-root"><div class="vue3-login-host"v-show="!state.authenticated"><div id="login-page"><div class="lcurrentStamp2-card"><div class="lcurrentStamp2-logo-wrap"><img id="login-logo-img"class="logo-loaded"src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22/%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C/text%3E%3C/svg%3E"data-logo="parliament"decoding="sync"fetchpriority="high"
+<div class="vue3-preserve-root"><div class="vue3-login-host"v-show="!state.authenticated"><div id="login-page"><div class="lcurrentStamp2-card"><div class="lcurrentStamp2-logo-wrap"><img id="login-logo-img"class="logo-loaded"src="<?!= getActiveLogoUrl_() ?>"data-logo="parliament"decoding="sync"
 alt="ตราสัญลักษณ์รัฐสภาไทย"
 loading="eager"></div><div class="lcurrentStamp2-title-main">ระบบบริหารจัดการเรื่องพิจารณา</div><div class="lcurrentStamp2-title-sub">คณะกรรมาธิการการป้องกันและปราบปรามการทุจริตประพฤติมิชอบ</div><div class="lcurrentStamp2-title-org">สภาผู้แทนราษฎร</div><div class="lcurrentStamp2-form-block"><div class="lcurrentStamp2-form-label">เข้าสู่ระบบ</div><form id="login-form"method="post"action="#"onsubmit="return false"data-submit="preventDefault"autocomplete="off"data-password-manager="off"><div class="lcurrentStamp2-field"><i class="fas fa-user lcurrentStamp2-field-icon"></i><input type="text"id="u_name"class="lcurrentStamp2-input"placeholder="ชื่อผู้ใช้งาน"
 autocomplete="off"autocapitalize="none"spellcheck="false"value=""
@@ -3963,7 +4941,7 @@ data-login-enter="1"></div><div id="login-error-msg"class="lcurrentStamp2-error"
 </button></form></div><div class="lcurrentStamp2-footer">
 กลุ่มงานคณะกรรมาธิการการป้องกันและปราบปรามการทุจริตประพฤติมิชอบ<br>
 สำนักกรรมาธิการ 3·สำนักงานเลขาธิการสภาผู้แทนราษฎร
-</div></div></div></div><div class="vue3-main-shell"v-show="state.authenticated"><div class="sidebar-overlay"id="sidebar-overlay"data-action="toggleSidebar"aria-hidden="true"></div><div id="side"class="sidebar"aria-label="เมนูหลักของระบบ"><div class="sidebar-header"><div id="side-logo"style="text-align:center;padding:4px 0;"><img id="side-logo-img"src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22/%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C/text%3E%3C/svg%3E"data-logo="parliament"loading="eager"decoding="async"fetchpriority="high"
+</div></div></div></div><div class="vue3-main-shell"v-show="state.authenticated"><div class="sidebar-overlay"id="sidebar-overlay"data-action="toggleSidebar"aria-hidden="true"></div><div id="side"class="sidebar"aria-label="เมนูหลักของระบบ"><div class="sidebar-header"><div id="side-logo"style="text-align:center;padding:4px 0;"><img id="side-logo-img"src="<?!= getActiveLogoUrl_() ?>"data-logo="parliament"loading="lazy"decoding="async"
 alt="ตรารัฐสภา"
 width="76"
 style="max-width:100%;height:auto;object-fit:contain;display:block;margin:0 auto;"></div><div class="sidebar-title">คณะกรรมาธิการการป้องกันและ<br>ปราบปรามการทุจริตประพฤติมิชอบ<br>สภาผู้แทนราษฎร</div><div id="user-badge"class="sidebar-user-badge mt-2 d-none"aria-live="polite"><div class="sidebar-user-name"data-user-badge-name>ชื่อ-สกุล:-</div><div class="sidebar-user-role"data-user-badge-role>ระดับสิทธิ์:Viewer</div></div></div><div class="nav flex-column mt-2"id="sidebar-menu"><div class="nav-link active"data-role-menu="all"data-nav="dash"data-app-page="dashboard"><i class="fas fa-chart-pie me-2"></i>Dashboard</div><div class="nav-link fw-bold text-white"data-role-menu="admin,staff"data-bs-toggle="collapse"data-bs-target="#caseMenu"
@@ -3975,13 +4953,13 @@ style="cursor:pointer;"aria-expanded="false"><i class="fas fa-folder-open me-2">
 </div><button type="button"id="app-theme-toggle"class="nav-link app-theme-toggle"data-action="toggleTheme"aria-pressed="false"title="โหมดมืด"><i class="fas fa-moon me-2"></i><span data-theme-label>โหมดมืด</span></button><div class="nav-link text-danger mt-4"data-action="logout"><i class="fas fa-sign-out-alt me-2"></i>ออกจากระบบ
 </div></div></div><div id="main-container"style="display:block;"><div class="mobile-topbar no-print"style="padding:10px 12px;align-items:center;gap:10px;"><button aria-label="เปิดเมนู"class="mobile-menu-btn"data-action="toggleSidebar"style="width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.12);
 border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;
-display:flex;align-items:center;justify-content:center;flex-shrink:0;" type="button"><i class="fas fa-bars"></i></button><img alt="ตรารัฐสภา"class="mobile-topbar-logo"data-logo="parliament"decoding="async"id="mobile-topbar-logo"loading="eager"fetchpriority="high"src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22/%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C/text%3E%3C/svg%3E"style="width:40px;height:40px;object-fit:contain;border-radius:50%;
+display:flex;align-items:center;justify-content:center;flex-shrink:0;" type="button"><i class="fas fa-bars"></i></button><img alt="ตรารัฐสภา"class="mobile-topbar-logo"data-logo="parliament"decoding="async"id="mobile-topbar-logo"loading="lazy"src="<?!= getActiveLogoUrl_() ?>"style="width:40px;height:40px;object-fit:contain;border-radius:50%;
 border:1.5px solid rgba(197,160,40,.6);background:rgba(255,255,255,.1);padding:3px;flex-shrink:0;"/><div class="mobile-topbar-title-wrap"><div class="mobile-topbar-title">ระบบบริหารจัดการเรื่องพิจารณา</div><div class="mobile-topbar-subtitle">คณะกรรมาธิการการป้องกันและปราบปรามการทุจริตประพฤติมิชอบ</div></div><div aria-hidden="true"class="mobile-topbar-spacer"></div></div><main id="main"class="content"role="main"tabindex="-1"aria-label="พื้นที่ทำงานหลัก"style="display:block;"><router-view></router-view></main></div></div><div id="app-toast-stack"class="app-toast-stack"></div></div>
 </script><script type="text/x-template"id="tpl-page-dashboard">
 <div class="page modern-dashboard-page"id="p-dash"><section class="modern-dash-hero mb-4"aria-labelledby="modern-dash-title"><div class="modern-dash-hero-bg"></div><div class="row g-3 align-items-center position-relative"><div class="col-lg-7"><div class="modern-dash-eyebrow"><i class="fas fa-shield-halved me-2"></i>Modern Committee</div><currentHotPath id="modern-dash-title"class="modern-dash-title mb-2">รายงานสถิติการพิจารณาของคณะกรรมาธิการ</currentHotPath><p class="modern-dash-subtitle mb-3">ภาพรวมเรื่องพิจารณา หนังสือติดตามมติงบประมาณ และสัญญาณที่ต้องติดตามในหน้าจอเดียว</p><div class="d-flex flex-wrap gap-2 align-items-center"><span class="modern-dash-pill"><i class="fas fa-clock me-1"></i><span id="dash-last-updated">กำลังโหลดข้อมูล...</span></span><span class="modern-dash-pill"><i class="fas fa-calendar-check me-1"></i><span id="dash-budget-fy-label">ปีงบประมาณ-</span></span></div></div><div class="col-lg-5"><div class="modern-dash-command-panel"><div><div class="modern-dash-command-score"id="dash-smart-score">-</div></div><div class="modern-dash-command-divider"></div><div class="modern-dash-command-meta"><div><span id="dash-modern-total">0</span><small>เรื่องทั้งหมด</small></div><div><span id="dash-modern-active">0</span><small>กำลังดำเนินการ</small></div><div><span id="dash-modern-overdue">0</span><small>ครบ/เลยกำหนด</small></div></div><button type="button"class="btn btn-light btn-sm rounded-pill modern-dash-refresh"id="dash-refresh-btn"><i class="fas fa-rotate me-1"></i>รีเฟรชข้อมูล
 </button></div></div></div></section><section class="modern-dash-section mb-4"aria-label="ตัวชี้วัดหลัก"><div class="row g-3"id="dash-cards"></div></section><section class="row g-3 mb-4"id="dash-smart-insights"><div class="col-12"><div class="modern-dash-insight-card"><div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3"><div class="flex-grow-1"><div class="modern-dash-section-label">Smart Dashboard Insight</div><h6 class="fw-bold text-navy mb-2"><i class="fas fa-wand-magic-sparkles me-2"></i>ภาพรวมสถานะระบบแบบอัจฉริยะ</h6><div class="smart-dashboard-muted"id="dash-smart-summary">กำลังวิเคราะห์ข้อมูลภาพรวม...</div><div class="mt-3 d-flex flex-wrap gap-2"id="dash-smart-pills"></div></div><div class="modern-dash-progress-box"><div class="small text-muted mb-2">ความคืบหน้าปิดงาน</div><div class="modern-dash-progress"><span id="dash-modern-progress-bar"style="width:0%"></span></div><div class="fw-bold mt-2"id="dash-modern-completion">0%</div></div></div></div></div></section><section class="row g-3 mb-4"><div class="col-xl-6"><div class="modern-dash-card h-100"><div class="modern-dash-card-head"><div><div class="modern-dash-section-label">Case Type Mix</div><h6 class="fw-bold text-navy mb-0"><i class="fas fa-chart-pie me-2"></i>สัดส่วนประเภทเรื่องพิจารณา</h6></div></div><div class="modern-dash-chart"><canvas id="typeChart"></canvas></div></div></div><div class="col-xl-6"><div class="modern-dash-card h-100"><div class="modern-dash-card-head"><div><div class="modern-dash-section-label">Topic Analytics</div><h6 class="fw-bold text-navy mb-0"><i class="fas fa-chart-bar me-2"></i>สถิติตามประเด็นพิจารณา</h6></div></div><div class="modern-dash-chart"><canvas id="topicChart"></canvas></div></div></div></section><section class="row g-3 mb-4"><div class="col-xl-6"><div class="modern-dash-card h-100"><div class="modern-dash-card-head"><div><div class="modern-dash-section-label">Budget Overview</div><h6 class="fw-bold text-navy mb-0"><i class="fas fa-wallet me-2"></i>งบประมาณปีล่าสุด</h6></div></div><div class="modern-dash-table-wrap modern-dash-layer"><table class="table mb-0 small modern-dash-table no-app-pager dashboard-no-pager"data-app-pager="off"><tbody id="table-budget-summary"></tbody></table></div></div></div><div class="col-xl-6"><div class="modern-dash-card h-100"><div class="modern-dash-card-head"><div><div class="modern-dash-section-label">Budget Workflow</div><h6 class="fw-bold text-navy mb-0"><i class="fas fa-chart-column me-2"></i>สรุปสถานะการคืนเงิน และรายงานค่าใช้จ่าย</h6></div></div><div class="modern-dash-table-wrap modern-dash-layer"><table class="table mb-0 small modern-dash-table no-app-pager dashboard-no-pager"data-app-pager="off"><tbody id="table-budget-status-summary"></tbody></table></div></div></div></section><section class="row g-3"><div class="col-xl-3"><div class="modern-dash-card h-100"><div class="modern-dash-card-head compact"><h6 class="fw-bold mb-0"><i class="fas fa-layer-group me-2"></i>สถานะเรื่องพิจารณา</h6></div><div class="modern-dash-table-wrap modern-dash-layer"><table class="table mb-0 small modern-dash-table no-app-pager dashboard-no-pager"data-app-pager="off"><tbody id="table-case-status"></tbody></table></div></div></div><div class="col-xl-3"><div class="modern-dash-card h-100"><div class="modern-dash-card-head compact"><h6 class="fw-bold mb-0"><i class="fas fa-list-ul me-2"></i>สถิติตามประเภทเรื่อง</h6></div><div class="modern-dash-table-wrap modern-dash-layer"><table class="table mb-0 small modern-dash-table no-app-pager dashboard-no-pager"data-app-pager="off"><tbody id="table-type"></tbody></table></div></div></div><div class="col-xl-3"><div class="modern-dash-card h-100"><div class="modern-dash-card-head compact"><h6 class="fw-bold mb-0"><i class="fas fa-tags me-2"></i>สถิติตามประเด็นพิจารณา</h6></div><div class="modern-dash-table-wrap modern-dash-layer"><table class="table mb-0 small modern-dash-table no-app-pager dashboard-no-pager"data-app-pager="off"><tbody id="table-topic"></tbody></table></div></div></div><div class="col-xl-3"><div class="modern-dash-card h-100"><div class="modern-dash-card-head compact"><h6 class="fw-bold mb-0"><i class="fas fa-envelope-open-text me-2"></i>สถิติติดตามหนังสือ</h6></div><div class="modern-dash-table-wrap modern-dash-layer"><table class="table mb-0 small modern-dash-table no-app-pager dashboard-no-pager"data-app-pager="off"><tbody id="table-letter"></tbody></table></div></div></div></section><section class="row g-3 mt-1"aria-label="สถิติการประชุม"><div class="col-12"><div class="modern-dash-card h-100"><div class="modern-dash-card-head compact"><h6 class="fw-bold mb-0"><i class="fas fa-people-group me-2"></i>สถิติการประชุมและผลการพิจารณา</h6><span class="small text-muted"id="dash-meeting-updated">เชื่อมโยงจากการประชุมคณะกรรมาธิการ</span></div><div class="modern-dash-table-wrap modern-dash-layer"><table class="table mb-0 small modern-dash-table no-app-pager dashboard-no-pager"data-app-pager="off"><tbody id="table-meeting-summary"></tbody></table></div></div></div></section></div>
 </script><script type="text/x-template"id="tpl-page-search">
-<div class="page"id="p-search"><div class="visually-hidden"role="status"aria-live="polite"data-app-a11y="live-region"></div><div id="search-main-view"><currentHotPath class="fw-bold mb-4 text-primary"><i class="fas fa-search me-2"></i>ค้นหาเรื่องพิจารณา</currentHotPath><div class="input-group mb-4 shadow-sm"><input class="form-control"data-action="searchAllInput"id="s-input"placeholder="พิมพ์คำค้นหา เช่น ชื่อเรื่อง, ลำดับเรื่อง, ผู้เสนอญัตติ/ผู้ร้อง..."data-app-term-placeholder="searchPlaceholder"type="text"/><button type="button" class="btn btn-primary"data-action="searchAll"><i class="fas fa-search"></i>ค้นหา</button></div><div class="app-table-scroll table-custom"><table data-page-size="20"data-app-pager="off"class="table table-hover align-middle mb-0 small app-table-standard no-app-pager"><thead class="table-light text-center"><tr><th width="8%">ลำดับเรื่อง</th><th width="12%">เลขรับเรื่อง</th><th width="12%">วันที่รับเรื่อง</th><th width="22%">ชื่อเรื่อง</th><th width="20%">ชื่อเรื่องพิจารณา(ถ้ามี)</th><th width="16%"data-app-term="petitionerShort">ผู้เสนอญัตติ/ผู้ร้อง</th><th width="10%">สถานะ</th><th width="6%">จัดการ</th></tr></thead><tbody id="search-table-res"><tr><td class="text-center text-muted p-4"colspan="8">กรุณาพิมพ์เพื่อค้นหา</td></tr></tbody></table></div><div class="mt-3 no-print app-table-footer"id="search-pagination"></div></div><div class="d-none"id="summary-view"><div class="no-print mb-3"><button type="button" class="btn btn-secondary"data-action="closeSummary"><i class="fas fa-xmark me-1"></i>ปิด</button><button type="button" class="btn btn-primary float-end"data-action="printPage"><i class="fas fa-print me-1"></i>พิมพ์ข้อมูล</button></div><div class="text-center print-header-show mb-4"><img data-logo="parliament"decoding="async"id="summary-logo-img"loading="lazy"alt="ตราสัญลักษณ์รัฐสภาไทย"src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22/%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C/text%3E%3C/svg%3E"style="width: 64px; height:64px; object-fit:contain; margin-bottom: 10px;"/><h5 class="fw-bold">รายละเอียดเรื่องพิจารณา</h5></div><div id="pdf-content"></div><div class="mt-4"id="pdf-history-content"></div><div class="card shadow-sm border-0 mt-4 app-card"id="case-ai-summary-card"><div class="card-body"><div class="d-flex justify-content-between align-items-center mb-3"><h6 class="fw-bold mb-0"><i class="fas fa-robot me-2 text-primary"></i>Executive Summary</h6><button class="btn btn-outline-primary btn-sm"data-action="generateCaseExecutiveSummary"type="button">สรุปโดย AI</button></div><div class="small text-muted"id="case-ai-summary-result">กดปุ่มเพื่อสรุปข้อมูลเรื่องโดย AI</div></div></div><div class="print-footer-container mt-4"id="summary-print-footer"></div></div></div>
+<div class="page"id="p-search"><div class="visually-hidden"role="status"aria-live="polite"data-app-a11y="live-region"></div><div id="search-main-view"><currentHotPath class="fw-bold mb-4 text-primary"><i class="fas fa-search me-2"></i>ค้นหาเรื่องพิจารณา</currentHotPath><div class="input-group mb-4 shadow-sm"><input class="form-control"data-action="searchAllInput"id="s-input"placeholder="พิมพ์คำค้นหา เช่น ชื่อเรื่อง, ลำดับเรื่อง, ผู้เสนอญัตติ/ผู้ร้อง..."data-app-term-placeholder="searchPlaceholder"type="text"/><button type="button" class="btn btn-primary"data-action="searchAll"><i class="fas fa-search"></i>ค้นหา</button></div><div class="app-table-scroll table-custom"><table data-page-size="20"data-app-pager="off"class="table table-hover align-middle mb-0 small app-table-standard no-app-pager"><thead class="table-light text-center"><tr><th width="8%">ลำดับเรื่อง</th><th width="12%">เลขรับเรื่อง</th><th width="12%">วันที่รับเรื่อง</th><th width="22%">ชื่อเรื่อง</th><th width="20%">ชื่อเรื่องพิจารณา(ถ้ามี)</th><th width="16%"data-app-term="petitionerShort">ผู้เสนอญัตติ/ผู้ร้อง</th><th width="10%">สถานะ</th><th width="6%">จัดการ</th></tr></thead><tbody id="search-table-res"><tr><td class="text-center text-muted p-4"colspan="8">กรุณาพิมพ์เพื่อค้นหา</td></tr></tbody></table></div><div class="mt-3 no-print app-table-footer"id="search-pagination"></div></div><div class="d-none"id="summary-view"><div class="no-print mb-3"><button type="button" class="btn btn-secondary"data-action="closeSummary"><i class="fas fa-xmark me-1"></i>ปิด</button><button type="button" class="btn btn-primary float-end"data-action="printPage"><i class="fas fa-print me-1"></i>พิมพ์ข้อมูล</button></div><div class="text-center print-header-show mb-4"><img data-logo="parliament"decoding="async"id="summary-logo-img"loading="lazy"alt="ตราสัญลักษณ์รัฐสภาไทย"src="<?= getActiveLogoUrl_() ?>"style="width: 64px; height:64px; object-fit:contain; margin-bottom: 10px;"/><h5 class="fw-bold">รายละเอียดเรื่องพิจารณา</h5></div><div id="pdf-content"></div><div class="mt-4"id="pdf-history-content"></div><div class="card shadow-sm border-0 mt-4 app-card"id="case-ai-summary-card"><div class="card-body"><div class="d-flex justify-content-between align-items-center mb-3"><h6 class="fw-bold mb-0"><i class="fas fa-robot me-2 text-primary"></i>Executive Summary</h6><button class="btn btn-outline-primary btn-sm"data-action="generateCaseExecutiveSummary"type="button">สรุปโดย AI</button></div><div class="small text-muted"id="case-ai-summary-result">กดปุ่มเพื่อสรุปข้อมูลเรื่องโดย AI</div></div></div><div class="print-footer-container mt-4"id="summary-print-footer"></div></div></div>
 </script><script type="text/x-template"id="tpl-page-track">
 <div class="page app-layout-contract-currentStamp"id="p-track"><div class="visually-hidden"role="status"aria-live="polite"data-app-a11y="live-region"></div><currentHotPath class="fw-bold mb-4">ระบบติดตามหนังสือ</currentHotPath><div class="no-print mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3"><div class="btn-group shadow-sm overflow-auto"role="group"><button type="button" class="btn btn-outline-primary active app-btn-nowrap"data-action="filterTrack"data-filter-track="all"id="btn-track-all">หนังสือทั้งหมด</button><button type="button" class="btn btn-outline-info app-btn-nowrap"data-action="filterTrack"data-filter-track="notdue"id="btn-track-notdue">ไม่ครบกำหนด</button><button type="button" class="btn btn-outline-danger app-btn-nowrap"data-action="filterTrack"data-filter-track="overdue"id="btn-track-overdue">ครบ/เลยกำหนด</button><button type="button" class="btn btn-outline-success app-btn-nowrap"data-action="filterTrack"data-filter-track="received"id="btn-track-received">ตอบรับแล้ว</button></div><div class="d-flex gap-2"><button type="button" class="btn btn-success shadow-sm app-btn-nowrap"data-action="exportToExcel"data-export-name="ข้อมูลติดตามหนังสือ"data-export-target="track-table-target"><i class="fas fa-file-excel me-1"></i>Excel</button><button type="button" class="btn btn-secondary shadow-sm app-btn-nowrap"data-action="printTrack"><i class="fas fa-print me-2"></i>พิมพ์</button></div></div><div class="print-header-show text-center mb-4"id="track-print-header"style="display:none;"><currentHotPath class="fw-bold mt-2"id="track-print-title">รายงานการติดตามหนังสือ(ทั้งหมด)</currentHotPath><h5 class="fw-bold"data-app-print-standard="fullOrganization">คณะกรรมาธิการการป้องกันและปราบปรามการทุจริตประพฤติมิชอบ สภาผู้แทนราษฎร</h5></div><div class="app-table-scroll table-custom"><table data-page-size="20"data-app-pager="off"class="table table-hover table-bordered align-middle small bg-white mb-0 app-track-table app-table-standard no-app-pager"id="track-table-target"><thead class="table-light text-center"id="track-thead"></thead><tbody id="track-tbody"></tbody></table></div><div class="mt-3 no-print app-table-footer"id="track-pagination"></div><div class="print-footer-container"id="track-print-footer"></div></div>
 </script><script type="text/x-template"id="tpl-page-report">
@@ -4030,15 +5008,1617 @@ border:1.5px solid rgba(197,160,40,.6);background:rgba(255,255,255,.1);padding:3
 <div class="page"id="p-admin"><div class="visually-hidden"role="status"aria-live="polite"aria-atomic="true"id="adm-live-region"></div><currentHotPath class="fw-bold mb-4">การจัดการระบบ(สำหรับผู้ดูแลระบบ)</currentHotPath><div class="app-table-scroll no-print mb-4 border-bottom"><ul class="nav nav-tabs border-bottom-0 flex-nowrap"id="adminTab"role="tablist"><li class="nav-item text-nowrap"><button type="button" class="nav-link active"role="tab"aria-selected="true"aria-controls="adm-user"data-action="showAdminTab"data-admin-tab="user">จัดการผู้ใช้งาน</button></li><li class="nav-item text-nowrap"><button type="button" class="nav-link"role="tab"aria-selected="false"aria-controls="adm-subcommittee"data-action="showAdminTab"data-admin-tab="subcommittee">คณะอนุกรรมาธิการ</button></li><li class="nav-item text-nowrap"><button type="button" class="nav-link"role="tab"aria-selected="false"aria-controls="adm-budgetsettings"data-action="showAdminTab"data-admin-tab="budgetsettings">ตั้งค่าวงเงินงบประมาณ</button></li></ul></div><div class="adm-tab"id="adm-user"><button type="button" class="btn btn-success mb-3 shadow-sm"aria-label="เพิ่มผู้ใช้งาน"data-action="addUserPopup"><i class="fas fa-plus"aria-hidden="true"></i>เพิ่มผู้ใช้งาน</button><div class="app-table-scroll table-custom"><table data-page-size="20"class="table table-hover mb-0"><thead class="table-light"><tr><th>ชื่อผู้ใช้</th><th>ชื่อ-สกุล</th><th>ระดับสิทธิ์</th><th class="text-center">จัดการ</th></tr></thead><tbody id="adm-user-list"aria-live="polite"aria-label="รายชื่อผู้ใช้งาน"></tbody></table></div><div class="mt-3 no-print app-table-footer"id="adm-user-footer"></div></div><div class="adm-tab d-none"id="adm-budgetsettings"><div class="card mt-3"id="adm-salary-settings"><div class="card-header d-flex justify-content-between align-items-center"><strong><i class="fas fa-coins me-2"></i>ตั้งค่าวงเงินและอัตราเงินเดือน</strong><button type="button" class="btn btn-sm btn-primary"aria-label="บันทึกการตั้งค่าเงินเดือน"data-action="saveAdminSalarySettings"><i class="fas fa-save me-1"aria-hidden="true"></i>บันทึก</button></div><div class="card-body"><div class="row g-2 align-items-center mb-2"><div class="col-md-4 fw-bold text-primary">ปีงบประมาณ</div><div class="col-md-4"><label for="adm-salary-fy"class="visually-hidden">ปีงบประมาณ</label><select class="form-select text-center fw-bold"id="adm-salary-fy"aria-label="เลือกปีงบประมาณ"data-change="loadAdminSalarySettings"><option value="2569">2569</option><option value="2570">2570</option><option value="2571">2571</option><option value="2572">2572</option><option value="2573">2573</option><option value="2574">2574</option><option value="2575">2575</option><option value="2576">2576</option></select></div></div><div class="row g-2 align-items-center mb-2"><div class="col-md-4 fw-bold text-primary">วงเงินงบประมาณรายเดือน</div><div class="col-md-4"><input class="form-control text-center"id="adm-set-budget"inputmode="decimal"type="text"/></div></div><div class="row g-2 text-center small fw-bold bg-light p-2 mb-2 rounded"><div class="col-md-4 text-md-start">ตำแหน่ง</div><div class="col-md-4">บุคคลทั่วไป</div><div class="col-md-4">ข้าราชการ</div></div><div class="row g-2 align-items-center small mb-2"><div class="col-md-4">ที่ปรึกษาประจำคณะกรรมาธิการ</div><div class="col-md-4"><input class="form-control text-center"id="adm-set-adv"inputmode="decimal"type="text"/></div><div class="col-md-4"><input class="form-control text-center"id="adm-set-adv-g"inputmode="decimal"type="text"/></div></div><div class="row g-2 align-items-center small mb-2"><div class="col-md-4">ผู้ชำนาญการประจำคณะกรรมาธิการ</div><div class="col-md-4"><input class="form-control text-center"id="adm-set-exp"inputmode="decimal"type="text"/></div><div class="col-md-4"><input class="form-control text-center"id="adm-set-exp-g"inputmode="decimal"type="text"/></div></div><div class="row g-2 align-items-center small mb-2"><div class="col-md-4">นักวิชาการประจำคณะกรรมาธิการ</div><div class="col-md-4"><input class="form-control text-center"id="adm-set-aca"inputmode="decimal"type="text"/></div><div class="col-md-4"><input class="form-control text-center"id="adm-set-aca-g"inputmode="decimal"type="text"/></div></div><div class="row g-2 align-items-center small"><div class="col-md-4">เลขานุการประจำคณะกรรมาธิการ</div><div class="col-md-4"><input class="form-control text-center"id="adm-set-sec"inputmode="decimal"type="text"/></div><div class="col-md-4"><input class="form-control text-center"id="adm-set-sec-g"inputmode="decimal"type="text"/></div></div></div></div><div class="card mt-3"><div class="card-header d-flex justify-content-between align-items-center"><strong><i class="fas fa-money-check-alt me-2"></i>ตั้งค่าวงเงินงบประมาณรายปี</strong><button type="button" class="btn btn-sm btn-primary"data-action="openAdminBudgetSettings"><i class="fas fa-plus me-1"></i>จัดการแผนงบประมาณ</button></div><div class="card-body text-center"><div class="small text-muted py-3">คลิกปุ่ม<b>จัดการแผนงบประมาณ</b>ด้านบน เพื่อเปิดหน้าต่าง(Modal)
 กำหนดวงเงินงบประมาณประจำปี<br/>ซึ่งจะช่วยให้ระบบสามารถสรุปรายการแยกตามหมวดหมู่ได้อย่างถูกต้อง</div></div></div></div><div class="adm-tab d-none"id="adm-subcommittee"><div class="card mt-3"><div class="card-header d-flex justify-content-between align-items-center"><strong><i class="fas fa-sitemap me-2"></i>คณะอนุกรรมาธิการ</strong><button type="button" class="btn btn-sm btn-primary"data-action="openSubcommitteePrompt"><i class="fas fa-plus me-1"></i>เพิ่ม</button></div><div class="card-body"><div class="app-table-scroll"><table data-page-size="20"class="table table-sm table-bordered align-middle"><thead class="table-light"><tr><th>ลำดับ</th><th>ชื่อคณะอนุกรรมาธิการ</th><th>สถานะ</th><th>วันแต่งตั้ง</th><th>วันเริ่มทำหน้าที่</th><th>วันสิ้นสุด</th><th>จำนวนวัน</th><th>วันครบกำหนด</th><th>ครบกำหนดหลังขยาย</th><th>จัดการ</th></tr></thead><tbody id="subcommittee-tbody"><tr><td class="text-center text-muted p-3"colspan="10">กำลังโหลด...</td></tr></tbody></table></div><div class="mt-3 no-print app-table-footer"id="adm-subcommittee-footer"></div></div></div></div>
 </script>
-<script src="./critical-login-runtime.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
 
+<?!=includeProductionBundle_('appCritical')?>
+<script id="app-async-runtime-loader">
+(function(root) {
+    "use strict"; if (!root.__APP_ASYNC_RUNTIME_LOADER__) {
+      let isFn = function(v) {
+        return typeof v == "function"
+      },
+      authenticated = function() {
+        try {
+          return!!(store && store.get && store.get("auth.token", "") || root.AppStore && root.AppStore.get && root.AppStore.get("auth.token",
+              ""))
+        } catch (_e) {
+          return!1
+        }
+      },
+      idle = function(fn) {
+        return(root.requestIdleCallback || function(cb) {
+            return setTimeout(cb, 1)
+          })(fn, {
+            timeout: 1200
+          })
+      },
+      ensure = function(reason) {
+        try {
+          if (root.AppCritical && isFn(root.AppCritical.ensureCoreRuntime))return Promise.resolve(root.AppCritical.ensureCoreRuntime({
+                reason: reason || "async-index"
+              }))
+        } catch (e) {
+          try {
+            root.__appObserve && root.__appObserve(e, "index.asyncRuntime.ensure")
+          } catch (_ignore) {
+          }
+        }
+        return Promise.resolve(!1)
+      }; root.__APP_ASYNC_RUNTIME_LOADER__ = !0; var store = root.AppStore || null; root.AppAsyncRuntimeLoader = {
+        owner: "Index.html:async-runtime-loader-current",
+        ensureCoreRuntime: ensure,
+        schedule: function(reason) {
+          return idle(function() {
+              (authenticated() || String(root.location && root.location.hash || "") != "#/login") && ensure(reason || "idle-first-paint")
+            }),
+          !0
+        }
+      },
+      document.addEventListener("DOMContentLoaded", function() {
+          root.AppAsyncRuntimeLoader.schedule("dom-ready")
+        }, {
+          once: !0
+        })
+    }
+  })(typeof window != "undefined" ? window: typeof globalThis != "undefined" ? globalThis: this);
+</script>
+<script>
+(function() {
+    "use strict"; var Boot = window.AppBoot || null; function publish(name, value, meta) {
+      return Boot && Boot.setFlag ?(Boot.setFlag(name, value, meta || {
+            owner: "Index.appboot-migration"
+          }), Boot.exposeGlobal && Boot.exposeGlobal(name, Object.assign({
+              owner: "Index.appboot-migration",
+              bridge: !0
+            }, meta || {
+            })), value): (window[name] = value, value)
+    }
+    var mountInstantShell = function() {
+      var host = document.getElementById("app"),
+      tpl = document.getElementById("tpl-vue3-root"); if (!host || !tpl || host.getAttribute("data-instant-shell") === "1")return!1; try {
+        host.textContent = ""; var range = document.createRange(); range.selectNode(host),
+        host.appendChild(range.createContextualFragment(String(tpl.innerHTML || ""))),
+        host.setAttribute("data-instant-shell", "1"); var token = ""; try {
+          token = String(window.AppStore && window.AppStore.get && window.AppStore.get("auth.token",
+              "") || "")
+        } catch (_tok) {
+          __appObserve(_tok, "ec")
+        }
+        var authenticated = !!token; if (!authenticated)try {
+          location.hash !== "#/login" && history.replaceState(null, "", location.pathname + location.search.replace(/([?&])_logout=1(&|$)/,
+              "$1").replace(/[?&]$/, "") + "#/login")
+        } catch (_forceLoginHash) {
+          try {
+            location.hash = "#/login"
+          } catch (_forceLoginHash2) {
+            typeof __appObserve == "function" && __appObserve(_forceLoginHash2, "ec")
+          }
+        }
+        var loginHost = host.querySelector(".vue3-login-host"),
+        mainShell = host.querySelector(".vue3-main-shell"),
+        loginPage = host.querySelector("#login-page"),
+        mainContainer = host.querySelector("#main-container"); loginHost &&(loginHost.style.display = authenticated ? "none": ""),
+        mainShell &&(mainShell.style.display = authenticated ? "": "none"),
+        loginPage &&(loginPage.style.display = authenticated ? "none": "flex"),
+        mainContainer &&(mainContainer.style.display = authenticated ? "block": "none"); var bootStatus = document.getElementById("app-boot-status"); bootStatus && bootStatus.parentNode && bootStatus.parentNode.removeChild(bootStatus); try {
+          window.AppLogin && typeof window.AppLogin.init == "function" && window.AppLogin.init()
+        } catch (_loginInit) {
+          __appObserve(_loginInit, "ec")
+        }
+        return!0
+      } catch (_instantErr) {
+        return typeof __appObserve == "function" && __appObserve(_instantErr, "ec"),
+        !1
+      }
+    }; publish("__APP_MOUNT_INSTANT_SHELL__", mountInstantShell, {
+        owner: "Index.instant-shell"
+      }),
+    mountInstantShell()
+  })();
+</script>
+<script>
+(function() {
+    'use strict'; var Boot = window.AppBoot || null; function publish(name, value, meta) {
+      if (Boot && Boot.setFlag) {
+        Boot.setFlag(name, value, meta || {
+            owner: 'Index.appboot-migration'
+          }); if (Boot.exposeGlobal)Boot.exposeGlobal(name, Object.assign({
+              owner: 'Index.appboot-migration',
+              bridge: true
+            }, meta || {
+            })); return value; 
+      }
+      window[name] = value; return value; 
+    }
+    publish('__APP_UPFRONT_INCLUDED_SCRIPTS__', (window.__APP_ASSET_MANIFEST__ && window.__APP_ASSET_MANIFEST__.upfrontScripts) || [],
+      {
+        owner: 'Index.include-map'
+      }); 
+    publish('__APP_CORE_RUNTIME_FILES__', <?!=(typeof coreRuntimeFilesJson!=='undefined'&&coreRuntimeFilesJson)?coreRuntimeFilesJson:'[]'?>, {
+        owner: 'Index.include-map'
+      }); 
+    publish('__APP_DEFERRED_SCRIPTS__', (window.__APP_ASSET_MANIFEST__ && window.__APP_ASSET_MANIFEST__.chunks) || <?!=(typeof deferredScriptMapJson!=='undefined'&&
+deferredScriptMapJson)?deferredScriptMapJson:'{}'?>,
+      {
+        owner: 'Index.include-map'
+      }); 
+    publish('__APP_DEFERRED_TEMPLATES__', (window.__APP_ASSET_MANIFEST__ && window.__APP_ASSET_MANIFEST__.templates) || <?!=(typeof deferredTemplateMapJson!=='undefined'&&
+deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
+      {
+        owner: 'Index.include-map'
+      }); 
+  })();
 </script>
 
-
-<script src="./app-index-bootstrap.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
-
+<script>
+(function() {
+    "use strict"; var __logoutBoot = window.AppBoot || null; function __bootSet(name, value, meta) {
+      return __logoutBoot && __logoutBoot.setFlag ?(__logoutBoot.setFlag(name, value, meta || {
+            owner: "Index.logout-click-bridge"
+          }), __logoutBoot.exposeGlobal && __logoutBoot.exposeGlobal(name, Object.assign({
+              owner: "Index.logout-click-bridge",
+              bridge: !0
+            }, meta || {
+            })), value): (window[name] = value, value)
+    }
+    if (!(__logoutBoot && __logoutBoot.getFlag && __logoutBoot.getFlag("canonicalLogoutClickBridge"))) {
+      if (__logoutBoot && __logoutBoot.setFlag)__logoutBoot.setFlag("canonicalLogoutClickBridge", !0,
+        {
+          owner: "Index.logout-click-bridge"
+        }); else {
+        if (window.__APP_CANONICAL_LOGOUT_CLICK_BRIDGE__)return; __bootSet("__APP_CANONICAL_LOGOUT_CLICK_BRIDGE__",
+          !0, {
+            owner: "Index.logout-click-bridge"
+          })
+      }
+      document.addEventListener("click", function(ev) {
+          var target; if (ev && ev.target && ev.target.closest && ev.target.closest('[data-action="logout"],#logout-btn,.logout-btn,[data-logout="1"]')) {
+            try {
+              ev.preventDefault(),
+              ev.stopPropagation(),
+              ev.stopImmediatePropagation && ev.stopImmediatePropagation()
+            } catch (_e) {
+              __appObserve(_e, "ec")
+            }
+            try {
+              if (window.AppLogout && typeof window.AppLogout.execute == "function")return window.AppLogout.execute(); if (window.AppAuth && typeof window.AppAuth.logout == "function")return window.AppAuth.logout(); if (typeof window.logout == "function")return window.logout()
+            } catch (err) {
+              try {
+                console.warn("canonical logout bridge failed", err)
+              } catch (_warn) {
+                typeof __appObserve == "function" && __appObserve(_warn, "ec")
+              }
+            }
+            try {
+              __bootSet("__APP_SESSION_RESUME_DISABLED__", !0, {
+                  owner: "Index.logout-state"
+                }),
+              __bootSet("__APP_LOGGED_OUT_LOCK__", !0, {
+                  owner: "Index.logout-state"
+                }),
+              __bootSet("__APP_LOGOUT_IN_PROGRESS__", !1, {
+                  owner: "Index.logout-state"
+                })
+            } catch (_flag) {
+              __appObserve(_flag, "ec")
+            }
+            try {
+              window.AppSessionResume && typeof window.AppSessionResume.clear == "function" && window.AppSessionResume.clear()
+            } catch (_resume) {
+              __appObserve(_resume, "ec")
+            }
+            try {
+              window.AppSecurity && typeof window.AppSecurity.clearBrowserAuthStorage == "function" && window.AppSecurity.clearBrowserAuthStorage()
+            } catch (_sec) {
+              __appObserve(_sec, "ec")
+            }
+            try {
+              sessionStorage.removeItem("commission.system.sessionResume.currentStamp"),
+              sessionStorage.removeItem("commission.system.session.currentStamp"),
+              sessionStorage.removeItem("app.auth.resume")
+            } catch (_storage) {
+              __appObserve(_storage, "ec")
+            }
+            try {
+              window.AppStore && typeof window.AppStore.assign == "function" && window.AppStore.assign({
+                  "auth.token": "",
+                  "auth.csrfToken": "",
+                  "auth.user": null,
+                  "auth.role": "",
+                  "auth.name": "",
+                  "auth.status": "anonymous",
+                  "auth.loginOk": !1,
+                  "auth.bootstrapOk": !1,
+                  "auth.resumePending": !1,
+                  "auth.sessionRestored": !1
+                })
+            } catch (_store) {
+              __appObserve(_store, "ec")
+            }
+            try {
+              var lp = document.getElementById("login-page"),
+              mc = document.getElementById("main-container"),
+              side = document.getElementById("side"),
+              ov = document.getElementById("sidebar-overlay"); lp &&(lp.style.display = "flex", lp.classList.remove("d-none"),
+                lp.setAttribute("aria-hidden", "false")),
+              mc &&(mc.style.display = "none", mc.setAttribute("aria-hidden", "true")),
+              side &&(side.style.display = "none"),
+              ov &&(ov.classList.remove("show"), ov.style.display = "none", ov.setAttribute("aria-hidden",
+                  "true"))
+            } catch (_dom) {
+              __appObserve(_dom, "ec")
+            }
+            try {
+              document.dispatchEvent(new CustomEvent("app:user-changed", {
+                    detail: {
+                      user: null,
+                      source: "canonical-logout-bridge-current"
+                    }
+                  }))
+            } catch (_event) {
+              __appObserve(_event, "ec")
+            }
+            try {
+              location.hash = "#/login"
+            } catch (_hash) {
+              __appObserve(_hash, "ec")
+            }
+          }
+        }, !0)
+    }
+  })();
 </script>
 
+<script>
+(function() {
+    "use strict"; var IndexKit = window.AppIndexKit || window.AppProductionFinal || {
+    },
+    AppBoot = window.AppBoot || null,
+    vueReady; function appBootSet(name, value, meta) {
+      return AppBoot && AppBoot.setFlag ?(AppBoot.setFlag(name, value, meta || {
+            owner: "Index.inlineBootstrap"
+          }), AppBoot.exposeGlobal && AppBoot.exposeGlobal(name, Object.assign({
+              owner: "Index.inlineBootstrap",
+              bridge: !0
+            }, meta || {
+            })), value): (window[name] = value, value)
+    }
+    function appBootGet(name, defaultValue) {
+      try {
+        return AppBoot && AppBoot.getFlag ? AppBoot.getFlag(name, defaultValue): Object.prototype.hasOwnProperty.call(window,
+          name) ? window[name]: defaultValue
+      } catch (_e) {
+        return defaultValue
+      }
+    }
+    function normalizeNavRole(role) {
+      return IndexKit && __appIsFn(IndexKit.normalizeRole) ? IndexKit.normalizeRole(role): role ? String(role): "Viewer"
+    }
+    function readStoreValue(path, def) {
+      try {
+        return window.AppStore && __appIsFn(window.AppStore.get) ? window.AppStore.get(path, def): def
+      } catch (_storeErr) {
+        return __appObserve(_storeErr, "nav.role.store"),
+        def
+      }
+    }
+    function firstText(values) {
+      for (var i = 0; i < values.length; i++) {
+        var v = values[i]; if (v != null && String(v).trim() !== "")return String(v).trim()
+      }
+      return ""
+    }
+    function resolveCurrentRole() {
+      var role = "",
+      user = null; try {
+        window.AppCoreAuth && __appIsFn(window.AppCoreAuth.getCanonicalAuthUser) &&(user = window.AppCoreAuth.getCanonicalAuthUser() || null)
+      } catch (_coreUserErr) {
+        __appObserve(_coreUserErr, "nav.role.coreUser")
+      }
+      try {
+        user ||(user = readStoreValue("auth.user", null))
+      } catch (_userErr) {
+        __appObserve(_userErr, "nav.role.user")
+      }
+      return role = firstText([user &&(user.role || user.userRole || user.accessRole),
+          readStoreValue("auth.role", ""),
+          window.currentUser &&(window.currentUser.role || window.currentUser.userRole || window.currentUser.accessRole),
+          window.currentUserRole,
+          window.userRole]),
+      normalizeNavRole(role ||(appNavAuthenticated() ? "Staff": "Viewer"))
+    }
+    function appNavRole() {
+      return resolveCurrentRole()
+    }
+    function appNavAllowed(id, role) {
+      var k = String(id || "").toLowerCase(); return role = normalizeNavRole(role || resolveCurrentRole()),
+      role === "Admin" ? !0: role === "Staff" ? k !== "admin": k === "dash" || k === "dashboard" || k === "search"
+    }
+    function appNavAuthenticated() {
+      try {
+        return window.AppStore && __appIsFn(window.AppStore.get) &&(window.AppStore.get("auth.token",
+            "") || window.AppStore.get("auth.loginOk", !1) === !0 || window.AppStore.get("auth.bootstrapOk",
+            !1) === !0 || String(window.AppStore.get("auth.status", "")) === "authenticated") || document.documentElement && document.documentElement.classList.contains("app-authenticated") ? !0: !!(window.AppCoreAuth && __appIsFn(window.AppCoreAuth.getCanonicalAuthUser) && window.AppCoreAuth.getCanonicalAuthUser())
+      } catch (_e) {
+        return __appObserve(_e, "nav.authenticated"),
+        !1
+      }
+    }
+    window.__APP_RESOLVE_CURRENT_ROLE__ = resolveCurrentRole,
+    window.resolveCurrentRole = resolveCurrentRole,
+    window.__APP_NAV1_ROLE_RESOLVER_OWNER__ = "Index.nav.resolveCurrentRole.readOnly.phase1"; function navRoleRawValue() {
+      var user = null; try {
+        window.AppCoreAuth && __appIsFn(window.AppCoreAuth.getCanonicalAuthUser) &&(user = window.AppCoreAuth.getCanonicalAuthUser() || null)
+      } catch (_coreRoleRawErr) {
+        __appObserve(_coreRoleRawErr, "nav2.role.raw.core")
+      }
+      try {
+        user ||(user = readStoreValue("auth.user", null))
+      } catch (_storeRoleRawErr) {
+        __appObserve(_storeRoleRawErr, "nav2.role.raw.store")
+      }
+      return firstText([user &&(user.role || user.userRole || user.accessRole),
+          readStoreValue("auth.role", ""),
+          window.currentUser &&(window.currentUser.role || window.currentUser.userRole || window.currentUser.accessRole),
+          window.currentUserRole,
+          window.userRole])
+    }
+    function navMenuMutationReady(role) {
+      var raw = firstText([role,
+          navRoleRawValue()]),
+      authenticated = appNavAuthenticated(),
+      ready = authenticated && !!raw; try {
+        document.documentElement && document.documentElement.setAttribute("data-role-menu-ready", ready ? "1": "0")
+      } catch (_readyAttrErr) {
+        __appObserve(_readyAttrErr, "nav2.menu.ready.attr")
+      }
+      return ready
+    }
+    function setNavVisible(el, on) {
+      el &&(el.style.display = on ? "": "none", el.setAttribute("aria-hidden", on ? "false": "true"),
+        el.classList && el.classList.toggle("d-none", !on))
+    }
+    function applyPendingStaffMenuAccess(reason) {
+      try {
+        Array.prototype.slice.call(document.querySelectorAll("#side [data-nav]")).forEach(function(el) {
+            var k = String(el.getAttribute("data-nav") || "").toLowerCase(); setNavVisible(el, k !== "admin")
+          }); var caseToggle = document.querySelector('#side [data-bs-target="#caseMenu"]'),
+        caseMenu = document.getElementById("caseMenu"); setNavVisible(caseToggle, !0),
+        caseMenu && caseMenu.classList.add("show"),
+        setNavVisible(document.getElementById("menu-admin"), !1),
+        document.documentElement &&(document.documentElement.setAttribute("data-user-role", "staff-pending"),
+          document.documentElement.setAttribute("data-role-menu-ready", "0"), document.documentElement.setAttribute("data-role-menu-pending",
+            reason || "phase2-auth-role-pending"))
+      } catch (_pendingMenuErr) {
+        __appObserve(_pendingMenuErr, "phase2.menu.pending")
+      }
+      return "Staff"
+    }
+    function applyNavMenuAccess(role, meta) {
+      if (meta = meta || {
+        }, !navMenuMutationReady(role) && !meta.force) {
+        try {
+          window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("phase2.menuMutationPending",
+            {
+              reason: meta.reason || "role-not-ready",
+              authenticated: appNavAuthenticated(),
+              role: role || navRoleRawValue() || ""
+            })
+        } catch (_skipWarnErr) {
+          __appObserve(_skipWarnErr, "phase2.menu.skip.warn")
+        }
+        return appNavAuthenticated() ? applyPendingStaffMenuAccess(meta.reason || "role-not-ready"): normalizeNavRole(role || navRoleRawValue() || "Viewer")
+      }
+      var resolved = normalizeNavRole(role || navRoleRawValue() ||(appNavAuthenticated() ? "Staff": "Viewer")),
+      isAdmin = resolved === "Admin",
+      isStaff = resolved === "Staff",
+      isViewer = resolved === "Viewer"; try {
+        Array.prototype.slice.call(document.querySelectorAll("#side [data-nav]")).forEach(function(el) {
+            var k = String(el.getAttribute("data-nav") || "").toLowerCase(); setNavVisible(el, isAdmin || isStaff && k !== "admin" || isViewer &&(k === "dash" || k === "dashboard" || k === "search"))
+          }); var caseToggle = document.querySelector('#side [data-bs-target="#caseMenu"]'),
+        caseMenu = document.getElementById("caseMenu"); setNavVisible(caseToggle, isAdmin || isStaff || isViewer),
+        caseMenu &&(isAdmin || isStaff || isViewer ? caseMenu.classList.add("show"): caseMenu.classList.remove("show")),
+        setNavVisible(document.getElementById("menu-admin"), isAdmin),
+        document.documentElement &&(document.documentElement.setAttribute("data-user-role", resolved.toLowerCase()),
+          document.documentElement.setAttribute("data-role-menu-ready", "1"), document.documentElement.removeAttribute("data-role-menu-pending"))
+      } catch (_applyMenuErr) {
+        __appObserve(_applyMenuErr, "nav2.menu.apply")
+      }
+      return resolved
+    }
+    window.__APP_NAV_MENU_MUTATION_READY__ = navMenuMutationReady,
+    window.__APP_APPLY_PENDING_STAFF_MENU_ACCESS__ = applyPendingStaffMenuAccess,
+    window.__APP_APPLY_ROLE_ACCESS_READY__ = applyNavMenuAccess,
+    window.__APP_NAV2_MENU_MUTATION_OWNER__ = "Index.nav.applyNavMenuAccess.readyGate.phase2"; function mobileSidebarEl() {
+      return document.getElementById("side")
+    }
+    function mobileSidebarOverlay() {
+      return document.getElementById("sidebar-overlay")
+    }
+    function setMobileSidebarOpen(open) {
+      var side = mobileSidebarEl(),
+      overlay = mobileSidebarOverlay(); open = !!open; try {
+        side &&(side.classList.toggle("show", open), side.setAttribute("aria-hidden", open ? "false": "true")),
+        overlay &&(overlay.classList.toggle("show", open), overlay.style.display = open ? "block": "none",
+          overlay.setAttribute("aria-hidden", open ? "false": "true")),
+        document.body && document.body.classList.toggle("sidebar-open", open)
+      } catch (_sideErr) {
+        __appObserve(_sideErr, "ec")
+      }
+      return open
+    }
+    function toggleMobileSubmenu(btn) {
+      var selector = btn && btn.getAttribute &&(btn.getAttribute("data-bs-target") || btn.getAttribute("data-target") || btn.getAttribute("aria-controls") && "#" + btn.getAttribute("aria-controls")); if (!selector)return!1; var panel = document.querySelector(selector); if (!panel)return!1; var open = !panel.classList.contains("show"); return panel.classList.toggle("show",
+        open),
+      btn.setAttribute("aria-expanded", open ? "true": "false"),
+      !0
+    }
+    window.toggleSidebar = function(force) {
+      var side = mobileSidebarEl(),
+      open; return side ?(open = typeof force == "boolean" ? force: !side.classList.contains("show"),
+        setMobileSidebarOpen(open)): !1
+    }; function bindSidebarNavClicks() {
+      if (window.__APP_DOM_ROUTE_CLICK_BOUND__ === !0)return!0; window.__APP_DOM_ROUTE_CLICK_BOUND__ = !0; appBootSet("__APP_SIDEBAR_NAV_CLICK_OWNER__",
+        !0, {
+          owner: "Index.dom-route-click-central-rewrite"
+        }); function stop(ev) {
+        try {
+          ev && ev.preventDefault && ev.preventDefault(),
+          ev && ev.stopPropagation && ev.stopPropagation(),
+          ev && ev.stopImmediatePropagation && ev.stopImmediatePropagation()
+        } catch (_e) {
+          __appObserve(_e, "route.click.stop")
+        }
+        return!1
+      }
+      function toggle(btn) {
+        var selector = btn &&(btn.getAttribute("data-bs-target") || btn.getAttribute("data-target") ||(btn.getAttribute("aria-controls") ? "#" + btn.getAttribute("aria-controls"): "")); if (!selector)return!1; var panel = document.querySelector(selector); if (!panel)return!1; var open = !panel.classList.contains("show"); panel.classList.toggle("show",
+          open); panel.style.display = open ? "block": "none"; btn.setAttribute("aria-expanded", open ? "true": "false"); return!0
+      }
+      function route(navId, link) {
+        navId = String(navId || "").trim(); if (!navId)return!1; try {
+          if (!appNavAuthenticated())return forceLoginRoute("sidebar-nav-unauth")
+        } catch (_auth) {
+          __appObserve(_auth, "route.click.auth")
+        }
+        try {
+          var role = appNavRole(),
+          _visible = link && link.offsetParent !== null; if (!appNavAllowed(navId, role) && !(appNavAuthenticated() && _visible && String(navId) !== "admin"))return!1; applyNavMenuAccess(role,
+            {
+              reason: "sidebar-click",
+              force: !0
+            })
+        } catch (_role) {
+          __appObserve(_role, "route.click.role")
+        }
+        try {
+          window.toggleSidebar && window.toggleSidebar(!1)
+        } catch (_side) {
+          __appObserve(_side, "route.click.sidebar")
+        }
+        var hashTarget = "#/" + navId,
+        routeTarget = routeMap[String(navId || "").trim().toLowerCase()] || "/" + navId;
+        function recordRouteFailure(err, stage) {
+          try {
+            window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("navigation.sidebar.recover",
+              err, {
+                navId: navId,
+                stage: stage || "route"
+              })
+          } catch (_warn) {
+            __appObserve(_warn, "route.click.warn")
+          }
+        }
+        function fallbackToHash(err, stage) {
+          recordRouteFailure(err, stage);
+          try {
+            if (String(location.hash || "") !== hashTarget)location.hash = hashTarget;
+            return!0
+          } catch (_hashErr) {
+            recordRouteFailure(_hashErr, "hash-fallback");
+            try {
+              window.AppRuntime && window.AppRuntime.showBanner && window.AppRuntime.showBanner("warning",
+                "ไม่สามารถเปลี่ยนหน้าได้ กรุณาลองอีกครั้ง", 3500)
+            } catch (_bannerErr) {
+              __appObserve(_bannerErr, "route.click.banner")
+            }
+            return!1
+          }
+        }
+        try {
+          if (window.AppVue3Bridge && window.AppVue3Bridge.router && __appIsFn(window.AppVue3Bridge.router.push)) {
+            var pushed = window.AppVue3Bridge.router.push(routeTarget);
+            pushed && __appIsFn(pushed.catch) && pushed.catch(function(err) {
+                var msg = String(err && err.message || err || "");
+                if (/duplicated|redundant|same route/i.test(msg))return!0;
+                return fallbackToHash(err, "vue-router")
+              });
+            return!0
+          }
+          if (__appIsFn(window.nav))return window.nav(navId, {
+              source: "sidebar-central",
+              target: link,
+              closeSidebar: !0
+            }) !== !1;
+          return fallbackToHash(null, "hash-owner")
+        } catch (err) {
+          return fallbackToHash(err, "route-exception")
+        }
+      }
+      function handle(ev) {
+        var raw = ev && ev.target && ev.target.closest ? ev.target: null; if (!raw)return!0; var link = raw.closest("#side [data-nav],#side [data-app-page],#side [data-page-target]"); if (link) {
+          var navId = link.getAttribute("data-nav") || link.getAttribute("data-app-page") || link.getAttribute("data-page-target") || ""; return stop(ev),
+          route(navId, link),
+          !1
+        }
+        var menuToggle = raw.closest("#side [data-bs-target],#side [data-toggle-target],#side [aria-controls]"); if (menuToggle && !menuToggle.getAttribute("data-nav"))return stop(ev),
+        toggle(menuToggle),
+        !1; var sidebarAction = raw.closest('[data-action="toggleSidebar"],#sidebar-overlay,.mobile-menu-btn'); if (sidebarAction)return stop(ev),
+        window.toggleSidebar && window.toggleSidebar(sidebarAction.id === "sidebar-overlay" ? !1: void 0),
+        !1; return!0
+      }
+      document.addEventListener("click", handle, !0); return!0
+    }
+    function forceLoginRoute(reason) {
+      try {
+        if (window.__APP_FORCE_LOGIN_VIEW__)return window.__APP_FORCE_LOGIN_VIEW__(reason || "nav-unauth")
+      } catch (_v) {
+        __appObserve(_v, "ec")
+      }
+      try {
+        location.hash = "#/login"
+      } catch (_h) {
+        __appObserve(_h, "ec")
+      }
+      return!1
+    }
+    function showVueUnavailableMode() {
+      try {
+        document.documentElement.classList.add("app-vue-error"); var note = document.getElementById("app-boot-status"); note &&(note.textContent = "โหลดระบบไม่สำเร็จ กรุณาโหลดหน้าใหม่"),
+        window.AppRuntime && window.AppRuntime.handleError && window.AppRuntime.handleError(new Error("Vue runtime unavailable"),
+          "โหลดระบบไม่สำเร็จ")
+      } catch (_vueUnavailableErr) {
+        typeof __appObserve == "function" && __appObserve(_vueUnavailableErr, "ec")
+      }
+      return!1
+    }
+    function startVueBootstrap() {
+      var Vue = {
+        reactive: function(o) {
+          return o || {
+          }
+        },
+        shallowRef: function(v) {
+          return {
+            value: v
+          }
+        },
+        nextTick: function(fn) {
+          return Promise.resolve().then(function() {
+              return typeof fn === "function" ? fn(): null
+            })
+        },
+        h: function(tag, props) {
+          return {
+            tag: tag,
+            props: props || {
+            }
+          }
+        }
+      }; function setTrustedRouteHtml(el, html) {
+        if (!el)return null; html = String(html || ""); try {
+          el.textContent = ""; var range = document.createRange(); range.selectNode(el),
+          el.appendChild(range.createContextualFragment(html)); return el
+        } catch (_htmlErr) {
+          try {
+            el.innerHTML = html; return el
+          } catch (_innerErr) {
+          }
+        }
+        if (window.ScriptsUtils && __appIsFn(window.ScriptsUtils.setHtml))return window.ScriptsUtils.setHtml(el,
+          html, {
+            trusted: !0,
+            moduleName: "Index.route"
+          }); if (window.AppDom && __appIsFn(window.AppDom.setHtml))return window.AppDom.setHtml(el,
+          html, {
+            trusted: !0,
+            moduleName: "Index.route"
+          }); return el.textContent = html.replace(/<[^>]*>/g, " "),
+        el
+      }
+      var BOOT = Object.assign({
+          page: "/dashboard",
+          defaultRoute: "/dashboard",
+          baseUrl: ""
+        }, window.__APP_BOOTSTRAP__ || {
+        }),
+      routeMap = {
+        login: "/login",
+        dash: "/dashboard",
+        dashboard: "/dashboard",
+        search: "/search",
+        petitioner: "/petitioner",
+        meeting: "/meeting",
+        "committee-meeting": "/committee-meeting",
+        committeeMeeting: "/committee-meeting",
+        committee: "/committee-meeting",
+        people: "/people",
+        personnel: "/people",
+        budget: "/budget",
+        track: "/track",
+        report: "/report",
+        admin: "/admin"
+      }; function routeFromNav(id) {
+        return routeMap[String(id || "").trim().toLowerCase()] || "/dashboard"
+      }
+      function navFromRoute(path) {
+        var inverse; return {
+          "/dashboard": "dashboard",
+          "/search": "search",
+          "/petitioner": "petitioner",
+          "/meeting": "meeting",
+          "/committee-meeting": "committee-meeting",
+          "/people": "personnel",
+          "/budget": "budget",
+          "/track": "track",
+          "/report": "report",
+          "/admin": "admin",
+          "/login": "login"
+        }
+        [path = String(path || "").toLowerCase()] || "dashboard"
+      }
+      var bridgeState = Vue.reactive({
+          authenticated: !1,
+          user: null,
+          bootstrapping: !1,
+          currentPath: "/login"
+        }),
+      storeGet = IndexKit && __appIsFn(IndexKit.storeGet) ? IndexKit.storeGet: window.ScriptsUtils && window.ScriptsUtils.storeGet || function(path,
+        defaultValue) {
+        try {
+          return window.AppStore && __appIsFn(window.AppStore.get) ? window.AppStore.get(path, defaultValue): defaultValue
+        } catch (_e) {
+          return defaultValue
+        }
+      }; function syncStateFromStore() {
+        var token = String(storeGet("auth.token", "") || ""),
+        user = storeGet("auth.user", null) || null,
+        locked = !(!window.__APP_LOGOUT_IN_PROGRESS__ && !window.__APP_LOGGED_OUT_LOCK__); return bridgeState.authenticated = !!token && !locked,
+        bridgeState.user = bridgeState.authenticated ? user: null,
+        bridgeState
+      }
+      function markSidebar(path) {
+        var navKey = navFromRoute(path); Array.prototype.slice.call(document.querySelectorAll("#side .nav-link[data-nav]")).forEach(function(el) {
+            el && el.classList && el.classList.toggle("active", String(el.getAttribute("data-nav") || "").trim().toLowerCase() === String(navKey).toLowerCase())
+          })
+      }
+      function safeCall(fn) {
+        var result; try {
+          result = typeof fn != "function" || fn()
+        } catch (e) {
+          return releaseUiLock("safe-call-sync-error"),
+          window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("page.lifecycle.sync",
+            e),
+          Promise.resolve(!1)
+        }
+        return Promise.resolve(result).catch (function(e) {
+            return releaseUiLock("safe-call-async-error"),
+            window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("page.lifecycle.async",
+              e),
+            !1
+          })
+      }
+      function setShellMode(authenticated) {
+        authenticated = !!authenticated; try {
+          document.body.classList.add("app-ready"),
+          document.documentElement.classList.toggle("app-authenticated", authenticated); var loginHost = document.querySelector(".vue3-login-host"),
+          mainShell = document.querySelector(".vue3-main-shell"),
+          loginPage = document.getElementById("login-page"),
+          mainContainer = document.getElementById("main-container"),
+          side = document.getElementById("side"),
+          overlay = document.getElementById("sidebar-overlay"); if (loginHost &&(loginHost.style.display = authenticated ? "none": ""),
+            mainShell &&(mainShell.style.display = authenticated ? "": "none"), loginPage &&(loginPage.style.display = authenticated ? "none": "flex"),
+            mainContainer &&(mainContainer.style.display = authenticated ? "block": "none"), side &&(side.style.display = authenticated ? "": "none"),
+            authenticated)try {
+            var target = routeState && routeState.path && routeState.path !== "/login" ? routeState.path: BOOT.defaultRoute || "/dashboard"; currentPageComponent === void 0 || !currentPageComponent || pageComponents === void 0 || !pageComponents || currentPageComponent.value && currentPageComponent.value !== LoginPage ||(currentPageComponent.value = pageComponents[target] || pageComponents["/dashboard"],
+              routeState.path = target, bridgeState.currentPath = target, markSidebar(target)); var bootNote = document.getElementById("app-boot-status"); bootNote &&(bootNote.style.display = "none")
+          } catch (_routeFillErr) {
+            __appObserve(_routeFillErr, "ec")
+          }
+          !authenticated && overlay && overlay.classList.remove("show")
+        } catch (_shellModeErr) {
+          __appObserve(_shellModeErr, "ec")
+        }
+        return authenticated
+      }
+      function releaseUiLock(reason) {
+        try {
+          document.documentElement.classList.remove("app-page-switching", "app-template-loading"),
+          document.body && document.body.classList.remove("app-page-switching", "app-template-loading",
+            "app-ui-unblocking"); var overlay = document.getElementById("sidebar-overlay"); overlay &&(overlay.classList.remove("show"),
+            overlay.setAttribute("aria-hidden", "true"), overlay.style.display = "none"),
+          window.AppRuntime && __appIsFn(window.AppRuntime.clearUiBlocks) && window.AppRuntime.clearUiBlocks(reason || "route-release",
+            {
+              clearSectionOverlays: !0,
+              closeLoadingSwal: !1,
+              closeSidebar: !1
+            })
+        } catch (_releaseErr) {
+          __appObserve(_releaseErr, "ec")
+        }
+        return!0
+      }
+      appBootSet("__APP_SET_SHELL_MODE__", setShellMode, {
+          owner: "Index.inlineBootstrap.shell-mode"
+        }),
+      appBootSet("__APP_UNLOCK_UI__", releaseUiLock, {
+          owner: "Index.inlineBootstrap.unlock-ui"
+        }); var activationState = {
+        key: "",
+        timer: null,
+        running: null,
+        unlockTimer: null
+      }; function schedulePageActivation(routeOrId, source) {
+        var pageId = canonicalPageId(String(routeOrId || "").replace(/^#?\/?/, "") || navFromRoute(routeState.path)); if (pageId === "login")return Promise.resolve(!0); var key = pageId; if (activationState.key === key && activationState.running)return activationState.running; if (activationState.timer) {
+          try {
+            clearTimeout(activationState.timer)
+          } catch (_clearActErr) {
+            __appObserve(_clearActErr, "ec")
+          }
+          activationState.timer = null
+        }
+        if (activationState.unlockTimer) {
+          try {
+            window.AppRuntime && window.AppRuntime.cancelTimer ? window.AppRuntime.cancelTimer(activationState.unlockTimer): clearTimeout(activationState.unlockTimer)
+          } catch (_clearUnlockErr) {
+            __appObserve(_clearUnlockErr, "ec")
+          }
+          activationState.unlockTimer = null
+        }
+        return activationState.key = key,
+        activationState.unlockTimer = routeDelay("route.unlock-watchdog", function() {
+            releaseUiLock("route-watchdog:" + pageId)
+          }, 9e3),
+        activationState.running = Promise.resolve().then(function() {
+            return activationState.timer = null,
+            runPageActivation(pageId)
+          }).catch (function(err) {
+            return releaseUiLock("route-error:" + pageId),
+            window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.activate",
+              err),
+            !1
+          }).finally(function() {
+            if (activationState.unlockTimer) {
+              try {
+                window.AppRuntime && window.AppRuntime.cancelTimer ? window.AppRuntime.cancelTimer(activationState.unlockTimer): clearTimeout(activationState.unlockTimer)
+              } catch (_unlockFinallyErr) {
+                __appObserve(_unlockFinallyErr, "ec")
+              }
+              activationState.unlockTimer = null
+            }
+            releaseUiLock("route-finally:" + pageId),
+            activationState.running = null
+          }),
+        activationState.running
+      }
+      var deferredScriptMap = window.__APP_DEFERRED_SCRIPTS__ || {
+      },
+      deferredTemplateMap = window.__APP_DEFERRED_TEMPLATES__ || {
+      }; function canonicalPageId(id) {
+        return(id = String(id || "").trim().toLowerCase()) === "dash" ? "dashboard": id === "personnel" ? "people": id === "committeemeeting" || id === "committee" || id === "committee_meeting" ? "committee-meeting": id || "dashboard"
+      }
+      function pageDomId(id) {
+        return(id = canonicalPageId(id)) === "dashboard" ? "p-dash": id === "people" || id === "personnel" ? "p-personnel": id === "committee-meeting" ? "p-committee-meeting": "p-" + id
+      }
+      function routeDelay(label, fn, ms) {
+        var run = typeof fn == "function" ? fn: function() {
+        },
+        delayMs = Math.max(0, Number(ms || 0) || 0); return window.AppRuntime && __appIsFn(window.AppRuntime.pageDelay) ? window.AppRuntime.pageDelay("route",
+          label || "route.delay", run, delayMs): window.AppRuntime && __appIsFn(window.AppRuntime.delay) ? window.AppRuntime.delay(label || "route.delay",
+          run, delayMs): setTimeout(run, delayMs)
+      }
+      function mountInlinePageTemplate(id, host) {
+        var inlineTpl = document.getElementById("tpl-page-" + id); return!(!inlineTpl || !String(inlineTpl.innerHTML || "").trim()) &&(host.classList.add("app-template-loading"),
+          setTrustedRouteHtml(host, inlineTpl.innerHTML || ""), host.classList.remove("app-template-loading"),
+          host.classList.add("app-template-loaded"), !0)
+      }
+      function waitForInlinePageTemplate(id, host, ms) {
+        var waitMs = Math.min(320, Math.max(64, Number(ms || 180) || 180)),
+        deadline = Date.now() + waitMs,
+        settled = !1; return new Promise(function(resolve) {
+            function finish(ok) {
+              if (settled)return;
+              settled = !0,
+              resolve(!!ok)
+            }
+            function tick() {
+              if (document.getElementById(pageDomId(id)) || mountInlinePageTemplate(id, host))return finish(!0); if (Date.now() >= deadline)return finish(!1); try {
+                routeDelay("route.waitInlineTemplate", tick, 32)
+              } catch (_waitErr) {
+                finish(!1)
+              }
+            }
+            tick()
+          })
+      }
+      function ensurePageTemplate(id) {
+        var domId = pageDomId(id = canonicalPageId(id)); if (document.getElementById(domId))return Promise.resolve(!0); var hostId = "deferred-page-host-" + id,
+        host = document.getElementById(hostId); if (!host) {
+          try {
+            var container = document.getElementById("main-container") || document.querySelector(".vue3-main-shell") || document.getElementById("app") || document.body; if (container) {
+              host = document.createElement("div"),
+              host.id = hostId,
+              host.className = "app-deferred-page-host app-page-loading-shell",
+              host.setAttribute("data-page", id),
+              host.setAttribute("aria-live", "polite"),
+              container.appendChild(host)
+            }
+          } catch (_routeHostErr) {
+            __appObserve(_routeHostErr, "route.ensurePageHost")
+          }
+        }
+        if (!host)return Promise.resolve(!1); if (mountInlinePageTemplate(id, host))return Promise.resolve(!0); var tplName = deferredTemplateMap[id] || deferredTemplateMap[String(id || "").replace(/^dash$/,
+            "dashboard")] || ""; return tplName && window.AppAssetLoader && __appIsFn(window.AppAssetLoader.mountPartial) ?(host.classList.add("app-template-loading"),
+          Promise.race([window.AppAssetLoader.mountPartial(tplName, host),
+              routeTimeoutPromise(5e3, "template:" + id)]).then(function(result) {
+              return result && result.timeout ? waitForInlinePageTemplate(id, host, 220): (host.classList.remove("app-template-loading"),
+                host.classList.add("app-template-loaded"), !0)
+            }).catch (function(err) {
+              return host.classList.remove("app-template-loading"),
+              waitForInlinePageTemplate(id, host, 220).then(function(ok) {
+                  return ok ||(setTrustedRouteHtml(host, '<div class="alert alert-warning">โหลดหน้าไม่สำเร็จ กรุณาลองใหม่</div>'),
+                    window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.template",
+                      err)),
+                  ok
+                })
+            })): waitForInlinePageTemplate(id, host, 240)
+      }
+      function routeTimeoutPromise(ms, label) {
+        return new Promise(function(resolve) {
+            try {
+              routeDelay("route.timeout:" + String(label || "route-timeout"), function() {
+                  resolve({
+                      timeout: !0,
+                      label: label || "route-timeout"
+                    })
+                }, Math.max(1e3, Number(ms || 8e3)))
+            } catch (_timeoutErr) {
+              resolve({
+                  timeout: !0,
+                  label: label || "route-timeout"
+                })
+            }
+          })
+      }
+      function pageScriptList(id) {
+        id = canonicalPageId(id); var list = deferredScriptMap[id] || deferredScriptMap[String(id || "").replace(/^dash$/,
+            "dashboard")] || []; return Array.isArray(list) ? list.filter(function(f) {
+            return String(f || "") !== "Scripts_Core_Runtime"
+          }).slice(): []
+      }
+      function ensurePageRuntimeReady(id) {
+        return ensurePageScripts(canonicalPageId(id));
+      }
 
+      function loadPageScriptsDirect(id) {
+        var list = pageScriptList(id = canonicalPageId(id));
+        if (!list.length) return Promise.resolve(true);
+
+        var loader =
+          (window.AppCritical && window.AppCritical.loadPartial) ||
+          (window.AppAssetLoader && window.AppAssetLoader.loadPartial);
+
+        if (!loader) return Promise.resolve(false);
+
+        return list.reduce(function(chain, name) {
+          return chain.then(function() {
+            return loader(name).catch(function(err) {
+              if (window.AppRuntime && window.AppRuntime.recordWarning) {
+                window.AppRuntime.recordWarning(
+                  "route.directPageChunk." + id,
+                  err,
+                  { partial: name }
+                );
+              }
+              throw err;
+            });
+          });
+        }, Promise.resolve(true));
+      }
+      function ensurePageScripts(id) {
+        id = canonicalPageId(id);
+
+        var loadedPages =
+          window.__APP_PAGE_SCRIPT_LOADED__ ||
+          (window.__APP_PAGE_SCRIPT_LOADED__ = {});
+        var pagePromises =
+          window.__APP_PAGE_SCRIPT_PROMISES__ ||
+          (window.__APP_PAGE_SCRIPT_PROMISES__ = {});
+
+        function mark(status, detail) {
+          try {
+            window.__APP_PAGE_SCRIPT_STATUS__ = Object.assign(
+              window.__APP_PAGE_SCRIPT_STATUS__ || {},
+              (function() {
+                var state = {};
+                state[id] = Object.assign(
+                  {
+                    status: status,
+                    at: new Date().toISOString()
+                  },
+                  detail || {}
+                );
+                return state;
+              })()
+            );
+          } catch (_markErr) {
+            __appObserve(_markErr, "route.pageScript.status");
+          }
+        }
+
+        function loadWithPrimaryOwner() {
+          var coreReady =
+            window.AppCritical &&
+            __appIsFn(window.AppCritical.ensureCoreRuntime)
+              ? window.AppCritical.ensureCoreRuntime()
+              : Promise.resolve(true);
+
+          return coreReady.then(function() {
+            return window.AppAssetLoader &&
+              __appIsFn(window.AppAssetLoader.loadPageScripts)
+              ? window.AppAssetLoader.loadPageScripts(id)
+              : loadPageScriptsDirect(id);
+          });
+        }
+
+        function observeOwner(ownerLoad) {
+          return Promise.race([
+            ownerLoad,
+            routeTimeoutPromise(45e3, "page-script-owner:" + id)
+          ]).then(function(result) {
+            if (result && result.timeout) {
+              mark("timeout-in-flight", {
+                ok: false,
+                ownerPreserved: true
+              });
+              if (
+                window.AppRuntime &&
+                window.AppRuntime.recordWarning
+              ) {
+                window.AppRuntime.recordWarning(
+                  "route.pageScriptTimeout." + id,
+                  new Error("โหลด page script ช้าเกินกำหนด: " + id),
+                  { ownerPreserved: true }
+                );
+              }
+              return false;
+            }
+            return result !== false;
+          });
+        }
+
+        if (loadedPages[id]) {
+          mark("already-loaded", { ok: true });
+          return Promise.resolve(true);
+        }
+
+        if (pagePromises[id]) {
+          mark("in-flight", { ok: true });
+          return observeOwner(pagePromises[id]);
+        }
+
+        var load = loadWithPrimaryOwner()
+          .then(function(result) {
+            if (result === false) {
+              mark("primary-false", { fallback: "direct" });
+              return loadPageScriptsDirect(id);
+            }
+            return result;
+          })
+          .catch(function(firstErr) {
+            mark("primary-error", {
+              error: String(
+                (firstErr && firstErr.message) || firstErr
+              ),
+              fallback: "direct"
+            });
+            return loadPageScriptsDirect(id).catch(function(secondErr) {
+              secondErr.__firstPageScriptError = firstErr;
+              throw secondErr;
+            });
+          });
+
+        var ownerLoad = load
+          .then(function(result) {
+            var ok = result !== false;
+            if (ok) loadedPages[id] = true;
+            mark(ok ? "loaded" : "not-loaded", { ok: ok });
+            return ok;
+          })
+          .catch(function(err) {
+            delete loadedPages[id];
+            mark("failed", {
+              error: String((err && err.message) || err)
+            });
+            if (
+              window.AppRuntime &&
+              window.AppRuntime.recordWarning
+            ) {
+              window.AppRuntime.recordWarning(
+                "route.pageScriptOwner." + id,
+                err
+              );
+            }
+            return false;
+          })
+          .finally(function() {
+            if (pagePromises[id] === ownerLoad) {
+              delete pagePromises[id];
+            }
+          });
+
+        pagePromises[id] = ownerLoad;
+        return observeOwner(ownerLoad);
+      }
+
+      function runPageActivation(id) {
+        id = canonicalPageId(id),
+        syncStateFromStore(); if (!bridgeState.authenticated)return safeApplyRoute("/login", !0, "activation-unauthenticated").catch (function() {
+            setShellMode(!1)
+          }),
+        Promise.resolve(!1); try {
+          var previousPage = window.AppStore && window.AppStore.get ? String(window.AppStore.get("ui.currentPage",
+              "") || ""): ""; document.dispatchEvent(new CustomEvent("app:page-changing", {
+                detail: {
+                  from: previousPage,
+                  to: id,
+                  source: "plain-route-current"
+                }
+              })),
+          document.documentElement.classList.add("app-page-switching"),
+          window.AppStore && window.AppStore.set && window.AppStore.set("ui.currentPage", id)
+        } catch (_pageChangingErr) {
+          __appObserve(_pageChangingErr, "ec")
+        }
+        setShellMode(!0),
+        markSidebar(routeFromNav(id)); function finish(result, emitActivatedEvent) {
+          if (emitActivatedEvent !== !1)try {
+            document.dispatchEvent(new CustomEvent("app:page-activated", {
+                  detail: {
+                    id: id,
+                    pageId: id,
+                    source: "plain-route-current",
+                    scope: phase8PageScope(id),
+                    phase8PageScope: !0
+                  }
+                }))
+          } catch (_activatedEvtErr) {
+            __appObserve(_activatedEvtErr, "ec")
+          }
+          return result
+        }
+        function reportActivationFailure(err, stage) {
+          try {
+            var scope = document.getElementById(pageDomId(id));
+            scope && scope.setAttribute("data-page-load-error", "1");
+            window.AppRuntime && window.AppRuntime.showBanner && window.AppRuntime.showBanner("danger",
+              "โหลดข้อมูลหน้าไม่สำเร็จ กรุณากดเมนูอีกครั้ง", 5000);
+            window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.activationFailure." + id,
+              err, {
+                pageId: id,
+                stage: stage || "activation"
+              })
+          } catch (_activationFailureErr) {
+            __appObserve(_activationFailureErr, "route.activationFailure")
+          }
+          return!1
+        }
+        function callNamed(name, arg) {
+          if (__appIsFn(window[name]))return Promise.resolve().then(function() {
+              return window[name](arg)
+            });
+          return ensurePageScripts(id).then(function() {
+              return __appIsFn(window[name]) ? window[name](arg): !1
+            })
+        }
+        function fallback() {
+          if (id === "dashboard" || id === "dash")return callNamed("loadDash", {
+              forceFresh: !1,
+              source: "route-flow-current"
+            }); if (id === "search")return window.closeSummary && window.closeSummary(),
+          callNamed("searchAll"); if (id === "petitioner")return window.closePetSummary && window.closePetSummary(),
+          callNamed("loadPetitioners", !1).then(function() {
+              return!window.renderPetitionerList || window.renderPetitionerList()
+            }); if (id === "meeting")return callNamed("initMeetingPage"); if (id === "committee-meeting")return window.CommitteeMeetingSystem && window.CommitteeMeetingSystem.activate ? window.CommitteeMeetingSystem.activate({
+              source: "route"
+            }): window.CommitteeMeetingSystem && window.CommitteeMeetingSystem.reload ? window.CommitteeMeetingSystem.reload(): ensurePageScripts(id).then(function() {
+              return window.CommitteeMeetingSystem && window.CommitteeMeetingSystem.activate ? window.CommitteeMeetingSystem.activate({
+                  source: "route"
+                }): !1
+            }); if (id === "track")return callNamed("loadTrackData"); if (id === "report")return callNamed("renderReport"); if (id === "people" || id === "personnel")return window.initPeoplePage ? window.initPeoplePage({
+              forceRefresh: !1
+            }): callNamed("showPsTab", "comm"); if (id === "budget")return window.initBudgetPage ? window.initBudgetPage(): callNamed("showBudgetTab",
+            "summary"); return id === "admin" ? callNamed("loadAdminData"): !0
+        }
+        var lifecycleOwnsActivatedEvent = !1;
+        return ensurePageTemplate(id).then(function(templateReady) {
+            if (!templateReady)throw new Error("โหลด page template ไม่สำเร็จ: " + id);
+            return ensurePageRuntimeReady(id)
+          }).then(function(runtimeReady) {
+            if (!runtimeReady)throw new Error("โหลด page runtime ไม่สำเร็จ: " + id);
+            if (window.AppLifecycle && window.AppLifecycle.getPage && window.AppLifecycle.getPage(id)) {
+              lifecycleOwnsActivatedEvent = !0;
+              return safeCall(function() {
+                  return window.AppLifecycle.activate(id, {
+                      source: "router"
+                    })
+                }).then(function(result) {
+                  return result === !1 ? fallback(): result
+                }).catch (function() {
+                  return fallback()
+                })
+            }
+            return fallback()
+          }).then(function(result) {
+            return finish(result, !lifecycleOwnsActivatedEvent)
+          }).catch (function(e) {
+            window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.moduleLoadRouteAlt",
+              e, {
+                pageId: id
+              });
+            return Promise.resolve().then(function() {
+                return fallback()
+              }).then(function(result) {
+                return finish(result, !lifecycleOwnsActivatedEvent)
+              }).catch (function(fallbackErr) {
+                reportActivationFailure(fallbackErr || e, "fallback");
+                return finish(!1, !lifecycleOwnsActivatedEvent)
+              })
+          }).finally(function() {
+            releaseUiLock("route-activation-finally:" + id),
+            document.documentElement.classList.remove("app-page-switching")
+          })
+      }
+      function mountPlainRouteHtml(t) {
+        try {
+          t = normalizeRouteTarget(t); if (t === "/login")return!0; var id = canonicalPageId(navFromRoute(t) || String(t || "").replace(/^\//,
+              "")),
+          map = {
+            dashboard: "tpl-page-dashboard",
+            search: "tpl-page-search",
+            petitioner: "tpl-page-petitioner",
+            meeting: "tpl-page-meeting",
+            "committee-meeting": "tpl-page-committee-meeting",
+            track: "tpl-page-track",
+            report: "tpl-page-report",
+            people: "tpl-page-people",
+            budget: "tpl-page-budget",
+            admin: "tpl-page-admin"
+          },
+          tpl = document.getElementById(map[id] || "tpl-page-dashboard"),
+          html = tpl ? String(tpl.innerHTML || ""): ""; html.trim() ||(html = '<div id="deferred-page-host-' + id + '" class="app-deferred-page-host app-page-loading-shell" data-page="' + id + '"><section class="app-card app-route-loading-card">กำลังเตรียมข้อมูล</section></div>'); var main = document.getElementById("main") || document.querySelector(".vue3-main-shell") || document.getElementById("main-container") || document.getElementById("app") || document.body; if (!main)return!1; main.style.display = "block",
+          main.removeAttribute("hidden"); var host = document.getElementById("app-route-host"),
+          rv = main.querySelector && main.querySelector("router-view"); host ||(host = document.createElement("div"),
+            host.id = "app-route-host", host.className = "app-route-host", rv && rv.parentNode ? rv.parentNode.replaceChild(host,
+              rv): main.appendChild(host)); rv && rv.parentNode && rv !== host && rv.parentNode.removeChild(rv); var domId = pageDomId(id),
+          blank = !String(host.innerHTML || "").trim() || !!host.querySelector("router-view") || !document.getElementById(domId); if (blank || host.getAttribute("data-current-page") !== id) {
+            host.textContent = ""; var r = document.createRange(); r.selectNode(host),
+            host.appendChild(r.createContextualFragment(html)),
+            host.setAttribute("data-current-route", t),
+            host.setAttribute("data-current-page", id),
+            host.setAttribute("data-template-mounted", "1")
+          }
+          host.style.display = "block",
+          host.removeAttribute("hidden"); var p = document.getElementById(domId); p &&(p.style.display = "",
+            p.removeAttribute("hidden"), p.classList.remove("d-none")); return!0
+        } catch (e) {
+          return __appObserve(e, "route.plain"),
+          !1
+        }
+      }
+      function createStaticPage(templateId, pageId) {
+        return {
+          name: "StaticPage_" + canonicalPageId(pageId).replace(/[^A-Za-z0-9_]/g, "_"),
+          render: function() {
+            return null
+          }
+        }
+      }
+      var LoginPage = {
+        name: "LoginPage",
+        render: function() {
+          return null
+        }
+      },
+      pageComponents = {
+        "/dashboard": createStaticPage("tpl-page-dashboard", "dashboard"),
+        "/search": createStaticPage("tpl-page-search", "search"),
+        "/petitioner": createStaticPage("tpl-page-petitioner", "petitioner"),
+        "/meeting": createStaticPage("tpl-page-meeting", "meeting"),
+        "/committee-meeting": createStaticPage("tpl-page-committee-meeting", "committee-meeting"),
+        "/track": createStaticPage("tpl-page-track", "track"),
+        "/report": createStaticPage("tpl-page-report", "report"),
+        "/people": createStaticPage("tpl-page-people", "people"),
+        "/budget": createStaticPage("tpl-page-budget", "budget"),
+        "/admin": createStaticPage("tpl-page-admin", "admin")
+      },
+      routeState = Vue.reactive({
+          path: "/login"
+        }),
+      afterRouteHooks = [],
+      currentPageComponent = Vue.shallowRef(LoginPage); function normalizeRouteTarget(target) {
+        return(target = String(target || "").trim()) ||(target = BOOT.defaultRoute || "/dashboard"),
+        (target = target.replace(/^#/, "")).charAt(0) !== "/" &&(target = routeFromNav(target)),
+        pageComponents[target] || target === "/login" ? target: BOOT.defaultRoute || "/dashboard"
+      }
+      function domNext(fn) {
+        return Promise.resolve().then(fn)
+      }
+      function applyRoute(target, replace) {
+        target = normalizeRouteTarget(target),
+        syncStateFromStore(),
+        bridgeState.authenticated || target === "/login" ||(target = "/login"),
+        bridgeState.authenticated && target === "/login" &&(target = BOOT.defaultRoute || "/dashboard"),
+        routeState.path = target,
+        bridgeState.currentPath = target,
+        currentPageComponent.value = target !== "/login" ? pageComponents[target] || pageComponents["/dashboard"]: LoginPage,
+        target !== "/login" ?(mountPlainRouteHtml(target), setShellMode(!0), markSidebar(target)): (setShellMode(!1),
+          function() {
+            try {
+              var h = document.getElementById("app-route-host"); h &&(h.textContent = "", h.removeAttribute("data-current-route"),
+                h.removeAttribute("data-current-page"))
+            } catch (_e) {
+              __appObserve(_e, "route.login.clearHost")
+            }
+          }
+          ()),
+        afterRouteHooks.slice().forEach(function(fn) {
+            try {
+              fn(target, routeState.path)
+            } catch (_hookErr) {
+              __appObserve(_hookErr, "ec")
+            }
+          }); try {
+          var hash = "#" + target; location.hash !== hash &&(replace && history && history.replaceState ? history.replaceState(null,
+              "", location.pathname + location.search + hash): location.hash = hash)
+        } catch (_hashErr) {
+          __appObserve(_hashErr, "ec")
+        }
+        return target === "/login" ?(domNext(function() {
+              try {
+                window.AppLogin && __appIsFn(window.AppLogin.init) && window.AppLogin.init()
+              } catch (_loginBindErr) {
+                __appObserve(_loginBindErr, "ec")
+              }
+            }), Promise.resolve(!0)): domNext(function() {
+            var id = navFromRoute(target); return Promise.resolve(schedulePageActivation(id, "apply-route:" + target)).catch (function(err) {
+                return releaseUiLock("route-activation-error:" + target),
+                window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.activation",
+                  err, {
+                    target: target,
+                    pageId: id
+                  }),
+                !1
+              })
+          }).then(function() {
+            return!0
+          }).catch (function(err) {
+            return __appObserve(err, "route.apply.dom"),
+            !1
+          })
+      }
+      function safeApplyRoute(target, replace, source) {
+        try {
+          return Promise.resolve(applyRoute(target, replace)).catch (function(err) {
+              return releaseUiLock("safe-apply-route:" + String(source || target || "")),
+              window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.safeApplyRoute",
+                err, {
+                  target,
+                  source: source || ""
+                }),
+              !1
+            })
+        } catch (err) {
+          releaseUiLock("safe-apply-route-sync:" + String(source || target || "")); try {
+            window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.safeApplyRoute.sync",
+              err, {
+                target,
+                source: source || ""
+              })
+          } catch (_warn) {
+            __appObserve(_warn, "route.safeApply.warn")
+          }
+          return Promise.resolve(!1)
+        }
+      }
+      function waitCoreForAuthenticatedRoute(source) {
+        try {
+          if (bridgeState.authenticated && window.AppCritical && __appIsFn(window.AppCritical.ensureCoreRuntime))return Promise.resolve(window.AppCritical.ensureCoreRuntime()).catch (function(err) {
+              try {
+                window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.ensureCoreBeforeApply",
+                  err, {
+                    source: source || ""
+                  })
+              } catch (_warn) {
+                __appObserve(_warn, "route.ensureCore.warn")
+              }
+              return!0
+            })
+        } catch (err) {
+          __appObserve(err, "route.ensureCore.sync")
+        }
+        return Promise.resolve(!0)
+      }
+      var router = {
+        currentRoute: {
+          value: routeState
+        },
+        push: function(target) {
+          return safeApplyRoute(target, !1, "router.push")
+        },
+        replace: function(target) {
+          return safeApplyRoute(target, !0, "router.replace")
+        },
+        isReady: function() {
+          return Promise.resolve(!0)
+        },
+        afterEach: function(fn) {
+          return typeof fn == "function" && afterRouteHooks.push(fn),
+          function() {
+            var i = afterRouteHooks.indexOf(fn); i > - 1 && afterRouteHooks.splice(i, 1)
+          }
+        }
+      }; function phase8PageScope(id) {
+        try {
+          var key = String(id || routeState.path || "").replace(/^#?\/?/, "").replace(/^dashboard$/,
+            "dash"); return document.getElementById("p-" + key) || document.querySelector('[data-page="' + key + '"]') || document.querySelector(".page:not(.d-none):not([hidden]),.app-page:not(.d-none):not([hidden])") || document
+        } catch (_e) {
+          return document
+        }
+      }
+      window.__APP_PHASE8_PAGE_PERF_STAMP__ = "phase8-runtime-page-performance-current"; function bootstrapFromSessionStorage() {
+        if (syncStateFromStore(), bridgeState.bootstrapping = !1, bridgeState.authenticated)return Promise.resolve(!0); var explicitLogin = location.hash === "#/login" || /(?:\?|&)_(?:logout|login)=/.test(location.search || "") || appBootGet("__APP_LOGGED_OUT_LOCK__",
+          !1) === !0; if (!explicitLogin && window.AppSessionResume && __appIsFn(window.AppSessionResume.get) && __appIsFn(window.AppSessionResume.tryResume))try {
+          var rec = window.AppSessionResume.get(); if (rec &&(rec.resumeHandle || rec.sessionResumeHandle))return window.AppSessionResume.tryResume({
+              reason: "vue-bootstrap-resume-current"
+            }).then(function() {
+              if (syncStateFromStore(), !bridgeState.authenticated)try {
+                location.hash !== "#/login" && history.replaceState(null, "", location.pathname + location.search.replace(/([?&])_logout=1(&|$)/,
+                    "$1").replace(/[?&]$/, "") + "#/login")
+              } catch (_resumeHashErr) {
+                try {
+                  location.hash = "#/login"
+                } catch (_resumeHashRouteAlt) {
+                  typeof __appObserve == "function" && __appObserve(_resumeHashRouteAlt, "ec")
+                }
+              }
+              return!!bridgeState.authenticated
+            }).catch (function() {
+              return syncStateFromStore(),
+              !!bridgeState.authenticated
+            })
+        } catch (_resumeBootstrapErr) {
+          __appObserve(_resumeBootstrapErr, "ec")
+        }
+        if (!bridgeState.authenticated) {
+          if (explicitLogin)try {
+            window.AppSessionResume && __appIsFn(window.AppSessionResume.clear) && window.AppSessionResume.clear()
+          } catch (_resumeClearErr) {
+            __appObserve(_resumeClearErr, "ec")
+          }
+          try {
+            location.hash !== "#/login" && history.replaceState(null, "", location.pathname + location.search.replace(/([?&])_logout=1(&|$)/,
+                "$1").replace(/[?&]$/, "") + "#/login")
+          } catch (_loginHashErr) {
+            try {
+              location.hash = "#/login"
+            } catch (_loginHashRouteAlt) {
+              typeof __appObserve == "function" && __appObserve(_loginHashRouteAlt, "ec")
+            }
+          }
+        }
+        return Promise.resolve(!!bridgeState.authenticated)
+      }
+      router.afterEach(function(to) {
+          try {
+            window.AppAccessibility && window.AppAccessibility.onRouteChange && window.AppAccessibility.onRouteChange(to)
+          } catch (_a11yRouteErr) {
+            __appObserve(_a11yRouteErr, "ec")
+          }
+          try {
+            window.AppUi && window.AppUi.enhance && window.AppUi.enhance(phase8PageScope(to && to.path || routeState.path))
+          } catch (_uiRouteErr) {
+            __appObserve(_uiRouteErr, "ec")
+          }
+        }),
+      window.AppVue3Bridge = window.AppVue3Bridge || {
+      },
+      window.AppVue3Bridge.router = router,
+      window.AppVue3Bridge.state = bridgeState,
+      window.AppVue3Bridge.syncState = syncStateFromStore,
+      window.AppVue3Bridge.activatePage = runPageActivation,
+      appBootSet("__APP_MARK_MAIN_SHELL_READY__", function(source) {
+          try {
+            if (syncStateFromStore(), bridgeState.authenticated) {
+              var target = routeState.path && routeState.path !== "/login" ? routeState.path: BOOT.defaultRoute || "/dashboard"; waitCoreForAuthenticatedRoute(source || "shell-ready").then(function() {
+                  return safeApplyRoute(target, !0, source || "shell-ready")
+                })
+            }
+          } catch (_markShellErr) {
+            __appObserve(_markShellErr, "ec")
+          }
+          return!0
+        }, {
+          owner: "Index.inlineBootstrap.shell-ready"
+        }),
+      appBootSet("__APP_FORCE_LOGIN_VIEW__", function(reason) {
+          try {
+            window.AppStore && __appIsFn(window.AppStore.assign) && window.AppStore.assign({
+                "auth.token": "",
+                "auth.csrfToken": "",
+                "auth.user": null,
+                "auth.role": "",
+                "auth.name": "",
+                "auth.status": "anonymous",
+                "auth.loginOk": !1,
+                "auth.bootstrapOk": !1,
+                "auth.bootstrapPending": !1
+              }),
+            bridgeState.authenticated = !1,
+            bridgeState.user = null,
+            routeState.path = "/login",
+            bridgeState.currentPath = "/login",
+            currentPageComponent.value = LoginPage,
+            setShellMode(!1); try {
+              ["u_name",
+                "u_pass",
+                "u_user",
+                "login-username",
+                "login-password"].forEach(function(id) {
+                  var el = document.getElementById(id); el &&(el.value = "", el.defaultValue = "", el.setAttribute("value",
+                      ""))
+                })
+            } catch (_clearLoginErr) {
+              __appObserve(_clearLoginErr, "ec")
+            }
+            try {
+              Array.prototype.forEach.call(document.querySelectorAll(".modal-backdrop,.offcanvas-backdrop,.swal2-container"),
+                function(el) {
+                  el && el.parentNode && el.parentNode.removeChild(el)
+                }),
+              document.body && document.body.classList.remove("modal-open", "swal2-shown", "swal2-height-auto",
+                "sidebar-open"),
+              document.body &&(document.body.style.overflow = "", document.body.style.paddingRight = ""); var ov = document.getElementById("sidebar-overlay"); ov &&(ov.classList.remove("show"),
+                ov.style.display = "none", ov.setAttribute("aria-hidden", "true")); var btn = document.getElementById("btn-login-action"); btn &&(btn.disabled = !1,
+                btn.removeAttribute("disabled"), btn.setAttribute("aria-busy", "false"), btn.textContent = btn.dataset.defaultText || "เข้าสู่ระบบ")
+            } catch (_loginSurfaceErr) {
+              __appObserve(_loginSurfaceErr, "ec")
+            }
+            try {
+              location.hash !== "#/login" && history.replaceState(null, "", location.pathname + location.search.replace(/([?&])_logout=1(&|$)/,
+                  "$1").replace(/[?&]$/, "") + "#/login")
+            } catch (_hashLoginErr) {
+              try {
+                location.hash = "#/login"
+              } catch (_hashRouteAltErr) {
+                typeof __appObserve == "function" && __appObserve(_hashRouteAltErr, "ec")
+              }
+            }
+            domNext(function() {
+                try {
+                  window.AppLogin && __appIsFn(window.AppLogin.init) && window.AppLogin.init()
+                } catch (_bindLoginErr) {
+                  __appObserve(_bindLoginErr, "ec")
+                }
+              })
+          } catch (_forceLoginErr) {
+            __appObserve(_forceLoginErr, "ec")
+          }
+          return!0
+        }, {
+          owner: "Index.inlineBootstrap.force-login"
+        }),
+      window.nav = function(id, opts) {
+        try {
+          var _now = Date.now ? Date.now(): 0,
+          _preserveLoading = !(!opts || !opts.preserveLoadingSwal) || !!(window.__APP_PRESERVE_LOADING_SWAL_UNTIL && _now < Number(window.__APP_PRESERVE_LOADING_SWAL_UNTIL || 0)); window.AppRuntime && window.AppRuntime.clearUiBlocks && window.AppRuntime.clearUiBlocks("nav",
+            {
+              closeLoadingSwal: !_preserveLoading,
+              closeSidebar: !0,
+              clearSectionOverlays: !0
+            })
+        } catch (_navUnblockErr) {
+          __appObserve(_navUnblockErr, "ec")
+        }
+        try {
+          window.toggleSidebar && window.toggleSidebar(!1)
+        } catch (_navSidebarErr) {
+          __appObserve(_navSidebarErr, "ec")
+        }
+        var _navRole = appNavRole(); if (!appNavAllowed(id, _navRole) && !(appNavAuthenticated() && opts && opts.target && opts.target.offsetParent !== null && String(id) !== "admin"))return!1; try {
+          appNavAuthenticated() && applyNavMenuAccess(resolveCurrentRole(), {
+              reason: "nav-click",
+              force: !0
+            })
+        } catch (_nav2NavApplyErr) {
+          __appObserve(_nav2NavApplyErr, "nav2.nav.apply")
+        }
+        var target = routeFromNav(id); return routeState.path !== target ? safeApplyRoute(target, !1,
+          "nav:" + id): (domNext(function() {
+              return Promise.resolve(schedulePageActivation(id, "nav-same-route")).catch (function(err) {
+                  return releaseUiLock("nav-same-route-error:" + id),
+                  window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.navSameRouteActivation",
+                    err, {
+                      pageId: id
+                    }),
+                  !1
+                })
+            }), !0)
+      },
+      window.addEventListener("hashchange", function() {
+          safeApplyRoute(location.hash || "/login", !0, "hashchange")
+        }),
+      document.addEventListener("app:user-changed", function(e) {
+          try {
+            syncStateFromStore(); try {
+              bridgeState.authenticated && applyNavMenuAccess(resolveCurrentRole(), {
+                  reason: "app:user-changed"
+                })
+            } catch (_nav2ApplyErr) {
+              __appObserve(_nav2ApplyErr, "nav2.userChanged.apply")
+            }
+            var target = bridgeState.authenticated ? BOOT.defaultRoute || "/dashboard": "/login"; waitCoreForAuthenticatedRoute("app:user-changed").then(function() {
+                return safeApplyRoute(target, !0, "app:user-changed")
+              })
+          } catch (err) {
+            releaseUiLock("user-changed-route-error"); try {
+              window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.userChanged",
+                err, {
+                  detail: e && e.detail || null
+                })
+            } catch (_warn) {
+              __appObserve(_warn, "route.userChanged.warn")
+            }
+          }
+        }); try {
+        var mountHost = document.getElementById("app"); mountHost && mountHost.setAttribute("data-static-shell-preserved",
+          "1"); try {
+          var bootStatus = document.getElementById("app-boot-status"); bootStatus && bootStatus.parentNode && bootStatus.parentNode.removeChild(bootStatus)
+        } catch (_bootStatusErr) {
+          __appObserve(_bootStatusErr, "plain.boot.status")
+        }
+        try {
+          window.AppLogin && __appIsFn(window.AppLogin.init) && window.AppLogin.init()
+        } catch (_loginBindErr) {
+          __appObserve(_loginBindErr, "plain.boot.loginInit")
+        }
+        Promise.resolve().then(function() {
+            return bootstrapFromSessionStorage()
+          }).then(function(authenticated) {
+            var target = authenticated ?(location.hash && location.hash !== "#/login" ? location.hash: BOOT.defaultRoute || BOOT.page || "/dashboard"): "/login"; return waitCoreForAuthenticatedRoute("plain-dom-bootstrap").then(function() {
+                return safeApplyRoute(target, !0, "plain-dom-bootstrap")
+              })
+          }).catch (function(err) {
+            try {
+              window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.plainDomBootstrap",
+                err)
+            } catch (_warn) {
+              __appObserve(_warn, "plain.boot.warn")
+            }
+            return safeApplyRoute("/login", !0, "plain-dom-bootstrap-fallback").catch (function() {
+                setShellMode(!1)
+              })
+          })
+      } catch (bootError) {
+        document.documentElement.classList.add("app-plain-boot-error"); try {
+          window.AppRuntime && window.AppRuntime.handleError && window.AppRuntime.handleError(bootError,
+            "โหลดระบบไม่สำเร็จ")
+        } catch (_e4) {
+          typeof __appObserve == "function" && __appObserve(_e4, "plain.boot.error")
+        }
+        showVueUnavailableMode()
+      }
+    }; bindSidebarNavClicks(); startVueBootstrap()
+  })();
+</script>
 </body>
 </html>
