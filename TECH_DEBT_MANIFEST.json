@@ -1,12 +1,12 @@
 {
   "releaseTrack": "production-current",
   "ledgerModel": "production-current-single-ledger",
-  "release": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-  "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-  "assetStamp": "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-  "updatedAt": "2026-07-10T13:45:00+07:00",
+  "release": "commission-v1.2-gas-hosted-production-2026-07-10-r21",
+  "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r21",
+  "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r21",
+  "updatedAt": "2026-07-10T16:30:00+07:00",
   "releaseGate": "tools/phaseN_legacy_transport_gate.py",
-  "transportMode": "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
+  "transportMode": "production-gas-hosted-google-script-run-api-router",
   "singleSourcePolicy": "docs/SINGLE_SOURCE_POLICY.md",
   "canonicalFrontendSource": "gas-backend/Scripts_*.html",
   "generatedMirror": "github-pages/partials/Scripts_*.html",
@@ -319,8 +319,8 @@
   "version": "1.2.0-production-current",
   "releaseAlignment": {
     "packageVersion": "1.2.0-production-current",
-    "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-    "assetStamp": "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20"
+    "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r21",
+    "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r21"
   },
   "criticalRuntimeDuplicationCleanupLedger": {
     "stamp": "production-current-critical-runtime-single-owner-2026-07-06-r1",
@@ -974,7 +974,7 @@
       "root.apiCall"
     ],
     "coreRuntimeBytesBefore": 483648,
-    "coreRuntimeBytesAfter": 471307,
+    "coreRuntimeBytesAfter": 471312,
     "coreRuntimeBytesRemoved": 12341,
     "canonicalRuntimeAndPageBytesRemoved": 13213,
     "allMirrorsAndRuntimeBytesRemoved": 26901,
@@ -1058,7 +1058,7 @@
       "Code_30_Domain_Cases MeetingDomain canonical sheet read and summary bundle owner",
       "Code_00_PlatformCore GAS backend entry URL validator and manual-link renderer"
     ],
-    "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+    "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r21",
     "noNewFiles": true,
     "noNewApiRoutes": true,
     "routeNamesChanged": false,
@@ -1071,5 +1071,22 @@
     "backendEntryAutoRedirectRemoved": true,
     "backendEntryGoogleHostRejected": true,
     "connectionResetFailSafe": true
+  },
+  "step7GasHostedProductionRewrite": {
+    "stamp": "production-current-step7-gas-hosted-direct-2026-07-10-r1",
+    "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r21",
+    "hostingOwner": "Google Apps Script HtmlService Web App",
+    "browserTransportOwner": "gas-backend/Scripts_Critical_Login_Runtime.html::AppTransport.run",
+    "serverEntryOwner": "gas-backend/Code_00_PlatformCore.gs::doGet -> renderVue3App_",
+    "serverApiOwner": "gas-backend/Code_20_Router.gs::apiRouter",
+    "transportPath": "GAS Index.html -> AppPageKit.apiRunner -> AppRuntime.call -> AppTransport.run -> google.script.run.apiRouter",
+    "vercelRequired": false,
+    "newApiRoutes": 0,
+    "newFiles": 0,
+    "routeNamesChanged": false,
+    "writeSchemaChanged": false,
+    "spreadsheetSchemaChanged": false,
+    "businessRulesChanged": false,
+    "uiStructureChanged": false
   }
 }

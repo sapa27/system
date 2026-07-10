@@ -1,8 +1,8 @@
 {
-  "name": "commission-system-vercel-proxy-only",
+  "name": "commission-system-gas-hosted-production",
   "private": true,
   "version": "1.2.0-production-current",
-  "description": "Vercel frontend and GAS backend proxy with deep runtime stability, payload-limit alignment, URL safety, and production-current contract locks.",
+  "description": "Google Apps Script hosted frontend and backend using one canonical apiRouter through google.script.run; Vercel files are retained only as an optional static backup.",
   "scripts": {
     "generate:vercel-env": "python3 tools/generate_vercel_env.py",
     "gate:security": "python3 tools/phaseG_security_gate.py",
@@ -21,7 +21,8 @@
     "test:api-facade": "COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
     "test:router-consolidation": "COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
     "test:proxy-origin": "COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
-    "test:runtime-bootstrap-meeting": "COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict"
+    "test:runtime-bootstrap-meeting": "COMMISSION_STRICT_GATES=1 python3 tools/phaseN_legacy_transport_gate.py --strict",
+    "test:gas-hosted": "node -e 'const fs=require(\"fs\");const p=fs.readFileSync(\"gas-backend/Code_00_PlatformCore.gs\",\"utf8\");const c=fs.readFileSync(\"gas-backend/Scripts_Critical_Login_Runtime.html\",\"utf8\");if(!/function doGet\\(e\\)[\\s\\S]*renderVue3App_\\(e\\)/.test(p))throw new Error(\"GAS_UI_ENTRY_MISSING\");if(!c.includes(\".apiRouter({\")||!c.includes(\"production-gas-hosted-google-script-run-api-router\"))throw new Error(\"GAS_DIRECT_TRANSPORT_MISSING\");if(c.includes(\"VERCEL_FRONTEND_REQUIRED\")||c.includes(\"resolveCriticalProxyEndpoint_\"))throw new Error(\"PROXY_ONLY_CRITICAL_OWNER_REMAINS\");console.log(JSON.stringify({ok:true,mode:\"gas-hosted-direct\"}));'"
   },
   "dependencies": {},
   "devDependencies": {},
@@ -29,7 +30,7 @@
     "node": "24.x"
   },
   "packageManager": "npm@10.8.2",
-  "release": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-  "releaseStamp": "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-  "assetStamp": "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20"
+  "release": "commission-v1.2-gas-hosted-production-2026-07-10-r21",
+  "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-10-r21",
+  "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r21"
 }
