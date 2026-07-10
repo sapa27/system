@@ -5456,7 +5456,31 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
       var side = mobileSidebarEl(),
       open; return side ?(open = typeof force == "boolean" ? force: !side.classList.contains("show"),
         setMobileSidebarOpen(open)): !1
-    }; function bindSidebarNavClicks() {
+    };
+    var APP_ROUTE_MAP = Object.freeze({
+      login: "/login",
+      dash: "/dashboard",
+      dashboard: "/dashboard",
+      search: "/search",
+      petitioner: "/petitioner",
+      meeting: "/meeting",
+      "committee-meeting": "/committee-meeting",
+      committeemeeting: "/committee-meeting",
+      committee: "/committee-meeting",
+      people: "/people",
+      personnel: "/people",
+      budget: "/budget",
+      track: "/track",
+      report: "/report",
+      admin: "/admin"
+    });
+    function appRouteTargetFromNav(id, fallback) {
+      var key = String(id || "").trim().toLowerCase();
+      return APP_ROUTE_MAP[key] || fallback || "/dashboard"
+    }
+    window.__APP_ROUTE_MAP__ = APP_ROUTE_MAP;
+    window.__APP_ROUTE_TARGET_FROM_NAV__ = appRouteTargetFromNav;
+    function bindSidebarNavClicks() {
       if (window.__APP_DOM_ROUTE_CLICK_BOUND__ === !0)return!0; window.__APP_DOM_ROUTE_CLICK_BOUND__ = !0; appBootSet("__APP_SIDEBAR_NAV_CLICK_OWNER__",
         !0, {
           owner: "Index.dom-route-click-central-rewrite"
@@ -5496,7 +5520,7 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
           __appObserve(_side, "route.click.sidebar")
         }
         var hashTarget = "#/" + navId,
-        routeTarget = routeMap[String(navId || "").trim().toLowerCase()] || "/" + navId;
+        routeTarget = appRouteTargetFromNav(navId, "/" + navId);
         function recordRouteFailure(err, stage) {
           try {
             window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("navigation.sidebar.recover",
@@ -5630,25 +5654,8 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
           defaultRoute: "/dashboard",
           baseUrl: ""
         }, window.__APP_BOOTSTRAP__ || {
-        }),
-      routeMap = {
-        login: "/login",
-        dash: "/dashboard",
-        dashboard: "/dashboard",
-        search: "/search",
-        petitioner: "/petitioner",
-        meeting: "/meeting",
-        "committee-meeting": "/committee-meeting",
-        committeeMeeting: "/committee-meeting",
-        committee: "/committee-meeting",
-        people: "/people",
-        personnel: "/people",
-        budget: "/budget",
-        track: "/track",
-        report: "/report",
-        admin: "/admin"
-      }; function routeFromNav(id) {
-        return routeMap[String(id || "").trim().toLowerCase()] || "/dashboard"
+        }); function routeFromNav(id) {
+        return appRouteTargetFromNav(id, "/dashboard")
       }
       function navFromRoute(path) {
         var inverse; return {
