@@ -95,7 +95,13 @@
   inline: "",
   active: "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22/%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C/text%3E%3C/svg%3E",
   source: "github-static-default"
-}, window.APP_PWA_MANIFEST = window.APP_PWA_MANIFEST || {
+}, function appManifestIconType(src) {
+  src = String(src || "").trim().toLowerCase();
+  if (src.indexOf("data:image/svg+xml") === 0 || /\.svg(?:[?#]|$)/.test(src)) return "image/svg+xml";
+  if (src.indexOf("data:image/webp") === 0 || /\.webp(?:[?#]|$)/.test(src)) return "image/webp";
+  return "image/png";
+}
+window.APP_PWA_MANIFEST = window.APP_PWA_MANIFEST || {
   name: "ระบบบริหารจัดการเรื่องพิจารณา",
   short_name: "Committee App",
   start_url: "./",
@@ -105,12 +111,12 @@
   icons: [{
       src: window.APP_LOGO.png192,
       sizes: "192x192",
-      type: "image/png"
+      type: appManifestIconType(window.APP_LOGO.png192)
     },
     {
       src: window.APP_LOGO.png512,
       sizes: "512x512",
-      type: "image/png"
+      type: appManifestIconType(window.APP_LOGO.png512)
     }]
 };
 try {
@@ -129,7 +135,6 @@ window.AppBoot && window.AppBoot.setFlag("__APP_ASSET_POLICY_CURRENT__", {
     pinExactBuilds: !0,
     allowFloatingMajorBuild: !1,
     criticalPreload: ["logo",
-      "vue",
       "sweetalert2"],
     onDemandExternalGroups: ["bootstrap",
       "xlsx"],
@@ -209,8 +214,8 @@ window.__SAFE_LOGO_URL__ = window.currentLogoUrl || window.DEFAULT_LOGO, (functi
   runtimeAuthContract: "runtime-auth-production-current-overwrite-correction",
   logoUrl: "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22/%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C/text%3E%3C/svg%3E",
   defaultRoute: "/dashboard",
-  appStamp: "github-pages-static-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-  assetStamp: "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+  appStamp: "github-pages-static-commission-v1.2-gas-hosted-production-2026-07-10-r27",
+  assetStamp: "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r27",
   baseUrl: "",
   uiMode: "vue3",
   enabledVuePages: ["/login",
@@ -228,7 +233,7 @@ window.__SAFE_LOGO_URL__ = window.currentLogoUrl || window.DEFAULT_LOGO, (functi
   printStandard: {
   }
 }, window.__APP_ASSET_MANIFEST__ = {
-  stamp: "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+  stamp: "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r27",
   bundles: {
     appCritical: {
       files: []

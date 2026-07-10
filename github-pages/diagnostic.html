@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport"content="width=device-width,initial-scale=1">
-<title>Production current Vercel Proxy-only Diagnostic</title>
+<title>P2 Runtime Stability Diagnostic</title>
 <style>
 body{
   font-family:Sarabun,Arial,sans-serif;
@@ -59,7 +59,7 @@ input{
 </head>
 <body>
 <div class="card">
-<h1>ตรวจสอบ Production current:Vercel Proxy-only→GAS</h1>
+<h1>ตรวจสอบ P2 Runtime Stability: Vercel Proxy → GAS</h1>
 <p>หน้านี้ทดสอบว่า frontend เรียก GAS ผ่าน same-origin Vercel API proxy เท่านั้น โดยไม่ใช้browser JSONP,hidden GAS bridge หรือ login POST iframe</p>
 <p><strong>Proxy API:</strong><code id="apiUrl"></code></p>
 <p><strong>Login API:</strong><code id="loginUrl"></code></p>
@@ -71,13 +71,13 @@ input{
 <p><input id="diagUser"autocomplete="username"placeholder="username/email สำหรับทดสอบ login"><input id="diagPass"autocomplete="current-password"type="password"placeholder="password"><button id="runBtn">เริ่มตรวจสอบ</button></p>
 <pre id="out">รอกดปุ่มตรวจสอบ...</pre>
 </div>
-<script src="./vercel-env.generated.js?v=commission-v1.2-deep-stability-hardening-2026-07-10-r20">
+<script src="./vercel-env.generated.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
 
 </script>
-<script src="./app-config.js?transport=production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe&v=commission-v1.2-deep-stability-hardening-2026-07-10-r20">
+<script src="./app-config.js?transport=production-vercel-proxy-only&v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
 
 </script>
-<script src="./github-gas-transport.js?transport=production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe&v=commission-v1.2-deep-stability-hardening-2026-07-10-r20">
+<script src="./github-gas-transport.js?transport=production-vercel-proxy-only&v=commission-v1.2-gas-hosted-production-2026-07-10-r27">
 
 </script>
 <script>
@@ -144,32 +144,45 @@ async function proxyCall(method, payload) {
     });
 }
 async function run() {
-  $('out').textContent = 'เริ่มตรวจสอบ Production current...';
+  $('out').textContent = 'เริ่มตรวจสอบ P2 Runtime Stability...';
   try {
-    write('1) ตรวจ Production current proxy-only config');
-    const status = window.AppTransport && window.AppTransport.phase2Status ? window.AppTransport.phase2Status(): {
-    };
-    write(JSON.stringify(status, null, 2));
+    write('1) ตรวจ Runtime/Transport owner และ release coherence');
+    const ownerHealth = window.AppTransport && window.AppTransport.runtimeOwnerStatus ? window.AppTransport.runtimeOwnerStatus(): { ok: false, errors: ['RUNTIME_OWNER_STATUS_MISSING'] };
+    write(JSON.stringify(ownerHealth, null, 2));
+    if (!ownerHealth.ok) throw new Error('APP_RUNTIME_OWNER_MISMATCH: ' + (ownerHealth.errors || []).join(','));
+    if (window.AppTransport && window.AppTransport.assertRuntimeOwner) window.AppTransport.assertRuntimeOwner('diagnostic');
+    const releaseHealth = window.AppTransport && window.AppTransport.releaseStatus ? window.AppTransport.releaseStatus(): { ok: false };
+    write(JSON.stringify(releaseHealth, null, 2));
+    if (!releaseHealth.ok) throw new Error('RELEASE_STAMP_MISMATCH');
+    const status = window.AppTransport && window.AppTransport.phase2Status ? window.AppTransport.phase2Status(): {};
+    write('2) ตรวจ cache policy ของ boot-critical JavaScript');
+    for (const asset of ['./github-gas-transport.js','./critical-login-runtime.js','./app-index-bootstrap.js']) {
+      const head = await fetch(asset + '?v=' + encodeURIComponent(cfg().releaseStamp || ''), { method: 'HEAD', cache: 'no-store', credentials: 'same-origin' });
+      const cacheControl = head.headers.get('cache-control') || '';
+      write(asset + ' HTTP ' + head.status + ' cache-control=' + cacheControl);
+      if (!head.ok) throw new Error('BOOT_ASSET_UNAVAILABLE:' + asset);
+      if (!/no-cache|max-age=0|no-store/i.test(cacheControl)) throw new Error('BOOT_ASSET_STALE_CACHE_POLICY:' + asset);
+    }
     if (!cfg().vercelApiProxyEnabled)throw new Error('VERCEL_PROXY_NOT_ENABLED');
     if (cfg().legacyTransportRemoved !== true)throw new Error('PHASE_N_LEGACY_TRANSPORT_NOT_REMOVED');
     if (cfg().loginFormPost !== false)throw new Error('LOGIN_POST_IFRAME_SHOULD_BE_DISABLED');
     if ((cfg().publicJsonpReadMethods || []).length)throw new Error('PUBLIC_JSONP_METHODS_SHOULD_BE_EMPTY');
     if (status.legacyTransportRemoved !== true)throw new Error('APPTRANSPORT_LEGACY_TRANSPORT_NOT_REMOVED');
     if (status.jsonpRemoved !== true || status.hiddenBridgeRemoved !== true || status.loginPostIframeRemoved !== true)throw new Error('LEGACY_TRANSPORT_FLAGS_INCOMPLETE');
-    write('2) GET /api/public-config');
+    write('3) GET /api/public-config');
     const pc = await fetchJson(publicConfigUrl(), {
         method: 'GET'
       });
     write(JSON.stringify(pc, null, 2).slice(0, 3000));
     if (!pc || pc.ok === false)throw new Error('PUBLIC_CONFIG_PROXY_FAILED: ' +(pc &&(pc.errorCode || pc.error) || ''));
-    write('3) POST /api/gas apiGetRouteContract');
+    write('4) POST /api/gas apiGetRouteContract');
     const contract = await proxyCall('apiGetRouteContract', {
         diagnostic: true,
         productionCurrent: true
       });
     write(JSON.stringify(contract, null, 2).slice(0, 3000));
     if (!contract || contract.ok === false)throw new Error('API_PROXY_CONTRACT_FAILED: ' +(contract &&(contract.errorCode || contract.error) || ''));
-    write('4) AppTransport.run(apiGetPhase2Contract) ต้องวิ่งผ่าน proxy-only transport');
+    write('5) AppTransport.run(apiGetPhase2Contract) ต้องวิ่งผ่าน proxy-only transport');
     const phase2 = await window.AppTransport.run('apiGetPhase2Contract', {
         diagnostic: true,
         productionCurrent: true
@@ -179,7 +192,7 @@ async function run() {
     const username = $('diagUser').value.trim();
     const password = $('diagPass').value;
     if (username && password) {
-      write('5) ทดสอบ /api/login ด้วยผู้ใช้จริง');
+      write('6) ทดสอบ /api/login ด้วยผู้ใช้จริง');
       const login = await window.AppTransport.run('apiLogin', {
           username,
           password
@@ -200,7 +213,7 @@ async function run() {
         _csrf: csrfToken,
         githubUsername: user.username || user.email || username
       };
-      write('6) ทดสอบ dashboard ผ่าน /api/gas หลัง login');
+      write('7) ทดสอบ dashboard ผ่าน /api/gas หลัง login');
       const dash = await window.AppTransport.run('apiGetDashboardBundle', Object.assign({
             diagnostic: true,
             productionCurrent: true,
@@ -212,9 +225,9 @@ async function run() {
       write(JSON.stringify(redact(dash), null, 2).slice(0, 3000));
       if (!dash || dash.ok === false)throw new Error('DASHBOARD_PROXY_FAILED');
     } else {
-      write('5) ข้าม login/dashboard เพราะไม่ได้กรอก username/password');
+      write('6) ข้าม login/dashboard เพราะไม่ได้กรอก username/password');
     }
-    write('\nผลลัพธ์: OK - Production current proxy-only พร้อมใช้งาน');
+    write('\nผลลัพธ์: OK - P2 runtime owner, release และ proxy พร้อมใช้งาน');
   } catch (e) {
     write('\nผลลัพธ์: ERROR');
     write(String(e && e.message || e));
