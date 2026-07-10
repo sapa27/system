@@ -7,15 +7,15 @@ var __APP_GLOBAL__ =(function() {
     return {
     }
   })(), APP_DEPLOY_RELEASE = Object.freeze({
-    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-    channel: "vercel-api-proxy-only-gas-backend",
-    buildName: "V1.2 Production current proxy-only contract freeze",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-10-r21",
+    channel: "gas-hosted-ui-direct-script-run",
+    buildName: "V1.2 Production GAS-hosted direct transport",
     releaseDate: "2026-07-02",
-    assetStamp: "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-    sourceFingerprint: "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-    contractStamp: "contract-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
-    transportMode: "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
-    description: "Production current proxy-only frontend; GAS backend remains domain owner."
+    assetStamp: "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r21",
+    sourceFingerprint: "commission-v1.2-gas-hosted-production-2026-07-10-r21",
+    contractStamp: "contract-commission-v1.2-gas-hosted-production-2026-07-10-r21",
+    transportMode: "production-gas-hosted-google-script-run-api-router",
+    description: "Production UI and backend are hosted by GAS; browser calls the canonical apiRouter through google.script.run."
   });
 function _appIsFn_(value) {
   return typeof value == "function"
@@ -626,9 +626,9 @@ function apiGetPhase1Contract(payload) {
   return contract.dataLoadingPerformance = AppBackendCore.dataLoadingPerformanceContract ? AppBackendCore.dataLoadingPerformanceContract(payload || {
     }): {
     ok: !0,
-    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r20"
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-10-r21"
   },
-  contract.stamp = "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+  contract.stamp = "commission-v1.2-gas-hosted-production-2026-07-10-r21",
   ok_(contract, "โหลด Phase 1 data-loading performance contract สำเร็จ")
 }
 AppBackendCore.dataLoadingPerformanceContract = function(payload) {
@@ -636,7 +636,7 @@ AppBackendCore.dataLoadingPerformanceContract = function(payload) {
   },
   {
     ok: !0,
-    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-10-r21",
     owner: "Code_00_PlatformCore.AppBackendCore.dataLoadingPerformanceContract",
     generatedAt: new Date().toISOString(),
     uiDomChanged: !1,
@@ -688,7 +688,7 @@ AppBackendCore.dataLoadingPerformanceContract = function(payload) {
     "Scripts_Page_Admin"];
   return {
     ok: !0,
-    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-10-r21",
     owner: "Code_00_PlatformCore.AppBackendCore.phase2SingleSourceContract",
     generatedAt: new Date().toISOString(),
     uiDomChanged: !1,
@@ -741,7 +741,7 @@ AppBackendCore.VERSION = "backend-contract-current", AppBackendCore.CASE_SEARCH_
   "status",
   "statusMeta",
   "reportColumns"], AppBackendCore.API_ROUTE_CONTRACT_SOURCE = "Code_20_Router._apiRouteRegistry_", AppBackendCore.API_CONTRACT = Object.freeze({
-  }), AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+  }), AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.2-gas-hosted-production-2026-07-10-r21",
 AppBackendCore.API_DTO_CONTRACT_BY_METHOD = {
   apiSearchCasesLite: {
     owner: "CaseDomain.searchCases",
@@ -6456,7 +6456,7 @@ function renderVue3App_(e) {
     []),
   template.evaluate().setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT)
 }
-var GITHUB_GAS_BRIDGE_STAMP = "commission-v1.2-deep-stability-hardening-2026-07-10-r20";
+var GITHUB_GAS_BRIDGE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-10-r21";
 function __platformCacheLedgerAppend__(value) {
   try {
     return JSON.stringify(value == null ? null: value)
@@ -6539,7 +6539,10 @@ function _bw() {
     legacyJsonpTransportRemoved: !0,
     legacyGasBridgeTransportRemoved: !0,
     legacyLoginPostIframeRemoved: !0,
-    hostingTarget: "vercel-api-proxy",
+    hostingTarget: "gas-html-service",
+    transportMode: "production-gas-hosted-google-script-run-api-router",
+    gasHostedFrontendReady: !0,
+    gasDirectApiRouterEnabled: !0,
     vercelBuildTool: "tools/generate_vercel_env.py",
     contractFinalCleanup: !0,
     securityHardening: !0,
@@ -6579,11 +6582,11 @@ function _W(result, method) {
 function _legacyTransportDisabled_(source, requestId) {
   return {
     ok: !1,
-    error: "LEGACY_TRANSPORT_DISABLED: production-current uses Vercel proxy only",
+    error: "LEGACY_TRANSPORT_DISABLED: production-current uses GAS HtmlService with google.script.run.apiRouter",
     errorCode: "LEGACY_TRANSPORT_DISABLED",
     source: String(source || "legacy-transport"),
     requestId: String(requestId || ""),
-    transport: "production-vercel-proxy-only",
+    transport: "production-gas-hosted-google-script-run-api-router",
     securityHardening: !0,
     releaseStamp: GITHUB_GAS_BRIDGE_STAMP
   }
@@ -6719,35 +6722,18 @@ function _bS(e) {
   };
   return cb ? _githubJsOut_(cb + "(" + __platformCacheLedgerAppend__(result) + ");"): _bg(result)
 }
-function _productionFrontendEntryUrl_() {
-  var raw = "";
-  try {
-    raw = String(_scriptProp_("VERCEL_FRONTEND_URL", "") || _scriptProp_("APP_FRONTEND_URL", "") || "").trim().replace(/\s+/g, "");
-  } catch (_frontendPropertyError) {
-    raw = "";
-  }
-  if (!/^https:\/\/[A-Za-z0-9.-]+(?::\d+)?(?:[\/?#].*)?$/i.test(raw)) return "";
-  var match = raw.match(/^https:\/\/([^\/?#:]+)(?::\d+)?/i);
-  var host = match && match[1] ? String(match[1]).toLowerCase() : "";
-  if (!host || /(^|\.)(?:google\.com|googleusercontent\.com|googleapis\.com)$/i.test(host)) return "";
-  if (/^(?:script|docs|drive|accounts)\.google\.com$/i.test(host)) return "";
-  return raw;
-}
-function _renderVercelFrontendEntry_() {
-  var frontendUrl = _productionFrontendEntryUrl_();
-  var title = "ระบบบริหารจัดการเรื่องพิจารณา";
-  var safeUrl = frontendUrl ? frontendUrl.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "";
-  var action = frontendUrl
-    ? '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#0b5ed7;color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">เปิดระบบบน Vercel Production</a><p style="color:#64748b;margin-top:14px">ระบบจะไม่เปลี่ยนหน้าอัตโนมัติ เพื่อป้องกัน URL ผิด โดเมนใช้งานไม่ได้ หรือวงจร redirect</p>'
-    : '<div style="background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:14px;border-radius:8px"><strong>ยังไม่ได้กำหนด Vercel Production URL ที่ถูกต้อง</strong><br>ตั้ง Script Property <code>VERCEL_FRONTEND_URL</code> เป็น URL แบบ <code>https://your-domain.vercel.app</code> หรือ custom domain ที่เปิดใช้งานจริง ห้ามใช้ GAS / Google URL</div>';
-  var html = '<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + title + '</title></head><body style="font-family:Arial,\'Sarabun\',sans-serif;background:#f8fafc;color:#0f172a;margin:0"><main style="max-width:760px;margin:48px auto;padding:28px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 12px 36px rgba(15,23,42,.08)"><h1 style="font-size:24px;margin-top:0">GAS Backend พร้อมใช้งาน</h1><p>URL นี้เป็น Backend สำหรับ Vercel API Proxy และไม่ใช่หน้า Production UI</p>' + action + '<hr style="border:0;border-top:1px solid #e2e8f0;margin:24px 0"><p style="font-size:13px;color:#64748b">Health check: เพิ่ม <code>?health=1</code> ที่ท้าย GAS deployment URL</p></main></body></html>';
-  return HtmlService.createHtmlOutput(html).setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
 function doGet(e) {
-  var p = e && e.parameter || {
-  },
-  legacy = p.__githubBridgeClient != null || p.__githubBridgeNamedRequest != null || p.__githubJsonpApi != null || p.__githubFastLogin != null;
-  return p.__githubPublicConfig != null ? _bF(e): legacy ? _legacyDoGetDisabled_(e): p.health || p.ping ? _cj(e): _renderVercelFrontendEntry_()
+  var parameters = e && e.parameter || {};
+  var legacyRequest = parameters.__githubBridgeClient != null ||
+    parameters.__githubBridgeNamedRequest != null ||
+    parameters.__githubJsonpApi != null ||
+    parameters.__githubFastLogin != null;
+
+  if (parameters.__githubPublicConfig != null) return _bF(e);
+  if (legacyRequest) return _legacyDoGetDisabled_(e);
+  if (parameters.health || parameters.ping) return _cj(e);
+
+  return renderVue3App_(e);
 }
 function _bp(e) {
   var p = e && e.parameter || {
