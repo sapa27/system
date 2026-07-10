@@ -613,7 +613,7 @@ try {
               expectedOwner: "gas-google-script-run",
               actualOwner: root2.AppTransport.__owner || "",
               transportMode: root2.AppTransport.transportMode || "",
-              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r29",
+              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r30",
               errors: errors
             };
           },
@@ -635,7 +635,7 @@ try {
               owner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
               gasHosted: true,
               directApiRouter: true,
-              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r29",
+              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r30",
               runtimeHealth: health,
               inFlight: Object.keys(criticalGasInFlight).length,
               metrics: Object.assign({}, criticalGasMetrics)
@@ -677,7 +677,7 @@ try {
         } catch (e) {
           status = { ok: false, errors: [String(e && e.message || e)] };
         }
-        status.releaseStamp = "commission-v1.2-gas-hosted-production-2026-07-10-r29";
+        status.releaseStamp = "commission-v1.2-gas-hosted-production-2026-07-10-r30";
         status.checkedAt = new Date().toISOString();
         return status;
       }
@@ -879,36 +879,36 @@ try {
       partialSessionPrefix = "__commission_runtime_partial_v1__:",
       partialSessionStamp = txt(manifest().stamp || root2.APP_RELEASE_STAMP || root2.__APP_RELEASE_STAMP__ || "current").replace(/[^A-Za-z0-9_.:-]/g,
         "_");
-      function sessionPartialKey(name) {
+      var sessionPartialKey = function(name) {
         return partialSessionPrefix + partialSessionStamp + ":" + txt(name)
-      }
-      function sessionPartialEligible(name, html) {
+      },
+      sessionPartialEligible = function(name, html) {
         name = txt(name); var size = txt(html).length; return!!size && size <= 12e5 &&(/^bundle:appCore$/i.test(name) || /^Scripts_(?:Core_Runtime|Page_)/.test(name))
-      }
-      function readSessionPartial(name) {
+      },
+      readSessionPartial = function(name) {
         try {
           if (!root2.sessionStorage)return ""; var value = root2.sessionStorage.getItem(sessionPartialKey(name)) || ""; return sessionPartialEligible(name,
             value) ? value: ""
         } catch (_sessionReadErr) {
           return ""
         }
-      }
-      function writeSessionPartial(name, html) {
+      },
+      writeSessionPartial = function(name, html) {
         try {
           if (!root2.sessionStorage || !sessionPartialEligible(name, html))return!1; root2.sessionStorage.setItem(sessionPartialKey(name),
             html); return!0
         } catch (_sessionWriteErr) {
           return!1
         }
-      }
-      function pruneOldSessionPartials() {
+      },
+      pruneOldSessionPartials = function() {
         try {
           if (!root2.sessionStorage || root2.__APP_PARTIAL_SESSION_CACHE_PRUNED__)return; root2.__APP_PARTIAL_SESSION_CACHE_PRUNED__ = !0; for (var i = root2.sessionStorage.length - 1; i >= 0; i--) {
             var key = root2.sessionStorage.key(i); key && key.indexOf(partialSessionPrefix) === 0 && key.indexOf(partialSessionPrefix + partialSessionStamp + ":") !== 0 && root2.sessionStorage.removeItem(key)
           }
         } catch (_sessionPruneErr) {
         }
-      }
+      };
       pruneOldSessionPartials(); var core = root2.__APP_CORE_RUNTIME_FILES__ && root2.__APP_CORE_RUNTIME_FILES__.slice() || bundle("appCore"); core.length ||(core = ["Scripts_Core_Runtime"]),
       root2.AppCritical = {
         ensureCoreRuntime: ensureCore,

@@ -914,12 +914,12 @@ var __appIsFn = typeof window != "undefined" && window.__appIsFn || function(v) 
 <script>
 window.APP_LOGO = window.APP_LOGO || <?!=JSON.stringify(__logo||{})?> || {
 };
-function appManifestIconType(src) {
+window.appManifestIconType = window.appManifestIconType || function(src) {
   src = String(src || '').trim().toLowerCase();
   if (src.indexOf('data:image/svg+xml') === 0 || /\.svg(?:[?#]|$)/.test(src)) return 'image/svg+xml';
   if (src.indexOf('data:image/webp') === 0 || /\.webp(?:[?#]|$)/.test(src)) return 'image/webp';
   return 'image/png';
-}
+};
 window.APP_PWA_MANIFEST = window.APP_PWA_MANIFEST || {
   name: 'ระบบบริหารจัดการเรื่องพิจารณา',
   short_name: 'Committee App',
@@ -930,12 +930,12 @@ window.APP_PWA_MANIFEST = window.APP_PWA_MANIFEST || {
   icons: [{
       src: window.APP_LOGO.png192,
       sizes: '192x192',
-      type: appManifestIconType(window.APP_LOGO.png192)
+      type: window.appManifestIconType(window.APP_LOGO.png192)
     },
     {
       src: window.APP_LOGO.png512,
       sizes: '512x512',
-      type: appManifestIconType(window.APP_LOGO.png512)
+      type: window.appManifestIconType(window.APP_LOGO.png512)
     }]
 };
 try {
