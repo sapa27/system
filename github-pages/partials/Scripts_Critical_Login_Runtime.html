@@ -438,105 +438,184 @@ try {
         }
       };
 
-      function isGoogleHostedFrontend_() {
-        var host = txt(root2.location && root2.location.hostname || "").toLowerCase();
-        return /(^|\.)script\.google\.com$|(^|\.)script\.googleusercontent\.com$|(^|\.)docs\.google\.com$|(^|\.)googleusercontent\.com$/.test(host)
+      function criticalGasRunner_() {
+        var googleApi = root2.google && root2.google.script;
+        var runner = googleApi && googleApi.run;
+        if (!runner || !__appIsFn(runner.withSuccessHandler) || !__appIsFn(runner.withFailureHandler)) {
+          var unavailable = new Error("GAS runtime ไม่พร้อมใช้งาน กรุณาเปิดระบบจาก URL Web App /exec ของ Google Apps Script");
+          unavailable.code = "GAS_HOST_RUNTIME_REQUIRED";
+          unavailable.errorCode = unavailable.code;
+          throw unavailable;
+        }
+        return runner;
       }
-      function resolveCriticalProxyEndpoint_(method) {
-        var config = root2.APP_CONFIG || {
-        },
-        key = method === "apiLogin" ? "vercelLoginProxyUrl": "vercelApiProxyUrl",
-        fallback = method === "apiLogin" ? "/api/login": "/api/gas",
-        raw = txt(config[key] || fallback).trim() || fallback,
-        resolved;
-        if (isGoogleHostedFrontend_()) {
-          var hostError = new Error("กำลังเปิดระบบจาก GAS backend URL ซึ่งไม่มี Vercel /api proxy กรุณาเปิดระบบจาก Vercel Production URL");
-          hostError.code = "VERCEL_FRONTEND_REQUIRED";
-          hostError.errorCode = hostError.code;
-          hostError.method = method;
-          throw hostError
-        }
-        try {
-          resolved = new URL(raw, root2.location && root2.location.href || "./")
-        } catch (_urlError) {
-          var invalidUrlError = new Error("Vercel proxy URL ไม่ถูกต้อง: " + raw);
-          invalidUrlError.code = "VERCEL_PROXY_URL_INVALID";
-          invalidUrlError.errorCode = invalidUrlError.code;
-          invalidUrlError.method = method;
-          throw invalidUrlError
-        }
-        if (!/^https?:$/.test(resolved.protocol)) {
-          var protocolError = new Error("Vercel proxy URL ต้องใช้ http หรือ https เท่านั้น");
-          protocolError.code = "VERCEL_PROXY_URL_INVALID";
-          protocolError.errorCode = protocolError.code;
-          protocolError.method = method;
-          throw protocolError
-        }
-        return resolved.href
-      }
-      function criticalProxyResponseError_(response, raw, method) {
-        var preview = String(raw || "").slice(0, 300),
-        html = /<html|<!doctype/i.test(preview),
-        googleHtml = html && /google|accounts\.google|workspace|เอกสารเวิร์ดโปรเซสเซอร์|สเปรดชีตผ่านเว็บ/i.test(String(response && response.url || "") + " " + preview),
-        err = new Error(googleHtml ? "ปลายทางส่งหน้า Google HTML แทน JSON: ตรวจว่าเปิดระบบจาก Vercel URL, GAS_WEB_APP_URL เป็น /exec และ Web App access อนุญาตผู้ใช้ที่ต้องการ": "Vercel proxy response ไม่ใช่ JSON");
-        err.code = googleHtml ? "GAS_DEPLOYMENT_ACCESS_OR_URL_INVALID": "VERCEL_PROXY_RESPONSE_NOT_JSON";
-        err.errorCode = err.code;
-        err.method = method;
-        err.response = {
-          ok: !1,
-          error: err.message,
-          errorCode: err.code,
+      function criticalGasFailure_(failure, method) {
+        var message = txt(failure && failure.message || failure || "ไม่สามารถติดต่อ Google Apps Script ได้");
+        var error = new Error(message);
+        error.code = txt(failure && (failure.errorCode || failure.code) || "GAS_SCRIPT_RUN_FAILED");
+        error.errorCode = error.code;
+        error.method = method;
+        error.response = {
+          ok: false,
+          error: message,
+          errorCode: error.code,
           method: method,
-          httpStatus: response && response.status || 0,
-          contentType: response && response.headers && response.headers.get ? response.headers.get("content-type") || "": "",
-          responseUrl: response && response.url || "",
-          rawPreview: preview
+          transport: "gas-hosted-google-script-run"
         };
-        return err
+        return error;
       }
-      root2.AppTransport = root2.AppTransport || {
-      },
-      root2.AppTransport.run = root2.AppTransport.run || function(fn, args, options) {
-        var method = txt(fn),
-        payload = args || {
-        },
-        endpoint;
+      function criticalGasKey_(method, payload) {
         try {
-          endpoint = resolveCriticalProxyEndpoint_(method)
-        } catch (endpointError) {
-          return Promise.reject(endpointError)
+          return method + "::" + JSON_.stringify(payload || {});
+        } catch (_keyError) {
+          return method + "::" + String(Date.now()) + "::" + String(Math.random());
         }
-        var body = method === "apiLogin" ? payload: {
-          method: method,
-          payload: payload,
-          options: options || {
-          },
-          source: "critical-login-proxy-only"
-        }; return fetch(endpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json"
-            },
-            credentials: "same-origin",
-            cache: "no-store",
-            body: JSON.stringify(body)
-          }).then(function(r) {
-            return r.text().then(function(t) {
-                var data = {
-                }; try {
-                  data = t ? JSON.parse(t): {
-                  }
-                } catch (_parseError) {
-                  throw criticalProxyResponseError_(r, t, method)
-                }
-                if (!r.ok || data && data.ok === false) {
-                  var err = new Error(String(data &&(data.error || data.message) ||("proxy status " + r.status))); err.response = data; err.code = data && data.errorCode || "VERCEL_PROXY_ERROR"; err.errorCode = err.code; throw err
-                }
-                return data
-              })
-          })
-      },
+      }
+
+      var criticalGasInFlight = Object.create(null);
+      var criticalGasMetrics = {
+        calls: 0,
+        successes: 0,
+        failures: 0,
+        timeouts: 0,
+        dedupeHits: 0,
+        lastMethod: "",
+        lastDurationMs: 0
+      };
+
+      function runCriticalGasApi_(fn, args, options) {
+        var method = txt(fn).trim();
+        var payload = args && typeof args === "object" ? args : {};
+        var opts = options && typeof options === "object" ? options : {};
+        if (!method) return Promise.reject(criticalGasFailure_("API_METHOD_EMPTY", method));
+
+        var isWrite = root2.isWriteApiMethod && root2.isWriteApiMethod(method);
+        var inFlightKey = isWrite ? "" : criticalGasKey_(method, payload);
+        if (inFlightKey && criticalGasInFlight[inFlightKey]) {
+          criticalGasMetrics.dedupeHits += 1;
+          return criticalGasInFlight[inFlightKey];
+        }
+
+        var timeoutMs = Number(opts.timeoutMs || (isWrite ? 180000 : 120000));
+        timeoutMs = Math.max(10000, Math.min(timeoutMs, 330000));
+        var startedAt = Date.now();
+        criticalGasMetrics.calls += 1;
+        criticalGasMetrics.lastMethod = method;
+
+        var promise = new Promise(function(resolve, reject) {
+          var settled = false;
+          var timer = setTimeout(function() {
+            if (settled) return;
+            settled = true;
+            criticalGasMetrics.timeouts += 1;
+            criticalGasMetrics.lastDurationMs = Date.now() - startedAt;
+            var timeoutError = new Error("GAS API timeout: " + method);
+            timeoutError.code = "GAS_SCRIPT_RUN_TIMEOUT";
+            timeoutError.errorCode = timeoutError.code;
+            timeoutError.method = method;
+            reject(timeoutError);
+          }, timeoutMs);
+
+          function finishSuccess(result) {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            criticalGasMetrics.successes += 1;
+            criticalGasMetrics.lastDurationMs = Date.now() - startedAt;
+            if (result && result.ok === false) {
+              var apiError = criticalGasFailure_(result.error || result.message || "คำขอไม่สำเร็จ", method);
+              apiError.code = txt(result.errorCode || result.code || apiError.code);
+              apiError.errorCode = apiError.code;
+              apiError.response = result;
+              reject(apiError);
+              return;
+            }
+            resolve(result);
+          }
+
+          function finishFailure(failure) {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            criticalGasMetrics.failures += 1;
+            criticalGasMetrics.lastDurationMs = Date.now() - startedAt;
+            reject(criticalGasFailure_(failure, method));
+          }
+
+          try {
+            criticalGasRunner_()
+              .withSuccessHandler(finishSuccess)
+              .withFailureHandler(finishFailure)
+              .apiRouter({
+                method: method,
+                payload: payload,
+                source: "gas-hosted-ui-direct-script-run",
+                transport: "google.script.run",
+                requestedAt: new Date().toISOString()
+              });
+          } catch (invokeError) {
+            finishFailure(invokeError);
+          }
+        });
+
+        if (inFlightKey) {
+          criticalGasInFlight[inFlightKey] = promise;
+          promise.then(function() {
+            delete criticalGasInFlight[inFlightKey];
+          }, function() {
+            delete criticalGasInFlight[inFlightKey];
+          });
+        }
+        return promise;
+      }
+
+      root2.AppTransport = {
+        __owner: "Scripts_Critical_Login_Runtime.html::gas-hosted-direct-transport",
+        __gasHostedDirect: true,
+        __vercelApiProxyOnly: false,
+        __legacyTransportRemoved: true,
+        transportMode: "production-gas-hosted-google-script-run-api-router",
+        run: runCriticalGasApi_,
+        clearApiCache: function() {
+          criticalGasInFlight = Object.create(null);
+          return true;
+        },
+        invalidateClientApiCache: function() {
+          criticalGasInFlight = Object.create(null);
+          return true;
+        },
+        clientCacheStatus: function() {
+          return {
+            ok: true,
+            owner: "backend-router-cache",
+            inFlightOwner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
+            readResponseCache: false,
+            sessionStorageReadCache: false,
+            cacheEntries: 0,
+            inFlight: Object.keys(criticalGasInFlight).length,
+            metrics: Object.assign({}, criticalGasMetrics)
+          };
+        },
+        phase2Status: function() {
+          return {
+            ok: true,
+            transportMode: "production-gas-hosted-google-script-run-api-router",
+            owner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
+            gasHosted: true,
+            directApiRouter: true,
+            inFlight: Object.keys(criticalGasInFlight).length,
+            metrics: Object.assign({}, criticalGasMetrics)
+          };
+        },
+        ping: function() {
+          return runCriticalGasApi_("apiGetRouteContract", {
+            at: new Date().toISOString(),
+            transportMode: "gas-hosted-direct-ping"
+          }, {
+            timeoutMs: 30000
+          });
+        }
+      };
       RT.rawRun = RT.rawRun || function(fn, args, options) {
         return root2.AppTransport.run(fn, args, options || {
           })

@@ -57,7 +57,7 @@ _$I = Array.isArray, _$P = Promise.resolve.bind(Promise), _$X = Math.max;
       noNewFiles: true,
       businessLogicChanged: false,
       owners: {
-        transport: "github-pages/github-gas-transport.js::AppTransport.run",
+        transport: "gas-backend/Scripts_Critical_Login_Runtime.html::AppTransport.run",
         runtime: "gas-backend/Scripts_Core_Runtime.html::AppRuntime/AppApi/AppPageKit",
         helper: "gas-backend/Scripts_Core_Runtime.html::AppPageKit/AppFrontendHelpers/AppDom/AppFormat",
         login: "Scripts_Critical_Login_Runtime.html + github-pages/critical-login-runtime.js",
@@ -7831,7 +7831,7 @@ try {
   if (root && !root.__APP_PRODUCTION_CLIENT_FRESHNESS_READY__) {
     root.__APP_PRODUCTION_CLIENT_FRESHNESS_READY__ = !0;
     var STAMP = "phase3-cache-policy-single-owner-router-current",
-    OWNER = "backend-router-cache + AppTransport.inFlightOnly";
+    OWNER = "backend-router-cache + GAS AppTransport.inFlightOnly";
     function fn(v) {
       return typeof v === "function"
     }
@@ -7854,7 +7854,7 @@ try {
         stamp: STAMP,
         mode: "router-hot-path-contract-owner",
         cachePolicyOwner: "backend-router-cache",
-        clientInFlightOwner: "github-pages/github-gas-transport.js::AppTransport.inFlightOnly",
+        clientInFlightOwner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
         readResponseCache: !1,
         sessionStorageReadCache: !1,
         cacheEntries: 0,
