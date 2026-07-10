@@ -7,13 +7,13 @@ var __APP_GLOBAL__ =(function() {
     return {
     }
   })(), APP_DEPLOY_RELEASE = Object.freeze({
-    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r18",
+    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
     channel: "vercel-api-proxy-only-gas-backend",
     buildName: "V1.2 Production current proxy-only contract freeze",
     releaseDate: "2026-07-02",
-    assetStamp: "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r18",
-    sourceFingerprint: "commission-v1.2-deep-stability-hardening-2026-07-10-r18",
-    contractStamp: "contract-commission-v1.2-deep-stability-hardening-2026-07-10-r18",
+    assetStamp: "asset-manifest-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+    sourceFingerprint: "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
+    contractStamp: "contract-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
     transportMode: "production-vercel-proxy-only-no-jsonp-no-bridge-no-login-iframe",
     description: "Production current proxy-only frontend; GAS backend remains domain owner."
   });
@@ -626,9 +626,9 @@ function apiGetPhase1Contract(payload) {
   return contract.dataLoadingPerformance = AppBackendCore.dataLoadingPerformanceContract ? AppBackendCore.dataLoadingPerformanceContract(payload || {
     }): {
     ok: !0,
-    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r18"
+    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r20"
   },
-  contract.stamp = "commission-v1.2-deep-stability-hardening-2026-07-10-r18",
+  contract.stamp = "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
   ok_(contract, "โหลด Phase 1 data-loading performance contract สำเร็จ")
 }
 AppBackendCore.dataLoadingPerformanceContract = function(payload) {
@@ -636,7 +636,7 @@ AppBackendCore.dataLoadingPerformanceContract = function(payload) {
   },
   {
     ok: !0,
-    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r18",
+    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
     owner: "Code_00_PlatformCore.AppBackendCore.dataLoadingPerformanceContract",
     generatedAt: new Date().toISOString(),
     uiDomChanged: !1,
@@ -688,7 +688,7 @@ AppBackendCore.dataLoadingPerformanceContract = function(payload) {
     "Scripts_Page_Admin"];
   return {
     ok: !0,
-    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r18",
+    stamp: "commission-v1.2-deep-stability-hardening-2026-07-10-r20",
     owner: "Code_00_PlatformCore.AppBackendCore.phase2SingleSourceContract",
     generatedAt: new Date().toISOString(),
     uiDomChanged: !1,
@@ -741,7 +741,7 @@ AppBackendCore.VERSION = "backend-contract-current", AppBackendCore.CASE_SEARCH_
   "status",
   "statusMeta",
   "reportColumns"], AppBackendCore.API_ROUTE_CONTRACT_SOURCE = "Code_20_Router._apiRouteRegistry_", AppBackendCore.API_CONTRACT = Object.freeze({
-  }), AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.2-deep-stability-hardening-2026-07-10-r18",
+  }), AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.2-deep-stability-hardening-2026-07-10-r20",
 AppBackendCore.API_DTO_CONTRACT_BY_METHOD = {
   apiSearchCasesLite: {
     owner: "CaseDomain.searchCases",
@@ -6456,7 +6456,7 @@ function renderVue3App_(e) {
     []),
   template.evaluate().setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT)
 }
-var GITHUB_GAS_BRIDGE_STAMP = "commission-v1.2-deep-stability-hardening-2026-07-10-r18";
+var GITHUB_GAS_BRIDGE_STAMP = "commission-v1.2-deep-stability-hardening-2026-07-10-r20";
 function __platformCacheLedgerAppend__(value) {
   try {
     return JSON.stringify(value == null ? null: value)
@@ -6722,22 +6722,26 @@ function _bS(e) {
 function _productionFrontendEntryUrl_() {
   var raw = "";
   try {
-    raw = String(_scriptProp_("VERCEL_FRONTEND_URL", "") || _scriptProp_("APP_FRONTEND_URL", "") || "").trim().replace(/\s+/g, "")
+    raw = String(_scriptProp_("VERCEL_FRONTEND_URL", "") || _scriptProp_("APP_FRONTEND_URL", "") || "").trim().replace(/\s+/g, "");
   } catch (_frontendPropertyError) {
-    raw = ""
+    raw = "";
   }
-  return /^https:\/\/[A-Za-z0-9.-]+(?::\d+)?(?:[\/?#].*)?$/i.test(raw) ? raw: ""
+  if (!/^https:\/\/[A-Za-z0-9.-]+(?::\d+)?(?:[\/?#].*)?$/i.test(raw)) return "";
+  var match = raw.match(/^https:\/\/([^\/?#:]+)(?::\d+)?/i);
+  var host = match && match[1] ? String(match[1]).toLowerCase() : "";
+  if (!host || /(^|\.)(?:google\.com|googleusercontent\.com|googleapis\.com)$/i.test(host)) return "";
+  if (/^(?:script|docs|drive|accounts)\.google\.com$/i.test(host)) return "";
+  return raw;
 }
 function _renderVercelFrontendEntry_() {
-  var frontendUrl = _productionFrontendEntryUrl_(),
-  title = "ระบบบริหารจัดการเรื่องพิจารณา",
-  html;
-  if (frontendUrl) {
-    html = '<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + title + '</title></head><body><p>กำลังเปิดระบบผ่าน Vercel Production...</p><script>location.replace(' + JSON.stringify(frontendUrl) + ');<\/script><noscript>กรุณาเปิด URL ของ Vercel Production ที่กำหนดไว้ใน Script Property VERCEL_FRONTEND_URL</noscript></body></html>'
-  } else {
-    html = '<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + title + '</title></head><body style="font-family:Arial,sans-serif;max-width:720px;margin:48px auto;padding:24px"><h1>GAS Backend พร้อมใช้งาน</h1><p>ระบบ Production ใช้หน้าเว็บบน Vercel และใช้ URL นี้เป็น Backend เท่านั้น</p><p>กรุณาเปิด Vercel Production URL หรือกำหนด Script Property <strong>VERCEL_FRONTEND_URL</strong> เป็น URL แบบ https:// ของหน้าเว็บ Production</p><p>การเปิด UI จาก GAS URL ถูกปิดเพื่อป้องกันคำขอ <code>/api/login</code> ไปยังโดเมน Google และได้รับ HTML แทน JSON</p></body></html>'
-  }
-  return HtmlService.createHtmlOutput(html).setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+  var frontendUrl = _productionFrontendEntryUrl_();
+  var title = "ระบบบริหารจัดการเรื่องพิจารณา";
+  var safeUrl = frontendUrl ? frontendUrl.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "";
+  var action = frontendUrl
+    ? '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#0b5ed7;color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:700">เปิดระบบบน Vercel Production</a><p style="color:#64748b;margin-top:14px">ระบบจะไม่เปลี่ยนหน้าอัตโนมัติ เพื่อป้องกัน URL ผิด โดเมนใช้งานไม่ได้ หรือวงจร redirect</p>'
+    : '<div style="background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:14px;border-radius:8px"><strong>ยังไม่ได้กำหนด Vercel Production URL ที่ถูกต้อง</strong><br>ตั้ง Script Property <code>VERCEL_FRONTEND_URL</code> เป็น URL แบบ <code>https://your-domain.vercel.app</code> หรือ custom domain ที่เปิดใช้งานจริง ห้ามใช้ GAS / Google URL</div>';
+  var html = '<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + title + '</title></head><body style="font-family:Arial,\'Sarabun\',sans-serif;background:#f8fafc;color:#0f172a;margin:0"><main style="max-width:760px;margin:48px auto;padding:28px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 12px 36px rgba(15,23,42,.08)"><h1 style="font-size:24px;margin-top:0">GAS Backend พร้อมใช้งาน</h1><p>URL นี้เป็น Backend สำหรับ Vercel API Proxy และไม่ใช่หน้า Production UI</p>' + action + '<hr style="border:0;border-top:1px solid #e2e8f0;margin:24px 0"><p style="font-size:13px;color:#64748b">Health check: เพิ่ม <code>?health=1</code> ที่ท้าย GAS deployment URL</p></main></body></html>';
+  return HtmlService.createHtmlOutput(html).setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 function doGet(e) {
   var p = e && e.parameter || {

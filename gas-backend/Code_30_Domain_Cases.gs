@@ -8906,16 +8906,22 @@ function _z28() {
     }
   }
 }
-function _z52(sheetName, includeDeleted) {
+function _z52(sheetName, includeDeleted, options) {
+  options = options || {};
+  var forceFresh = options.forceFresh === !0 || options.noCache === !0 || options.bypassCache === !0;
+  var ttl = forceFresh ? 0 : Math.max(0, Math.min(Number(options.cacheTtlSeconds != null ? options.cacheTtlSeconds : 180) || 0, 600));
   try {
-    return ensureCanonicalHeadersForNewSheet_(sheetName),
-    _rg(sheetName, [], {
-        includeDeleted: includeDeleted === !0,
-        requireCanonical: !0,
-        ttl: 180
-      })
+    ensureCanonicalHeadersForNewSheet_(sheetName);
+    return _rg(sheetName, [], {
+      includeDeleted: includeDeleted === !0,
+      requireCanonical: !0,
+      forceFresh: forceFresh,
+      bypassRequestCache: forceFresh,
+      ttl: ttl,
+      owner: "MeetingDomain.canonicalSheetRead"
+    });
   } catch (e) {
-    throw new Error("ไม่สามารถอ่านชีต " + sheetName + " ได้: " + String(e && e.message || e))
+    throw new Error("ไม่สามารถอ่านชีต " + sheetName + " ได้: " + String(e && e.message || e));
   }
 }
 function _z3(name) {
@@ -9160,76 +9166,100 @@ function _z16(meeting, items) {
   titles.length > 2 ? titles.slice(0, 2).join(" / ") + " และอีก " +(titles.length - 2) + " เรื่อง": titles.join(" / ") || _j(meeting.displayTitle || meeting.summaryTitle || meeting.title || _T9)
 }
 function _z6(payload) {
-  var meetingId = _j((payload = payload || {
-      }).meetingId || payload.id || ""),
-  q = _j(payload.query || payload.q || payload.keyword || "").toLowerCase(),
-  agendaFilter = _j(payload.agendaNo || payload.agenda || ""),
-  meetingsAll = _z52(_S25, !1),
-  itemsAll = _z52(_S8, !1).map(_z72),
-  allGrouped = {
+  payload = payload || {};
+  var meetingId = _j(payload.meetingId || payload.id || "");
+  var q = _j(payload.query || payload.q || payload.keyword || "").toLowerCase();
+  var agendaFilter = _j(payload.agendaNo || payload.agenda || "");
+  var forceFresh = payload.forceFresh === !0 || payload.noCache === !0 || payload.bypassCache === !0;
+  var readOptions = {
+    forceFresh: forceFresh,
+    noCache: forceFresh,
+    bypassCache: forceFresh,
+    cacheTtlSeconds: forceFresh ? 0 : Number(payload.cacheTtlSeconds != null ? payload.cacheTtlSeconds : 180) || 180
   };
+  var meetingsAll = _z52(_S25, !1, readOptions);
+  var itemsAll = _z52(_S8, !1, readOptions).map(_z72);
+  var allGrouped = {};
+
   itemsAll.forEach(function(item) {
-      var id = _s_(item.meetingId); allGrouped[id] ||(allGrouped[id] = []),
-      allGrouped[id].push(item)
-    }),
+    var id = _s_(item.meetingId);
+    if (!allGrouped[id]) allGrouped[id] = [];
+    allGrouped[id].push(item);
+  });
   Object.keys(allGrouped).forEach(function(id) {
-      allGrouped[id].sort(function(a, b) {
-          return Number(a.agendaNo || 0) - Number(b.agendaNo || 0) || Number(a.seq || 0) - Number(b.seq || 0)
-        })
+    allGrouped[id].sort(function(a, b) {
+      return Number(a.agendaNo || 0) - Number(b.agendaNo || 0) || Number(a.seq || 0) - Number(b.seq || 0);
     });
-  var meetingsRaw,
-  meetings = meetingsAll.filter(function(meeting) {
-      var id = _s_(meeting.meetingId); if (meetingId)return id === meetingId; if (!q && !agendaFilter)return!0; var rows = allGrouped[id] || [],
-      hasAgenda = !agendaFilter || rows.some(function(item) {
-          return _s_(item.agendaNo) === String(agendaFilter)
-        }); return!(agendaFilter && !hasAgenda) &&(q ? !!_z34(meeting, q) || rows.some(function(item) {
-            return _z77(meeting, item, q, agendaFilter)
-          }): hasAgenda)
-    }).sort(function(a, b) {
-      var an = Number(_s_(a.meetingNo).replace(/[^0-9.\-]/g, "")),
-      bn = Number(_s_(b.meetingNo).replace(/[^0-9.\-]/g, "")); if (!isNaN(an) && !isNaN(bn) && an !== bn)return an - bn; var cmp = _s_(a.meetingNo).localeCompare(_s_(b.meetingNo),
-        "th", {
-          numeric: !0,
-          sensitivity: "base"
-        }),
-      av,
-      bv; return cmp !== 0 ? cmp: _z15(a.meetingDate) - _z15(b.meetingDate)
-    }).map(_z55),
-  ids = {
-  };
-  meetings.forEach(function(m) {
-      ids[_s_(m.meetingId)] = !0
+  });
+
+  var meetings = meetingsAll.filter(function(meeting) {
+    var id = _s_(meeting.meetingId);
+    if (meetingId) return id === meetingId;
+    if (!q && !agendaFilter) return !0;
+    var rows = allGrouped[id] || [];
+    var hasAgenda = !agendaFilter || rows.some(function(item) {
+      return _s_(item.agendaNo) === String(agendaFilter);
     });
-  var items = itemsAll.filter(function(item) {
-      return ids[_s_(item.meetingId)] === !0
-    }),
-  grouped = {
-  };
-  return items.forEach(function(item) {
-      var id = _s_(item.meetingId); grouped[id] ||(grouped[id] = []),
-      grouped[id].push(item)
-    }),
-  Object.keys(grouped).forEach(function(id) {
-      grouped[id].sort(function(a, b) {
-          return Number(a.agendaNo || 0) - Number(b.agendaNo || 0) || Number(a.seq || 0) - Number(b.seq || 0)
-        })
-    }),
+    if (agendaFilter && !hasAgenda) return !1;
+    return q ? !!_z34(meeting, q) || rows.some(function(item) {
+      return _z77(meeting, item, q, agendaFilter);
+    }) : hasAgenda;
+  }).sort(function(a, b) {
+    var an = Number(_s_(a.meetingNo).replace(/[^0-9.\-]/g, ""));
+    var bn = Number(_s_(b.meetingNo).replace(/[^0-9.\-]/g, ""));
+    if (!isNaN(an) && !isNaN(bn) && an !== bn) return an - bn;
+    var cmp = _s_(a.meetingNo).localeCompare(_s_(b.meetingNo), "th", {
+      numeric: !0,
+      sensitivity: "base"
+    });
+    return cmp !== 0 ? cmp : _z15(a.meetingDate) - _z15(b.meetingDate);
+  }).map(_z55);
+
+  var ids = {};
   meetings.forEach(function(meeting) {
-      var id = _s_(meeting.meetingId),
-      displayTitle = _z16(meeting, grouped[id] || []); meeting.displayTitle = displayTitle,
-      meeting.summaryTitle = displayTitle
-    }),
-  {
-    meetings,
-    items,
+    ids[_s_(meeting.meetingId)] = !0;
+  });
+  var items = itemsAll.filter(function(item) {
+    return ids[_s_(item.meetingId)] === !0;
+  });
+  var grouped = {};
+  items.forEach(function(item) {
+    var id = _s_(item.meetingId);
+    if (!grouped[id]) grouped[id] = [];
+    grouped[id].push(item);
+  });
+  Object.keys(grouped).forEach(function(id) {
+    grouped[id].sort(function(a, b) {
+      return Number(a.agendaNo || 0) - Number(b.agendaNo || 0) || Number(a.seq || 0) - Number(b.seq || 0);
+    });
+  });
+  meetings.forEach(function(meeting) {
+    var id = _s_(meeting.meetingId);
+    var displayTitle = _z16(meeting, grouped[id] || []);
+    meeting.displayTitle = displayTitle;
+    meeting.summaryTitle = displayTitle;
+  });
+
+  return {
+    meetings: meetings,
+    items: items,
     itemsByMeetingId: grouped,
     spec: _z28(),
     filters: {
       query: q,
       agendaNo: agendaFilter,
-      agendaLabel: agendaFilter ? _Q(agendaFilter): "ทุกวาระ"
+      agendaLabel: agendaFilter ? _Q(agendaFilter) : "ทุกวาระ"
+    },
+    meta: {
+      owner: "MeetingDomain.listMeetings",
+      source: forceFresh ? "canonical-sheets-live" : "canonical-sheets-cache",
+      forceFresh: forceFresh,
+      meetingsRead: meetingsAll.length,
+      agendaItemsRead: itemsAll.length,
+      meetingsReturned: meetings.length,
+      agendaItemsReturned: items.length
     }
-  }
+  };
 }
 TrackingDomain.VERSION = "tracking-domain-final-current", TrackingDomain.normalize = function(res) {
   var data = res && res.data && typeof res.data == "object" ? res.data: res;
