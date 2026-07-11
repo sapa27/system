@@ -10,6 +10,7 @@ const PROXY_LARGE_BODY_METHODS = new Set([
 ]);
 const DEFAULT_PROXY_TIMEOUT_MS = 55000;
 const MAX_PROXY_TIMEOUT_MS = 55000;
+const DEFAULT_GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyePJucr2k5kt5xvyOymbatxKIxEJf4pSYWjzeABKPHRjFwlWrmVMZuP7sw2mXWnx-f/exec";
 // GENERATED from gas-backend/Code_20_Router.gs canonical route registry.
 const PROXY_ALLOWED_METHODS = Object.freeze([
   "apiLogin",
@@ -164,7 +165,7 @@ function normalizeGasWebAppUrl(url) {
   return url;
 }
 function gasUrl() {
-  return normalizeGasWebAppUrl(process.env.GAS_WEB_APP_URL || process.env.VERCEL_GAS_WEB_APP_URL || "");
+  return normalizeGasWebAppUrl(process.env.GAS_WEB_APP_URL || process.env.VERCEL_GAS_WEB_APP_URL || process.env.DEFAULT_GAS_WEB_APP_URL || DEFAULT_GAS_WEB_APP_URL || "");
 }
 function isLikelyGasExecUrl(url) {
   return /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:[?#].*)?$/i.test(normalizeGasWebAppUrl(url));
