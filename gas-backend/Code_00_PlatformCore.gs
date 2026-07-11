@@ -7,13 +7,13 @@ var __APP_GLOBAL__ =(function() {
     return {
     }
   })(), APP_DEPLOY_RELEASE = Object.freeze({
-    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r39",
     channel: "gas-hosted-ui-direct-script-run",
     buildName: "V1.2 Production GAS-hosted direct transport",
     releaseDate: "2026-07-02",
-    assetStamp: "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-11-r38",
-    sourceFingerprint: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
-    contractStamp: "contract-commission-v1.2-gas-hosted-production-2026-07-11-r38",
+    assetStamp: "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-11-r39",
+    sourceFingerprint: "commission-v1.2-gas-hosted-production-2026-07-11-r39",
+    contractStamp: "contract-commission-v1.2-gas-hosted-production-2026-07-11-r39",
     transportMode: "production-gas-hosted-google-script-run-api-router",
     description: "Production UI and backend are hosted by GAS; browser calls the canonical apiRouter through google.script.run."
   });
@@ -626,9 +626,9 @@ function apiGetPhase1Contract(payload) {
   return contract.dataLoadingPerformance = AppBackendCore.dataLoadingPerformanceContract ? AppBackendCore.dataLoadingPerformanceContract(payload || {
     }): {
     ok: !0,
-    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38"
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r39"
   },
-  contract.stamp = "commission-v1.2-gas-hosted-production-2026-07-11-r38",
+  contract.stamp = "commission-v1.2-gas-hosted-production-2026-07-11-r39",
   ok_(contract, "โหลด Phase 1 data-loading performance contract สำเร็จ")
 }
 AppBackendCore.dataLoadingPerformanceContract = function(payload) {
@@ -636,7 +636,7 @@ AppBackendCore.dataLoadingPerformanceContract = function(payload) {
   },
   {
     ok: !0,
-    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r39",
     owner: "Code_00_PlatformCore.AppBackendCore.dataLoadingPerformanceContract",
     generatedAt: new Date().toISOString(),
     uiDomChanged: !1,
@@ -688,7 +688,7 @@ AppBackendCore.dataLoadingPerformanceContract = function(payload) {
     "Scripts_Page_Admin"];
   return {
     ok: !0,
-    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r39",
     owner: "Code_00_PlatformCore.AppBackendCore.phase2SingleSourceContract",
     generatedAt: new Date().toISOString(),
     uiDomChanged: !1,
@@ -741,7 +741,7 @@ AppBackendCore.VERSION = "backend-contract-current", AppBackendCore.CASE_SEARCH_
   "status",
   "statusMeta",
   "reportColumns"], AppBackendCore.API_ROUTE_CONTRACT_SOURCE = "Code_20_Router._apiRouteRegistry_", AppBackendCore.API_CONTRACT = Object.freeze({
-  }), AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.2-gas-hosted-production-2026-07-11-r38",
+  }), AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.2-gas-hosted-production-2026-07-11-r39",
 AppBackendCore.API_DTO_CONTRACT_BY_METHOD = {
   apiSearchCasesLite: {
     owner: "CaseDomain.searchCases",
@@ -6456,7 +6456,7 @@ function renderVue3App_(e) {
     []),
   template.evaluate().setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT)
 }
-var GITHUB_GAS_BRIDGE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-11-r38";
+var GITHUB_GAS_BRIDGE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-11-r39";
 function __platformCacheLedgerAppend__(value) {
   try {
     return JSON.stringify(value == null ? null: value)

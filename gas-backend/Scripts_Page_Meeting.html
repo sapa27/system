@@ -791,7 +791,7 @@ var _M = {
           if (t) {
             var n = N(t, ["caseId",
                 "id"]),
-            i = e.resolveCaseRunningNo ? e.resolveCaseRunningNo(t): N(t, ["caseNum",
+            i =(e.resolveCaseRunningNo ? e.resolveCaseRunningNo(t): "") || N(t, ["caseNum",
                 "caseNo",
                 "runningNo"]),
             r = e.resolveCaseReceiveNo ? e.resolveCaseReceiveNo(t): N(t, ["recNo",
@@ -861,7 +861,7 @@ var _M = {
             E(_M.q, n),
             V(n || i || r || A(t)),
             E(_M.x57, i || ""),
-            E(_M.u, _statusForReason),
+            setMeetingSelectValuePreservingLegacy(_M.u, _statusForReason),
             E(_M.x86, r || ""),
             M(_M.x70, k(N(t, ["offerDate",
                     "offerDateText",
@@ -906,9 +906,11 @@ var _M = {
                     "เลขรับวันที่",
                     "วันที่รับคำร้อง",
                     "วันที่รับหนังสือ"]), D(t, "receive"), t && t.recDate)),
-            E(_M.x34, N(t, ["cat",
+            setMeetingSelectValuePreservingLegacy(_M.x34, N(t, ["cat",
                   "caseType",
-                  "type"]) || _M.P),
+                  "type",
+                  "category",
+                  "ประเภท"]) || _M.P),
             E(_M.x85, N(t, ["title",
                   "subject",
                   _M.x20])),
@@ -921,8 +923,12 @@ var _M = {
                   "caseTitle",
                   "topic",
                   "เรื่องพิจารณา"])),
-            E("meeting-subCat", N(t, ["subCat",
-                  "subCategory"]));
+            setMeetingSelectValuePreservingLegacy("meeting-subCat", N(t, ["subCat",
+                  "subCategory",
+                  "caseIssue",
+                  "issue",
+                  "ประเด็นพิจารณา",
+                  "ประเด็น"]));
             var a = N(t, [_M.x,
                 "petitionerName",
                 "petitioner",
@@ -973,7 +979,7 @@ var _M = {
                 _M.x71,
                 _M.x78,
                 "มือถือ"]) || te(a, t);
-            E(_M.o, _f14(o)),
+            E(_M.o, normalizeMeetingPhone(o)),
             !o && a && de(a, t),
             E($meetingIdRespondent, N(t, ["respondent",
                   "accused",
@@ -1650,7 +1656,7 @@ var _M = {
       }
       ne(_M.j, e || "");
       var i = t || te(e, null);
-      return i && E(_M.o, _f14(i)),
+      return i && E(_M.o, normalizeMeetingPhone(i)),
       Ie(),
       !0
     },
@@ -2090,6 +2096,16 @@ var _M = {
         var n = $meetingTypeString == typeof e ? document.getElementById(e): e; return n &&(n.value = null == t ? "": t),
         n
       })(e, null == t ? "": t)
+  }
+  function setMeetingSelectValuePreservingLegacy(id, value) {
+    var node = r(id), normalized = d(value).trim();
+    if (node && "SELECT" === String(node.tagName || "").toUpperCase() && normalized) {
+      var exists = Array.prototype.some.call(node.options || [], function(option) {
+          return d(option.value).trim() === normalized || d(option.textContent).trim() === normalized
+        });
+      if (!exists)node.appendChild(new Option(normalized, normalized));
+    }
+    return E(id, normalized)
   }
   function T(e) {
     return(n && $meetingFn(n.val) ? n.val: function(e) {
@@ -3250,7 +3266,7 @@ var _M = {
   function Te(t) {
     var n = r("meeting-case-badge");
     if (n)if (t) {
-      var i = e.resolveCaseRunningNo ? e.resolveCaseRunningNo(t): d(t.caseNum || "");
+      var i =(e.resolveCaseRunningNo ? e.resolveCaseRunningNo(t): "") || d(t.caseNum || t.caseNo || t.runningNo || "");
       n.textContent = "ลำดับ " + d(i || "-") + " : " + d(t.title || t.caseTitle || "")
     } else n.textContent = "ยังไม่ได้เลือกรายการ"
   }
@@ -6353,329 +6369,128 @@ var _M = {
     }
   })(window, document);
 </script><script data-app-owner="meeting-route-action-owner-current">
-!function(root, doc) {
+(function(root, doc) {
   "use strict";
-  if (root && doc && !root._mRA) {
-    root._mRA = !0;
-    var Kit = root.AppPageKit && root.AppPageKit.moduleKit ? root.AppPageKit.moduleKit("MeetingRouteActionOwner"): root.AppPageKit || root.AppKit || {
-    },
-    txt = Kit && Kit.text || function(v) {
-      return String(null == v ? "": v).replace(/[\u00A0\u200B-\u200D\uFEFF]/g, "").replace(/\s+/g, "").trim()
-    },
-    byId = Kit && Kit.byId || function(id) {
-      return doc.getElementById(id)
-    },
-    setVal = function(id, v) {
-      if (root.AppMeetingStatusLock && $meetingFn(root.AppMeetingStatusLock.setFieldValue))return root.AppMeetingStatusLock.setFieldValue(id,
-        v);
-      var el = byId(id);
-      if (!el)return!1;
-      el.value = null == v ? "": String(v);
-      try {
-        el.dispatchEvent(new Event($meetingEventInput, {
-              bubbles: !0
-            })),
-        el.dispatchEvent(new Event($meetingEventChange, {
-              bubbles: !0
-            }))
-      } catch (_e) {
-        typeof __appObserve === $meetingTypeFunction && $meetingObserve(_e, "c6.SPM:3831")
-      }
-      return!0
-    };
-    function _f43() {
-      try {
-        root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = null;
-        root._mSK = Date.now ? Date.now() + 180: 1;
-        if (root.AppStore && isFn(root.AppStore.set)) {
-          root.AppStore.set($meetingStoreEditSeed, null);
-          root.AppStore.set("search.editSeed", null);
-        }
-      } catch (_e) {
-        $meetingObserve(_e, "meeting.route.clearPendingCreate");
-      }
-    }
-    root.AppMeetingEventOwner && $meetingFn(root.AppMeetingEventOwner.bind) && root.AppMeetingEventOwner.bind([{
-          target: doc,
-          event: $meetingEventClick,
-          options: !0,
-          key: "route-action.click",
-          handler: function(ev) {
-            var btn = ev.target && ev.target.closest ? ev.target.closest('[data-action="meetingEditLog"],[data-action="meetingCreateNew"],#meeting-create-btn'): null; if (btn) {
-              var action = btn.getAttribute("data-action") || ""; if ($meetingActionMeetingEditLog === action)return root.AppEvents && $meetingFn(root.AppEvents.routeAction) ? root.AppEvents.routeAction(ev,
-                {
-                  target: btn,
-                  action: action,
-                  pageId: "meeting",
-                  key: "meeting.route." + action,
-                  handler: function() {
-                    return isFn(root.meetingEditLog) && root.meetingEditLog(ev)
-                  }
-                }): (ev.preventDefault(), ev.stopPropagation && ev.stopPropagation(), isFn(root.meetingEditLog) && root.meetingEditLog(ev)); if ("meetingCreateNew" === action || "meeting-create-btn" === btn.id) {
-                _f43(); setTimeout(function() {
-                    isFn(root.meetingCreateNew) ? root.meetingCreateNew(): _f9()
-                  }, 0)
-              }
-            }
-          }
-        },
-        {
-          target: doc,
-          event: "app:page-activated",
-          options: !0,
-          key: "route-action.page-activated",
-          handler: function(ev) {
-            var d = ev && ev.detail || {
-            },
-            id; if ("meeting" === txt(d.id || d.pageId || d.page || "").replace(/^\//, "")) {
-              var opened = !1,
-              attempts = 0; function openOnce() {
-                if (opened)return; attempts += 1; if (_f55())return opened = !0,
-                void 0; if (attempts >= 2)return opened = !0,
-                _f9(),
-                void 0; root.setTimeout(openOnce, 120)
-              }
-              openOnce()
-            }
-          }
-        }]),
-    root.AppMeetingRouteActionOwner = {
-      owner: "Scripts_Page_Meeting:RouteActionOwner.Current",
-      openManagementForm: _f9,
-      applySearchSeed: _f39,
-      applyPending: _f55
-    }
-  }
-  function isFn(f) {
-    var K = root.AppPageSlim || root.AppRuntimeHelpers || root.AppRuntime || root.ScriptsUtils || {
-    };
-    return K.isFn ? K.isFn(f): $meetingTypeFunction == typeof f
-  }
-  function pick(seed, keys) {
-    var K = root.AppPageSlim || root.AppRuntimeHelpers || root.ScriptsUtils || {
-    };
-    return K.pick ? K.pick(seed, keys, {
-        collapse: true
-      }): ""
-  }
-  function _f39(seed) {
-    if (!seed)return!1;
-    var status = txt(pick(seed, ["status",
-          "caseStatus",
-          "สถานะ",
-          "สถานะเรื่อง"])) || _M.b,
-    map = {
-      "meeting-caseId": pick(seed, ["caseId",
-          "id"]),
-      "meeting-caseNum": pick(seed, ["caseNum",
-          "caseNo",
-          "runningNo",
-          $meetingLabelCaseOrder]),
-      "meeting-recNo": pick(seed, ["recNo",
-          "receiveNo",
-          $meetingLabelReceiveNo]),
-      "meeting-offerDate": pick(seed, ["offerDate",
-          "offerDateText",
-          "dateProposed",
-          "proposalDate",
-          "proposeDate",
-          "proposedDate",
-          "submittedDate",
-          "submitDate",
-          "bookDate",
-          "letterDate",
-          "documentDate",
-          _M.x46,
-          _M.x81,
-          _M.x23,
-          _M.x17,
-          _M.x82,
-          _M.x24]),
-      "meeting-recDate": pick(seed, ["recDateText",
-          "recDate",
-          "receiveDate",
-          "receiveDateText",
-          _M.x32]),
-      "meeting-cat": pick(seed, ["cat",
-          "caseType",
-          "type",
-          "ประเภท"]) || _M.P,
-      "meeting-title": pick(seed, ["title",
-          "subject",
-          _M.x20]),
-      "meeting-caseTitle": pick(seed, ["considerationTitle",
-          $meetingFieldCaseConsiderationTitle,
-          "caseTitle",
-          _M.d,
-          _M.p]),
-      "meeting-subCat": pick(seed, ["subCat",
-          "subCategory",
-          "caseIssue",
-          "issue",
-          _M.x89]),
-      "meeting-petitioners": pick(seed, [_M.x,
-          "petitioner",
-          "petitionerName",
-          _M.R]),
-      "meeting-petitionerPhone": pick(seed, ["petitionerPhone",
-          "petitionerTel",
-          "petitionerPhoneNumber",
-          "requesterPhone",
-          "complainantPhone",
-          "proposerPhone",
-          "phone",
-          "tel",
-          "mobile",
-          "telephone",
-          _M.f,
-          _M.x15,
-          _M.x71]),
-      "meeting-respondent": pick(seed, ["respondent",
-          "accused",
-          "agencyName",
-          "agency",
-          _M.x83,
-          _M.x48]),
-      "meeting-agencyName": pick(seed, ["agencyName",
-          "agency",
-          _M.x48]),
-      "meeting-assignees": pick(seed, [_M.x99,
-          "owner",
-          "responsibleCommissioners"]),
-      "meeting-coAssignees": pick(seed, [_M.x50,
-          "coOwners"]),
-      "meeting-staffs": pick(seed, ["staffs",
-          "staff",
-          "officer"]),
-      "meeting-opStaff": pick(seed, ["opStaff",
-          "operationStaff",
-          "secretariatOfficer"]),
-      "meeting-keySummary": pick(seed, ["keySummary",
-          "summary",
-          "description",
-          _M.x97]),
-      "meeting-remark": pick(seed, ["remark",
-          "note",
-          _M.r]),
-      "meeting-status": status,
-      "meeting-pendingRemark": pick(seed, ["pendingRemark",
-          "pendingReason",
-          "waitReason",
-          "waitingReason",
-          _M.x62,
-          _M.x44,
-          "reason",
-          _M.x10,
-          _M.x31,
-          _M.x7,
-          _M.x16,
-          _M.L,
-          _M.r]),
-      "meeting-closedReason": pick(seed, ["closedReason",
-          "closeReason",
-          "terminateReason",
-          "stopReason",
-          "endReason",
-          "caseCloseReason",
-          "caseEndReason",
-          _M.x62,
-          _M.x44,
-          "reason",
-          _M.x10,
-          _M.x22,
-          _M.U,
-          _M.r]),
-      "meeting-rejectionReason": pick(seed, ["rejectionReason",
-          "rejectReason",
-          "notAcceptedReason",
-          "notReceiveReason",
-          "notAcceptReason",
-          "caseRejectReason",
-          _M.x62,
-          _M.x44,
-          "reason",
-          _M.x10,
-          _M.V,
-          _M.x6,
-          _M.J,
-          _M.r])
-    };
-    Object.keys(map).forEach(function(k) {
-        setVal(k, map[k] || "")
-      });
-    try {
-      var _f25 = txt(byId(_M.u) && byId(_M.u).value) || status;
-      if (_M.z === _f25) {
-        setVal(_M.t, ""),
-        setVal(_M.k, "")
-      } else if (_M.S === _f25) {
-        setVal(_M.h, ""),
-        setVal(_M.k, "")
-      } else if (_M.e === _f25) {
-        setVal(_M.t, ""),
-        setVal(_M.h, "")
-      } else {
-        setVal(_M.t, ""),
-        setVal(_M.h, ""),
-        setVal(_M.k, "")
-      }
-      var ws = byId(_M.x27);
-      ws &&(ws.classList.remove($meetingClassHidden), ws.style.display = "", ws.setAttribute(_M.y, $meetingStringFalse));
-      var p = byId("p-meeting");
-      p &&(p.classList.remove($meetingClassHidden), p.style.display = ""),
-      root.meetingToggleStatusFields && root.meetingToggleStatusFields()
-    } catch (_e) {
-      typeof __appObserve === $meetingTypeFunction && $meetingObserve(_e, "c6.SPM:3915")
-    }
-    return!0
-  }
-  function _f9() {
-    try {
-      var ws = byId(_M.x27);
-      return ws &&(ws.classList.remove($meetingClassHidden), ws.style.display = "", ws.setAttribute(_M.y, $meetingStringFalse)),
-      isFn(root.meetingSetMode) && root.meetingSetMode("case", byId("tab-case-data")),
-      !0
-    } catch (e) {
-      try {
-        root.AppRuntime && root.AppRuntime.recordWarning && root.AppRuntime.recordWarning("meeting.openManagementForm",
-          e)
-      } catch (_) {
-        typeof __appObserve === $meetingTypeFunction && $meetingObserve(_, "c6.SPM:3928")
-      }
-      return!1
-    }
+  if (!root || !doc || root.__APP_MEETING_ROUTE_ACTION_OWNER__)return;
+  root.__APP_MEETING_ROUTE_ACTION_OWNER__ = true;
+
+  var inFlight = null;
+  function isFn(value) { return typeof value === "function"; }
+  function text(value) { return String(value == null ? "" : value).replace(/[\u00A0\u200B-\u200D\uFEFF]/g, " ").replace(/\s+/g, " ").trim(); }
+  function byId(id) { return doc.getElementById(id); }
+  function warn(label, error) {
+    try { root.AppRuntime && root.AppRuntime.recordWarning && root.AppRuntime.recordWarning(label, error); } catch (_) {}
   }
   function pendingSeed() {
-    var skipUntil = Number(root._mSK || 0);
-    if (skipUntil && Date.now && Date.now() < skipUntil)return null;
-    var p = root.__MEETING_SEARCH_EDIT_IN_PROGRESS__;
-    if (p && p.seed)return p.seed;
+    var active = root.__MEETING_SEARCH_EDIT_IN_PROGRESS__;
+    if (active && active.seed)return active.seed;
     try {
-      if (root.AppStore && isFn(root.AppStore.get))return root.AppStore.get($meetingStoreEditSeed, null) || root.AppStore.get("search.editSeed",
-        null)
-    } catch (_e) {
-      typeof __appObserve === $meetingTypeFunction && $meetingObserve(_e, "c6.SPM:3941")
+      if (root.AppStore && isFn(root.AppStore.get))return root.AppStore.get("meeting.editSeed", null) || root.AppStore.get("meeting.searchEditSeed", null) || root.AppStore.get("search.editSeed", null);
+    } catch (error) { warn("meeting.route.pendingSeed", error); }
+    return null;
+  }
+  function clearSeed() {
+    root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = null;
+    try {
+      if (root.AppStore && isFn(root.AppStore.set)) {
+        root.AppStore.set("meeting.editSeed", null);
+        root.AppStore.set("meeting.searchEditSeed", null);
+        root.AppStore.set("search.editSeed", null);
+      }
+    } catch (error) { warn("meeting.route.clearSeed", error); }
+  }
+  function openManagementForm() {
+    try {
+      var workspace = byId("meeting-workspace");
+      if (workspace) {
+        workspace.classList.remove("d-none");
+        workspace.style.display = "";
+        workspace.setAttribute("aria-hidden", "false");
+      }
+      if (isFn(root.meetingSetMode))root.meetingSetMode("case", byId("tab-case-data"));
+      return true;
+    } catch (error) { warn("meeting.route.openManagementForm", error); return false; }
+  }
+  function hydrationSnapshot() {
+    var ids = ["meeting-caseId","meeting-caseNum","meeting-recNo","meeting-title","meeting-caseTitle","meeting-cat","meeting-subCat","meeting-petitioners","meeting-petitionerPhone","meeting-respondent","meeting-agencyName","meeting-assignees","meeting-coAssignees","meeting-staffs","meeting-opStaff","meeting-keySummary","meeting-remark","meeting-status"];
+    var values = {};
+    ids.forEach(function(id) { values[id] = text((byId(id) || {}).value); });
+    values.badge = text((byId("meeting-case-badge") || {}).textContent);
+    return values;
+  }
+  function dispatchHydrated(ok, caseId, message, values) {
+    try {
+      doc.dispatchEvent(new CustomEvent("app:meeting-edit-hydrated", { detail: { ok: !!ok, caseId: caseId, message: message || "", values: values || {}, source: "Scripts_Page_Meeting.RouteActionOwner" } }));
+    } catch (error) { warn("meeting.route.hydratedEvent", error); }
+  }
+  function applySearchSeed(seed) {
+    if (!seed)return Promise.resolve(false);
+    if (inFlight)return inFlight;
+    var caseId = text(seed.caseId || seed.id || seed.caseNum || seed.recNo || "");
+    openManagementForm();
+    if (!isFn(root.meetingEditCase)) {
+      dispatchHydrated(false, caseId, "ฟังก์ชันจัดการเรื่องพิจารณายังไม่พร้อม");
+      return Promise.resolve(false);
     }
-    return null
+    inFlight = Promise.resolve(root.meetingEditCase(caseId, { seed: seed, __singlePass: true, silentLoading: true, source: "search-edit-route-owner" })).then(function(result) {
+      var values = hydrationSnapshot();
+      var hydrated = !!(values["meeting-caseId"] && values["meeting-title"] && values["meeting-status"] && values.badge && values.badge !== "ยังไม่ได้เลือกรายการ");
+      if (hydrated)clearSeed();
+      dispatchHydrated(hydrated, caseId, hydrated ? "" : "ข้อมูลเรื่องพิจารณายังเติมลงแบบฟอร์มไม่ครบ", values);
+      return hydrated && result !== false;
+    }).catch(function(error) {
+      warn("meeting.route.applySearchSeed", error);
+      dispatchHydrated(false, caseId, String(error && error.message || error));
+      return false;
+    }).then(function(value) { inFlight = null; return value; }, function(error) { inFlight = null; throw error; });
+    return inFlight;
   }
-  function _f55() {
-    var seed = pendingSeed();
-    if (!seed)return !1;
-    _f9();
-    var ok = _f39(seed);
-    var caseId = txt(seed.caseId || seed.id || seed.caseNum || seed.recNo || "");
-    var hydrated = !!(txt((byId("meeting-caseId") || {}).value) || txt((byId("meeting-title") || {}).value) || txt((byId("meeting-caseNum") || {}).value) || txt((byId("meeting-recNo") || {}).value));
-    if (ok && hydrated)try {
-      root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = null;
-      root.AppStore && isFn(root.AppStore.set) && (root.AppStore.set($meetingStoreEditSeed, null), root.AppStore.set("meeting.searchEditSeed", null), root.AppStore.set("search.editSeed", null));
-    } catch (clearErr) { $meetingObserve(clearErr, "meeting.route.clearHydratedSeed"); }
-    try {
-      doc.dispatchEvent(new CustomEvent("app:meeting-edit-hydrated", { detail: { ok: !!(ok && hydrated), caseId: caseId, source: "Scripts_Page_Meeting.RouteActionOwner" } }));
-    } catch (eventErr) { $meetingObserve(eventErr, "meeting.route.hydratedEvent"); }
-    return !!(ok && hydrated);
+  function applyPending() { return applySearchSeed(pendingSeed()); }
+  function createNew() {
+    clearSeed();
+    return isFn(root.meetingCreateNew) ? root.meetingCreateNew() : openManagementForm();
   }
-}
-(window, document);
+
+  var owner = root.AppMeetingEventOwner;
+  if (owner && isFn(owner.bind))owner.bind([{
+    target: doc,
+    event: "click",
+    options: true,
+    key: "route-action.click",
+    handler: function(event) {
+      var button = event.target && event.target.closest ? event.target.closest('[data-action="meetingEditLog"],[data-action="meetingCreateNew"],#meeting-create-btn') : null;
+      if (!button)return;
+      var action = button.getAttribute("data-action") || "";
+      if (action === "meetingEditLog") {
+        event.preventDefault();
+        return isFn(root.meetingEditLog) && root.meetingEditLog(event);
+      }
+      if (action === "meetingCreateNew" || button.id === "meeting-create-btn") {
+        event.preventDefault();
+        return createNew();
+      }
+    }
+  },{
+    target: doc,
+    event: "app:page-activated",
+    options: true,
+    key: "route-action.page-activated",
+    handler: function(event) {
+      var detail = event && event.detail || {};
+      var pageId = text(detail.id || detail.pageId || detail.page || "").replace(/^\//, "");
+      if (pageId !== "meeting")return;
+      var seed = pendingSeed();
+      if (seed)applySearchSeed(seed); else openManagementForm();
+    }
+  }]);
+
+  root.AppMeetingRouteActionOwner = {
+    owner: "Scripts_Page_Meeting:RouteActionOwner.Current",
+    openManagementForm: openManagementForm,
+    applySearchSeed: applySearchSeed,
+    applyPending: applyPending
+  };
+})(window, document);
 </script><script id="meeting-production-subcommittee-owner">
 !function(root, doc) {
   "use strict";

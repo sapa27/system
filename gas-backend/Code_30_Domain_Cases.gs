@@ -1884,14 +1884,19 @@ function _r56(name) {
   if (name === "Letters")return ["letterId", _S12, "letterNo", "bookNo", "agency", _S20, "issue", "letterStatus", _S18, "officer", "opStaff", "letterDate", _S5, _S16, _S4, _S6];
   return [];
 }
-function _r30(name, includeDeleted) {
+function _r30(name, includeDeleted, options) {
+  options = options || {};
   var fields = _r56(name = _s_(name).trim());
   if (!fields.length)throw new Error("MEETING_LETTERS_PROJECTED_READER_UNAVAILABLE:" + name);
+  var forceFresh = options.forceFresh === !0 || options.noCache === !0 || options.bypassCache === !0;
   try {
     return _rg(name, fields, {
         includeDeleted: includeDeleted === !0,
-        ttl: 120,
-        requireCanonical: !1
+        ttl: forceFresh ? 0 : Math.max(0, Math.min(Number(options.cacheTtlSeconds || 120) || 120, 600)),
+        requireCanonical: !1,
+        forceFresh: forceFresh,
+        bypassRequestCache: forceFresh,
+        owner: "MeetingDomain.compatibilityProjectedRead"
       }) || []
   } catch (_projectedErr) {
     throw _recordWarning_("ec", _projectedErr),
@@ -9238,7 +9243,7 @@ function _committeeMeetingLegacyHash_(value) {
 function _committeeMeetingLegacyBundle_(readOptions) {
   var rows = [];
   try {
-    rows = _r30(_S0, !1) || [];
+    rows = _r30(_S0, !1, readOptions || {}) || [];
   } catch (err) {
     _c30W_("committee.meeting.legacyRead", err, { sheet: _S0 });
     return { meetings: [], items: [], source: "MeetingLogs-read-failed", error: String(err && err.message || err) };
@@ -9302,11 +9307,25 @@ function _z6(payload) {
     bypassCache: forceFresh,
     cacheTtlSeconds: forceFresh ? 0 : Number(payload.cacheTtlSeconds != null ? payload.cacheTtlSeconds : 180) || 180
   };
-  var meetingsAll = _z52(_S25, !1, readOptions);
-  var itemsAll = _z52(_S8, !1, readOptions).map(_z72);
+  var meetingsAll = [];
+  var itemsAll = [];
+  var readErrors = [];
+  try {
+    meetingsAll = _z52(_S25, !1, readOptions) || [];
+  } catch (meetingReadError) {
+    readErrors.push("CommitteeMeetings: " + String(meetingReadError && meetingReadError.message || meetingReadError));
+    _c30W_("committee.meeting.canonicalMeetingsRead", meetingReadError, { sheet: _S25 });
+  }
+  try {
+    itemsAll = (_z52(_S8, !1, readOptions) || []).map(_z72);
+  } catch (itemReadError) {
+    readErrors.push("CommitteeMeetingAgendaItems: " + String(itemReadError && itemReadError.message || itemReadError));
+    _c30W_("committee.meeting.canonicalItemsRead", itemReadError, { sheet: _S8 });
+  }
   var canonicalMeetingCount = meetingsAll.length;
   var canonicalItemCount = itemsAll.length;
   var legacyBundle = payload.includeLegacy === !1 ? null: _committeeMeetingLegacyBundle_(readOptions);
+  if (legacyBundle && legacyBundle.error)readErrors.push(String(legacyBundle.error));
   var legacyMeetingsAdded = 0;
   if (legacyBundle && (legacyBundle.meetings || []).length) {
     var canonicalIds = {};
@@ -9329,6 +9348,9 @@ function _z6(payload) {
     (legacyBundle.items || []).forEach(function(item) {
       if (addedIds[_j(item && item.meetingId || "")])itemsAll.push(_z72(item))
     })
+  }
+  if (!meetingsAll.length && !itemsAll.length && readErrors.length && (!legacyBundle || !(legacyBundle.meetings || []).length)) {
+    throw new Error("โหลดข้อมูลสรุปการประชุมไม่สำเร็จ: " + readErrors.join(" | "));
   }
   var allGrouped = {};
 
@@ -9414,7 +9436,8 @@ function _z6(payload) {
       meetingsRead: meetingsAll.length,
       agendaItemsRead: itemsAll.length,
       meetingsReturned: meetings.length,
-      agendaItemsReturned: items.length
+      agendaItemsReturned: items.length,
+      warnings: readErrors
     }
   };
 }

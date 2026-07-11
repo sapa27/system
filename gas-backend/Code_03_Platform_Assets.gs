@@ -84,7 +84,7 @@ function include(filename) {
   return HtmlService.createTemplateFromFile(filename).evaluate().getContent()
 }
 function _appDefaultLogoDataUri_() {
-  var markup = '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#001e3c"/><text x="64" y="70" text-anchor="middle" font-family="Sarabun, Arial" font-size="20" font-weight="700" fill="#ffd84d">รัฐสภา</text></svg>';
+  var markup = '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#ffffff"/><rect x="1" y="1" width="126" height="126" rx="23" fill="none" stroke="#d7dee8" stroke-width="2"/><text x="64" y="70" text-anchor="middle" font-family="Sarabun, Arial" font-size="20" font-weight="800" fill="#001e3c">รัฐสภา</text></svg>';
   return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(markup)
 }
 function getAppLogoConfig_() {

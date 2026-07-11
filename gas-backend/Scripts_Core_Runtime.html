@@ -5123,11 +5123,17 @@ try {
   root.formatTrackLetterNo = e.formatTrackLetterNo,
   root.toDateInputValue ||(root.toDateInputValue = e.toDateInputValue),
   root.normalizeCaseManualNo = root.normalizeCaseManualNo || function(e) {
-    var t = a(e)[_$23](/^'+/, "")[_$23](/[​-‍﻿]/g, "")[_$22]();
-    if (!t || "-" === t || /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s/i.test(t) || /GMT[+-]\d{4}|เวลาอินโดจีน/i.test(t) || /^\d{4}-\d{1,2}-\d{1,2}/.test(t) || /^\d{1,2}\/\d{1,2}\/(?:19|20|25)\d{2}$/.test(t) || /^CASE[_-]|^MAIN-\d+|^ROW-\d+/i.test(t))return "";
+    var t = a(e)[_$23](/^'+/, "")[_$23](/[​-‍﻿]/g, "")[_$23](/\s+/g, " ")[_$22]();
+    if (!t || "-" === t || /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s/i.test(t) || /GMT[+-]\d{4}|เวลาอินโดจีน/i.test(t) || /^\d{4}-\d{1,2}-\d{1,2}/.test(t) || /^\d{1,2}[\/\-.]\d{1,2}[\/\-.](?:19|20|25)\d{2}$/.test(t) || /^CASE[_-]|^MAIN-\d+|^ROW-\d+/i.test(t))return "";
     if (/^\d+$/.test(t))return t;
     var r = t[_$29](/^(\d+)\.0+$/);
-    return r ? r[1]: ""
+    if (r)return r[1];
+    var n = t[_$29](/^(.{0,40}?)(\d+)\s*[\/\-–—]\s*((?:19|20|25)\d{2})$/);
+    if (n) {
+      var i = String(n[1] || "")[_$23](/\s+/g, " ")[_$22]();
+      return(i ? i + " ": "") + n[2] + "/" + n[3]
+    }
+    return /^[A-Za-zก-๙][A-Za-zก-๙0-9 ._()\-\/]{0,79}$/.test(t) ? t: ""
   },
   root.normalizeCaseReceiveNo = root.normalizeCaseReceiveNo || function(e) {
     var t = function recover(e) {

@@ -6571,31 +6571,50 @@ function $y(payload) {
 function $aG(payload) {
   var auth = $3(payload, "viewer", "apiBudgetGetFiscalYears");
   if (!auth.ok)return auth.result;
-  payload = auth.payload;
+  payload = auth.payload || {};
   var d = new Date,
-  currentFy = String(d.getMonth() >= 9 ? d.getFullYear() + 544: d.getFullYear() + 543),
-  yearsMap = {
-  };
-  function addFiscalYearOption(fy2) {
-    (fy2 = _b32FY_(fy2)) &&(yearsMap[fy2] = !0)
+  calendarCurrentFy = String(d.getMonth() >= 9 ? d.getFullYear() + 544: d.getFullYear() + 543),
+  dataYearsMap = {},
+  displayYearsMap = {},
+  warnings = [];
+  function normalizeFiscalYear(value) {
+    return _b32FY_(value);
   }
-  for (var fy = 2569; fy <= 2576; fy++)addFiscalYearOption(fy);
-  addFiscalYearOption(currentFy);
-  var defaultFy = currentFy;
-  try {
-    addFiscalYearOption(defaultFy = _resolveBudgetDefaultFiscalYear_() || currentFy)
-  } catch (_e) {
-    _b32W_("budget.fiscalYears.defaultFy", _e)
+  function addDisplayFiscalYear(value) {
+    var fy = normalizeFiscalYear(value);
+    if (fy)displayYearsMap[fy] = !0;
+    return fy;
   }
-  var years = Object.keys(yearsMap).sort(function(a, b) {
-      return Number(a) - Number(b)
-    });
+  function addDataFiscalYear(value) {
+    var fy = addDisplayFiscalYear(value);
+    if (fy)dataYearsMap[fy] = !0;
+  }
+  function collectFromSheet(sheetName) {
+    try {
+      var rows = $a5(sheetName, _B32FY, 240) || [];
+      rows.forEach(function(row) { addDataFiscalYear($f(row || {}, _B32FY)); });
+    } catch (error) {
+      warnings.push(sheetName + ":" + String(error && error.message || error));
+      _b32W_("budget.fiscalYears." + sheetName, error);
+    }
+  }
+  [_B32BI, _B32BSU, _B32BYI].forEach(collectFromSheet);
+  var configuredFy = "";
+  try { configuredFy = normalizeFiscalYear(_resolveBudgetDefaultFiscalYear_() || ""); } catch (error) { warnings.push("default:" + String(error && error.message || error)); _b32W_("budget.fiscalYears.defaultFy", error); }
+  addDisplayFiscalYear(calendarCurrentFy);
+  addDisplayFiscalYear(configuredFy);
+  var dataYears = Object.keys(dataYearsMap).sort(function(a, b) { return Number(a) - Number(b); });
+  var defaultFy = configuredFy && dataYearsMap[configuredFy] ? configuredFy: (dataYears.length ? dataYears[dataYears.length - 1]: configuredFy || calendarCurrentFy);
+  addDisplayFiscalYear(defaultFy);
+  var years = Object.keys(displayYearsMap).sort(function(a, b) { return Number(a) - Number(b); });
   return ok_({
-      years,
+      years: years,
       currentFy: defaultFy,
-      calendarCurrentFy: currentFy,
-      defaultFy,
-      source: "fixed-range-fast"
+      calendarCurrentFy: calendarCurrentFy,
+      defaultFy: defaultFy,
+      source: "BudgetImports+BudgetSummary+BudgetYearSettingsItems/data-driven",
+      dataYears: dataYears,
+      warnings: warnings
     }, "โหลดตัวเลือกปีงบประมาณสำเร็จ")
 }
 function $aX(payload) {
