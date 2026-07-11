@@ -21,6 +21,7 @@ GAS_INDEX = ROOT / "gas-backend" / "Index.html"
 CRITICAL_RUNTIME = ROOT / "gas-backend" / "Scripts_Critical_Login_Runtime.html"
 ASSET_SOURCE = ROOT / "gas-backend" / "Code_03_Platform_Assets.gs"
 APP_CONFIG = ROOT / "github-pages" / "app-config.js"
+STATIC_INDEX = ROOT / "github-pages" / "index.html"
 GENERATED_FRONTEND_FILES = {
     "app-index-foundation-pre-vue.js",
     "app-index-foundation-after-vue.js",
@@ -80,6 +81,59 @@ def _sync_fallback_logo() -> bool:
         raise RuntimeError("APP_CONFIG_FALLBACK_LOGO_BLOCK_NOT_FOUND")
     if updated != text:
         APP_CONFIG.write_text(updated, encoding="utf-8")
+        return True
+    return False
+
+
+STATIC_LOGIN_CONTRACT_START = "/* GENERATED LOGIN TRANSITION CONTRACT: canonical GAS Index */"
+STATIC_LOGIN_CONTRACT_END = "/* END GENERATED LOGIN TRANSITION CONTRACT */"
+
+
+def _sync_static_login_contract() -> bool:
+    expected_logo = _canonical_fallback_logo_data_uri()
+    text = STATIC_INDEX.read_text(encoding="utf-8")
+    updated = text
+
+    login_pattern = re.compile(
+        r'(<div class="lcurrentStamp2-logo-wrap">)(?:<span class="lcurrentStamp2-logo-placeholder"[^>]*>[^<]*</span>)?<img id="login-logo-img"(?:\s*class="logo-loaded")?\s*src="[^"]*"',
+        re.S,
+    )
+    replacement = (
+        r'\1<span class="lcurrentStamp2-logo-placeholder" aria-hidden="true">รัฐสภา</span>'
+        + '<img id="login-logo-img" src=' + json.dumps(expected_logo, ensure_ascii=False)
+    )
+    updated, count = login_pattern.subn(replacement, updated, count=1)
+    if count != 1:
+        raise RuntimeError("STATIC_LOGIN_LOGO_CONTRACT_NOT_FOUND")
+
+    for logo_id in ("side-logo-img", "mobile-topbar-logo"):
+        pattern = re.compile(r'(<img id="' + re.escape(logo_id) + r'"src=")[^"]*(")')
+        updated = pattern.sub(lambda match: match.group(1) + expected_logo + match.group(2), updated)
+
+    css = f"""{STATIC_LOGIN_CONTRACT_START}
+.lcurrentStamp2-logo-wrap{{position:relative;background:#fff!important}}
+.lcurrentStamp2-logo-placeholder{{
+  position:absolute;inset:8px;z-index:0;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:#fff!important;color:#001e3c;font-size:1.15rem;font-weight:800;
+  text-align:center;border:1px solid #d7dee8
+}}
+.lcurrentStamp2-logo-wrap img{{position:relative;z-index:1}}
+.lcurrentStamp2-logo-wrap img:not(.logo-loaded){{visibility:hidden}}
+.app-boot-status{{display:none;background:#fff;color:#1e293b}}
+html.app-auth-resolving #app-boot-status{{display:flex!important}}
+html.app-auth-resolving #login-page,html.app-auth-resolving #side,html.app-auth-resolving #sidebar-overlay,html.app-auth-resolving #main-container{{display:none!important}}
+{STATIC_LOGIN_CONTRACT_END}"""
+    block_pattern = re.compile(re.escape(STATIC_LOGIN_CONTRACT_START) + r'[\s\S]*?' + re.escape(STATIC_LOGIN_CONTRACT_END))
+    if block_pattern.search(updated):
+        updated = block_pattern.sub(css, updated, count=1)
+    else:
+        style_end = updated.rfind("</style>")
+        if style_end < 0:
+            raise RuntimeError("STATIC_INDEX_STYLE_END_NOT_FOUND")
+        updated = updated[:style_end] + css + "\n" + updated[style_end:]
+
+    if updated != text:
+        STATIC_INDEX.write_text(updated, encoding="utf-8")
         return True
     return False
 
@@ -146,7 +200,7 @@ def _sync_manifest(methods: list[str]) -> bool:
     freeze["routeCount"] = len(methods)
     freeze["apiMethods"] = methods
     data["p3ReleaseSecurity"] = {
-        "stamp": "production-runtime-recovery-single-owner-r38",
+        "stamp": "production-verified-recovery-single-owner-r39",
         "releaseOwner": "package.json::release",
         "apiContractOwner": "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_",
         "proxyAllowlistGenerated": True,
@@ -170,7 +224,7 @@ def _sync_manifest(methods: list[str]) -> bool:
     data["generatedMirror"] = "github-pages/{app-index-foundation-pre-vue.js,app-index-foundation-after-vue.js,app-index-foundation-after-swal.js,app-index-bootstrap.js,critical-login-runtime.js,vercel-env.generated.js,partials/Scripts_*.html}"
     single = data.setdefault("singleSourceGeneration", {})
     single.update({
-        "stamp": "production-runtime-recovery-single-owner-r38",
+        "stamp": "production-verified-recovery-single-owner-r39",
         "canonicalOwners": ["gas-backend/Index.html", "gas-backend/Scripts_*.html", "github-pages/app-config.js"],
         "generator": "tools/generate_vercel_env.py",
         "generatedRuntimeCount": 9,
@@ -194,7 +248,7 @@ def _sync_manifest(methods: list[str]) -> bool:
     runtime["frontendTransportOwner"] = "host-aware: GAS Scripts_Critical_Login_Runtime AppTransport.run; Vercel github-pages/github-gas-transport.js AppTransport.run"
     runtime["clientInFlightOwner"] = "host-aware AppTransport.inFlightOnly"
     data["productionConsolidation"] = {
-        "stamp": "production-runtime-recovery-single-owner-r38",
+        "stamp": "production-verified-recovery-single-owner-r39",
         "releaseOwner": "package.json::release",
         "apiContractOwner": "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_",
         "runtimeSourceOwner": "gas-backend/Index.html + gas-backend/Scripts_*.html",
@@ -240,6 +294,9 @@ def _contract_drift_errors() -> list[str]:
     fallback_match = re.search(r'FALLBACK_LOGO\s*=\s*"([^"]*)"', app_config)
     if not fallback_match or fallback_match.group(1) != _canonical_fallback_logo_data_uri():
         errors.append("APP_CONFIG_FALLBACK_LOGO_NOT_CANONICAL")
+    static_index = STATIC_INDEX.read_text(encoding="utf-8")
+    if STATIC_LOGIN_CONTRACT_START not in static_index or 'รัฐสภา</span><img id="login-logo-img"' not in static_index:
+        errors.append("STATIC_LOGIN_CONTRACT_NOT_GENERATED_FROM_CANONICAL")
     for path in RELEASE_SYNC_FILES:
         text = path.read_text(encoding="utf-8")
         releases = set(RELEASE_PATTERN.findall(text))
@@ -536,6 +593,7 @@ def generate() -> dict:
     proxySynced = _sync_proxy_contract(methods)
     manifestSynced = _sync_manifest(methods)
     fallbackLogoSynced = _sync_fallback_logo()
+    staticLoginContractSynced = _sync_static_login_contract()
     outputs = _expected_outputs()
     STATIC_RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -569,6 +627,7 @@ def generate() -> dict:
         "proxyContractSynced": proxySynced,
         "manifestContractSynced": manifestSynced,
         "fallbackLogoSynced": fallbackLogoSynced,
+        "staticLoginContractSynced": staticLoginContractSynced,
         "apiMethodCount": len(methods),
         "written": written,
         "unchanged": unchanged,

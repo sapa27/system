@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 RELEASE = str(PACKAGE.get("release") or PACKAGE.get("releaseStamp") or "")
 ASSET = str(PACKAGE.get("assetStamp") or "")
-CURRENT_STAMP = "production-runtime-recovery-single-owner-r38"
+CURRENT_STAMP = "production-workflow-rewrite-single-owner-r40"
 CANONICAL_API_OWNER = "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_"
 CANONICAL_RUNTIME_OWNER = "gas-backend/Index.html + gas-backend/Scripts_*.html"
 
@@ -31,9 +31,9 @@ FROZEN_PUBLIC_METHODS = "apiGetPhase0ContractGate apiGetPhase1Contract apiGetPha
 ROUTE_SHA256 = "de5c16d36b912ec4267787e225ec029b77c5fb0bd0052781e6f9d51e4afc9f89"
 WRITE_SCHEMA_SHA256 = "a62622facc8e9c97ebfca4bd3bf081597a2bd3fcdbaef1fffefa5ef8f9ed475b"
 PROXY_SHA256 = "3ae9aa68719b1ea7925c7b1013b4e4396e9683e7476fa2cf625af1a7627227c4"
-UI_TEMPLATE_SHA256 = "76dcadd48639fd1f7876a90ea9cf51d07cf5a8eb2709bbee34ab6a6b1773d518"
+UI_TEMPLATE_SHA256 = "f2fa4ba42ae750a4e6b5fc0a844421fdb4cfd5e98f92d489d57ef04af0efc692"
 UI_TEMPLATE_COUNT = 11
-PAGE_API_AGGREGATE_SHA256 = "85a63ccebf265999a76a3e48554c2ed870b0f659f2d28a356d2af6272a80d254"
+PAGE_API_AGGREGATE_SHA256 = "6487ffc342326674834f19272cdba8be89ebea4a32fc554577fd28680fdb0be0"
 EXPECTED_SOURCE_FILES = 37
 EXPECTED_BUILD_FILES = 52
 GENERATED_FRONTEND = [
@@ -359,9 +359,9 @@ def current_checks(strict: bool = False):
     require("projected report cache owner","case_report_projection_r33_" in cases and "getDataRange().getValues()" not in projection and "allowFullMatrix: !0" not in projection,"projected MainData read")
     require("shared upload policy","window.AppUploadPolicy = window.AppUploadPolicy ||" in core and "root.AppUploadPolicy.pdfLimitBytes()" in dashboard and "root.AppUploadPolicy.pdfLimitBytes()" in meeting,"AppUploadPolicy")
     require("meeting/search/budget workflow guards","__APP_COMMITTEE_MEETING_BIND_READY__" in meeting and "meeting.editSeed" in report and 'showBudgetTab: "budget"' in critical,"workflow readiness")
-    require("meeting legacy read compatibility","_committeeMeetingLegacyBundle_" in cases and "MeetingLogs-compat-read" in cases and "readOnlyLegacy" in meeting,"legacy meetings remain visible read-only")
+    require("meeting legacy read compatibility","_committeeMeetingLegacyBundle_" in cases and "MeetingLogs-compat-read" in cases and "readOnlyLegacy" in meeting and "committee.meeting.canonicalMeetingsRead" in cases and "MeetingDomain.compatibilityProjectedRead" in cases,"canonical errors do not prevent MeetingLogs compatibility read")
     require("budget empty cache prohibited","cached.rows.length" in budget_backend and contains_code(budget_backend,"return rows.length ? $u(cacheKey"),"empty summary is never cached")
-    require("search edit uses one hydration owner",'app:meeting-edit-hydrated' in report and "AppMeetingRouteActionOwner" in report and "root.meetingEditCase(editKey" not in report and 'doc.dispatchEvent(new CustomEvent("app:meeting-edit-hydrated"' in meeting,"route owner hydrates and confirms")
+    require("search edit uses one hydration owner",'app:meeting-edit-hydrated' in report and "AppMeetingRouteActionOwner" in report and "root.meetingEditCase(editKey" not in report and 'root.meetingEditCase(caseId, { seed: seed, __singlePass: true' in meeting and 'doc.dispatchEvent(new CustomEvent("app:meeting-edit-hydrated"' in meeting,"route owner delegates to canonical meetingEditCase and confirms")
     require("datepicker single event owner","thai-datepicker-single-event-current" in core and 'doc[_$c](openEvent, delegated, !0)' in core and 'doc[_$c]("focusin", delegated' not in core,"pointer/keyboard single owner")
 
     collisions=gas_collision_errors(); require("GAS global namespace collision-free",not collisions," | ".join(collisions[:10]))
@@ -445,6 +445,7 @@ def run_p0_browser_smoke():
   function jsonResponse(obj){{return Promise.resolve(new Response(JSON.stringify(obj),{{status:200,headers:{{"Content-Type":"application/json"}}}}));}}
   function textResponse(txt){{return Promise.resolve(new Response(String(txt||""),{{status:200,headers:{{"Content-Type":"text/html; charset=utf-8"}}}}));}}
   function rowsData(extra){{return Object.assign({{rows:[],items:[],records:[],data:[],meetings:[],letters:[],cases:[],total:0,totalRecords:0,loadOk:true,degraded:false}},extra||{{}});}}
+  window.__P0_API_CALLS__=[];
   window.fetch=function(input,init){{
     var url=String(input&&input.url||input||"");
     var clean=url.split('?')[0],file=clean.substring(clean.lastIndexOf('/')+1);
@@ -456,18 +457,19 @@ def run_p0_browser_smoke():
     }}
     if(url.indexOf('/api/gas')>=0){{
       var body={{}};try{{body=JSON.parse(init&&init.body||"{{}}");}}catch(_e){{}}
-      var method=String(body.method||"");
+      var method=String(body.method||""); window.__P0_API_CALLS__.push({{method:method,body:body}});
       if(method==='apiSessionResume'||method==='apiSessionCheck')return jsonResponse({{ok:false,error:"NO_SESSION",errorCode:"NO_SESSION",method:method}});
-      var caseRow={{caseId:"CASE-001",id:"CASE-001",caseNum:"1/2569",recNo:"100/2569",recDate:"11/07/2569",title:"ชื่อเรื่องพิจารณาทดสอบ",caseTitle:"ชื่อเรื่องพิจารณาทดสอบ",considerationTitle:"ชื่อเรื่องพิจารณาทดสอบ",petitioners:"ผู้ร้องทดสอบ",status:"เรื่องเข้าใหม่",cat:"เรื่องร้องเรียน"}};
+      var caseRow={{caseId:"CASE-001",id:"CASE-001",caseNum:"1/2569",recNo:"100/2569",recDate:"11/07/2569",offerDate:"10/07/2569",title:"ชื่อเรื่องพิจารณาทดสอบ",caseTitle:"ชื่อเรื่องพิจารณาทดสอบ",considerationTitle:"ชื่อเรื่องพิจารณาทดสอบ",petitioners:"ผู้ร้องทดสอบ",petitionerPhone:"0812345678",respondent:"หน่วยงานทดสอบ",agencyName:"หน่วยงานทดสอบ",assignees:"กรรมาธิการ ก",coAssignees:"กรรมาธิการ ข",staffs:"เจ้าหน้าที่ ก",opStaff:"เจ้าหน้าที่ ข",keySummary:"สาระสำคัญทดสอบ",remark:"หมายเหตุทดสอบ",status:"เรื่องเข้าใหม่",cat:"เรื่องร้องเรียน",subCat:"ทุจริต"}};
       var agendaItem={{itemId:"ITEM-001",meetingId:"CMTG-001",agendaNo:"3",seq:1,title:"เรื่องทดสอบ",caseId:"CASE-001",caseNum:"1/2569",recNo:"100/2569",caseTitle:"ชื่อเรื่องพิจารณาทดสอบ",result:"เห็นชอบ"}};
       var meetingRow={{meetingId:"CMTG-001",meetingNo:"1/2569",meetingDate:"11/07/2569",title:"การประชุมทดสอบ",meetingTitle:"การประชุมทดสอบ",items:[agendaItem]}};
-      var budgetRow={{fy:"2569",planGroup:"แผนงานยุทธศาสตร์ทดสอบ",category:"ค่าใช้จ่าย",item:"ค่าใช้จ่ายทดสอบ",label:"ค่าใช้จ่ายทดสอบ",name:"ค่าใช้จ่ายทดสอบ",budget:100000,spent:25000,expense:25000,remain:75000}};
-      var payload=rowsData({{source:"p0-browser-smoke",summary:{{}},statusCounts:{{}},cards:[],byPlan:[],plans:[],fiscalYears:[2569],years:[2569],currentFy:"2569",defaultFy:"2569",user:{{id:"P0",role:"admin"}},routeContractDeferred:true,dataContractDeferred:true}});
+      var budgetRow={{fy:"2568",planGroup:"แผนงานยุทธศาสตร์ทดสอบ",category:"ค่าใช้จ่าย",item:"ค่าใช้จ่ายทดสอบ",label:"ค่าใช้จ่ายทดสอบ",name:"ค่าใช้จ่ายทดสอบ",budget:100000,spent:25000,expense:25000,remain:75000}};
+      var payload=rowsData({{source:"p0-browser-smoke",summary:{{}},statusCounts:{{}},cards:[],byPlan:[],plans:[],fiscalYears:[2568],years:[2568],currentFy:"2568",defaultFy:"2568",user:{{id:"P0",role:"admin"}},routeContractDeferred:true,dataContractDeferred:true}});
       if(method==='apiGetRouteContract')payload={{methods:[],routes:[],writeMethods:[],publicMethods:[]}};
       if(method==='apiBootstrap')payload={{user:{{id:"P0",role:"admin"}},routeContractDeferred:true,dataContractDeferred:true}};
       if(method==='apiListCommitteeMeetings')payload={{meetings:[meetingRow],items:[agendaItem],itemsByMeetingId:{{"CMTG-001":[agendaItem]}},total:1,loadOk:true,degraded:false}};
       if(method==='apiGetCommitteeMeetingSystem')payload={{meeting:meetingRow,items:[agendaItem],loadOk:true,degraded:false}};
-      if(method==='apiBudgetGetSummary')payload={{rows:[budgetRow],items:[budgetRow],records:[budgetRow],total:1,totals:{{budget:100000,spent:25000,remain:75000}},grandTotals:{{budget:100000,spent:25000,remain:75000}},meta:{{fy:"2569"}},loadOk:true,degraded:false}};
+      if(method==='apiBudgetGetFiscalYears')payload={{years:["2568"],currentFy:"2568",defaultFy:"2568",calendarCurrentFy:"2569",loadOk:true,degraded:false}};
+      if(method==='apiBudgetGetSummary')payload={{rows:[budgetRow],items:[budgetRow],records:[budgetRow],total:1,totals:{{budget:100000,spent:25000,remain:75000}},grandTotals:{{budget:100000,spent:25000,remain:75000}},meta:{{fy:"2568"}},loadOk:true,degraded:false}};
       if(method==='apiGetCanonicalCaseBundle'||method==='apiGetCaseContext')payload={{case:caseRow,rawCase:caseRow,item:caseRow,record:caseRow,relatedCases:[caseRow],petitioners:[],history:[],letters:[],loadOk:true,degraded:false}};
       if(method==='apiGetCases'||method==='apiSearchCasesLite'||method==='apiSearch')payload={{rows:[caseRow],items:[caseRow],records:[caseRow],cases:[caseRow],total:1,totalRecords:1,loadOk:true,degraded:false}};
       return jsonResponse(Object.assign({{ok:true,method:method,data:payload}},payload));
@@ -509,12 +511,20 @@ def run_p0_browser_smoke():
             fallback_text = page.locator(".lcurrentStamp2-logo-placeholder").first.inner_text().strip()
             if fallback_text != "รัฐสภา":
                 raise RuntimeError("P0_BROWSER_LOGO_FALLBACK_INVALID:" + fallback_text)
+            fallback_style = page.locator(".lcurrentStamp2-logo-placeholder").first.evaluate("el => ({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color})")
+            if fallback_style.get("background") not in ("rgb(255, 255, 255)", "rgba(255, 255, 255, 1)"):
+                raise RuntimeError("P0_BROWSER_LOGO_FALLBACK_BACKGROUND_INVALID:" + json.dumps(fallback_style, ensure_ascii=False))
             page.fill("#u_name", "p0")
             page.fill("#u_pass", "p0")
             page.click("#btn-login-action", force=True)
             page.wait_for_function("() => document.documentElement.classList.contains('app-authenticated') && document.documentElement.classList.contains('app-auth-resolving')", timeout=5000)
             if page.locator("#login-page").is_visible():
                 raise RuntimeError("P0_BROWSER_LOGIN_FLASH_DURING_AUTH_RESOLUTION")
+            if not page.locator("#app-boot-status").is_visible():
+                raise RuntimeError("P0_BROWSER_DASHBOARD_TRANSITION_BLANK")
+            transition_text = page.locator("#app-boot-status").inner_text().strip()
+            if "Dashboard" not in transition_text:
+                raise RuntimeError("P0_BROWSER_DASHBOARD_TRANSITION_TEXT_MISSING:" + transition_text)
             try:
                 page.wait_for_function("window.__APP_CORE_RUNTIME_LOADED__ === true", timeout=15000)
             except Exception as exc:
@@ -566,6 +576,22 @@ def run_p0_browser_smoke():
             page.wait_for_selector("#meeting-caseId", state="attached", timeout=8000)
             page.wait_for_function("() => (document.querySelector('#meeting-caseId') || {}).value === 'CASE-001'", timeout=8000)
             page.wait_for_function("() => /ชื่อเรื่องพิจารณาทดสอบ/.test((document.querySelector('#meeting-title') || {}).value || '')", timeout=8000)
+            page.wait_for_function("() => (document.querySelector('#meeting-petitionerPhone') || {}).value === '0812345678'", timeout=8000)
+            page.wait_for_function("() => /หน่วยงานทดสอบ/.test((document.querySelector('#meeting-respondent') || {}).value || '')", timeout=8000)
+            page.wait_for_function("() => /สาระสำคัญทดสอบ/.test((document.querySelector('#meeting-keySummary') || {}).value || '')", timeout=8000)
+            edit_values = page.evaluate("""() => { const ids=['meeting-caseId','meeting-caseNum','meeting-recNo','meeting-offerDate','meeting-recDate','meeting-cat','meeting-title','meeting-caseTitle','meeting-subCat','meeting-petitioners','meeting-petitionerPhone','meeting-respondent','meeting-agencyName','meeting-assignees','meeting-coAssignees','meeting-staffs','meeting-opStaff','meeting-keySummary','meeting-remark','meeting-status']; const out={}; ids.forEach(id=>out[id]=(document.getElementById(id)||{}).value||''); out.badge=(document.getElementById('meeting-case-badge')||{}).textContent||''; return out; }""")
+            required_edit_values = {
+                'meeting-caseNum': '1/2569', 'meeting-recNo': '100/2569', 'meeting-cat': 'เรื่องร้องเรียน',
+                'meeting-subCat': 'ทุจริต', 'meeting-petitioners': 'ผู้ร้องทดสอบ', 'meeting-assignees': 'กรรมาธิการ ก',
+                'meeting-coAssignees': 'กรรมาธิการ ข', 'meeting-staffs': 'เจ้าหน้าที่ ก', 'meeting-opStaff': 'เจ้าหน้าที่ ข',
+                'meeting-remark': 'หมายเหตุทดสอบ'
+            }
+            missing_edit_values = {key: {'expected': value, 'actual': edit_values.get(key, '')} for key, value in required_edit_values.items() if value not in str(edit_values.get(key, ''))}
+            if not edit_values.get('meeting-recDate') or not edit_values.get('meeting-offerDate') or not edit_values.get('meeting-status'):
+                missing_edit_values['required-nonempty'] = {'recDate': edit_values.get('meeting-recDate'), 'offerDate': edit_values.get('meeting-offerDate'), 'status': edit_values.get('meeting-status')}
+            if missing_edit_values:
+                raise RuntimeError('P0_BROWSER_SEARCH_EDIT_INCOMPLETE:' + json.dumps({'missing': missing_edit_values, 'values': edit_values}, ensure_ascii=False))
+            page.wait_for_function("() => !/ยังไม่ได้เลือกรายการ/.test((document.querySelector('#meeting-case-badge') || {}).textContent || '')", timeout=8000)
             date_input = page.locator("#meeting-recDate")
             if date_input.count():
                 date_input.click(force=True)
@@ -576,7 +602,24 @@ def run_p0_browser_smoke():
             page.wait_for_function("() => ((document.querySelector('#committee-meeting-list-tbody') || {}).innerText || '').includes('1/2569')", timeout=8000)
             page.wait_for_function("() => /ชื่อเรื่องพิจารณาทดสอบ/.test((document.querySelector('#committee-meeting-list-tbody') || {}).innerText || '')", timeout=8000)
             route("budget", "#p-budget")
-            page.wait_for_function("() => /ค่าใช้จ่ายทดสอบ/.test((document.querySelector('#budget-summary-body') || {}).innerText || '')", timeout=8000)
+            try:
+                page.wait_for_function("() => /ค่าใช้จ่ายทดสอบ/.test((document.querySelector('#budget-summary-body') || {}).innerText || '')", timeout=8000)
+            except Exception as exc:
+                budget_diag = page.evaluate("""() => ({
+                  body: (document.querySelector('#budget-summary-body') || {}).innerText || '',
+                  fy: (document.querySelector('#budget-fy-filter') || {}).value || '',
+                  options: document.querySelector('#budget-fy-filter') ? Array.from(document.querySelector('#budget-fy-filter').options).map(o=>({value:o.value,selected:o.selected,text:o.textContent})) : [],
+                  calls: (window.__P0_API_CALLS__ || []).filter(x => /Budget/.test(x.method)),
+                  initialized: !!window.__budgetPageInitialized,
+                  hasInit: typeof window.initBudgetPage === 'function',
+                  hasLoad: typeof window.loadBudgetSummary === 'function',
+                  health: window.AppPageHealth && typeof window.AppPageHealth.get === 'function' ? window.AppPageHealth.get('budget') : null
+                })""")
+                raise RuntimeError("P0_BROWSER_BUDGET_DATA_TIMEOUT:" + json.dumps(budget_diag, ensure_ascii=False) + " | PAGE_ERRORS=" + " | ".join(errors[-8:]) + " | CONSOLE=" + " | ".join(console_messages[-12:])) from exc
+            page.wait_for_timeout(500)
+            budget_fy_state = page.evaluate("""() => { const el=document.querySelector('#budget-fy-filter'); return {value:el&&el.value, options:el?Array.from(el.options).map(o=>({value:o.value,text:o.textContent,selected:o.selected})):[], state:window.AppStore&&window.AppStore.get?window.AppStore.get('budget.state',null):null, calls:(window.__P0_API_CALLS__||[]).filter(x=>/Budget/.test(x.method))}; }""")
+            if "2568" not in str(budget_fy_state.get("value") or ""):
+                raise RuntimeError("P0_BROWSER_BUDGET_FY_NOT_DATA_DRIVEN:" + json.dumps(budget_fy_state, ensure_ascii=False))
             budget_tab = page.locator('#p-budget [data-action="showBudgetTab"]').first
             if budget_tab.count():
                 budget_tab.click(force=True)
