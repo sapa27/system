@@ -2117,54 +2117,30 @@ $budgetLabelRound = 'ครั้งที่', $budgetLabelAmount = 'จำน�
           var n = e && e.target; 
           n && n.classList && n.classList.contains($budgetIdSeminarCost) &&(gt(), t.calcBudgetTotalNow()),
           n &&("calcBudgetTotalNow" === n.getAttribute("data-input") || /^budget-.*(cost|allowance|amount)$/i.test(n.id || "")) && t.calcBudgetTotalNow()
-        }, !1, "budget.calc.input.current"), window.initBudgetPage = function() {
-        return!(!t.isAuthenticated || !t.isAuthenticated()) && !(!(n = r && r("p-budget")) || n.classList.contains($budgetClassHidden)) && function(n) {
-          if (n = n || {
-            }, !t.isAuthenticated || !t.isAuthenticated())return!1; 
-          var a; 
-          U(),
-          (a = Y(new Date), q(G(a), m.currentFiscalYear || a), m.__fyRemoteRefreshQueued ||(m.__fyRemoteRefreshQueued = !0,
-              budgetDelay("page:budget.fiscal-years-refresh", function() {
-                  A("apiBudgetGetFiscalYears", {
-                    }, function(t) {
-                      var e = H(t); 
-                      q(e.years || [], e.defaultFy || e.currentFy || a)
-                    }, function() {
-                    }).catch (function(_cleanupPromiseErr) {
-                      $budgetTypeofFunction == typeof $budgetObserve ? $budgetObserve(_cleanupPromiseErr, "observed.promise.catch"): void _cleanupPromiseErr
-                    })
-                }, 800)), Promise.resolve(m.fiscalYears || [])).then(function() {
-              U()
-            }).catch (function(_cleanupPromiseErr) {
-              $budgetTypeofFunction == typeof $budgetObserve ? $budgetObserve(_cleanupPromiseErr, "observed.promise.catch"): void _cleanupPromiseErr
-            }),
-          function() {
-            if (t.__budgetStaticBound)return!0; 
-            t.__budgetStaticBound = !0
-          }
-          (),
-          z(); 
-          try {
-            e.enhanceThaiDateInputs && e.enhanceThaiDateInputs(r("p-budget") || document)
-          } 
-          catch (t) {
-            $budgetTypeofFunction == typeof $budgetObserve && $budgetObserve(t, "ec")
-          }
-          return t.__budgetPageInitialized ||(t.__budgetPageInitialized = !0),
-          $budgetTabTypeSummary === j() ?(W(!1), !n.forceRefresh && !budgetCURRENTBIsDirty($budgetTabTypeSummary) && m.typeSummaryRows && m.typeSummaryRows.length || t.loadBudgetTypeSummary()): "entry" === j() ?(W(!0),
-            Promise.resolve(t.fillBudgetDropdowns(!1)).catch (function(_err) {
-                return $budgetTypeofFunction == typeof $budgetObserve && $budgetObserve(_err, "ec"),
-                !1
-              }), $(V()), E(!1), _(), z(), budgetDelay("page:budget.defaults", function() {
-                E(!1),
-                z()
-              }, 80)): (W(!1), !n.forceRefresh && !budgetCURRENTBIsDirty($budgetTabSummary) && m.summaryRows && m.summaryRows.length || t.loadBudgetSummary(m.summaryPage || 1)),
-          !0
-        }
-        ({
-            forceRefresh: !t.__budgetPageInitialized
-          }); 
-        var n
+        }, !1, "budget.calc.input.current"), window.initBudgetPage = function(options) {
+        options = options || {};
+        if (!t.isAuthenticated || !t.isAuthenticated())return !1;
+        var page = r && r("p-budget");
+        if (!page || page.classList.contains($budgetClassHidden))return !1;
+        var current = Y(new Date);
+        q(m.fiscalYears && m.fiscalYears.length ? m.fiscalYears.slice() : G(current), m.currentFiscalYear || current);
+        if (!t.__budgetStaticBound)t.__budgetStaticBound = !0;
+        z();
+        try { e.enhanceThaiDateInputs && e.enhanceThaiDateInputs(page || document); } catch (dateErr) { $budgetTypeofFunction == typeof $budgetObserve && $budgetObserve(dateErr, "budget.init.thaiDate"); }
+        return A("apiBudgetGetFiscalYears", { forceFresh: options.forceRefresh === !0, source: "budget-page-init-fiscal-year-owner" }).then(function(response) {
+            var data = H(response); q(data.years || [], data.defaultFy || data.currentFy || current); U(); return data;
+          }).catch(function(err) {
+            budgetWarn("budget.init.fiscalYears", err); U(); return { years: m.fiscalYears || [], defaultFy: m.currentFiscalYear || current };
+          }).then(function() {
+            var activeTab = j(), firstLoad = !t.__budgetPageInitialized; t.__budgetPageInitialized = !0;
+            if ($budgetTabTypeSummary === activeTab) { W(!1); return !options.forceRefresh && !budgetCURRENTBIsDirty($budgetTabTypeSummary) && m.typeSummaryRows && m.typeSummaryRows.length ? m.typeSummaryRows : t.loadBudgetTypeSummary({ forceRefresh: firstLoad || options.forceRefresh === !0 }); }
+            if ("entry" === activeTab) {
+              W(!0); Promise.resolve(t.fillBudgetDropdowns(!1)).catch(function(err) { budgetWarn("budget.init.dropdowns", err); });
+              $(V()); E(!1); _(); z(); budgetDelay("page:budget.defaults", function() { E(!1); z(); }, 80); return !0;
+            }
+            W(!1);
+            return !options.forceRefresh && !budgetCURRENTBIsDirty($budgetTabSummary) && m.summaryRows && m.summaryRows.length ? m.summaryRows : t.loadBudgetSummary(m.summaryPage || 1, { forceRefresh: firstLoad || options.forceRefresh === !0 });
+          });
       }, t.budgetFooterPage = window.budgetFooterPage = function(page, btn) {
         var pager = btn && btn.closest ? btn.closest(".app-table-pager,[data-budget-footer],[data-pager-kind],#budget-pagination-container"): null,
         kind = btn && btn.getAttribute &&(btn.getAttribute($budgetDataBudgetFooter) || btn.getAttribute("data-kind") || btn.getAttribute("data-pager-kind")) || pager && pager.getAttribute &&(pager.getAttribute($budgetDataBudgetFooter) || pager.getAttribute("data-kind") || pager.getAttribute("data-pager-kind")) ||(pager && "budget-pagination-container" === pager.id ? "budget-type-summary": "") || $budgetIdTypeSummary,
@@ -2541,32 +2517,19 @@ $budgetLabelRound = 'ครั้งที่', $budgetLabelAmount = 'จำน�
         return n.indexOf(t) === e
       }): n.slice()
   }
-  function q(t, e) {
-    t =($budgetIsArray(t) ? t: []).map(function(t) {
-        return String(t || "").replace(/[^0-9]/g, "")
-      }).filter(Boolean),
-    t = G(e),
-    e = String(e || Y(new Date)).replace(/[^0-9]/g, ""),
-    t.length ||(t = G(e)),
-    e && - 1 === t.indexOf(e) && t.unshift(e),
-    t = t.filter(function(e, n) {
-        return e && t.indexOf(e) === n
-      }),
-    m.fiscalYears = t,
-    m.currentFiscalYear = e || t[0] || "",
-    [$budgetIdFiscalYearFilter,
-      $budgetIdTypeFiscalYearCurrent].forEach(function(e) {
-        var n = r(e); 
-        if (n) {
-          for (var a = String(n.value || ""); 
-            n.options.length; 
-          )n.remove(0); 
-          t.forEach(function(t) {
-              n.appendChild(new Option(String(t), String(t), !1, !1))
-            }),
-          a && - 1 !== t.indexOf(a) ? n.value = a: n.value = m.currentFiscalYear || t[0] || ""
-        }
-      })
+  function q(years, selectedYear) {
+    var provided = ($budgetIsArray(years) ? years : []).map(function(value) { return String(value || "").replace(/[^0-9]/g, ""); }).filter(Boolean);
+    var selected = String(selectedYear || Y(new Date)).replace(/[^0-9]/g, "");
+    var merged = provided.concat(G(selected)).filter(function(value, index, all) { return value && all.indexOf(value) === index; }).sort(function(a, b) { return Number(a) - Number(b); });
+    if (selected && merged.indexOf(selected) < 0)merged.unshift(selected);
+    m.fiscalYears = merged;
+    m.currentFiscalYear = selected || merged[0] || "";
+    [$budgetIdFiscalYearFilter, $budgetIdTypeFiscalYearCurrent].forEach(function(id) {
+      var node = r(id); if (!node)return; var previous = String(node.value || "");
+      while (node.options.length)node.remove(0);
+      merged.forEach(function(value) { node.appendChild(new Option(String(value), String(value), !1, !1)); });
+      node.value = previous && merged.indexOf(previous) >= 0 ? previous : m.currentFiscalYear || merged[0] || "";
+    });
   }
   function J(t) {
     [$budgetIdFiscalYearFilter,

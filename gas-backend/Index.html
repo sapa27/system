@@ -987,41 +987,64 @@ window.__SAFE_LOGO_URL__ = window.currentLogoUrl || window.DEFAULT_LOGO;
 
 <script>
 (function(root) {
+    var doc = root.document;
+    var placeholderText = "รัฐสภา";
     function logoSrc() {
-      var logo = root.APP_LOGO || {
-      }; return String(root.currentLogoUrl || root.LOGO_URL || root.__SAFE_LOGO_URL__ || logo.active || logo.png96 || logo.svg || "")
+      var logo = root.APP_LOGO || {};
+      return String(root.currentLogoUrl || root.LOGO_URL || root.__SAFE_LOGO_URL__ || logo.active || logo.png96 || logo.svg || "");
     }
-    var __parliamentLogo = logoSrc(); function schedule() {
+    function ensurePlaceholder(img) {
+      if (!img || img.id !== "login-logo-img" || !img.parentNode)return null;
+      var host = img.parentNode;
+      var node = host.querySelector && host.querySelector(".lcurrentStamp2-logo-placeholder");
+      if (!node) {
+        node = doc.createElement("span");
+        node.className = "lcurrentStamp2-logo-placeholder";
+        node.textContent = placeholderText;
+        node.setAttribute("aria-hidden", "true");
+        host.insertBefore(node, img);
+      }
+      return node;
+    }
+    function setLogoState(img, loaded) {
+      if (!img)return;
+      var placeholder = ensurePlaceholder(img);
+      img.classList && img.classList.toggle("logo-loaded", !!loaded);
+      img.style && (img.style.visibility = loaded ? "visible" : "hidden");
+      placeholder && (placeholder.hidden = !!loaded, placeholder.style.display = loaded ? "none" : "flex");
+    }
+    function bindImage(img, src) {
+      if (!img || !img.setAttribute)return;
+      if (img.id === "login-logo-img")setLogoState(img, !!(img.complete && img.naturalWidth > 0));
+      img.onload = function() {
+        setLogoState(this, true);
+      };
+      img.onerror = function() {
+        setLogoState(this, false);
+      };
+      if (src && img.getAttribute("src") !== src)img.setAttribute("src", src);
+      if (img.complete)setLogoState(img, img.naturalWidth > 0);
+    }
+    function schedule() {
       try {
-        root.patchParliamentLogo()
-      } catch (_e) {
-        __appObserve(_e, "ec")
+        root.patchParliamentLogo();
+      } catch (err) {
+        typeof root.__appObserve === "function" && root.__appObserve(err, "logo.patch");
       }
     }
-    function logoDelay(ms) {
-      return root.AppProductionFinal && typeof root.AppProductionFinal.delay == "function" ? root.AppProductionFinal.delay("logo.patch.retry",
-        schedule, ms): root.setTimeout(schedule, ms)
+    function delay(ms) {
+      return root.AppProductionFinal && typeof root.AppProductionFinal.delay === "function" ? root.AppProductionFinal.delay("logo.patch.retry", schedule, ms) : root.setTimeout(schedule, ms);
     }
-    root.AppBoot.setFlag("__APP_PARLIAMENT_LOGO__", __parliamentLogo, {
-        owner: "Index.logo"
-      }),
-    root.patchParliamentLogo = root.patchParliamentLogo || function() {
-      var src = logoSrc(); if (!src)return!1; var nodes = document.querySelectorAll('[data-logo="parliament"],#login-logo-img,#side-logo-img,#mobile-topbar-logo,.print-logo-img'); return Array.prototype.forEach.call(nodes,
-        function(img) {
-          img && img.setAttribute &&(img.getAttribute("src") !== src && img.setAttribute("src", src),
-            img.onerror = function() {
-              this && this.getAttribute("src") !== src && this.setAttribute("src", src)
-            })
-        }),
-      !0
-    },
-    document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", schedule, {
-        once: !0
-      }): schedule(),
-    [250,
-      1e3].forEach(function(ms) {
-        logoDelay(ms)
-      })
+    doc && doc.documentElement && doc.documentElement.classList.add("app-auth-resolving");
+    root.AppBoot && root.AppBoot.setFlag("__APP_PARLIAMENT_LOGO__", logoSrc(), { owner: "Index.logo" });
+    root.patchParliamentLogo = function() {
+      var src = logoSrc();
+      var nodes = doc.querySelectorAll('[data-logo="parliament"],#login-logo-img,#side-logo-img,#mobile-topbar-logo,.print-logo-img');
+      Array.prototype.forEach.call(nodes, function(img) { bindImage(img, src); });
+      return nodes.length > 0;
+    };
+    doc.readyState === "loading" ? doc.addEventListener("DOMContentLoaded", schedule, { once: true }) : schedule();
+    [120, 500].forEach(delay);
   })(window);
 </script>
 <style id="css-consolidated-production-final">
@@ -1170,8 +1193,37 @@ body:not(.app-ready) #login-page{
 body.app-ready #login-page{
   display:none
 }
-html:not(.app-authenticated) body.app-ready #login-page{
+html:not(.app-authenticated):not(.app-auth-resolving) body.app-ready #login-page{
   display:flex
+}
+html.app-auth-resolving #login-page,html.app-auth-resolving #side,html.app-auth-resolving #sidebar-overlay,html.app-auth-resolving #main-container{
+  display:none!important
+}
+html.app-auth-resolving body:after{
+  content:"กำลังเตรียมระบบ...";
+  position:fixed;
+  inset:0;
+  z-index:10050;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-weight:700;
+  background:linear-gradient(160deg,#000d1f,#002266 65%,#001e3c)
+}
+.lcurrentStamp2-logo-placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#ffd84d;
+  font-size:1.15rem;
+  font-weight:800;
+  text-align:center
+}
+.lcurrentStamp2-logo-wrap img:not(.logo-loaded){
+  visibility:hidden
 }
 .app-page-skeleton-quiet{
   min-height:0;
@@ -5714,17 +5766,29 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
             !1
           })
       }
+      function setAuthResolving(active, reason) {
+        active = !!active;
+        try {
+          document.documentElement.classList.toggle("app-auth-resolving", active);
+          document.documentElement.setAttribute("data-auth-resolution", active ? String(reason || "resolving") : "settled");
+          bridgeState.bootstrapping = active;
+        } catch (err) {
+          __appObserve(err, "auth.resolving");
+        }
+        return active;
+      }
       function setShellMode(authenticated) {
         authenticated = !!authenticated; try {
           document.body.classList.add("app-ready"),
-          document.documentElement.classList.toggle("app-authenticated", authenticated); var loginHost = document.querySelector(".vue3-login-host"),
+          document.documentElement.classList.toggle("app-authenticated", authenticated); var resolving = document.documentElement.classList.contains("app-auth-resolving"),
+          loginHost = document.querySelector(".vue3-login-host"),
           mainShell = document.querySelector(".vue3-main-shell"),
           loginPage = document.getElementById("login-page"),
           mainContainer = document.getElementById("main-container"),
           side = document.getElementById("side"),
-          overlay = document.getElementById("sidebar-overlay"); if (loginHost &&(loginHost.style.display = authenticated ? "none": ""),
-            mainShell &&(mainShell.style.display = authenticated ? "": "none"), loginPage &&(loginPage.style.display = authenticated ? "none": "flex"),
-            mainContainer &&(mainContainer.style.display = authenticated ? "block": "none"), side &&(side.style.display = authenticated ? "": "none"),
+          overlay = document.getElementById("sidebar-overlay"); if (loginHost &&(loginHost.style.display = authenticated || resolving ? "none": ""),
+            mainShell &&(mainShell.style.display = authenticated && !resolving ? "": "none"), loginPage &&(loginPage.style.display = authenticated || resolving ? "none": "flex"),
+            mainContainer &&(mainContainer.style.display = authenticated && !resolving ? "block": "none"), side &&(side.style.display = authenticated && !resolving ? "": "none"),
             authenticated)try {
             var target = routeState && routeState.path && routeState.path !== "/login" ? routeState.path: BOOT.defaultRoute || "/dashboard"; currentPageComponent === void 0 || !currentPageComponent || pageComponents === void 0 || !pageComponents || currentPageComponent.value && currentPageComponent.value !== LoginPage ||(currentPageComponent.value = pageComponents[target] || pageComponents["/dashboard"],
               routeState.path = target, bridgeState.currentPath = target, markSidebar(target)); var bootNote = document.getElementById("app-boot-status"); bootNote &&(bootNote.style.display = "none")
@@ -6525,47 +6589,39 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
         }
       }
       window.__APP_PHASE8_PAGE_PERF_STAMP__ = "phase8-runtime-page-performance-current"; function bootstrapFromSessionStorage() {
-        if (syncStateFromStore(), bridgeState.bootstrapping = !1, bridgeState.authenticated)return Promise.resolve(!0); var explicitLogin = location.hash === "#/login" || /(?:\?|&)_(?:logout|login)=/.test(location.search || "") || appBootGet("__APP_LOGGED_OUT_LOCK__",
-          !1) === !0; if (!explicitLogin && window.AppSessionResume && __appIsFn(window.AppSessionResume.get) && __appIsFn(window.AppSessionResume.tryResume))try {
-          var rec = window.AppSessionResume.get(); if (rec &&(rec.resumeHandle || rec.sessionResumeHandle))return window.AppSessionResume.tryResume({
-              reason: "vue-bootstrap-resume-current"
-            }).then(function() {
-              if (syncStateFromStore(), !bridgeState.authenticated)try {
-                location.hash !== "#/login" && history.replaceState(null, "", location.pathname + location.search.replace(/([?&])_logout=1(&|$)/,
-                    "$1").replace(/[?&]$/, "") + "#/login")
-              } catch (_resumeHashErr) {
-                try {
-                  location.hash = "#/login"
-                } catch (_resumeHashRouteAlt) {
-                  typeof __appObserve == "function" && __appObserve(_resumeHashRouteAlt, "ec")
-                }
-              }
-              return!!bridgeState.authenticated
-            }).catch (function() {
-              return syncStateFromStore(),
-              !!bridgeState.authenticated
-            })
-        } catch (_resumeBootstrapErr) {
-          __appObserve(_resumeBootstrapErr, "ec")
-        }
-        if (!bridgeState.authenticated) {
-          if (explicitLogin)try {
-            window.AppSessionResume && __appIsFn(window.AppSessionResume.clear) && window.AppSessionResume.clear()
-          } catch (_resumeClearErr) {
-            __appObserve(_resumeClearErr, "ec")
-          }
-          try {
-            location.hash !== "#/login" && history.replaceState(null, "", location.pathname + location.search.replace(/([?&])_logout=1(&|$)/,
-                "$1").replace(/[?&]$/, "") + "#/login")
-          } catch (_loginHashErr) {
+        setAuthResolving(!0, "session-resume");
+        syncStateFromStore();
+        if (bridgeState.authenticated)return Promise.resolve(!0);
+        var explicitLogin = location.hash === "#/login" || /(?:\?|&)_(?:logout|login)=/.test(location.search || "") || appBootGet("__APP_LOGGED_OUT_LOCK__", !1) === !0;
+        function settleAnonymous() {
+          syncStateFromStore();
+          if (!bridgeState.authenticated) {
+            if (explicitLogin)try {
+              window.AppSessionResume && __appIsFn(window.AppSessionResume.clear) && window.AppSessionResume.clear();
+            } catch (clearErr) {
+              __appObserve(clearErr, "auth.resume.clear");
+            }
             try {
-              location.hash = "#/login"
-            } catch (_loginHashRouteAlt) {
-              typeof __appObserve == "function" && __appObserve(_loginHashRouteAlt, "ec")
+              if (location.hash !== "#/login")history.replaceState(null, "", location.pathname + location.search.replace(/([?&])_logout=1(&|$)/, "$1").replace(/[?&]$/, "") + "#/login");
+            } catch (routeErr) {
+              try { location.hash = "#/login"; } catch (hashErr) { __appObserve(hashErr, "auth.resume.loginRoute"); }
             }
           }
+          return !!bridgeState.authenticated;
         }
-        return Promise.resolve(!!bridgeState.authenticated)
+        if (!explicitLogin && window.AppSessionResume && __appIsFn(window.AppSessionResume.get) && __appIsFn(window.AppSessionResume.tryResume))try {
+          var rec = window.AppSessionResume.get();
+          if (rec && (rec.resumeHandle || rec.sessionResumeHandle))return Promise.resolve(window.AppSessionResume.tryResume({ reason: "bootstrap-session-resume" })).then(function() {
+              syncStateFromStore();
+              return bridgeState.authenticated ? !0 : settleAnonymous();
+            }).catch(function(err) {
+              __appObserve(err, "auth.resume.failed");
+              return settleAnonymous();
+            });
+        } catch (resumeErr) {
+          __appObserve(resumeErr, "auth.resume.bootstrap");
+        }
+        return Promise.resolve(settleAnonymous());
       }
       router.afterEach(function(to) {
           try {
@@ -6617,6 +6673,7 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
             routeState.path = "/login",
             bridgeState.currentPath = "/login",
             currentPageComponent.value = LoginPage,
+            setAuthResolving(!1, "force-login"),
             setShellMode(!1); try {
               ["u_name",
                 "u_pass",
@@ -6707,25 +6764,33 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
           safeApplyRoute(location.hash || "/login", !0, "hashchange")
         }),
       document.addEventListener("app:user-changed", function(e) {
+          setAuthResolving(!0, "user-changed");
           try {
-            syncStateFromStore(); try {
-              bridgeState.authenticated && applyNavMenuAccess(resolveCurrentRole(), {
-                  reason: "app:user-changed"
-                })
-            } catch (_nav2ApplyErr) {
-              __appObserve(_nav2ApplyErr, "nav2.userChanged.apply")
+            syncStateFromStore();
+            setShellMode(bridgeState.authenticated);
+            try {
+              bridgeState.authenticated && applyNavMenuAccess(resolveCurrentRole(), { reason: "app:user-changed", force: !0 });
+            } catch (accessErr) {
+              __appObserve(accessErr, "nav.userChanged.access");
             }
-            var target = bridgeState.authenticated ? BOOT.defaultRoute || "/dashboard": "/login"; waitCoreForAuthenticatedRoute("app:user-changed").then(function() {
-                return safeApplyRoute(target, !0, "app:user-changed")
-              })
+            var target = bridgeState.authenticated ? BOOT.defaultRoute || "/dashboard" : "/login";
+            waitCoreForAuthenticatedRoute("app:user-changed").then(function() {
+                return safeApplyRoute(target, !0, "app:user-changed");
+              }).catch(function(err) {
+                releaseUiLock("user-changed-route-error");
+                window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.userChanged", err, { detail: e && e.detail || null });
+                return !1;
+              }).finally(function() {
+                setAuthResolving(!1, "user-changed-settled");
+                setShellMode(bridgeState.authenticated);
+              });
           } catch (err) {
-            releaseUiLock("user-changed-route-error"); try {
-              window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.userChanged",
-                err, {
-                  detail: e && e.detail || null
-                })
-            } catch (_warn) {
-              __appObserve(_warn, "route.userChanged.warn")
+            setAuthResolving(!1, "user-changed-error");
+            releaseUiLock("user-changed-route-error");
+            try {
+              window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.userChanged", err, { detail: e && e.detail || null });
+            } catch (warnErr) {
+              __appObserve(warnErr, "route.userChanged.warn");
             }
           }
         }); try {
@@ -6740,22 +6805,25 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
         } catch (_loginBindErr) {
           __appObserve(_loginBindErr, "plain.boot.loginInit")
         }
+        setAuthResolving(!0, "plain-dom-bootstrap");
         Promise.resolve().then(function() {
-            return bootstrapFromSessionStorage()
+            return bootstrapFromSessionStorage();
           }).then(function(authenticated) {
-            var target = authenticated ?(location.hash && location.hash !== "#/login" ? location.hash: BOOT.defaultRoute || BOOT.page || "/dashboard"): "/login"; return waitCoreForAuthenticatedRoute("plain-dom-bootstrap").then(function() {
-                return safeApplyRoute(target, !0, "plain-dom-bootstrap")
-              })
-          }).catch (function(err) {
+            var target = authenticated ? (location.hash && location.hash !== "#/login" ? location.hash : BOOT.defaultRoute || BOOT.page || "/dashboard") : "/login";
+            return waitCoreForAuthenticatedRoute("plain-dom-bootstrap").then(function() {
+                return safeApplyRoute(target, !0, "plain-dom-bootstrap");
+              });
+          }).catch(function(err) {
             try {
-              window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.plainDomBootstrap",
-                err)
-            } catch (_warn) {
-              __appObserve(_warn, "plain.boot.warn")
+              window.AppRuntime && window.AppRuntime.recordWarning && window.AppRuntime.recordWarning("route.plainDomBootstrap", err);
+            } catch (warnErr) {
+              __appObserve(warnErr, "plain.boot.warn");
             }
-            return safeApplyRoute("/login", !0, "plain-dom-bootstrap-fallback").catch (function() {
-                setShellMode(!1)
-              })
+            return safeApplyRoute("/login", !0, "plain-dom-bootstrap-fallback").catch(function() { setShellMode(!1); });
+          }).finally(function() {
+            syncStateFromStore();
+            setAuthResolving(!1, "plain-dom-bootstrap-settled");
+            setShellMode(bridgeState.authenticated);
           })
       } catch (bootError) {
         document.documentElement.classList.add("app-plain-boot-error"); try {

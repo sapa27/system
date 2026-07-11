@@ -83,6 +83,10 @@ function include_(filename) {
 function include(filename) {
   return HtmlService.createTemplateFromFile(filename).evaluate().getContent()
 }
+function _appDefaultLogoDataUri_() {
+  var markup = '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#001e3c"/><text x="64" y="70" text-anchor="middle" font-family="Sarabun, Arial" font-size="20" font-weight="700" fill="#ffd84d">รัฐสภา</text></svg>';
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(markup)
+}
 function getAppLogoConfig_() {
   var logoUrl = "",
   logoDataUri = "";
@@ -98,7 +102,7 @@ function getAppLogoConfig_() {
     _recordWarning_("ec", _dataErr),
     logoDataUri = ""
   }
-  var compactDefaultSvg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#f8fafc"/><circle cx="64" cy="48" r="26" fill="#d4af37"/><path d="M28 100h72M40 88h48M48 74h32" stroke="#334155" stroke-width="7" stroke-linecap="round"/><text x="64" y="55" text-anchor="middle" font-family="Sarabun, Arial" font-size="18" fill="#334155">สภา</text></svg>'),
+  var compactDefaultSvg = _appDefaultLogoDataUri_(),
   active = logoUrl || logoDataUri || compactDefaultSvg;
   return {
     svg: active,

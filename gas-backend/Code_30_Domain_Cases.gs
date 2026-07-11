@@ -1868,59 +1868,21 @@ function _r122(payloadOrCaseId, sourceName) {
   return found
 }
 function _r56(name) {
-  return(name = _s_(name).trim()) === "MainData" ? [_S12,
-    _T4,
-    _S23,
-    _S28,
-    _S7,
-    _S20,
-    _S3,
-    _S9,
-    _S18,
-    _S5,
-    _S16,
-    _S4,
-    _S6]: name === "MeetingLogs" ? [_S38,
-    _S34,
-    _S12,
-    _S35,
-    "date",
-    _T31,
-    _S28,
-    "location",
-    "attendees",
-    "summary",
-    _S39,
-    "note",
-    _T33,
-    _T34,
-    _S29,
-    "meetingGroup",
-    _T4,
-    _S23,
-    _S5,
-    _S16,
-    _S4,
-    _S6]: name === "Letters" ? ["letterId",
-    _S12,
-    "letterNo",
-    "bookNo",
-    "agency",
-    _S20,
-    "issue",
-    "letterStatus",
-    _S18,
-    "officer",
-    "opStaff",
-    "letterDate",
-    "dueDate",
-    "extendDate",
-    "repliesJSON",
-    "repliesJson",
-    _S5,
-    _S16,
-    _S4,
-    _S6]: []
+  name = _s_(name).trim();
+  if (name === "MainData")return [_S12, _T4, _S23, _S28, _S7, _S20, _S3, _S9, _S18, _S5, _S16, _S4, _S6];
+  if (name === "MeetingLogs")return [
+    _S38, "meetingLogId", "id", _S34, _S12, _S35,
+    "round", "meetingRound", "meetingNo", "relatedMeetingNo", "roundNo", "ครั้งที่", "ครั้งที่ประชุม", "การประชุมครั้งที่",
+    "date", _T31, "relatedMeetingDate", "dateRaw", _L12, "วันประชุม",
+    _S28, "caseTitle", "considerationTitle", "subject", "เรื่อง", "ชื่อเรื่อง",
+    "location", "meetingLocation", "สถานที่ประชุม", "attendees", "participants", "ผู้เข้าร่วมประชุม",
+    "summary", _S39, "ผลการประชุม", "มติ", "note",
+    _T33, "meetingType", "type", "ประเภทการประชุม", _T34, "subcommittee", "subCommitteeName", "คณะอนุกรรมาธิการ", _S29, "meetingGroup",
+    _T4, "caseNo", "runningNo", "orderNo", "ลำดับเรื่อง", _S23, "receiveNo", "receiptNo", "เลขรับเรื่อง", "เลขรับ",
+    "agendaNo", "agencyOrPresenter", "agencyName", "หน่วยงาน", _S5, _S16, _S4, _S6
+  ];
+  if (name === "Letters")return ["letterId", _S12, "letterNo", "bookNo", "agency", _S20, "issue", "letterStatus", _S18, "officer", "opStaff", "letterDate", _S5, _S16, _S4, _S6];
+  return [];
 }
 function _r30(name, includeDeleted) {
   var fields = _r56(name = _s_(name).trim());
@@ -9276,84 +9238,57 @@ function _committeeMeetingLegacyHash_(value) {
 function _committeeMeetingLegacyBundle_(readOptions) {
   var rows = [];
   try {
-    rows = _r30(_S0, !1) || []
+    rows = _r30(_S0, !1) || [];
   } catch (err) {
-    _c30W_("committee.meeting.legacyRead", err, {
-        sheet: _S0
-      });
-    return {
-      meetings: [],
-      items: [],
-      source: "MeetingLogs-read-failed"
+    _c30W_("committee.meeting.legacyRead", err, { sheet: _S0 });
+    return { meetings: [], items: [], source: "MeetingLogs-read-failed", error: String(err && err.message || err) };
+  }
+  var groups = {}, meetings = [], items = [];
+  rows.forEach(function(rawRow, index) {
+    var row = rawRow || {};
+    if (_appIsFnName_("isSoftDeletedRow_") && isSoftDeletedRow_(row))return;
+    var normalized = _normalizeMeetingLogRow_(row);
+    var meetingNo = _j(normalized.round || row.relatedMeetingNo || row.roundNo || "");
+    var meetingDate = _committeeMeetingDateText_(normalized.meetingDate || row.relatedMeetingDate || row.วันประชุม || "");
+    var existingId = _j(row.meetingId || "");
+    var committeeType = _j(normalized.committeeType || row.meetingType || row.ประเภทการประชุม || "");
+    var subcommitteeName = _j(normalized.subcommitteeName || row.subcommittee || row.subCommitteeName || row.คณะอนุกรรมาธิการ || "");
+    var title = _j(normalized.title || row.considerationTitle || row.subject || row.เรื่อง || row.ชื่อเรื่อง || "");
+    var caseId = _j(normalized.caseId || row.caseId || "");
+    var caseNum = _caseMeetingAgendaNumberText_(normalized.caseNum || row.caseNo || row.runningNo || row.orderNo || row.ลำดับเรื่อง || "");
+    var recNo = _caseMeetingAgendaNumberText_(normalized.recNo || row.receiveNo || row.receiptNo || row.เลขรับเรื่อง || row.เลขรับ || "");
+    var result = _j(normalized.result || normalized.note || row.ผลการประชุม || row.มติ || "");
+    var key = existingId || [meetingNo, meetingDate, committeeType, subcommitteeName].join("|");
+    if (!key.replace(/\|/g, ""))key = [caseId, caseNum, recNo, title, meetingDate].join("|");
+    if (!key.replace(/\|/g, ""))return;
+    var meetingId = existingId || "LEGACY-" + _committeeMeetingLegacyHash_(key);
+    var group = groups[meetingId];
+    if (!group) {
+      group = groups[meetingId] = { meeting: {
+        meetingId: meetingId,
+        meetingNo: meetingNo || "-",
+        meetingDate: meetingDate,
+        title: _j(row.meetingTitle || title || committeeType || subcommitteeName || _T9),
+        status: "ข้อมูลเดิม",
+        note: _j(normalized.summary || normalized.note || result || ""),
+        readOnlyLegacy: !0,
+        legacySource: _S0
+      }, items: [] };
+      meetings.push(group.meeting);
     }
-  }
-  var groups = {
-  }, meetings = [], items = [];
-  rows.forEach(function(row, index) {
-      row = row || {
+    if (title || result || caseId || caseNum || recNo) {
+      var itemId = _j(normalized.logId || row.logId || row.meetingLogId || row.id || "") || "LEGACY-ITEM-" + _committeeMeetingLegacyHash_([key, caseId, title, index].join("|"));
+      var item = {
+        itemId: itemId, meetingId: meetingId, agendaNo: _j(row.agendaNo || "3") || "3", seq: group.items.length + 1,
+        title: title, caseId: caseId, caseNum: caseNum, recNo: recNo, caseTitle: title,
+        agencyOrPresenter: _j(row.agencyOrPresenter || row.agencyName || row.หน่วยงาน || subcommitteeName || committeeType || ""),
+        result: result, note: _j(normalized.note || row.note || ""), readOnlyLegacy: !0, legacySource: _S0,
+        legacyLogId: _j(normalized.logId || row.logId || row.meetingLogId || row.id || "")
       };
-      if (_appIsFnName_("isSoftDeletedRow_") && isSoftDeletedRow_(row))return;
-      var meetingNo = _j(row.meetingNo || row.meetingRound || row.round || row[_S22] || ""),
-      meetingDate = _committeeMeetingDateText_(row.meetingDate || row.date || row[_L12] || ""),
-      existingId = _j(row.meetingId || ""),
-      committeeType = _j(row.committeeType || row.meetingType || row[_L17] || ""),
-      subcommitteeName = _j(row.subcommitteeName || row.subcommittee || row[_L0] || ""),
-      key = existingId || [meetingNo,
-        meetingDate,
-        committeeType,
-        subcommitteeName].join("|");
-      if (!key || key === "|||")return;
-      var meetingId = existingId || "LEGACY-" + _committeeMeetingLegacyHash_(key),
-      group = groups[meetingId];
-      if (!group) {
-        group = groups[meetingId] = {
-          meeting: {
-            meetingId: meetingId,
-            meetingNo: meetingNo,
-            meetingDate: meetingDate,
-            title: _j(row.meetingTitle || committeeType || subcommitteeName || _T9),
-            status: "ข้อมูลเดิม",
-            note: _j(row.summary || row.note || ""),
-            readOnlyLegacy: !0,
-            legacySource: _S0
-          },
-          items: []
-        };
-        meetings.push(group.meeting)
-      }
-      var title = _j(row.caseTitle || row.title || row.subject || row.considerationTitle || ""),
-      result = _j(row.result || row.note || row.summary || ""),
-      itemId = _j(row.logId || row.id || "") || "LEGACY-ITEM-" + _committeeMeetingLegacyHash_([key,
-          row.caseId,
-          title,
-          index].join("|"));
-      if (title || result || row.caseId || row.caseNum || row.recNo) {
-        var item = {
-          itemId: itemId,
-          meetingId: meetingId,
-          agendaNo: _j(row.agendaNo || "3") || "3",
-          seq: group.items.length + 1,
-          title: title,
-          caseId: _j(row.caseId || ""),
-          caseNum: _caseMeetingAgendaNumberText_(row.caseNum || row.caseNo || row.runningNo || ""),
-          recNo: _caseMeetingAgendaNumberText_(row.recNo || row.receiveNo || row.receiptNo || ""),
-          caseTitle: title,
-          agencyOrPresenter: _j(row.agencyOrPresenter || row.agencyName || subcommitteeName || committeeType || ""),
-          result: result,
-          note: _j(row.note || ""),
-          readOnlyLegacy: !0,
-          legacySource: _S0,
-          legacyLogId: _j(row.logId || row.id || "")
-        };
-        group.items.push(item),
-        items.push(item)
-      }
-    });
-  return {
-    meetings: meetings,
-    items: items,
-    source: "MeetingLogs-compat-read"
-  }
+      group.items.push(item); items.push(item);
+    }
+  });
+  return { meetings: meetings, items: items, source: "MeetingLogs-compat-read", projectedAliasContract: "meetinglogs-all-known-aliases-current" };
 }
 function _z6(payload) {
   payload = payload || {};

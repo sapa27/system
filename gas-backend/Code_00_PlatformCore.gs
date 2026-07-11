@@ -7,13 +7,13 @@ var __APP_GLOBAL__ =(function() {
     return {
     }
   })(), APP_DEPLOY_RELEASE = Object.freeze({
-    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r37",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
     channel: "gas-hosted-ui-direct-script-run",
     buildName: "V1.2 Production GAS-hosted direct transport",
     releaseDate: "2026-07-02",
-    assetStamp: "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-11-r37",
-    sourceFingerprint: "commission-v1.2-gas-hosted-production-2026-07-11-r37",
-    contractStamp: "contract-commission-v1.2-gas-hosted-production-2026-07-11-r37",
+    assetStamp: "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-11-r38",
+    sourceFingerprint: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
+    contractStamp: "contract-commission-v1.2-gas-hosted-production-2026-07-11-r38",
     transportMode: "production-gas-hosted-google-script-run-api-router",
     description: "Production UI and backend are hosted by GAS; browser calls the canonical apiRouter through google.script.run."
   });
@@ -626,9 +626,9 @@ function apiGetPhase1Contract(payload) {
   return contract.dataLoadingPerformance = AppBackendCore.dataLoadingPerformanceContract ? AppBackendCore.dataLoadingPerformanceContract(payload || {
     }): {
     ok: !0,
-    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r37"
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38"
   },
-  contract.stamp = "commission-v1.2-gas-hosted-production-2026-07-11-r37",
+  contract.stamp = "commission-v1.2-gas-hosted-production-2026-07-11-r38",
   ok_(contract, "โหลด Phase 1 data-loading performance contract สำเร็จ")
 }
 AppBackendCore.dataLoadingPerformanceContract = function(payload) {
@@ -636,7 +636,7 @@ AppBackendCore.dataLoadingPerformanceContract = function(payload) {
   },
   {
     ok: !0,
-    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r37",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
     owner: "Code_00_PlatformCore.AppBackendCore.dataLoadingPerformanceContract",
     generatedAt: new Date().toISOString(),
     uiDomChanged: !1,
@@ -688,7 +688,7 @@ AppBackendCore.dataLoadingPerformanceContract = function(payload) {
     "Scripts_Page_Admin"];
   return {
     ok: !0,
-    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r37",
+    stamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
     owner: "Code_00_PlatformCore.AppBackendCore.phase2SingleSourceContract",
     generatedAt: new Date().toISOString(),
     uiDomChanged: !1,
@@ -741,7 +741,7 @@ AppBackendCore.VERSION = "backend-contract-current", AppBackendCore.CASE_SEARCH_
   "status",
   "statusMeta",
   "reportColumns"], AppBackendCore.API_ROUTE_CONTRACT_SOURCE = "Code_20_Router._apiRouteRegistry_", AppBackendCore.API_CONTRACT = Object.freeze({
-  }), AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.2-gas-hosted-production-2026-07-11-r37",
+  }), AppBackendCore.API_CONTRACT_STAMP = "contract-commission-v1.2-gas-hosted-production-2026-07-11-r38",
 AppBackendCore.API_DTO_CONTRACT_BY_METHOD = {
   apiSearchCasesLite: {
     owner: "CaseDomain.searchCases",
@@ -6456,7 +6456,7 @@ function renderVue3App_(e) {
     []),
   template.evaluate().setTitle(title).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT)
 }
-var GITHUB_GAS_BRIDGE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-11-r37";
+var GITHUB_GAS_BRIDGE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-11-r38";
 function __platformCacheLedgerAppend__(value) {
   try {
     return JSON.stringify(value == null ? null: value)
@@ -6497,8 +6497,8 @@ function _b6() {
     typeof getAppLogoConfig_ == "function" &&(cfg = getAppLogoConfig_() || cfg)
   } catch (_e) {
   }
-  if (!cfg.active) {
-    var fallbackSvg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#f8fafc"/><circle cx="64" cy="48" r="26" fill="#d4af37"/><path d="M28 100h72M40 88h48M48 74h32" stroke="#334155" stroke-width="7" stroke-linecap="round"/><text x="64" y="55" text-anchor="middle" font-family="Sarabun, Arial" font-size="18" fill="#334155">สภา</text></svg>');
+  if (!cfg.active && typeof _appDefaultLogoDataUri_ == "function") {
+    var fallbackSvg = _appDefaultLogoDataUri_();
     cfg = {
       svg: fallbackSvg,
       png96: fallbackSvg,
@@ -6506,7 +6506,7 @@ function _b6() {
       png512: fallbackSvg,
       inline: "",
       active: fallbackSvg,
-      source: "github-default"
+      source: "canonical-default"
     }
   }
   return cfg

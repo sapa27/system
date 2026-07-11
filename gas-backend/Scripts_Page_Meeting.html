@@ -4669,7 +4669,8 @@ var _M = {
       $meetingObserve(_initialClearErr, "meeting.committee.initialize.clear")
     }
     var initial = Promise.resolve(loadList({
-          forceFresh: !1
+          forceFresh: !0,
+          forceReload: !0
         })).then(function(value) {
         listState.initialLoadPromise = null;
         return value
@@ -6658,11 +6659,20 @@ var _M = {
     return null
   }
   function _f55() {
-    var seed = pendingSeed(),
-    active = root.__MEETING_SEARCH_EDIT_IN_PROGRESS__;
-    if (!seed)return!1;
+    var seed = pendingSeed();
+    if (!seed)return !1;
     _f9();
-    return active && "searchEditCase.singlePass" === String(active.source || "") ? !0: (_f39(seed), !0)
+    var ok = _f39(seed);
+    var caseId = txt(seed.caseId || seed.id || seed.caseNum || seed.recNo || "");
+    var hydrated = !!(txt((byId("meeting-caseId") || {}).value) || txt((byId("meeting-title") || {}).value) || txt((byId("meeting-caseNum") || {}).value) || txt((byId("meeting-recNo") || {}).value));
+    if (ok && hydrated)try {
+      root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = null;
+      root.AppStore && isFn(root.AppStore.set) && (root.AppStore.set($meetingStoreEditSeed, null), root.AppStore.set("meeting.searchEditSeed", null), root.AppStore.set("search.editSeed", null));
+    } catch (clearErr) { $meetingObserve(clearErr, "meeting.route.clearHydratedSeed"); }
+    try {
+      doc.dispatchEvent(new CustomEvent("app:meeting-edit-hydrated", { detail: { ok: !!(ok && hydrated), caseId: caseId, source: "Scripts_Page_Meeting.RouteActionOwner" } }));
+    } catch (eventErr) { $meetingObserve(eventErr, "meeting.route.hydratedEvent"); }
+    return !!(ok && hydrated);
   }
 }
 (window, document);

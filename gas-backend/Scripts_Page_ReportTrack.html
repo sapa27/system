@@ -694,107 +694,51 @@
     },
     root.searchDeleteCase.__reportTrackDeleteWrapped = !0,
     root.searchEditCase = function(id) {
-      if (!(id = clean(id)))return!1;
-      var editLoadingShown = showCaseLoading("กำลังโหลดข้อมูล", "กำลังเปิดข้อมูลเรื่องพิจารณาเพื่อแก้ไข..."),
-      finishEditLoading = function() {
-        editLoadingShown && closeCaseLoadingAfterMin(450)
-      };
+      id = clean(id);
+      if (!id)return !1;
+      var loadingShown = showCaseLoading("กำลังโหลดข้อมูล", "กำลังเปิดข้อมูลเรื่องพิจารณาเพื่อแก้ไข...");
+      function finishLoading() { loadingShown && closeCaseLoadingAfterMin(450); }
       return fetchBundle(id).then(function(bundle) {
-          var item = bundle &&(bundle.rawCase || bundle.case); if (!item)throw new Error("ไม่พบรายการเรื่องพิจารณาที่ต้องการจัดการ"); var editKey = clean(item.caseId || item.id || id),
-          normalized = normalizeCase(item),
-          editSeed = $po({
-            }, item, normalized, {
-              __fromSearchEdit: !0,
-              __suppressEditLoading: !0,
-              __skipCanonicalFetch: !0,
-              __singlePassEdit: !0,
-              __searchEditAt: Date.now ? Date.now(): 0
-            }); root.__searchEditCaseSeeds = root.__searchEditCaseSeeds || {
-          },
-          [editKey,
-            item.id,
-            item.caseId,
-            item.caseNum,
-            item.recNo,
-            editSeed.id,
-            editSeed.caseId,
-            editSeed.caseNum,
-            editSeed.recNo].forEach(function(k) {
-              (k = clean(k)) &&(root.__searchEditCaseSeeds[k] = editSeed)
-            }); root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = {
-            caseId: editKey,
-            seed: editSeed,
-            until: (Date.now ? Date.now(): 0) + 12e3,
-            source: "searchEditCase.singlePass"
-          }; try {
-            root.AppStore && root.AppStore.set &&(root.AppStore.set("meeting.editSeed", editSeed),
-              root.AppStore.set("meeting.searchEditSeed", editSeed), root.AppStore.set("search.editSeed", editSeed))
-          } catch (_seedStoreErr) {
-            $ob(_seedStoreErr, "reportTrack.searchEdit.seedStore")
-          }
-          function waitMeetingEditorReady() {
-            var started = Date.now ? Date.now(): 0,
-            timeoutMs = 8000;
-            return new Promise(function(resolve, reject) {
-                function check() {
-                  if ($fn(root.meetingEditCase) && document.getElementById("meeting-caseId") && document.getElementById("meeting-workspace"))return resolve(!0);
-                  if ((Date.now ? Date.now(): 0) - started >= timeoutMs)return reject(new Error("หน้าจัดการเรื่องพิจารณายังไม่พร้อมใช้งาน"));
-                  (root.AppRuntime && $fn(root.AppRuntime.pageDelay) ? root.AppRuntime.pageDelay("search", "search.edit.waitMeeting", check, 40): root.setTimeout(check, 40))
-                }
-                check()
-              })
-          }
-          var navigation = root.nav ? root.nav("meeting", {
-              preserveLoadingSwal: !0,
-              source: "searchEditCase.singlePass",
-              caseId: editKey,
-              seed: editSeed
-            }): (location.hash = "#/meeting", !0);
-          return Promise.resolve(navigation).then(function() {
-              var loadMeeting = root.AppAssetLoader && $fn(root.AppAssetLoader.loadPageScripts) ? root.AppAssetLoader.loadPageScripts("meeting"): Promise.resolve(!0);
-              return Promise.resolve(loadMeeting)
-            }).then(waitMeetingEditorReady).then(function() {
-              if (!$fn(root.meetingEditCase))throw new Error("ไม่พบ meetingEditCase หลังโหลดหน้าจัดการเรื่องพิจารณา");
-              return root.meetingEditCase(editKey, {
-                  source: "searchEditCase.singlePass",
-                  silentLoading: !0,
-                  seed: editSeed,
-                  __singlePass: !0,
-                  __skipCreateNewOnActivate: !0
-                })
-            }).then(function(result) {
-              if (!1 === result)throw new Error("ไม่สามารถเติมข้อมูลเรื่องพิจารณาในแบบฟอร์มได้");
-              var caseIdValue = clean((document.getElementById("meeting-caseId") || {
-                  }).value),
-              caseTitleValue = clean((document.getElementById("meeting-title") || {
-                  }).value),
-              receiveValue = clean((document.getElementById("meeting-recNo") || {
-                  }).value),
-              orderValue = clean((document.getElementById("meeting-caseNum") || {
-                  }).value);
-              if (!caseIdValue && !caseTitleValue && !receiveValue && !orderValue && root.AppMeetingRouteActionOwner && $fn(root.AppMeetingRouteActionOwner.applySearchSeed)) {
-                root.AppMeetingRouteActionOwner.applySearchSeed(editSeed),
-                caseIdValue = clean((document.getElementById("meeting-caseId") || {
-                    }).value),
-                caseTitleValue = clean((document.getElementById("meeting-title") || {
-                    }).value),
-                receiveValue = clean((document.getElementById("meeting-recNo") || {
-                    }).value),
-                orderValue = clean((document.getElementById("meeting-caseNum") || {
-                    }).value)
+          var item = bundle && (bundle.rawCase || bundle.case);
+          if (!item)throw new Error("ไม่พบรายการเรื่องพิจารณาที่ต้องการจัดการ");
+          var editKey = clean(item.caseId || item.id || id);
+          var editSeed = $po({}, item, normalizeCase(item), { __fromSearchEdit: !0, __suppressEditLoading: !0, __skipCanonicalFetch: !0, __searchEditAt: Date.now ? Date.now() : 0 });
+          root.__searchEditCaseSeeds = root.__searchEditCaseSeeds || {};
+          [editKey, item.id, item.caseId, item.caseNum, item.recNo].forEach(function(key) { key = clean(key); key && (root.__searchEditCaseSeeds[key] = editSeed); });
+          root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = { caseId: editKey, seed: editSeed, until: (Date.now ? Date.now() : 0) + 15000, source: "searchEditCase.route-owner" };
+          try {
+            if (root.AppStore && root.AppStore.set) {
+              root.AppStore.set("meeting.editSeed", editSeed);
+              root.AppStore.set("meeting.searchEditSeed", editSeed);
+              root.AppStore.set("search.editSeed", editSeed);
+            }
+          } catch (storeErr) { $ob(storeErr, "reportTrack.searchEdit.seedStore"); }
+          return new Promise(function(resolve, reject) {
+              var settled = !1, started = Date.now ? Date.now() : 0, timeoutMs = 12000;
+              function cleanup() { document.removeEventListener("app:meeting-edit-hydrated", onHydrated, !0); }
+              function done(ok, value) { if (settled)return; settled = !0; cleanup(); ok ? resolve(value) : reject(value); }
+              function onHydrated(ev) {
+                var detail = ev && ev.detail || {}, hydratedId = clean(detail.caseId || detail.id || "");
+                if (hydratedId && editKey && hydratedId !== editKey)return;
+                detail.ok === !1 ? done(!1, new Error(detail.message || "ไม่สามารถเติมข้อมูลเรื่องพิจารณาในแบบฟอร์มได้")) : done(!0, detail);
               }
-              if (!caseIdValue && !caseTitleValue && !receiveValue && !orderValue)throw new Error("เปิดหน้าจัดการเรื่องพิจารณาแล้ว แต่ไม่สามารถเติมข้อมูลที่เลือกได้");
-              return result
-            })
-        }).catch (function(err) {
-          return editLoadingShown &&(closeCaseLoading(), editLoadingShown = !1),
-          root.AppRuntime && root.AppRuntime.handleError ? root.AppRuntime.handleError(err, "เปิดหน้าจัดการเรื่องพิจารณาไม่สำเร็จ"): notify("ดำเนินการไม่สำเร็จ",
-            String(err && err.message || "เปิดหน้าจัดการเรื่องพิจารณาไม่สำเร็จ"), "error"),
-          !1
-        }).then(function(result) {
-          return finishEditLoading(),
-          result
-        })
+              function requestOwner() {
+                if (settled)return;
+                if ((Date.now ? Date.now() : 0) - started >= timeoutMs)return done(!1, new Error("หน้าจัดการเรื่องพิจารณาไม่สามารถเติมข้อมูลได้ภายในเวลาที่กำหนด"));
+                var owner = root.AppMeetingRouteActionOwner;
+                if (owner && $fn(owner.applyPending) && document.getElementById("meeting-workspace"))try { owner.applyPending(); } catch (ownerErr) { $ob(ownerErr, "reportTrack.searchEdit.applyPending"); }
+                (root.AppRuntime && $fn(root.AppRuntime.pageDelay) ? root.AppRuntime.pageDelay("search", "search.edit.awaitHydration", requestOwner, 80) : root.setTimeout(requestOwner, 80));
+              }
+              document.addEventListener("app:meeting-edit-hydrated", onHydrated, !0);
+              var navigation = root.nav ? root.nav("meeting", { preserveLoadingSwal: !0, source: "searchEditCase.route-owner", caseId: editKey }) : (location.hash = "#/meeting", !0);
+              Promise.resolve(navigation).then(function() {
+                  return root.AppAssetLoader && $fn(root.AppAssetLoader.loadPageScripts) ? root.AppAssetLoader.loadPageScripts("meeting") : !0;
+                }).then(requestOwner).catch(function(err) { done(!1, err); });
+            });
+        }).catch(function(err) {
+          loadingShown && (closeCaseLoading(), loadingShown = !1);
+          return root.AppRuntime && root.AppRuntime.handleError ? root.AppRuntime.handleError(err, "เปิดหน้าจัดการเรื่องพิจารณาไม่สำเร็จ") : notify("ดำเนินการไม่สำเร็จ", String(err && err.message || "เปิดหน้าจัดการเรื่องพิจารณาไม่สำเร็จ"), "error"), !1;
+        }).then(function(result) { finishLoading(); return result; });
     },
     root.AppPages && $fn(root.AppPages.registerActions) &&(root.AppPages.registerActions("search", {
           searchAll: function() {

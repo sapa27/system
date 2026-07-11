@@ -613,7 +613,7 @@ try {
               expectedOwner: "gas-google-script-run",
               actualOwner: root2.AppTransport.__owner || "",
               transportMode: root2.AppTransport.transportMode || "",
-              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-11-r37",
+              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
               errors: errors
             };
           },
@@ -635,7 +635,7 @@ try {
               owner: "Scripts_Critical_Login_Runtime.html::AppTransport.run",
               gasHosted: true,
               directApiRouter: true,
-              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-11-r37",
+              releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-11-r38",
               runtimeHealth: health,
               inFlight: Object.keys(criticalGasInFlight).length,
               metrics: Object.assign({}, criticalGasMetrics)
@@ -677,7 +677,7 @@ try {
         } catch (e) {
           status = { ok: false, errors: [String(e && e.message || e)] };
         }
-        status.releaseStamp = "commission-v1.2-gas-hosted-production-2026-07-11-r37";
+        status.releaseStamp = "commission-v1.2-gas-hosted-production-2026-07-11-r38";
         status.checkedAt = new Date().toISOString();
         return status;
       }
