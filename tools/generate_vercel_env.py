@@ -19,6 +19,8 @@ STATIC_RUNTIME_DIR = ROOT / "github-pages" / "partials"
 ENV_OUT = ROOT / "github-pages" / "vercel-env.generated.js"
 GAS_INDEX = ROOT / "gas-backend" / "Index.html"
 CRITICAL_RUNTIME = ROOT / "gas-backend" / "Scripts_Critical_Login_Runtime.html"
+ASSET_SOURCE = ROOT / "gas-backend" / "Code_03_Platform_Assets.gs"
+APP_CONFIG = ROOT / "github-pages" / "app-config.js"
 GENERATED_FRONTEND_FILES = {
     "app-index-foundation-pre-vue.js",
     "app-index-foundation-after-vue.js",
@@ -58,6 +60,28 @@ RELEASE_SYNC_FILES = [
 ]
 RELEASE_PATTERN = re.compile(r"commission-v1\.2-gas-hosted-production-\d{4}-\d{2}-\d{2}-r\d+")
 ASSET_PATTERN = re.compile(r"asset-manifest-commission-v1\.2-gas-hosted-production-\d{4}-\d{2}-\d{2}-r\d+")
+
+
+def _canonical_fallback_logo_data_uri() -> str:
+    text = ASSET_SOURCE.read_text(encoding="utf-8")
+    match = re.search(r"function _appDefaultLogoDataUri_\(\) \{[\s\S]*?var markup = '([^']+)';", text)
+    if not match:
+        raise RuntimeError("CANONICAL_FALLBACK_LOGO_NOT_FOUND")
+    from urllib.parse import quote
+    return "data:image/svg+xml;charset=UTF-8," + quote(match.group(1), safe="")
+
+
+def _sync_fallback_logo() -> bool:
+    expected = _canonical_fallback_logo_data_uri()
+    text = APP_CONFIG.read_text(encoding="utf-8")
+    pattern = re.compile(r'(FALLBACK_LOGO\s*=\s*)"[^"]*"')
+    updated, count = pattern.subn(lambda m: m.group(1) + json.dumps(expected, ensure_ascii=False), text, count=1)
+    if count != 1:
+        raise RuntimeError("APP_CONFIG_FALLBACK_LOGO_BLOCK_NOT_FOUND")
+    if updated != text:
+        APP_CONFIG.write_text(updated, encoding="utf-8")
+        return True
+    return False
 
 
 def _router_methods() -> list[str]:
@@ -122,7 +146,7 @@ def _sync_manifest(methods: list[str]) -> bool:
     freeze["routeCount"] = len(methods)
     freeze["apiMethods"] = methods
     data["p3ReleaseSecurity"] = {
-        "stamp": "production-release-security-discipline-r35",
+        "stamp": "production-runtime-recovery-single-owner-r38",
         "releaseOwner": "package.json::release",
         "apiContractOwner": "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_",
         "proxyAllowlistGenerated": True,
@@ -146,15 +170,15 @@ def _sync_manifest(methods: list[str]) -> bool:
     data["generatedMirror"] = "github-pages/{app-index-foundation-pre-vue.js,app-index-foundation-after-vue.js,app-index-foundation-after-swal.js,app-index-bootstrap.js,critical-login-runtime.js,vercel-env.generated.js,partials/Scripts_*.html}"
     single = data.setdefault("singleSourceGeneration", {})
     single.update({
-        "stamp": "production-current-index-runtime-single-source-r36",
+        "stamp": "production-runtime-recovery-single-owner-r38",
         "canonicalOwners": ["gas-backend/Index.html", "gas-backend/Scripts_*.html", "github-pages/app-config.js"],
         "generator": "tools/generate_vercel_env.py",
         "generatedRuntimeCount": 9,
         "generatedFrontendCount": 5,
         "generatedEnv": "github-pages/vercel-env.generated.js",
         "sourcePackageExcludesGeneratedArtifacts": True,
-        "sourceFileCount": 38,
-        "buildOutputFileCount": 53,
+        "sourceFileCount": 37,
+        "buildOutputFileCount": 52,
         "duplicateRuntimeBytesRemovedFromSourcePackage": 2022437,
         "postSwalFoundationGenerated": True,
         "uiModernizationRuntimeGenerated": True,
@@ -170,7 +194,7 @@ def _sync_manifest(methods: list[str]) -> bool:
     runtime["frontendTransportOwner"] = "host-aware: GAS Scripts_Critical_Login_Runtime AppTransport.run; Vercel github-pages/github-gas-transport.js AppTransport.run"
     runtime["clientInFlightOwner"] = "host-aware AppTransport.inFlightOnly"
     data["productionConsolidation"] = {
-        "stamp": "production-consolidated-single-owner-r36",
+        "stamp": "production-runtime-recovery-single-owner-r38",
         "releaseOwner": "package.json::release",
         "apiContractOwner": "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_",
         "runtimeSourceOwner": "gas-backend/Index.html + gas-backend/Scripts_*.html",
@@ -183,8 +207,8 @@ def _sync_manifest(methods: list[str]) -> bool:
         "historicalGateBytesBeforeConsolidation": 263260,
         "currentProductionGateBytes": (ROOT / "tools" / "phaseN_legacy_transport_gate.py").stat().st_size,
         "exactDuplicateFunctionGroupsOver300Bytes": 0,
-        "sourceFileCount": 38,
-        "buildOutputFileCount": 53,
+        "sourceFileCount": 37,
+        "buildOutputFileCount": 52,
         "noNewApiRoutes": True,
         "noNewSourceFiles": True,
         "spreadsheetSchemaChanged": False,
@@ -212,6 +236,10 @@ def _contract_drift_errors() -> list[str]:
         errors.append("MANIFEST_API_METHODS_NOT_GENERATED_FROM_ROUTER")
     if manifest.get("release") != RELEASE or manifest.get("assetStamp") != ASSET:
         errors.append("MANIFEST_RELEASE_NOT_PACKAGE_OWNED")
+    app_config = APP_CONFIG.read_text(encoding="utf-8")
+    fallback_match = re.search(r'FALLBACK_LOGO\s*=\s*"([^"]*)"', app_config)
+    if not fallback_match or fallback_match.group(1) != _canonical_fallback_logo_data_uri():
+        errors.append("APP_CONFIG_FALLBACK_LOGO_NOT_CANONICAL")
     for path in RELEASE_SYNC_FILES:
         text = path.read_text(encoding="utf-8")
         releases = set(RELEASE_PATTERN.findall(text))
@@ -507,6 +535,7 @@ def generate() -> dict:
     methods = _router_methods()
     proxySynced = _sync_proxy_contract(methods)
     manifestSynced = _sync_manifest(methods)
+    fallbackLogoSynced = _sync_fallback_logo()
     outputs = _expected_outputs()
     STATIC_RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -539,6 +568,7 @@ def generate() -> dict:
         "releaseMetadataSynced": releaseSynced,
         "proxyContractSynced": proxySynced,
         "manifestContractSynced": manifestSynced,
+        "fallbackLogoSynced": fallbackLogoSynced,
         "apiMethodCount": len(methods),
         "written": written,
         "unchanged": unchanged,

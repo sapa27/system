@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 RELEASE = str(PACKAGE.get("release") or PACKAGE.get("releaseStamp") or "")
 ASSET = str(PACKAGE.get("assetStamp") or "")
-CURRENT_STAMP = "production-data-flow-single-owner-r37"
+CURRENT_STAMP = "production-runtime-recovery-single-owner-r38"
 CANONICAL_API_OWNER = "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_"
 CANONICAL_RUNTIME_OWNER = "gas-backend/Index.html + gas-backend/Scripts_*.html"
 
@@ -337,7 +337,7 @@ def current_checks(strict: bool = False):
     require("post-Swal bootstrap is generated",(ROOT/"github-pages/app-index-foundation-after-swal.js").exists() and manifest.get("singleSourceGeneration",{}).get("postSwalFoundationGenerated") is True,"generated from Index.html")
     require("critical runtime has one static owner",static_index.count("critical-login-runtime.js")==1 and "Scripts_Critical_Login_Runtime" not in static_index and contains_code(app,"appCritical:{files:[]}"),"critical-login-runtime.js")
 
-    build=scripts.get("build",""); require("one build contract owner",build.count("npm run check:contracts")==1 and "npm run check:architecture" not in build and "npm run check:stability" not in build,build)
+    build=scripts.get("build",""); expected_build="npm run generate:artifacts && npm run check:single-source && npm run check:api && npm run check:frontend && npm run check:inline"; require("deterministic Vercel build owner",build==expected_build,build)
     aliases=["check:p0-correctness","check:p1-performance","check:p2-lifecycle","check:architecture","check:stability","check:consolidation","check:workflow","test:api-facade","test:router-consolidation","test:runtime-bootstrap-meeting"]
     require("compatibility commands delegate to one owner",all(scripts.get(name)=="npm run check:contracts" for name in aliases),json.dumps({name:scripts.get(name) for name in aliases}))
     require("strict audit has one current chain",scripts.get("audit:strict","").startswith("npm run build &&") and "phaseG_security_gate.py --strict" in scripts.get("audit:strict","") and "phaseN_legacy_transport_gate.py --strict" in scripts.get("audit:strict",""),scripts.get("audit:strict",""))
@@ -361,7 +361,7 @@ def current_checks(strict: bool = False):
     require("meeting/search/budget workflow guards","__APP_COMMITTEE_MEETING_BIND_READY__" in meeting and "meeting.editSeed" in report and 'showBudgetTab: "budget"' in critical,"workflow readiness")
     require("meeting legacy read compatibility","_committeeMeetingLegacyBundle_" in cases and "MeetingLogs-compat-read" in cases and "readOnlyLegacy" in meeting,"legacy meetings remain visible read-only")
     require("budget empty cache prohibited","cached.rows.length" in budget_backend and contains_code(budget_backend,"return rows.length ? $u(cacheKey"),"empty summary is never cached")
-    require("search edit waits and verifies","timeoutMs = 8000" in report and "ไม่สามารถเติมข้อมูลที่เลือกได้" in report,"single owner edit hydration")
+    require("search edit uses one hydration owner",'app:meeting-edit-hydrated' in report and "AppMeetingRouteActionOwner" in report and "root.meetingEditCase(editKey" not in report and 'doc.dispatchEvent(new CustomEvent("app:meeting-edit-hydrated"' in meeting,"route owner hydrates and confirms")
     require("datepicker single event owner","thai-datepicker-single-event-current" in core and 'doc[_$c](openEvent, delegated, !0)' in core and 'doc[_$c]("focusin", delegated' not in core,"pointer/keyboard single owner")
 
     collisions=gas_collision_errors(); require("GAS global namespace collision-free",not collisions," | ".join(collisions[:10]))
@@ -448,8 +448,8 @@ def run_p0_browser_smoke():
   window.fetch=function(input,init){{
     var url=String(input&&input.url||input||"");
     var clean=url.split('?')[0],file=clean.substring(clean.lastIndexOf('/')+1);
-    if(partials[file])return textResponse(partials[file]);
-    if(url.indexOf('/api/public-config')>=0)return jsonResponse({{ok:true,releaseStamp:release,assetStamp:asset,logoUrl:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"}});
+    if(partials[file])return file === "Scripts_Core_Runtime.html" ? new Promise(function(resolve){{ setTimeout(function(){{ resolve(new Response(String(partials[file] || ""),{{status:200,headers:{{"Content-Type":"text/html; charset=utf-8"}}}})); }},350); }}) : textResponse(partials[file]);
+    if(url.indexOf('/api/public-config')>=0)return jsonResponse({{ok:true,releaseStamp:release,assetStamp:asset,logoUrl:"https://commission-smoke.test/missing-logo.svg"}});
     if(url.indexOf('/api/login')>=0){{
       var login={{user:{{id:"P0",username:"p0",name:"P0 Smoke",role:"admin"}},token:"p0-token",csrfToken:"p0-csrf",routeContractDeferred:true,dataContractDeferred:true}};
       return jsonResponse(Object.assign({{ok:true,data:login}},login));
@@ -484,6 +484,7 @@ def run_p0_browser_smoke():
             args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
         )
         page = browser.new_page()
+        page.route("**/missing-logo.svg", lambda route: route.abort())
         page.on("pageerror", lambda exc: errors.append(str(exc)))
         try:
             page.set_content(clean_html, wait_until="domcontentloaded", timeout=15000)
@@ -497,9 +498,23 @@ def run_p0_browser_smoke():
               window.dispatchEvent(new Event('load'));
             }""")
             page.wait_for_selector("#u_name", state="attached", timeout=10000)
+            page.evaluate("""() => {
+              const missing = 'https://commission-smoke.test/missing-logo.svg';
+              window.currentLogoUrl = missing;
+              window.LOGO_URL = missing;
+              window.__SAFE_LOGO_URL__ = missing;
+              if (typeof window.patchParliamentLogo === 'function') window.patchParliamentLogo();
+            }""")
+            page.wait_for_selector(".lcurrentStamp2-logo-placeholder", state="visible", timeout=3000)
+            fallback_text = page.locator(".lcurrentStamp2-logo-placeholder").first.inner_text().strip()
+            if fallback_text != "รัฐสภา":
+                raise RuntimeError("P0_BROWSER_LOGO_FALLBACK_INVALID:" + fallback_text)
             page.fill("#u_name", "p0")
             page.fill("#u_pass", "p0")
             page.click("#btn-login-action", force=True)
+            page.wait_for_function("() => document.documentElement.classList.contains('app-authenticated') && document.documentElement.classList.contains('app-auth-resolving')", timeout=5000)
+            if page.locator("#login-page").is_visible():
+                raise RuntimeError("P0_BROWSER_LOGIN_FLASH_DURING_AUTH_RESOLUTION")
             try:
                 page.wait_for_function("window.__APP_CORE_RUNTIME_LOADED__ === true", timeout=15000)
             except Exception as exc:
@@ -582,7 +597,7 @@ def run_p0_browser_smoke():
                 raise RuntimeError("P2_BROWSER_LIFECYCLE_ERRORS:" + json.dumps(bad_states, ensure_ascii=False))
             return {
                 "ok": True,
-                "workflows": ["login", "dashboard", "submenu", "search-edit", "calendar", "committee-data", "budget-data", "petitioner"],
+                "workflows": ["logo-fallback", "login-no-flash", "dashboard", "submenu", "search-edit", "calendar", "committee-data", "budget-data", "petitioner"],
                 "engine": Path(chromium).name,
                 "pageErrors": errors,
                 "lifecycleSequence": lifecycle.get("sequence", 0),
