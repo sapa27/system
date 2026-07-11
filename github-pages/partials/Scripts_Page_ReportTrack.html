@@ -210,11 +210,13 @@ var c=normalizeCase(row),v="cat"===type?c.cat:"sub"===type?c.subCat:"comm"===typ
 (v=clean(v))&&opts.indexOf(v)<0&&opts.push(v)
 }),setOptions(opts,!1),opts
 })
-},root.searchAll=function(page){
+},root.searchAll=function(page,opts){
+opts=opts&&"object"==typeof opts&&!Array.isArray(opts)?opts:{};
+var manualRefresh=opts.forceFresh===!0||opts.manualRefresh===!0;
 searchState.page=Math.max(1,Number(page||1)||1);
 var tb=byId("search-table-res"),table=tb&&tb.closest?tb.closest("table"):null,hadRows=Array.isArray(searchState.rows)&&searchState.rows.length>0;
 !hadRows&&tb&&setHtml(tb,'<tr><td colspan="8" class="text-center text-muted p-4">กำลังค้นหาข้อมูล...</td></tr>'),table&&table.setAttribute("aria-busy","true");
-return loadCases(searchState,"search").then(function(result){
+return loadCases(searchState,"search",{forceFresh:manualRefresh,source:manualRefresh?"search-button-manual-refresh":"search-cache-first"}).then(function(result){
 if(table)table.removeAttribute("aria-busy");
 if(!result||result.stale)return searchState.rows;
 if(searchState.renderedRequestSeq===result.requestSeq)return searchState.rows;
@@ -228,11 +230,13 @@ return!hadRows&&tb&&setHtml(tb,'<tr><td colspan="8" class="text-center text-dang
 })
 },root.searchChangePage=function(page,source){
 return updateReportTrackPagerState(searchState,source,"search-pagination",page),!0===searchState.serverPaged?root.searchAll(searchState.page):(drawSearch(),!0)
-},root.loadReportData=root.renderReport=function(page){
+},root.loadReportData=root.renderReport=function(page,opts){
+opts=opts&&"object"==typeof opts&&!Array.isArray(opts)?opts:{};
+var manualRefresh=opts.forceFresh===!0||opts.manualRefresh===!0;
 reportState.page=Math.max(1,Number(page||1)||1);
 var tb=byId("report-table-body"),table=tb&&tb.closest?tb.closest("table"):null,hadRows=Array.isArray(reportState.rows)&&reportState.rows.length>0;
 !hadRows&&tb&&setHtml(tb,'<tr><td colspan="7" class="text-center text-muted p-4">กำลังโหลดข้อมูล...</td></tr>'),table&&table.setAttribute("aria-busy","true"),applyHeaders();
-return loadCases(reportState,"report").then(function(result){
+return loadCases(reportState,"report",{forceFresh:manualRefresh,source:manualRefresh?"report-load-button-manual-refresh":"report-cache-first"}).then(function(result){
 if(table)table.removeAttribute("aria-busy");
 if(!result||result.stale)return reportState.rows;
 if(reportState.renderedRequestSeq===result.requestSeq)return reportState.rows;
@@ -414,9 +418,9 @@ return finishEditLoading(),result
 })
 },root.AppPages&&__appIsFn(root.AppPages.registerActions)&&(root.AppPages.registerActions("search",{
 searchAll:function(){
-return root.searchAll(1)
+return root.searchAll(1,{forceFresh:!0,manualRefresh:!0,source:"search-action-button"})
 },searchAllInput:function(){
-return root.searchAll(1)
+return root.searchAll(1,{forceFresh:!0,manualRefresh:!0,source:"search-input-button"})
 },searchChangePage:function(ctx){
 return root.searchChangePage(attr(ctx,"data-page")||1)
 },searchShowCase:function(ctx){
@@ -430,9 +434,9 @@ return root.exportToExcel(ctx)
 }
 }),root.AppPages.registerActions("report",{
 renderReport:function(){
-return root.loadReportData(1)
+return root.loadReportData(1,{forceFresh:!0,manualRefresh:!0,source:"report-action-render"})
 },loadReportData:function(){
-return root.loadReportData(1)
+return root.loadReportData(1,{forceFresh:!0,manualRefresh:!0,source:"report-action-load"})
 },updateReportGroupOptions:function(){
 return root.updateReportGroupOptions()
 },reportChangePage:function(ctx){
@@ -474,7 +478,7 @@ typeof __appObserve==="function"&&__appObserve(_localPagerClick,"c6.SPR:565")
 var btn=ev.target&&ev.target.closest?ev.target.closest("#p-search [data-action],#p-report [data-action],#p-track [data-action]"):null;
 if(btn){
 var action=btn.getAttribute("data-action")||"",id=btn.getAttribute("data-case-id")||"",page=btn.getAttribute("data-page")||1;
-if(/^(searchChangePage|reportChangePage|trackChangePage|filterTrack|printTrack|searchShowCase|searchEditCase|searchDeleteCase|exportToExcel|searchAll|loadReportData)$/.test(action))return(root.AppEvents&&__appIsFn(root.AppEvents.consume)?root.AppEvents.consume(ev,{key:"reportTrack.actions"}):(ev.preventDefault(),ev.stopPropagation())),"searchAll"===action?root.searchAll(1):"loadReportData"===action?root.loadReportData(1):"filterTrack"===action?root.filterTrack({
+if(/^(searchChangePage|reportChangePage|trackChangePage|filterTrack|printTrack|searchShowCase|searchEditCase|searchDeleteCase|exportToExcel|searchAll|loadReportData)$/.test(action))return(root.AppEvents&&__appIsFn(root.AppEvents.consume)?root.AppEvents.consume(ev,{key:"reportTrack.actions"}):(ev.preventDefault(),ev.stopPropagation())),"searchAll"===action?root.searchAll(1,{forceFresh:!0,manualRefresh:!0,source:"search-data-action"}):"loadReportData"===action?root.loadReportData(1,{forceFresh:!0,manualRefresh:!0,source:"report-data-action"}):"filterTrack"===action?root.filterTrack({
 target:btn
 }):"printTrack"===action?root.printTrack():"searchChangePage"===action?root.searchChangePage(page):"reportChangePage"===action?root.reportChangePage(page):"trackChangePage"===action?root.trackChangePage(page):"searchShowCase"===action?root.searchShowCase(id):"searchEditCase"===action?!!root.searchEditCase&&root.searchEditCase(id):"searchDeleteCase"===action?root.searchDeleteCase(id):"exportToExcel"===action?root.exportToExcel({
 target:btn
@@ -496,14 +500,14 @@ typeof __appObserve==="function"&&__appObserve(_localPagerChange,"c6.SPR:586")
 var t=ev.target;
 if(t&&t.classList&&t.classList.contains("app-report-page-size")){
 var kind=t.getAttribute("data-report-pager")||"report",size=Number(t.value||20)||20;
-return"search"===kind?(searchState.pageSize=size,searchState.page=1,root.searchAll(1)):(reportState.pageSize=size,reportState.page=1,root.loadReportData(1))
+return"search"===kind?(searchState.pageSize=size,searchState.page=1,root.searchAll(1,{forceFresh:!0,manualRefresh:!0,source:"search-page-size-change"})):(reportState.pageSize=size,reportState.page=1,root.loadReportData(1,{forceFresh:!0,manualRefresh:!0,source:"report-page-size-change"}))
 }
 if(t&&t.classList&&t.classList.contains("app-track-page-size"))return trackState.pageSize=Number(t.value||20)||20,trackState.page=1,root.loadTrackData(trackState.filter||"all",1),void 0;
 t&&"report-type"===t.id&&root.updateReportGroupOptions().then(function(){
-return root.loadReportData(1)
-}),t&&"report-group-value"===t.id&&root.loadReportData(1)
+return root.loadReportData(1,{forceFresh:!0,manualRefresh:!0,source:"report-type-change"})
+}),t&&"report-group-value"===t.id&&root.loadReportData(1,{forceFresh:!0,manualRefresh:!0,source:"report-group-change"})
 },!1,"reportTrack.filters.production"),bindReportDocOnce("keydown",function(ev){
-"Enter"===ev.key&&ev.target&&"s-input"===ev.target.id&&(ev.preventDefault(),root.searchAll(1)),"Enter"===ev.key&&ev.target&&"report-search-name"===ev.target.id&&(ev.preventDefault(),root.loadReportData(1))
+"Enter"===ev.key&&ev.target&&"s-input"===ev.target.id&&(ev.preventDefault(),root.searchAll(1,{forceFresh:!0,manualRefresh:!0,source:"search-enter-key"})),"Enter"===ev.key&&ev.target&&"report-search-name"===ev.target.id&&(ev.preventDefault(),root.loadReportData(1,{forceFresh:!0,manualRefresh:!0,source:"report-enter-key"}))
 },!1,"reportTrack.enterSearch.production"),bindReportDocOnce("DOMContentLoaded",applyHeaders,!1,"reportTrack.applyHeaders.domReady"),root.AppRuntime&&__appIsFn(root.AppRuntime.nextTick)?root.AppRuntime.nextTick(function(){
 applyHeaders(),root.updateReportGroupOptions(),byId("p-track")&&!byId("p-track").classList.contains("d-none")&&root.loadTrackData(trackState.filter||"all",1)
 },"report.headers"):defer(function(){
@@ -1104,9 +1108,20 @@ var resolvedRecDateText=displayRecDate(row,c)||"";
 return resolvedRecDateText&&(row.recDateText=resolvedRecDateText,row.receiveDateText=resolvedRecDateText,row["วันที่รับเรื่อง"]=resolvedRecDateText),row.cat=row.cat||row.caseType||row.category||row.type||row["ประเภท"]||c.cat||"",row.subCat=row.subCat||row.subCategory||row.issue||row.topic||row.issueTitle||row["ประเด็นพิจารณา"]||c.subCat||"",row.respondent=row.respondent||row.agencyName||row.accusedAgency||row.accused||row["หน่วยงาน / ผู้ถูกร้อง"]||row["หน่วยงาน/ผู้ถูกร้อง"]||c.respondent||"",row.assignees=row.assignees||row.owner||row.committeeOwner||row.responsibleCommittee||row.responsibleCommissioners||row.responsibleComm||row["กมธ. รับผิดชอบ"]||row["กมธ.รับผิดชอบ"]||c.assignees||"",row.coAssignees=row.coAssignees||row.coAssignee||row.coOwners||row.coResponsible||row["ผู้รับผิดชอบร่วม"]||c.coAssignees||"",row.operationOfficer=row.operationOfficer||row.secretariatOfficer||row.secretariatStaff||row.opStaff||row.staffs||row.operator||row.responsibleOfficer||row.staff||row.officer||row["เจ้าหน้าที่ฝ่ายเลขานุการ"]||c.opStaff||"",row.staffs=row.staffs||row.operationOfficer||row.secretariatStaff||row["เจ้าหน้าที่ฝ่ายเลขานุการ"]||c.opStaff||"",row.committeeHistory=row.committeeHistory||row.committeeMeeting||row.committeeMeetings||row.meetingCommitteeHistory||row["คณะกรรมาธิการ"]||c.committeeHistory||"",row.subcommitteeHistory=row.subcommitteeHistory||row.subcommitteeMeeting||row.subcommitteeMeetings||row.meetingSubcommitteeHistory||row["คณะอนุกรรมาธิการ"]||c.subcommitteeHistory||"",row.type="case",row.typeLabel="เรื่องพิจารณา",row.__source=source||row.__source||"",row.__clientIndex=idx+1,row
 })
 }
-function loadCases(state,mode){
+function loadCases(state,mode,opts){
 state=state||{
 };
+opts=opts&&"object"==typeof opts&&!Array.isArray(opts)?opts:{};
+var forceRefresh=opts.forceFresh===!0||opts.manualRefresh===!0;
+if(forceRefresh){
+state.pageCache=Object.create(null);
+state.pageCacheBaseKey="";
+state.pagePrefetch=Object.create(null);
+state.inFlightRequestKey="";
+state.inFlightRequestPromise=null;
+state.exportRows=[];
+state.exportCacheKey="";
+}
 var requestedPageSize=Math.max(10,Math.min(100,Number(state.pageSize||20)||20)),requestedPage=Math.max(1,Number(state.page||1)||1),requestedQuery=queryFor(mode),requestedReportType="report"===mode?clean((byId("report-type")||{
 }).value||"all"):"all",requestedReportValue="report"===mode?clean((byId("report-group-value")||{
 }).value||""):"",cacheBaseKey=[mode,requestedPageSize,requestedQuery,requestedReportType,requestedReportValue,"caseNum","asc","phase3-report-readmodel-v1"].join("|"),requestKey=cacheBaseKey+"|page="+requestedPage,now=Date.now?Date.now():+new Date,cacheTtlMs=180000;
@@ -1134,7 +1149,7 @@ __appObserve(_reportRowsStoreErr,"ec")
 }
 function payloadFor(pageNo,prefetch){
 var payload={
-query:requestedQuery,page:pageNo,limit:requestedPageSize,pageSize:requestedPageSize,noPage:!1,fullList:!1,sortBy:"caseNum",sortDir:"asc",forceFresh:!1,cacheTtlSeconds:600,noCache:!1,bypassCache:!1,serverPaged:!0,compactReadModel:!0,includeMeetingHistory:!1,receiveNoFix:"single-owner",receiveDateFix:"MainData.phase3ReadModel",pagingContract:"case-search-page-envelope-v3",source:prefetch?"search-report-page-prefetch-cache-first":"search-report-phase3-read-model-cache-first",requestStabilityContract:"latest-request-wins-phase3-read-model",productionSingleOwner:!0,productionSingleOwnerOnly:!0
+query:requestedQuery,page:pageNo,limit:requestedPageSize,pageSize:requestedPageSize,noPage:!1,fullList:!1,sortBy:"caseNum",sortDir:"asc",forceFresh:forceRefresh===!0,cacheTtlSeconds:forceRefresh?0:600,noCache:forceRefresh===!0,bypassCache:forceRefresh===!0,serverPaged:!0,compactReadModel:!0,includeMeetingHistory:!1,receiveNoFix:"single-owner",receiveDateFix:"MainData.phase3ReadModel",pagingContract:"case-search-page-envelope-v3",source:forceRefresh?(opts.source||("report"===mode?"report-manual-refresh":"search-manual-refresh")):(prefetch?"search-report-page-prefetch-cache-first":"search-report-phase3-read-model-cache-first"),requestStabilityContract:"latest-request-wins-phase3-read-model",productionSingleOwner:!0,productionSingleOwnerOnly:!0
 };
 return"report"===mode&&(payload.reportType=requestedReportType,payload.reportValue=requestedReportValue),payload
 }
@@ -1162,14 +1177,14 @@ return null
 }catch(_prefetchErr){try{reportTrackWarn("reportTrack.prefetch.schedule",_prefetchErr,{mode:mode})}catch(_warn2){__appObserve(_warn2,"report.prefetch.schedule.warn")}}
 }
 var cachedEntry=state.pageCache[String(requestedPage)],currentTime=Date.now?Date.now():+new Date;
-if(cachedEntry&&cachedEntry.contract==="report-track-page-cache-v1"&&cachedEntry.expiresAt>currentTime){
+if(!forceRefresh&&cachedEntry&&cachedEntry.contract==="report-track-page-cache-v1"&&cachedEntry.expiresAt>currentTime){
 var cachedSeq=Math.max(0,Number(state.requestSeq||0)||0)+1;
 return state.requestSeq=cachedSeq,state.activeRequestKey=requestKey,state.loading=!1,commitEntry(cachedEntry,cachedSeq),schedulePrefetch(cachedEntry),Promise.resolve({
 stale:!1,cached:!0,requestSeq:cachedSeq,requestKey:requestKey,rows:cachedEntry.rows.slice()
 })
 }
 var pendingPrefetch=state.pagePrefetch[String(requestedPage)];
-if(pendingPrefetch){
+if(!forceRefresh&&pendingPrefetch){
 var prefetchSeq=Math.max(0,Number(state.requestSeq||0)||0)+1;
 state.requestSeq=prefetchSeq,state.activeRequestKey=requestKey,state.loading=!0;
 return Promise.resolve(pendingPrefetch).then(function(entry){
@@ -1188,7 +1203,7 @@ stale:!0,requestSeq:prefetchSeq,rows:state.rows,error:err
 throw state.loading=!1,err
 })
 }
-if(state.inFlightRequestKey===requestKey&&state.inFlightRequestPromise)return state.inFlightRequestPromise;
+if(!forceRefresh&&state.inFlightRequestKey===requestKey&&state.inFlightRequestPromise)return state.inFlightRequestPromise;
 var requestSeq=Math.max(0,Number(state.requestSeq||0)||0)+1;
 state.requestSeq=requestSeq,state.activeRequestKey=requestKey,state.loading=!0;
 var requestPromise=fetchPage(requestedPage,!1).then(function(entry){
