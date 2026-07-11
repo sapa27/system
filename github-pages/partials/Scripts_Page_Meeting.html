@@ -4250,9 +4250,10 @@ var _M = {
                 run(n + 1)
               }, 80), !1): !1;
           try {
-            showView("form"),
-            ensureCommitteeMeetingFormVisible(),
-            toggleMeetingFormCollapse(null, !1)
+            var activeView = listState.activeView === "list" ? "list": "form";
+            showView(activeView),
+            activeView === "form" && ensureCommitteeMeetingFormVisible(),
+            activeView === "form" && toggleMeetingFormCollapse(null, !1)
           } catch (_activateViewErr) {
             $meetingObserve(_activateViewErr, "meeting.committee.activate.view")
           }
@@ -4441,15 +4442,16 @@ var _M = {
     root.CommitteeMeetingSummaryDetail && $meetingFn(root.CommitteeMeetingSummaryDetail.enhanceRows) && root.CommitteeMeetingSummaryDetail.enhanceRows()
   }
   function showView(view) {
-    view = "list" === view ? "list": "form",
+    view = "list" === view ? "list": "form";
+    listState.activeView = view;
     ["form",
       "list"].forEach(function(name) {
         var panel = byId("committee-meeting-" + name + "-panel"); panel && panel.classList.toggle("d-none",
           name !== view); var tab = byId("committee-meeting-tab-" + name); tab && tab.classList.toggle("active",
           name === view)
-      }),
-    "form" === view && ensureCommitteeMeetingFormVisible(),
-    "list" === view && loadList()
+      });
+    if ("form" === view)return ensureCommitteeMeetingFormVisible(), Promise.resolve(!0);
+    return loadList()
   }
   function ensureCommitteeMeetingFormVisible() {
     var rootPanel = byId(_M.x68),
@@ -4608,10 +4610,12 @@ var _M = {
     options = options || {
     };
     data = assertMeetingReadPayload(data, "apiListCommitteeMeetings");
+    for (var depth = 0; depth < 3 && data && data.data && $meetingTypeObject == typeof data.data && !data.meetings && !data.listMeetings && !data.tableMeetings; depth += 1)data = data.data;
     var meetings =(data = data || {
-      }).meetings || [],
+      }).meetings || data.listMeetings || data.tableMeetings || data.rows || data.items || [],
     itemsByMeetingId = data.itemsByMeetingId || {
     };
+    meetings = $meetingIsArray(meetings) ? meetings: [];
     return listState.meetings = meetings.slice ? meetings.slice(): meetings,
     listState.itemsByMeetingId = itemsByMeetingId || {
     },
@@ -4799,17 +4803,6 @@ var _M = {
         "danger" === tone), el.classList.toggle("text-success", "success" === tone), el.classList.toggle("text-muted",
         !tone || "muted" === tone))
   }
-  function meetingPdfUploadLimitBytes() {
-    var config = root.APP_CONFIG || {},
-    hostingTarget = String(config.hostingTarget || "").toLowerCase(),
-    proxyUrl = String(config.vercelApiProxyUrl || "");
-    return hostingTarget.indexOf("vercel") >= 0 || /^\/api\//.test(proxyUrl)
-      ? 3000000
-      : 6291456
-  }
-  function meetingPdfUploadLimitLabel(bytes) {
-    return Number(bytes || 0) <= 3000000 ? "3 MB": "6 MB"
-  }
   function fileToBase64(file) {
     return new Promise(function(resolve, reject) {
         var reader = new FileReader; reader.onload = function() {
@@ -4877,9 +4870,9 @@ var _M = {
     total
   }
   function scanAgendaFile(file, btn) {
-    var maxPdfBytes = meetingPdfUploadLimitBytes();
+    var maxPdfBytes = root.AppUploadPolicy.pdfLimitBytes();
     return file ? /pdf$/i.test(String(file.type || "")) || /\.pdf$/i.test(String(file.name || "")) ? file.size > maxPdfBytes ?(notify("warning",
-        "ไฟล์ใหญ่เกิน " + meetingPdfUploadLimitLabel(maxPdfBytes) + " กรุณาลดขนาดไฟล์ก่อนสแกน"), Promise.resolve(!1)): hasAgendaData() && !root.confirm("AI จะเติม/แทนที่ข้อมูลในช่องระเบียบวาระที่ตรวจพบ ต้องการดำเนินการต่อหรือไม่?") ? Promise.resolve(!1): (disable(btn,
+        "ไฟล์ใหญ่เกิน " + root.AppUploadPolicy.pdfLimitLabel(maxPdfBytes) + " กรุณาลดขนาดไฟล์ก่อนสแกน"), Promise.resolve(!1)): hasAgendaData() && !root.confirm("AI จะเติม/แทนที่ข้อมูลในช่องระเบียบวาระที่ตรวจพบ ต้องการดำเนินการต่อหรือไม่?") ? Promise.resolve(!1): (disable(btn,
         !0), setAiAgendaStatus("AI กำลังสแกนเอกสารและแยกระเบียบวาระ กรุณารอสักครู่...", "muted"), root.Swal && root.Swal.fire({
           title: "AI กำลังสแกนระเบียบวาระ",
           text: _M.x2,
@@ -4978,7 +4971,7 @@ var _M = {
       key): (doc.addEventListener(eventName, handler, options), !0)
   }
   function bind() {
-    if (root._mCB)return!0;
+    if (root._mCB && root.__APP_COMMITTEE_MEETING_BIND_READY__ === !0)return!0;
     root._mCB = !0,
     bindCommitteeEvent("click", function(ev) {
         var btn = ev.target && ev.target.closest ? ev.target.closest('[data-committee-meeting-form-toggle],#committee-agenda-accordion [data-bs-toggle="collapse"],[data-committee-meeting-view],[data-agenda-add],.js-remove,.js-search-case,.js-show-meeting-detail,.js-load-meeting,.js-delete-meeting,#committee-meeting-ai-agenda-btn,#committee-meeting-save-btn,#committee-meeting-new-btn,#committee-meeting-refresh-list-btn,#committee-meeting-search-list-btn,#committee-meeting-clear-filter-btn,.app-table-pager [data-action="committeeMeetingSummaryPage"]'): null; if (btn) {
@@ -5065,9 +5058,11 @@ var _M = {
           btn = row && row.querySelector(".js-search-case"); btn &&(ev.preventDefault(), searchCase(btn))
         }
       }, !1, "meeting.committeeSystem.keydown"),
+    root.__APP_COMMITTEE_MEETING_BIND_READY__ = !0,
     byId(_M.x68) && initializeCommitteeMeetingSystem().catch (function(_bindLoadErr) {
         $meetingObserve(_bindLoadErr, "meeting.committee.bind.load")
-      })
+      });
+    return!0
   }
 }
 (window, document);
@@ -5839,7 +5834,8 @@ var _M = {
       } catch (_e) {
         $meetingObserve(_e, "meeting.edit.keepSeed")
       }
-      var out = prevEdit && prevEdit.apply(this, [row,
+      var editArg = row && $meetingTypeObject == typeof row ? key: row,
+      out = prevEdit && prevEdit.apply(this, [editArg,
           opts]);
       if (opts && opts.__singlePass)return Promise.resolve(out).then(function(value) {
           return _f7(),

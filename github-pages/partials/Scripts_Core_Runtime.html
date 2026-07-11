@@ -36,6 +36,18 @@ _$12 = "childNodes", _$13 = "contentWindow", _$14 = "contentDocument", _$15 = "r
 _$17 = "filter", _$18 = "forEach", _$19 = "then", _$20 = "catch", _$21 = "finally", _$22 = "trim", _$23 = "replace",
 _$24 = "split", _$25 = "join", _$26 = "push", _$27 = "slice", _$28 = "indexOf", _$29 = "match", _$A = Object.assign,
 _$I = Array.isArray, _$P = Promise.resolve.bind(Promise), _$X = Math.max;
+window.AppUploadPolicy = window.AppUploadPolicy || {
+  pdfLimitBytes: function() {
+    var config = window.APP_CONFIG || {
+    },
+    hostingTarget = String(config.hostingTarget || "").toLowerCase(),
+    proxyUrl = String(config.vercelApiProxyUrl || "");
+    return hostingTarget.indexOf("vercel") >= 0 || /^\/api\//.test(proxyUrl) ? 3000000: 6291456
+  },
+  pdfLimitLabel: function(bytes) {
+    return Number(bytes || 0) <= 3000000 ? "3 MB": "6 MB"
+  }
+};
 (function(root) {
     "use strict"; if (root.__APP_RUNTIME_OWNER_MATRIX_CURRENT__)return; var OWNER = "production-current-runtime-owner-matrix"; function isFn(v) {
       return typeof v === "function"
@@ -5910,8 +5922,8 @@ try {
         }),
       !1
     }
-  }
-  function unlockUi(e) {
+  }function phT(e,r,t){try{return root.AppPageHealth&&__af(root.AppPageHealth.transition)?root.AppPageHealth.transition(e,r,t||{}):null}catch{return null}}function phA(e,r,t,n){try{return root.AppPageHealth&&__af(root.AppPageHealth.action)?root.AppPageHealth.action(e||a,r,t,n||{}):null}catch{return null}}
+function unlockUi(e) {
     try {
       __aR() && __af(__aR().clearUiBlocks) ? __aR().clearUiBlocks(e || "app-pages", {
           clearSectionOverlays: !0,
@@ -6053,6 +6065,7 @@ try {
       var protectedAction = isProtectedAction(r),
       busyKey = protectedAction ? actionKey(s, r, p ? t: null): "";
       if (protectedAction && actionInFlight[busyKey])return actionInFlight[busyKey];
+      protectedAction && phA(s,r,"running");
       var u = c({
           action: r,
           target: p ? t: null,
@@ -6063,16 +6076,18 @@ try {
         });
       if (protectedAction && u && __af(u.then)) {
         setActionBusy(p ? t: null, !0);
-        var guarded = Promise.resolve(u)[_$21](function() {
+        var guarded = Promise.resolve(u).then(function(e){return phA(s,r,"completed"),e},function(e){throw phA(s,r,"error",{error:e}),e})[_$21](function() {
             delete actionInFlight[busyKey],
             setActionBusy(p ? t: null, !1)
           });
         return actionInFlight[busyKey] = guarded,
         guarded
       }
-      return void 0 === u || u
+      return protectedAction && phA(s,r,"completed"),
+      void 0 === u || u
     } catch (e) {
-      return __aR() && __af(__aR().reportError) && __aR().reportError("AppPages.dispatchAction." + r,
+      return protectedAction && phA(s,r,"error",{error:e}),
+      __aR() && __af(__aR().reportError) && __aR().reportError("AppPages.dispatchAction." + r,
         e, {
           pageId: s
         }),
@@ -6132,6 +6147,7 @@ try {
         source: "AppPages.activate"
       }, t || {
       });
+    phT(e,"activating",i);
     return s[e] = Promise.resolve()[_$19](function() {
         a && a !== e && pages.dispose(a, {
             nextPageId: e,
@@ -6163,12 +6179,13 @@ try {
           __ao(e, "app-pages.activate.warn")
         }
         return!1
-      })[_$19](function(e) {
-        return emit("app:page-activated", _$A({
+      })[_$19](function(result) {
+        return phT(e,!1===result?"degraded":"ready"),
+        emit("app:page-activated", _$A({
             }, i, {
-              degraded: !1 === e
+              degraded: !1 === result
             })),
-        e
+        result
       })[_$21](function() {
         delete s[e],
         unlockUi("app-pages-activate-finally:" + e)
@@ -6190,7 +6207,9 @@ try {
       }, r || {
       }),
     i = e + ":" + String(n.method || n.reason || "manual");
-    return c[i] ? c[i]: c[i] = Promise.resolve()[_$19](function() {
+    if (c[i])return c[i];
+    phT(e,"refreshing",n);
+    return c[i] = Promise.resolve()[_$19](function() {
         var e = runHook(t, "refresh", n); return void 0 === e &&(e = runHook(t, "load", n)),
         void 0 === e &&(e = runHook(t, "init", n)),
         Promise.resolve(void 0 === e || e)
@@ -6202,12 +6221,13 @@ try {
           __ao(e, "app-pages.refresh.warn")
         }
         return!1
-      })[_$19](function(e) {
-        return emit("app:page-refreshed", _$A({
+      })[_$19](function(result) {
+        return phT(e,!1===result?"degraded":"ready"),
+        emit("app:page-refreshed", _$A({
             }, n, {
-              degraded: !1 === e
+              degraded: !1 === result
             })),
-        e
+        result
       })[_$21](function() {
         delete c[i],
         unlockUi("app-pages-refresh-finally:" + e)
@@ -11976,7 +11996,7 @@ try {
     }
   }
   d.addEventListener("click", function(e) {
-      if (w.AppMeetingEventOwner && typeof w.AppMeetingEventOwner.bind === "function")return;
+      if (w.__APP_COMMITTEE_MEETING_BIND_READY__ === !0)return;
       var b = e.target && e.target.closest && e.target.closest('[data-committee-meeting-view],[data-committee-meeting-form-toggle],#committee-agenda-accordion [data-bs-toggle="collapse"],[data-agenda-add],.committee-agenda-row .js-remove,.js-show-meeting-detail'); if (!b)return; if (b.classList && b.classList.contains("js-show-meeting-detail")) {
         e.preventDefault(); e.stopPropagation && e.stopPropagation(); return w.CommitteeMeetingSummaryDetail && typeof w.CommitteeMeetingSummaryDetail.show === "function" && w.CommitteeMeetingSummaryDetail.show(b.getAttribute("data-id") || "")
       }
