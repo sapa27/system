@@ -836,7 +836,7 @@
                 catch (_) {
                 }
               }
-              , img.style.display = "", img.getAttribute("src") !== url && img.setAttribute("src", url),
+              , img.style.display = "", img.style.visibility = "visible", img.classList && img.classList.add("logo-loaded"), img.getAttribute("src") !== url && img.setAttribute("src", url),
               img.dataset.logoSource = source || "app-config")
           }
         )
