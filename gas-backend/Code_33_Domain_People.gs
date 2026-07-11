@@ -2279,11 +2279,16 @@ function normalizePetitionerRow_(r) {
   }
 }
 function _Domain_getPetitioners() {
-  var rows = [];
+  var rows = [],
+  directReadError = null;
   try {
     rows = _readPeopleSheetRowsDirect_("Petitioners").map(normalizePetitionerRow_)
   } 
   catch (e) {
+    directReadError = e,
+    _appIsFnName_("_recordWarning_") && _recordWarning_("people.petitioner.directRead", e, {
+        sheet: "Petitioners"
+      }),
     rows = []
   }
   if ((rows =(Array.isArray(rows) ? rows: []).filter(function(r) {
@@ -2329,7 +2334,14 @@ function _Domain_getPetitioners() {
       })
   } 
   catch (_directErr) {
-    return[]
+    _appIsFnName_("_recordWarning_") && _recordWarning_("people.petitioner.mainDataFallback", _directErr, {
+        directReadError: String(directReadError && directReadError.message || "")
+      });
+    var petitionerReadError = new Error("PEOPLE_PETITIONER_READ_FAILED:" + String(_directErr && _directErr.message || _directErr || "unknown"));
+    petitionerReadError.code = "PEOPLE_PETITIONER_READ_FAILED";
+    petitionerReadError.directReadError = directReadError;
+    petitionerReadError.cause = _directErr;
+    throw petitionerReadError
   }
 }
 function _Domain_savePetitioner(p) {
@@ -3396,7 +3408,11 @@ function _peoplePetitionerRowsFromMainData_() {
       })
   } 
   catch (e) {
-    _appIsFnName_("_recordWarning_") && _recordWarning_("people.petitioner.mainDataRead", e)
+    _appIsFnName_("_recordWarning_") && _recordWarning_("people.petitioner.mainDataRead", e);
+    var mainDataReadError = new Error("PEOPLE_PETITIONER_MAINDATA_READ_FAILED:" + String(e && e.message || e || "unknown"));
+    mainDataReadError.code = "PEOPLE_PETITIONER_MAINDATA_READ_FAILED";
+    mainDataReadError.cause = e;
+    throw mainDataReadError
   }
   return rows
 }
@@ -3409,8 +3425,33 @@ function _petitionerGetListDomainOwnerPhase5_(payload) {
     rows = "function" == typeof _Domain_getPetitioners ? _Domain_getPetitioners(): []
   } 
   catch (e) {
-    _appIsFnName_("_recordWarning_") && _recordWarning_("people.petitioner.domain", e),
-    rows = []
+    _appIsFnName_("_recordWarning_") && _recordWarning_("people.petitioner.domain", e, {
+        errorCode: String(e && e.code || "PEOPLE_PETITIONER_READ_FAILED")
+      });
+    var failedData = {
+      rows: [],
+      items: [],
+      records: [],
+      data: [],
+      totalRecords: 0,
+      total: 0,
+      loadOk: !1,
+      degraded: !0,
+      errorCode: String(e && e.code || "PEOPLE_PETITIONER_READ_FAILED"),
+      source: "apiGetPetitioners-read-error"
+    };
+    var failedResult = "function" == typeof err_ ? err_(String(e && e.message || e || "โหลดข้อมูลผู้ร้องเรียนไม่สำเร็จ"), failedData): {
+      ok: !1,
+      error: String(e && e.message || e || "โหลดข้อมูลผู้ร้องเรียนไม่สำเร็จ"),
+      data: failedData
+    };
+    failedResult.errorCode = failedData.errorCode;
+    failedResult.loadOk = !1;
+    failedResult.degraded = !0;
+    failedResult.rows = [];
+    failedResult.items = [];
+    failedResult.records = [];
+    return failedResult
   }
   var previousMainDataReadKey = "forceMainData" + String.fromCharCode(70, 97, 108, 108, 98, 97, 99, 107),
   forceMainDataRead = !0 === payload.forceMainDataRead || "true" === String(payload.forceMainDataRead || "").toLowerCase() || !0 === payload[previousMainDataReadKey] || "true" === String(payload[previousMainDataReadKey] || "").toLowerCase();

@@ -589,8 +589,14 @@ $budgetLabelRound = 'ครั้งที่', $budgetLabelAmount = 'จำน�
             if (m.summaryRequestSeq !== requestSeq)return m.summaryRows || []; 
             if (O(resp)) {
               var data = H(resp),
-              rows = $budgetIsArray(data.rows) ? data.rows: $budgetIsArray(data.data) ? data.data: []; 
+              rows = $budgetIsArray(data.rows) ? data.rows: $budgetIsArray(data.data) ? data.data: $budgetIsArray(data.items) ? data.items: $budgetIsArray(data.records) ? data.records: []; 
               data.rows = rows; 
+              if (!rows.length && !force && !opts.__emptyRetry) {
+                return t.loadBudgetSummary(pageNo, {
+                    forceRefresh: !0,
+                    __emptyRetry: !0
+                  })
+              }
               m._summaryNoWaitTried = !0; 
               tt(data); 
               budgetCURRENTBClearDirty($budgetTabSummary); 

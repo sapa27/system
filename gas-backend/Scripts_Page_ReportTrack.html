@@ -724,28 +724,67 @@
             }); root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = {
             caseId: editKey,
             seed: editSeed,
-            until: (Date.now ? Date.now(): 0) + 6e3,
+            until: (Date.now ? Date.now(): 0) + 12e3,
             source: "searchEditCase.singlePass"
           }; try {
-            root.AppStore && root.AppStore.set &&(root.AppStore.set("meeting.searchEditSeed", editSeed),
-              root.AppStore.set("search.editSeed", editSeed))
+            root.AppStore && root.AppStore.set &&(root.AppStore.set("meeting.editSeed", editSeed),
+              root.AppStore.set("meeting.searchEditSeed", editSeed), root.AppStore.set("search.editSeed", editSeed))
           } catch (_seedStoreErr) {
             $ob(_seedStoreErr, "reportTrack.searchEdit.seedStore")
           }
-          if (root.nav)root.nav("meeting", {
+          function waitMeetingEditorReady() {
+            var started = Date.now ? Date.now(): 0,
+            timeoutMs = 8000;
+            return new Promise(function(resolve, reject) {
+                function check() {
+                  if ($fn(root.meetingEditCase) && document.getElementById("meeting-caseId") && document.getElementById("meeting-workspace"))return resolve(!0);
+                  if ((Date.now ? Date.now(): 0) - started >= timeoutMs)return reject(new Error("หน้าจัดการเรื่องพิจารณายังไม่พร้อมใช้งาน"));
+                  (root.AppRuntime && $fn(root.AppRuntime.pageDelay) ? root.AppRuntime.pageDelay("search", "search.edit.waitMeeting", check, 40): root.setTimeout(check, 40))
+                }
+                check()
+              })
+          }
+          var navigation = root.nav ? root.nav("meeting", {
               preserveLoadingSwal: !0,
               source: "searchEditCase.singlePass",
               caseId: editKey,
               seed: editSeed
-            }); else location.hash = "#/meeting"; var loadMeeting = root.AppAssetLoader && $fn(root.AppAssetLoader.loadPageScripts) ? root.AppAssetLoader.loadPageScripts("meeting"): Promise.resolve(!0); return Promise.resolve(loadMeeting).then(function() {
-              if (!$fn(root.meetingEditCase))throw new Error("ไม่พบ meetingEditCase หลังโหลดหน้าจัดการเรื่องพิจารณา"); return root.meetingEditCase(editSeed,
-                {
+            }): (location.hash = "#/meeting", !0);
+          return Promise.resolve(navigation).then(function() {
+              var loadMeeting = root.AppAssetLoader && $fn(root.AppAssetLoader.loadPageScripts) ? root.AppAssetLoader.loadPageScripts("meeting"): Promise.resolve(!0);
+              return Promise.resolve(loadMeeting)
+            }).then(waitMeetingEditorReady).then(function() {
+              if (!$fn(root.meetingEditCase))throw new Error("ไม่พบ meetingEditCase หลังโหลดหน้าจัดการเรื่องพิจารณา");
+              return root.meetingEditCase(editKey, {
                   source: "searchEditCase.singlePass",
                   silentLoading: !0,
                   seed: editSeed,
                   __singlePass: !0,
                   __skipCreateNewOnActivate: !0
                 })
+            }).then(function(result) {
+              if (!1 === result)throw new Error("ไม่สามารถเติมข้อมูลเรื่องพิจารณาในแบบฟอร์มได้");
+              var caseIdValue = clean((document.getElementById("meeting-caseId") || {
+                  }).value),
+              caseTitleValue = clean((document.getElementById("meeting-title") || {
+                  }).value),
+              receiveValue = clean((document.getElementById("meeting-recNo") || {
+                  }).value),
+              orderValue = clean((document.getElementById("meeting-caseNum") || {
+                  }).value);
+              if (!caseIdValue && !caseTitleValue && !receiveValue && !orderValue && root.AppMeetingRouteActionOwner && $fn(root.AppMeetingRouteActionOwner.applySearchSeed)) {
+                root.AppMeetingRouteActionOwner.applySearchSeed(editSeed),
+                caseIdValue = clean((document.getElementById("meeting-caseId") || {
+                    }).value),
+                caseTitleValue = clean((document.getElementById("meeting-title") || {
+                    }).value),
+                receiveValue = clean((document.getElementById("meeting-recNo") || {
+                    }).value),
+                orderValue = clean((document.getElementById("meeting-caseNum") || {
+                    }).value)
+              }
+              if (!caseIdValue && !caseTitleValue && !receiveValue && !orderValue)throw new Error("เปิดหน้าจัดการเรื่องพิจารณาแล้ว แต่ไม่สามารถเติมข้อมูลที่เลือกได้");
+              return result
             })
         }).catch (function(err) {
           return editLoadingShown &&(closeCaseLoading(), editLoadingShown = !1),

@@ -640,20 +640,9 @@
         ""), !/^[A-Za-z0-9+/=]+$/.test(raw))throw new Error("ไฟล์ PDF ไม่อยู่ในรูปแบบ base64 ที่ถูกต้อง");
     return raw
   }
-  function dashboardPdfUploadLimitBytes() {
-    var config = root.APP_CONFIG || {},
-    hostingTarget = String(config.hostingTarget || "").toLowerCase(),
-    proxyUrl = String(config.vercelApiProxyUrl || "");
-    return hostingTarget.indexOf("vercel") >= 0 || /^\/api\//.test(proxyUrl)
-      ? 3000000
-      : 6291456
-  }
-  function dashboardPdfUploadLimitLabel(bytes) {
-    return Number(bytes || 0) <= 3000000 ? "3 MB": "6 MB"
-  }
   function readFileAsBase64(file) {
     return new Promise(function(resolve, reject) {
-        if (!file)return reject("ไม่พบไฟล์"); if (!/pdf$/i.test(String(file.type || "")) && !/\.pdf$/i.test(String(file.name || "")))return reject("รองรับเฉพาะไฟล์ PDF เท่านั้น"); var maxBytes = dashboardPdfUploadLimitBytes(); if (file.size && file.size > maxBytes)return reject("ไฟล์ PDF มีขนาดใหญ่เกิน " + dashboardPdfUploadLimitLabel(maxBytes) + " กรุณาลดขนาดไฟล์แล้วลองใหม่"); var reader = new FileReader; reader.onload = function(e) {
+        if (!file)return reject("ไม่พบไฟล์"); if (!/pdf$/i.test(String(file.type || "")) && !/\.pdf$/i.test(String(file.name || "")))return reject("รองรับเฉพาะไฟล์ PDF เท่านั้น"); var maxBytes = root.AppUploadPolicy.pdfLimitBytes(); if (file.size && file.size > maxBytes)return reject("ไฟล์ PDF มีขนาดใหญ่เกิน " + root.AppUploadPolicy.pdfLimitLabel(maxBytes) + " กรุณาลดขนาดไฟล์แล้วลองใหม่"); var reader = new FileReader; reader.onload = function(e) {
           try {
             var result = String(e && e.target && e.target.result || ""); resolve(normalizePdfBase64(result))
           } catch (parseErr) {
@@ -2172,7 +2161,7 @@
           phase1Merged: !0,
           phase1LazyHydrated: !0,
           budgetOnlyMergeGuard: budgetOnly,
-          releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-10-r30"
+          releaseStamp: "commission-v1.2-gas-hosted-production-2026-07-11-r37"
         }),
       out
     }

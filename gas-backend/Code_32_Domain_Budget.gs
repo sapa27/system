@@ -141,9 +141,12 @@ var _B32R1 = ["amount",
   "dashboard"];
 function _b32W_(label, e, meta) {
   try {
-    _appIsFnName_("_recordWarning_") ? _recordWarning_(label, e, meta): _b32W_(label, e, meta)
+    if (_appIsFnName_("_recordWarning_"))return _recordWarning_(label, e, meta);
+    if (_appIsFnName_("_logWarn_"))return _logWarn_(label, e, meta);
+    typeof console != "undefined" && console && typeof console.warn == "function" && console.warn(label, e, meta)
   } catch (_) {
   }
+  return!1
 }
 function _b32A_(v) {
   return Array.isArray(v) ? v: []
@@ -339,7 +342,15 @@ function $k(sheetName, fields, opts) {
   try {
     return $aL(sheetName, opts.includeDeleted === !0) || []
   } catch (_e) {
-    return[]
+    _b32W_("budget.read.failed." + String(sheetName || "unknown"), _e, {
+        sheetName: String(sheetName || ""),
+        owner: String(opts.owner || "budget.domain")
+      });
+    var budgetReadError = new Error("BUDGET_READ_FAILED:" + String(sheetName || "unknown") + ":" + String(_e && _e.message || _e || "unknown"));
+    budgetReadError.code = "BUDGET_READ_FAILED";
+    budgetReadError.sheetName = String(sheetName || "");
+    budgetReadError.cause = _e;
+    throw budgetReadError
   }
 }
 function $at(fy) {
@@ -4456,7 +4467,7 @@ function $bo(fy) {
   var cacheStamp = $c(_B32BIL) + "|" + $c("budgetsummary") + "|" + $c("budgetyearsettingsitems") + "|" + $c("personnel_staff") + "|" + $c("salarypayments") + "|" + $c("salarysettings") + "|" + $c("budgetsalarysettings") + "|budget-personnel-summary-row-current-v12",
   cacheKey = "budget:canonical:summary:personnel-summary-row-current-v12:" + fy + ":" + cacheStamp,
   cached = $w(cacheKey);
-  if (cached && Array.isArray(cached.rows))return $M(cached.rows, fy);
+  if (cached && Array.isArray(cached.rows) && cached.rows.length)return $M(cached.rows, fy);
   var rows = [];
   try {
     rows =(typeof $5 == _B32FN ? $5(fy): []) || []
@@ -4488,10 +4499,10 @@ function $bo(fy) {
       }),
     rows = []
   }
-  return rows = $M(_b32A_(rows), fy),
-  $u(cacheKey, {
-      rows
-    }, 180).rows
+  rows = $M(_b32A_(rows), fy);
+  return rows.length ? $u(cacheKey, {
+      rows: rows
+    }, 180).rows: rows
 }
 function $ar(sheetName) {
   var common = ["id",

@@ -6067,12 +6067,140 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
         return observeOwner(ownerLoad);
       }
 
+      function installPageHealthOwner() {
+        if (window.AppPageHealth && window.AppPageHealth.__owner === "Index.AppPageHealth.lifecycle-r34")return window.AppPageHealth;
+        var states = {}, actions = {}, history = [], sequence = 0, activePattern = /^(routing|template-loading|runtime-loading|activating|refreshing|disposing)$/;
+        function normalizePageId(value) {
+          value = canonicalPageId(String(value || "").trim());
+          return value || "unknown"
+        }
+        function now() {
+          return Date.now ? Date.now(): new Date().getTime()
+        }
+        function errorText(error) {
+          try {
+            return String(error &&(error.message || error.error) || error || "")
+          } catch (_errorTextErr) {
+            return "PAGE_LIFECYCLE_ERROR"
+          }
+        }
+        function publish(name, detail) {
+          try {
+            document.dispatchEvent(new CustomEvent(name, {
+                  detail: detail
+                }))
+          } catch (_publishErr) {
+            __appObserve(_publishErr, "page-health.publish")
+          }
+        }
+        function copy(record) {
+          return Object.assign({}, record || {})
+        }
+        function transition(pageId, state, meta) {
+          pageId = normalizePageId(pageId), state = String(state || "unknown").trim() || "unknown", meta = meta || {};
+          var time = now(), previous = states[pageId] || {
+            pageId: pageId,
+            state: "unloaded",
+            activations: 0,
+            refreshes: 0,
+            failures: 0
+          }, startedAt = activePattern.test(state) ? activePattern.test(previous.state || "") ? Number(previous.startedAt || time): time: Number(previous.startedAt || time), record = Object.assign({}, previous, {
+              pageId: pageId,
+              previousState: previous.state || "unloaded",
+              state: state,
+              sequence: ++sequence,
+              startedAt: startedAt,
+              updatedAt: time,
+              durationMs: /^(ready|degraded|error|disposed)$/.test(state) ? Math.max(0, time - startedAt): Number(previous.durationMs || 0),
+              source: String(meta.source || previous.source || "AppPageHealth"),
+              stage: String(meta.stage || state),
+              lastError: state === "error" ? errorText(meta.error): state === "ready" ? "": String(previous.lastError || ""),
+              activations: Number(previous.activations || 0) +(state === "activating" ? 1: 0),
+              refreshes: Number(previous.refreshes || 0) +(state === "refreshing" ? 1: 0),
+              failures: Number(previous.failures || 0) +(state === "error" ? 1: 0)
+            });
+          states[pageId] = record, history.push(copy(record)), history.length > 120 && history.splice(0, history.length - 120);
+          try {
+            var pageNode = document.querySelector('[data-page="' + pageId + '"],#p-' + pageId);
+            pageNode &&(pageNode.setAttribute("data-page-state", state), pageNode.setAttribute("aria-busy", activePattern.test(state) ? "true": "false")), document.documentElement.setAttribute("data-app-page-state", state), document.documentElement.setAttribute("data-app-page-state-id", pageId)
+          } catch (_domErr) {
+            __appObserve(_domErr, "page-health.dom")
+          }
+          return publish("app:page-state-changed", copy(record)),
+          record
+        }
+        function action(pageId, actionName, state, meta) {
+          pageId = normalizePageId(pageId), actionName = String(actionName || "unknown").trim() || "unknown", state = String(state || "unknown").trim() || "unknown", meta = meta || {};
+          var key = pageId + ":" + actionName, time = now(), previous = actions[key] || {
+            pageId: pageId,
+            action: actionName,
+            count: 0,
+            failures: 0
+          }, startedAt = state === "running" ? time: Number(previous.startedAt || time), record = Object.assign({}, previous, {
+              pageId: pageId,
+              action: actionName,
+              state: state,
+              startedAt: startedAt,
+              updatedAt: time,
+              durationMs: /^(completed|error)$/.test(state) ? Math.max(0, time - startedAt): Number(previous.durationMs || 0),
+              lastError: state === "error" ? errorText(meta.error): state === "completed" ? "": String(previous.lastError || ""),
+              count: Number(previous.count || 0) +(state === "running" ? 1: 0),
+              failures: Number(previous.failures || 0) +(state === "error" ? 1: 0)
+            });
+          return actions[key] = record, publish("app:page-action-state-changed", copy(record)), record
+        }
+        function snapshot() {
+          var pageCopy = {}, actionCopy = {};
+          return Object.keys(states).forEach(function(key) {
+              pageCopy[key] = copy(states[key])
+            }), Object.keys(actions).forEach(function(key) {
+              actionCopy[key] = copy(actions[key])
+            }), {
+            currentPage: String(window.AppPages && window.AppPages.current && window.AppPages.current() || document.documentElement.getAttribute("data-app-page-state-id") || ""),
+            sequence: sequence,
+            pages: pageCopy,
+            actions: actionCopy,
+            history: history.slice(-40).map(copy)
+          }
+        }
+        return window.AppPageHealth = {
+          __owner: "Index.AppPageHealth.lifecycle-r34",
+          __boundedHistory: 120,
+          transition: transition,
+          action: action,
+          get: function(pageId) {
+            return states[normalizePageId(pageId)] || null
+          },
+          snapshot: snapshot,
+          assertReady: function(pageId) {
+            var record = states[normalizePageId(pageId)];
+            if (!record || !/^(ready|degraded)$/.test(record.state))throw new Error("APP_PAGE_NOT_READY:" + normalizePageId(pageId) + ":" +(record && record.state || "missing"));
+            return record
+          }
+        }
+      }
+      installPageHealthOwner();
       function runPageActivation(id) {
         id = canonicalPageId(id),
         syncStateFromStore(); if (!bridgeState.authenticated)return safeApplyRoute("/login", !0, "activation-unauthenticated").catch (function() {
             setShellMode(!1)
           }),
-        Promise.resolve(!1); try {
+        Promise.resolve(!1);
+        function markPageLifecycle(state, meta) {
+          try {
+            return window.AppPageHealth && __appIsFn(window.AppPageHealth.transition) ? window.AppPageHealth.transition(id, state, Object.assign({
+                  pageId: id,
+                  source: "Index.runPageActivation"
+                }, meta || {
+                })): null
+          } catch (_pageHealthErr) {
+            return __appObserve(_pageHealthErr, "route.pageHealth"),
+            null
+          }
+        }
+        markPageLifecycle("routing", {
+          stage: "route-start"
+        }); try {
           var previousPage = window.AppStore && window.AppStore.get ? String(window.AppStore.get("ui.currentPage",
               "") || ""): ""; document.dispatchEvent(new CustomEvent("app:page-changing", {
                 detail: {
@@ -6088,6 +6216,10 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
         }
         setShellMode(!0),
         markSidebar(routeFromNav(id)); function finish(result, emitActivatedEvent) {
+          markPageLifecycle(result === !1 ? "degraded": "ready", {
+            stage: "route-complete",
+            degraded: result === !1
+          });
           if (emitActivatedEvent !== !1)try {
             document.dispatchEvent(new CustomEvent("app:page-activated", {
                   detail: {
@@ -6104,6 +6236,10 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
           return result
         }
         function reportActivationFailure(err, stage) {
+          markPageLifecycle("error", {
+            stage: stage || "activation",
+            error: err
+          });
           try {
             var scope = document.getElementById(pageDomId(id));
             scope && scope.setAttribute("data-page-load-error", "1");
@@ -6147,8 +6283,14 @@ deferredTemplateMapJson)?deferredTemplateMapJson:'{}'?>,
             "summary"); return id === "admin" ? callNamed("loadAdminData"): !0
         }
         var lifecycleOwnsActivatedEvent = !1;
+        markPageLifecycle("template-loading", {
+          stage: "ensure-template"
+        });
         return ensurePageTemplate(id).then(function(templateReady) {
             if (!templateReady)throw new Error("โหลด page template ไม่สำเร็จ: " + id);
+            markPageLifecycle("runtime-loading", {
+              stage: "ensure-runtime"
+            });
             return ensurePageRuntimeReady(id)
           }).then(function(runtimeReady) {
             if (!runtimeReady)throw new Error("โหลด page runtime ไม่สำเร็จ: " + id);

@@ -1057,7 +1057,7 @@ function _casePick_(row, keys) {
   }
   return ""
 }
-function _r28(row) {
+function _caseSchemaFromRow_(row) {
   var title,
   cat,
   subCat,
@@ -1099,7 +1099,7 @@ function _r118(input) {
       }, input || {
       })).id = input.id || input.caseId || "",
   input.caseId = input.caseId || input.id || "";
-  var schema = _r28(input);
+  var schema = _caseSchemaFromRow_(input);
   input.title = schema.title,
   input.caseTitle = String(_casePick_(input, [_S7,
         _S28,
@@ -1174,7 +1174,7 @@ function _caseNormalizeStatusForDisplay_(status) {
     })
 }
 function _r96(row) {
-  var schema = _r28(row = row || {
+  var schema = _caseSchemaFromRow_(row = row || {
     }),
   title = schema.title,
   cat = schema.cat,
@@ -1322,7 +1322,7 @@ function _r94() {
   _appIsFnName_("_requestScopePut_") &&(idx = _requestScopePut_("caseSaveLookupIndex", cacheKey, idx)),
   idx
 }
-function _r28(input) {
+function _caseFindIndexedExisting_(input) {
   input = input || {
   };
   var idx = _r94(),
@@ -1349,7 +1349,7 @@ function _r40(input) {
     _recordWarning_("cases.findExisting.byId", _findByIdErr)
   }
   try {
-    var indexed = _appIsFnName_("_r28") ? _r28(input): null;
+    var indexed = _appIsFnName_("_caseFindIndexedExisting_") ? _caseFindIndexedExisting_(input): null;
     if (indexed)return indexed
   } catch (_caseIndexErr) {
     _recordWarning_("cases.findExisting.keyedIndex", _caseIndexErr)
@@ -1377,7 +1377,7 @@ function _r95(input, existing, now) {
   },
   now = now || new Date().toISOString();
   var resolvedId = String(existing.caseId || input.id || input.caseId || "CASE_" + Date.now() + "_" + Math.floor(9e3 * Math.random() + 1e3)).trim(),
-  schema = _r28(_c30O_({
+  schema = _caseSchemaFromRow_(_c30O_({
       }, existing, input)),
   title = _s_(input.title || input.caseTitle || schema.title || existing.title || existing.caseTitle).trim(),
   cat = _s_(schema.cat || input.cat || input.caseType || existing.cat || existing.caseType).trim(),
@@ -6085,23 +6085,96 @@ function _z40(raw, rowNumber, headers, indexes) {
   },
   row
 }
+var _caseReportProjectionRuntimeCache_ = {
+};
+function _caseReportProjectionCacheKey_() {
+  var mainStamp = _appIsFnName_("_entityCacheStamp_") ? _entityCacheStamp_("maindata"): "1",
+  caseStamp = _appIsFnName_("_entityCacheStamp_") ? _entityCacheStamp_("case"): "1";
+  return "case_report_projection_r33_" + String(mainStamp || "1") + "_" + String(caseStamp || "1")
+}
+function _caseReportProjectedMatrix_(sh) {
+  var lastColumn = Math.max(Number(sh && sh.getLastColumn && sh.getLastColumn()) || 0, 1),
+  lastRow = Math.max(Number(sh && sh.getLastRow && sh.getLastRow()) || 0, 1),
+  header = sh.getRange(1, 1, 1, lastColumn).getValues()[0] || [],
+  headers = header.map(_ra),
+  fields = _z25(),
+  idx = {
+  },
+  width = 1;
+  Object.keys(fields).forEach(function(field) {
+      var columnIndex = _r72(headers, fields[field]);
+      idx[field] = columnIndex,
+      columnIndex >= 0 &&(width = Math.max(width, columnIndex + 1))
+    });
+  width = Math.max(1, Math.min(width, lastColumn));
+  var body = [];
+  if (lastRow > 1)body = _appIsFnName_("_readSheetMatrixBodyPartitioned_") ? _readSheetMatrixBodyPartitioned_(sh,
+      2, width, {
+        batchSize: 400
+      }): sh.getRange(2, 1, lastRow - 1, width).getValues();
+  return {
+    matrix: [header.slice(0, width)].concat(body || []),
+    headers: headers.slice(0, width),
+    idx,
+    width,
+    lastColumn,
+    lastRow
+  }
+}
+function _caseReportProjectionMeta_(rows, meta) {
+  try {
+    Object.defineProperty(rows, "_p1ProjectionMeta", {
+        value: meta || {
+        },
+        enumerable: !1,
+        configurable: !0
+      })
+  } catch (_metaErr) {
+    rows._p1ProjectionMeta = meta || {
+    }
+  }
+  return rows
+}
 function _z58(payload) {
   payload = payload || {
   };
-  var rows = [];
+  var rows = [],
+  cacheKey = _caseReportProjectionCacheKey_(),
+  runtimeHit = _caseReportProjectionRuntimeCache_[cacheKey];
+  if (_c30A_(runtimeHit))return _caseReportProjectionMeta_(runtimeHit.slice(), {
+      cacheHit: !0,
+      cacheLevel: "execution",
+      cacheKey,
+      rows: runtimeHit.length
+    });
+  if (payload.forceFresh !== !0 && payload.noCache !== !0 && payload.bypassCache !== !0 && _appIsFnName_("_cacheGetJson_")) {
+    var sharedHit = _cacheGetJson_(cacheKey);
+    if (_c30A_(sharedHit))return _caseReportProjectionRuntimeCache_[cacheKey] = sharedHit,
+    _caseReportProjectionMeta_(sharedHit.slice(), {
+        cacheHit: !0,
+        cacheLevel: "script",
+        cacheKey,
+        rows: sharedHit.length
+      })
+  }
   try {
     var sh = typeof getSheet_ == "function" ? getSheet_(_S2): null;
-    if (!sh)return[];
-    var matrix = typeof getSheetMatrix_ == "function" ? getSheetMatrix_(sh, 0, {
-        allowFullMatrix: !0
-      }): sh.getDataRange().getValues();
-    if (!_c30A_(matrix) || matrix.length < 2)return[];
-    var headers =(matrix[0] || []).map(_ra),
-    fields = _z25(),
-    idx = {
-    };
-    Object.keys(fields).forEach(function(field) {
-        idx[field] = _r72(headers, fields[field])
+    if (!sh) {
+      var missingSheetError = new Error("CASE_REPORT_SHEET_NOT_FOUND:" + String(_S2 || "MainData"));
+      missingSheetError.code = "CASE_REPORT_SHEET_NOT_FOUND";
+      throw missingSheetError
+    }
+    var projection = _caseReportProjectedMatrix_(sh),
+    matrix = projection.matrix,
+    headers = projection.headers,
+    idx = projection.idx;
+    if (!_c30A_(matrix) || matrix.length < 2)return _caseReportProjectionMeta_([], {
+        cacheHit: !1,
+        cacheLevel: "sheet",
+        cacheKey,
+        rows: 0,
+        projectedColumns: projection.width,
+        sourceColumns: projection.lastColumn
       });
     for (var r = 1; r < matrix.length; r++) {
       var raw = matrix[r] || [];
@@ -6115,11 +6188,35 @@ function _z58(payload) {
         _r26(deletionProbe) || rows.push(_z40(raw, r + 1, headers, idx))
       }
     }
+    _caseReportProjectionRuntimeCache_[cacheKey] = rows;
+    if (payload.forceFresh !== !0 && payload.noCache !== !0 && payload.bypassCache !== !0 && _appIsFnName_("_cachePutJson_"))try {
+      _cachePutJson_(cacheKey, rows, Math.max(60, Math.min(Number(payload.projectionCacheTtlSeconds || 180) || 180,
+            300)))
+    } catch (_projectionCacheErr) {
+      _c30W_("case.report.projection.cachePut", _projectionCacheErr, {
+          cacheKey,
+          rows: rows.length
+        })
+    }
+    return _caseReportProjectionMeta_(rows.slice(), {
+        cacheHit: !1,
+        cacheLevel: "sheet",
+        cacheKey,
+        rows: rows.length,
+        projectedColumns: projection.width,
+        sourceColumns: projection.lastColumn,
+        rowsRead: Math.max(0, projection.lastRow - 1)
+      })
   } catch (e) {
-    _c30W_("case.report.phase3.readMain", e),
-    rows = []
+    _c30W_("case.report.phase3.readMain", e, {
+        sheet: String(_S2 || "MainData"),
+        errorCode: String(e && e.code || "CASE_REPORT_READ_FAILED")
+      });
+    var readError = new Error("CASE_REPORT_READ_FAILED:" + String(e && e.message || e || "unknown"));
+    readError.code = String(e && e.code || "CASE_REPORT_READ_FAILED");
+    readError.cause = e;
+    throw readError
   }
-  return rows
 }
 function _z37(row, payload) {
   payload = payload || {
@@ -6221,6 +6318,8 @@ function _rX(payload) {
     hit
   }
   var allRows = _z58(payload),
+  projectionMeta = allRows && allRows._p1ProjectionMeta || {
+  },
   rowsRead = allRows.length,
   meetingMatched = 0;
   includeMeetingHistory &&(allRows = _rA(allRows), meetingMatched = Number(allRows._r74 || 0) || 0);
@@ -6270,7 +6369,11 @@ function _rX(payload) {
       durationMs: Math.max(0, Date.now() - started),
       includeMeetingHistory,
       meetingHistoryMatchedRows: meetingMatched,
-      phase3Stamp: _ri
+      phase3Stamp: _ri,
+      projectionCacheHit: projectionMeta.cacheHit === !0,
+      projectionCacheLevel: _ra(projectionMeta.cacheLevel || "sheet"),
+      projectedColumns: Number(projectionMeta.projectedColumns || 0) || 0,
+      sourceColumns: Number(projectionMeta.sourceColumns || 0) || 0
     }
   };
   if (typeof AppBackendCore != "undefined" && AppBackendCore.normalizeCaseSearchResponse &&(res = AppBackendCore.normalizeCaseSearchResponse(res)),
@@ -9165,6 +9268,93 @@ function _z16(meeting, items) {
   return titles.length ||(titles = collect("1")),
   titles.length > 2 ? titles.slice(0, 2).join(" / ") + " และอีก " +(titles.length - 2) + " เรื่อง": titles.join(" / ") || _j(meeting.displayTitle || meeting.summaryTitle || meeting.title || _T9)
 }
+function _committeeMeetingLegacyHash_(value) {
+  for (var raw = _s_(value).toLowerCase(), hash = 2166136261, i = 0; i < raw.length; i++)hash^=raw.charCodeAt(i),
+  hash +=(hash << 1) +(hash << 4) +(hash << 7) +(hash << 8) +(hash << 24);
+  return(hash >>> 0).toString(36).toUpperCase()
+}
+function _committeeMeetingLegacyBundle_(readOptions) {
+  var rows = [];
+  try {
+    rows = _r30(_S0, !1) || []
+  } catch (err) {
+    _c30W_("committee.meeting.legacyRead", err, {
+        sheet: _S0
+      });
+    return {
+      meetings: [],
+      items: [],
+      source: "MeetingLogs-read-failed"
+    }
+  }
+  var groups = {
+  }, meetings = [], items = [];
+  rows.forEach(function(row, index) {
+      row = row || {
+      };
+      if (_appIsFnName_("isSoftDeletedRow_") && isSoftDeletedRow_(row))return;
+      var meetingNo = _j(row.meetingNo || row.meetingRound || row.round || row[_S22] || ""),
+      meetingDate = _committeeMeetingDateText_(row.meetingDate || row.date || row[_L12] || ""),
+      existingId = _j(row.meetingId || ""),
+      committeeType = _j(row.committeeType || row.meetingType || row[_L17] || ""),
+      subcommitteeName = _j(row.subcommitteeName || row.subcommittee || row[_L0] || ""),
+      key = existingId || [meetingNo,
+        meetingDate,
+        committeeType,
+        subcommitteeName].join("|");
+      if (!key || key === "|||")return;
+      var meetingId = existingId || "LEGACY-" + _committeeMeetingLegacyHash_(key),
+      group = groups[meetingId];
+      if (!group) {
+        group = groups[meetingId] = {
+          meeting: {
+            meetingId: meetingId,
+            meetingNo: meetingNo,
+            meetingDate: meetingDate,
+            title: _j(row.meetingTitle || committeeType || subcommitteeName || _T9),
+            status: "ข้อมูลเดิม",
+            note: _j(row.summary || row.note || ""),
+            readOnlyLegacy: !0,
+            legacySource: _S0
+          },
+          items: []
+        };
+        meetings.push(group.meeting)
+      }
+      var title = _j(row.caseTitle || row.title || row.subject || row.considerationTitle || ""),
+      result = _j(row.result || row.note || row.summary || ""),
+      itemId = _j(row.logId || row.id || "") || "LEGACY-ITEM-" + _committeeMeetingLegacyHash_([key,
+          row.caseId,
+          title,
+          index].join("|"));
+      if (title || result || row.caseId || row.caseNum || row.recNo) {
+        var item = {
+          itemId: itemId,
+          meetingId: meetingId,
+          agendaNo: _j(row.agendaNo || "3") || "3",
+          seq: group.items.length + 1,
+          title: title,
+          caseId: _j(row.caseId || ""),
+          caseNum: _caseMeetingAgendaNumberText_(row.caseNum || row.caseNo || row.runningNo || ""),
+          recNo: _caseMeetingAgendaNumberText_(row.recNo || row.receiveNo || row.receiptNo || ""),
+          caseTitle: title,
+          agencyOrPresenter: _j(row.agencyOrPresenter || row.agencyName || subcommitteeName || committeeType || ""),
+          result: result,
+          note: _j(row.note || ""),
+          readOnlyLegacy: !0,
+          legacySource: _S0,
+          legacyLogId: _j(row.logId || row.id || "")
+        };
+        group.items.push(item),
+        items.push(item)
+      }
+    });
+  return {
+    meetings: meetings,
+    items: items,
+    source: "MeetingLogs-compat-read"
+  }
+}
 function _z6(payload) {
   payload = payload || {};
   var meetingId = _j(payload.meetingId || payload.id || "");
@@ -9179,6 +9369,32 @@ function _z6(payload) {
   };
   var meetingsAll = _z52(_S25, !1, readOptions);
   var itemsAll = _z52(_S8, !1, readOptions).map(_z72);
+  var canonicalMeetingCount = meetingsAll.length;
+  var canonicalItemCount = itemsAll.length;
+  var legacyBundle = payload.includeLegacy === !1 ? null: _committeeMeetingLegacyBundle_(readOptions);
+  var legacyMeetingsAdded = 0;
+  if (legacyBundle && (legacyBundle.meetings || []).length) {
+    var canonicalIds = {};
+    var canonicalKeys = {};
+    meetingsAll.forEach(function(meeting) {
+      var id = _j(meeting && meeting.meetingId || "");
+      if (id)canonicalIds[id] = !0;
+      var key = [_j(meeting && meeting.meetingNo || ""), _committeeMeetingDateText_(meeting && meeting.meetingDate || "")].join("|").toLowerCase();
+      if (key !== "|")canonicalKeys[key] = !0
+    });
+    var addedIds = {};
+    (legacyBundle.meetings || []).forEach(function(meeting) {
+      var id = _j(meeting && meeting.meetingId || "");
+      var key = [_j(meeting && meeting.meetingNo || ""), _committeeMeetingDateText_(meeting && meeting.meetingDate || "")].join("|").toLowerCase();
+      if (id && canonicalIds[id] || key !== "|" && canonicalKeys[key])return;
+      meetingsAll.push(meeting);
+      id && (addedIds[id] = !0);
+      legacyMeetingsAdded++
+    });
+    (legacyBundle.items || []).forEach(function(item) {
+      if (addedIds[_j(item && item.meetingId || "")])itemsAll.push(_z72(item))
+    })
+  }
   var allGrouped = {};
 
   itemsAll.forEach(function(item) {
@@ -9252,8 +9468,14 @@ function _z6(payload) {
     },
     meta: {
       owner: "MeetingDomain.listMeetings",
-      source: forceFresh ? "canonical-sheets-live" : "canonical-sheets-cache",
+      source: legacyMeetingsAdded ? "canonical+MeetingLogs-read-only-compatibility": (forceFresh ? "canonical-sheets-live": "canonical-sheets-cache"),
+      canonicalSource: "CommitteeMeetings+CommitteeMeetingAgendaItems",
+      legacySource: legacyMeetingsAdded ? "MeetingLogs-read-only-compatibility": "",
+      legacyReadOnly: legacyMeetingsAdded > 0,
+      legacyMeetingsAdded: legacyMeetingsAdded,
       forceFresh: forceFresh,
+      canonicalMeetingsRead: canonicalMeetingCount,
+      canonicalAgendaItemsRead: canonicalItemCount,
       meetingsRead: meetingsAll.length,
       agendaItemsRead: itemsAll.length,
       meetingsReturned: meetings.length,
