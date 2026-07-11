@@ -1,5 +1,5 @@
 "use strict";
-const RELEASE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-11-r38";
+const RELEASE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-11-r40";
 const DEFAULT_MAX_BODY_BYTES = 1048576;
 const MAX_STREAM_BODY_BYTES = 4300000;
 const MAX_RESPONSE_BODY_BYTES = 4300000;
@@ -10,7 +10,7 @@ const PROXY_LARGE_BODY_METHODS = new Set([
 ]);
 const DEFAULT_PROXY_TIMEOUT_MS = 55000;
 const MAX_PROXY_TIMEOUT_MS = 55000;
-// GENERATED from gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_.
+// GENERATED from gas-backend/Code_20_Router.gs canonical route registry.
 const PROXY_ALLOWED_METHODS = Object.freeze([
   "apiLogin",
   "apiSessionResume",
