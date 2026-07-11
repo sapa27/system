@@ -37,7 +37,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; manifest-src 'self' data:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; upgrade-insecure-requests; form-action 'self'; script-src-attr 'none'; worker-src 'none'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; manifest-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; frame-src 'none'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; upgrade-insecure-requests; form-action 'self'; script-src-attr 'none'; worker-src 'none'"
         },
         {
           "key": "Cross-Origin-Resource-Policy",
@@ -54,7 +54,7 @@
         },
         {
           "key": "X-Production-Vercel-Proxy",
-          "value": "commission-v1.2-gas-hosted-production-2026-07-11-r38; contract-freeze=production-current-2026-07-06"
+          "value": "commission-v1.2-gas-hosted-production-2026-07-11-r39; contract-freeze=production-current-2026-07-06"
         }
       ]
     },
