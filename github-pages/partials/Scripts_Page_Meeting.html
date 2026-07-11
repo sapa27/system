@@ -4436,7 +4436,10 @@ var _M = {
       void 0
     }
     setHtml(_M.x11, rows.map(function(m) {
-          return '<tr><td class="text-center fw-bold">' + esc(m.meetingNo || "") + '</td><td class="text-center">' + esc(formatDate(m.meetingDate || "")) + "</td><td>" + esc(meetingListDisplayTitle(m)) + '</td><td class="text-center"><button class="btn btn-sm btn-outline-info js-show-meeting-detail" data-id="' + esc(m.meetingId || "") + '" type="button">แสดงข้อมูล</button> <button class="btn btn-sm btn-outline-primary js-load-meeting" data-id="' + esc(m.meetingId || "") + '" type="button">แก้ไข</button> <button class="btn btn-sm btn-outline-danger js-delete-meeting" data-id="' + esc(m.meetingId || "") + '" type="button">ลบ</button></td></tr>'
+          var legacy = !!(m &&(m.readOnlyLegacy || "MeetingLogs" === m.legacySource)),
+          actions = '<button class="btn btn-sm btn-outline-info js-show-meeting-detail" data-id="' + esc(m.meetingId || "") + '" type="button">แสดงข้อมูล</button>';
+          return legacy ? actions += ' <span class="badge text-bg-secondary">ข้อมูลเดิม (อ่านอย่างเดียว)</span>': actions += ' <button class="btn btn-sm btn-outline-primary js-load-meeting" data-id="' + esc(m.meetingId || "") + '" type="button">แก้ไข</button> <button class="btn btn-sm btn-outline-danger js-delete-meeting" data-id="' + esc(m.meetingId || "") + '" type="button">ลบ</button>',
+          '<tr><td class="text-center fw-bold">' + esc(m.meetingNo || "") + '</td><td class="text-center">' + esc(formatDate(m.meetingDate || "")) + "</td><td>" + esc(meetingListDisplayTitle(m)) + '</td><td class="text-center">' + actions + '</td></tr>'
         }).join("")),
     renderListFooter(total),
     root.CommitteeMeetingSummaryDetail && $meetingFn(root.CommitteeMeetingSummaryDetail.enhanceRows) && root.CommitteeMeetingSummaryDetail.enhanceRows()
@@ -6655,8 +6658,11 @@ var _M = {
     return null
   }
   function _f55() {
-    var seed = pendingSeed();
-    return!!seed &&(_f9(), _f39(seed), !0)
+    var seed = pendingSeed(),
+    active = root.__MEETING_SEARCH_EDIT_IN_PROGRESS__;
+    if (!seed)return!1;
+    _f9();
+    return active && "searchEditCase.singlePass" === String(active.source || "") ? !0: (_f39(seed), !0)
   }
 }
 (window, document);

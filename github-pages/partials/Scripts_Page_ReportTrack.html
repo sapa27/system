@@ -724,7 +724,7 @@
             }); root.__MEETING_SEARCH_EDIT_IN_PROGRESS__ = {
             caseId: editKey,
             seed: editSeed,
-            until: (Date.now ? Date.now(): 0) + 6e3,
+            until: (Date.now ? Date.now(): 0) + 12e3,
             source: "searchEditCase.singlePass"
           }; try {
             root.AppStore && root.AppStore.set &&(root.AppStore.set("meeting.editSeed", editSeed),
@@ -734,7 +734,7 @@
           }
           function waitMeetingEditorReady() {
             var started = Date.now ? Date.now(): 0,
-            timeoutMs = 2400;
+            timeoutMs = 8000;
             return new Promise(function(resolve, reject) {
                 function check() {
                   if ($fn(root.meetingEditCase) && document.getElementById("meeting-caseId") && document.getElementById("meeting-workspace"))return resolve(!0);
@@ -764,6 +764,26 @@
                 })
             }).then(function(result) {
               if (!1 === result)throw new Error("ไม่สามารถเติมข้อมูลเรื่องพิจารณาในแบบฟอร์มได้");
+              var caseIdValue = clean((document.getElementById("meeting-caseId") || {
+                  }).value),
+              caseTitleValue = clean((document.getElementById("meeting-title") || {
+                  }).value),
+              receiveValue = clean((document.getElementById("meeting-recNo") || {
+                  }).value),
+              orderValue = clean((document.getElementById("meeting-caseNum") || {
+                  }).value);
+              if (!caseIdValue && !caseTitleValue && !receiveValue && !orderValue && root.AppMeetingRouteActionOwner && $fn(root.AppMeetingRouteActionOwner.applySearchSeed)) {
+                root.AppMeetingRouteActionOwner.applySearchSeed(editSeed),
+                caseIdValue = clean((document.getElementById("meeting-caseId") || {
+                    }).value),
+                caseTitleValue = clean((document.getElementById("meeting-title") || {
+                    }).value),
+                receiveValue = clean((document.getElementById("meeting-recNo") || {
+                    }).value),
+                orderValue = clean((document.getElementById("meeting-caseNum") || {
+                    }).value)
+              }
+              if (!caseIdValue && !caseTitleValue && !receiveValue && !orderValue)throw new Error("เปิดหน้าจัดการเรื่องพิจารณาแล้ว แต่ไม่สามารถเติมข้อมูลที่เลือกได้");
               return result
             })
         }).catch (function(err) {

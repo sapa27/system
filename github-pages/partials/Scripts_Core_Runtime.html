@@ -6412,7 +6412,10 @@ function unlockUi(e) {
       activeScrollParents = [],
       activeFrame = 0,
       lastOpenAt = 0,
-      DATEPICKER_FIX_STAMP = "thai-datepicker-fast-open-current",
+      outsideEvents = root.PointerEvent ? ["pointerdown"]: ["mousedown",
+        "touchstart"],
+      openEvent = root.PointerEvent ? "pointerdown": "click",
+      DATEPICKER_FIX_STAMP = "thai-datepicker-single-event-current",
       text = function __E2_text_3(v) {
         return null == v ? "": String(v)[_$22]()
       },
@@ -6517,7 +6520,7 @@ function unlockUi(e) {
       root._q20 = "SCR:thai-date-fast-open-current.65",
       root._q8 &&(root._q8.adapterOnly = !0, root._q8.adoptedBy = root._q20, root._q8.adoptedAt = Date.now()),
       doc[_$d] && close(),
-      root._q53 ||(root._q53 = !0, doc[_$c]("focusin", delegated, !0), doc[_$c]("click", delegated, !0),
+      root._q53 ||(root._q53 = !0, doc[_$c](openEvent, delegated, !0),
         doc[_$c]("keydown", delegated, !0), ["app:page-activated"][_$18](function(evt) {
             doc[_$c](evt, function(e) {
                 try {
@@ -6617,10 +6620,7 @@ function unlockUi(e) {
   }
   function close() {
     !function removeOutsideCloser() {
-      if (_q44 &&(["pointerdown",
-            "mousedown",
-            "touchstart",
-            "click"][_$18](function(evt) {
+      if (_q44 &&(outsideEvents[_$18](function(evt) {
               try {
                 doc[_$d](evt, _q44, !0)
               } catch (_e) {
@@ -6978,21 +6978,12 @@ function unlockUi(e) {
     }
     (pop, input),
     schedulePlace(pop, input),
-    setTimeout(function() {
-        schedulePlace(pop, input)
-      }, 0),
-    setTimeout(function() {
-        schedulePlace(pop, input)
-      }, 80),
     _q44 = function(e) {
       var target = e && e.target;
       target === input || target && target[_$4] && target[_$4]("#app-thai-date-lite-popover") || close()
     },
     setTimeout(function() {
-        ["pointerdown",
-          "mousedown",
-          "touchstart",
-          "click"][_$18](function(evt) {
+        outsideEvents[_$18](function(evt) {
             try {
               doc[_$c](evt, _q44, !0)
             } catch (_e) {
