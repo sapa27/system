@@ -65,7 +65,17 @@ ASSET_PATTERN = re.compile(r"asset-manifest-commission-v1\.2-gas-hosted-producti
 
 def _canonical_fallback_logo_data_uri() -> str:
     text = ASSET_SOURCE.read_text(encoding="utf-8")
-    match = re.search(r"function _appDefaultLogoDataUri_\(\) \{[\s\S]*?var markup = '([^']+)';", text)
+    # Former readable owner.
+    match = re.search(
+        r"function _appDefaultLogoDataUri_\(\)\s*\{[\s\S]*?var markup\s*=\s*'([^']+)'",
+        text,
+    )
+    # Current compact owner in getAppLogoConfig_.
+    if not match:
+        match = re.search(
+            r"compactDefaultSvg\s*=\s*[\"']data:image/svg\+xml;charset=UTF-8,[\"']\s*\+\s*encodeURIComponent\(\s*'([^']+)'\s*\)",
+            text,
+        )
     if not match:
         raise RuntimeError("CANONICAL_FALLBACK_LOGO_NOT_FOUND")
     from urllib.parse import quote
@@ -89,13 +99,139 @@ STATIC_LOGIN_CONTRACT_START = "/* GENERATED LOGIN TRANSITION CONTRACT: canonical
 STATIC_LOGIN_CONTRACT_END = "/* END GENERATED LOGIN TRANSITION CONTRACT */"
 
 
+def _staticize_index_from_canonical() -> bool:
+    text = GAS_INDEX.read_text(encoding="utf-8")
+    expected_logo = _canonical_fallback_logo_data_uri()
+
+    replacements = [
+        (r"<\?var __logo=[\s\S]*?\?>", ""),
+        (r"<\?!=\s*__logo\.png96\s*\?>", expected_logo),
+        (r"<\?!=\s*getActiveLogoUrl_\(\)\s*\?>", expected_logo),
+        (r"<\?=\s*getActiveLogoUrl_\(\)\s*\?>", expected_logo),
+        (r"<\?!=JSON\.stringify\(__logo\|\|\{\}\)\?>", _vercel_static_logo_expression()),
+        (
+            r"<\?!=JSON\.stringify\(\(typeof serverLogoUrl[\s\S]*?\)\?serverLogoUrl:''\)\?>",
+            'String((window.APP_CONFIG || {}).logoUrl || "")',
+        ),
+        (r"<\?!=bootstrapJson\?>", _vercel_static_bootstrap_expression()),
+        (r"<\?!=\(typeof assetManifestJson[\s\S]*?\?>", _vercel_static_asset_manifest_expression()),
+        (
+            r"<\?!=includeProductionBundle_\('appCritical'\)\?>",
+            '<script src="critical-login-runtime.js"></script>',
+        ),
+        (
+            r"<\?!=\(typeof coreRuntimeFilesJson[\s\S]*?\?>",
+            json.dumps(["Scripts_Core_Runtime"], ensure_ascii=False),
+        ),
+        (
+            r"<\?!=\(typeof deferredScriptMapJson[\s\S]*?\?>",
+            json.dumps({
+                "dashboard": ["Scripts_Page_Dashboard"],
+                "search": ["Scripts_Page_ReportTrack"],
+                "petitioner": ["Scripts_Page_Petitioner"],
+                "meeting": ["Scripts_Page_Meeting"],
+                "committee-meeting": ["Scripts_Page_Meeting"],
+                "track": ["Scripts_Page_ReportTrack"],
+                "report": ["Scripts_Page_ReportTrack"],
+                "people": ["Scripts_Page_People"],
+                "personnel": ["Scripts_Page_People"],
+                "budget": ["Scripts_Page_Budget"],
+                "admin": ["Scripts_Page_Admin"],
+                "ai": ["Scripts_Core_Runtime"],
+                "print": ["Scripts_Core_Runtime"],
+            }, ensure_ascii=False),
+        ),
+        (r"<\?!=\(typeof deferredTemplateMapJson[\s\S]*?\?>", "{}"),
+    ]
+    updated = text
+    for pattern, value in replacements:
+        updated, count = re.subn(pattern, lambda _m, replacement=value: replacement, updated)
+        if count < 1:
+            raise RuntimeError(f"STATIC_INDEX_TEMPLATE_REPLACEMENT_FAILED:{pattern}:{count}")
+    if "<?" in updated:
+        raise RuntimeError("UNRESOLVED_GAS_TEMPLATE_IN_STATIC_INDEX")
+
+    canonical_blocks = _script_blocks(GAS_INDEX)
+    dom_contract_index = next(
+        (i for i, block in enumerate(canonical_blocks) if block["id"] == "app-index-dom-contract-owner"),
+        -1,
+    )
+    async_index = next(
+        (i for i, block in enumerate(canonical_blocks) if block["id"] == "app-async-runtime-loader"),
+        -1,
+    )
+    if dom_contract_index < 0 or async_index < 0:
+        raise RuntimeError("STATIC_INDEX_SCRIPT_OWNER_MARKER_MISSING")
+    pre_indices = set(range(dom_contract_index + 1))
+    thai_indices = {
+        i for i, block in enumerate(canonical_blocks)
+        if "Index.thai-date-early-adapter" in block["body"]
+    }
+    after_tokens = (
+        "function safeAlertFire",
+        "window.APP_LOGO=window.APP_LOGO||",
+        "__APP_ASSET_POLICY_CURRENT__",
+        "window.DEFAULT_LOGO=window.DEFAULT_LOGO||",
+        "patchParliamentLogo",
+        "window.__APP_BOOTSTRAP__=",
+    )
+    after_indices = {
+        i for i, block in enumerate(canonical_blocks)
+        if any(token in block["body"] for token in after_tokens)
+    }
+    bootstrap_indices = {
+        i for i, block in enumerate(canonical_blocks)
+        if i > async_index and block["body"] and "text/x-template" not in block["type"]
+    }
+    if len(thai_indices) != 1 or len(after_indices) != len(after_tokens) or len(bootstrap_indices) < 4:
+        raise RuntimeError(
+            f"STATIC_INDEX_SCRIPT_OWNER_COUNT_INVALID:thai={len(thai_indices)}:after={len(after_indices)}:bootstrap={len(bootstrap_indices)}"
+        )
+
+    first_pre = min(pre_indices)
+    first_thai = min(thai_indices)
+    first_after = min(after_indices)
+    first_bootstrap = min(bootstrap_indices)
+    script_index = -1
+    script_pattern = re.compile(r"<script\b([^>]*)>([\s\S]*?)</script>", re.IGNORECASE)
+
+    def externalize_script(match: re.Match) -> str:
+        nonlocal script_index
+        if "critical-login-runtime.js" in (match.group(1) or ""):
+            return match.group(0)
+        script_index += 1
+        if script_index in pre_indices:
+            return '<script src="app-index-foundation-pre-vue.js"></script>' if script_index == first_pre else ""
+        if script_index in thai_indices:
+            return '<script src="app-index-foundation-after-vue.js"></script>' if script_index == first_thai else ""
+        if script_index in after_indices:
+            return '<script src="app-index-foundation-after-swal.js"></script>' if script_index == first_after else ""
+        if script_index == async_index:
+            return ""
+        if script_index in bootstrap_indices:
+            return '<script src="app-index-bootstrap.js"></script>' if script_index == first_bootstrap else ""
+        return match.group(0)
+
+    updated = script_pattern.sub(externalize_script, updated)
+    transport_anchor = '<script src="app-index-foundation-pre-vue.js"></script>'
+    transport_block = '<script src="app-config.js"></script>\n<script src="github-gas-transport.js"></script>\n' + transport_anchor
+    if transport_anchor not in updated:
+        raise RuntimeError("STATIC_INDEX_TRANSPORT_ANCHOR_MISSING")
+    updated = updated.replace(transport_anchor, transport_block, 1)
+    current = STATIC_INDEX.read_text(encoding="utf-8") if STATIC_INDEX.exists() else None
+    if current != updated:
+        STATIC_INDEX.write_text(updated, encoding="utf-8")
+        return True
+    return False
+
+
 def _sync_static_login_contract() -> bool:
     expected_logo = _canonical_fallback_logo_data_uri()
     text = STATIC_INDEX.read_text(encoding="utf-8")
     updated = text
 
     login_pattern = re.compile(
-        r'(<div class="lcurrentStamp2-logo-wrap">)(?:<span class="lcurrentStamp2-logo-placeholder"[^>]*>[^<]*</span>)?<img id="login-logo-img"(?:\s*class="logo-loaded")?\s*src="[^"]*"',
+        r'(<div class="lcurrentStamp2-logo-wrap">)\s*(?:<span class="lcurrentStamp2-logo-placeholder"[^>]*>[^<]*</span>\s*)?<img id="login-logo-img"(?:\s*class="logo-loaded")?\s*src="[^"]*"',
         re.S,
     )
     replacement = (
@@ -120,8 +256,8 @@ def _sync_static_login_contract() -> bool:
 .lcurrentStamp2-logo-wrap img{{position:relative;z-index:1}}
 .lcurrentStamp2-logo-wrap img:not(.logo-loaded){{visibility:hidden}}
 .app-boot-status{{display:none;background:#fff;color:#1e293b}}
-html.app-auth-resolving #app-boot-status{{display:flex!important}}
-html.app-auth-resolving #login-page,html.app-auth-resolving #side,html.app-auth-resolving #sidebar-overlay,html.app-auth-resolving #main-container{{display:none!important}}
+html.app-auth-resolving #app-boot-status{{display:none!important}}
+html.app-auth-resolving #login-page{{display:none!important}}
 {STATIC_LOGIN_CONTRACT_END}"""
     block_pattern = re.compile(re.escape(STATIC_LOGIN_CONTRACT_START) + r'[\s\S]*?' + re.escape(STATIC_LOGIN_CONTRACT_END))
     if block_pattern.search(updated):
@@ -138,14 +274,68 @@ html.app-auth-resolving #login-page,html.app-auth-resolving #side,html.app-auth-
     return False
 
 
+def _extract_function_body(text: str, function_name: str) -> str:
+    start = text.find(f"function {function_name}")
+    if start < 0:
+        return ""
+    brace = text.find("{", start)
+    if brace < 0:
+        return ""
+    depth = 0
+    quote = ""
+    escaped = False
+    for index in range(brace, len(text)):
+        char = text[index]
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in ("'", '"', "`"):
+            quote = char
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return text[brace + 1:index]
+    return ""
+
+
 def _router_methods() -> list[str]:
     text = ROUTER_SOURCE.read_text(encoding="utf-8")
+
+    # Backward-compatible reader for the former canonical handler map.
     start = text.find("function _routerCanonicalHandlerMap_")
     end = text.find("function _routerResolveCanonicalHandler_", start)
-    if start < 0 or end <= start:
-        raise RuntimeError("ROUTER_CANONICAL_HANDLER_MAP_NOT_FOUND")
-    block = text[start:end]
-    methods = re.findall(r"^\s*(api[A-Za-z0-9_]+|getDeferredInclude)\s*:\s*typeof\s+", block, re.MULTILINE)
+    methods: list[str] = []
+    if start >= 0 and end > start:
+        block = text[start:end]
+        methods = re.findall(
+            r"^\s*(api[A-Za-z0-9_]+|getDeferredInclude)\s*:\s*typeof\s+",
+            block,
+            re.MULTILINE,
+        )
+
+    # Current router owner: core, admin and AI route tuple registries.
+    if not methods:
+        route_group_pattern = re.compile(
+            r"[\"']((?:(?:api[A-Za-z0-9_]+|getDeferredInclude)(?:\|(?:api[A-Za-z0-9_]+|getDeferredInclude))*))[\"']\s*,"
+        )
+        for function_name in (
+            "_routerPhase1CoreRouteTuples_",
+            "_routerAdminRoutes_",
+            "_routerAiRoutes_",
+        ):
+            body = _extract_function_body(text, function_name)
+            if not body:
+                raise RuntimeError(f"ROUTER_ROUTE_TUPLE_OWNER_NOT_FOUND:{function_name}")
+            for group in route_group_pattern.findall(body):
+                methods.extend(group.split("|"))
+
     methods = list(dict.fromkeys(methods))
     if len(methods) < 50:
         raise RuntimeError(f"ROUTER_METHOD_COUNT_SUSPICIOUS:{len(methods)}")
@@ -153,7 +343,7 @@ def _router_methods() -> list[str]:
 
 
 def _proxy_allowlist_text(methods: list[str]) -> str:
-    lines = ["// GENERATED from gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_.",
+    lines = ["// GENERATED from gas-backend/Code_20_Router.gs canonical route registry.",
              "const PROXY_ALLOWED_METHODS = Object.freeze(["]
     lines.extend(f'  {json.dumps(method)},' for method in methods)
     lines.append("]);" )
@@ -176,7 +366,7 @@ def _sync_release_metadata() -> list[str]:
 
 def _sync_proxy_contract(methods: list[str]) -> bool:
     text = PROXY_COMMON.read_text(encoding="utf-8")
-    pattern = re.compile(r"(?:\/\/ GENERATED from gas-backend/Code_20_Router\.gs::_routerCanonicalHandlerMap_\.\n)?const PROXY_ALLOWED_METHODS = Object\.freeze\(\[[\s\S]*?\]\);", re.MULTILINE)
+    pattern = re.compile(r"(?:\/\/ GENERATED from gas-backend/Code_20_Router\.gs(?: canonical route registry|::_routerCanonicalHandlerMap_)\.\n)?const PROXY_ALLOWED_METHODS = Object\.freeze\(\[[\s\S]*?\]\);", re.MULTILINE)
     updated, count = pattern.subn(_proxy_allowlist_text(methods), text, count=1)
     if count != 1:
         raise RuntimeError("PROXY_ALLOWLIST_BLOCK_NOT_FOUND")
@@ -279,6 +469,17 @@ def _sync_manifest(methods: list[str]) -> bool:
 
 def _contract_drift_errors() -> list[str]:
     errors = []
+    # GAS may reject raw BOM/line-separator characters embedded mid-source even
+    # when modern Node parses them. Keep the canonical GAS source ASCII-escaped.
+    lexical_hazards = {"\ufeff": "RAW_BOM", "\u2028": "RAW_LINE_SEPARATOR", "\u2029": "RAW_PARAGRAPH_SEPARATOR"}
+    for source in sorted(CANONICAL_RUNTIME_DIR.iterdir()):
+        if not source.is_file() or source.suffix.lower() not in {".gs", ".html", ".js"}:
+            continue
+        source_text = source.read_text(encoding="utf-8")
+        for token, label in lexical_hazards.items():
+            positions = [str(i) for i, char in enumerate(source_text) if char == token]
+            if positions:
+                errors.append(f"GAS_LEXICAL_HAZARD:{label}:{source.relative_to(ROOT)}:{','.join(positions[:8])}")
     methods = _router_methods()
     proxy = PROXY_COMMON.read_text(encoding="utf-8")
     match = re.search(r"const PROXY_ALLOWED_METHODS = Object\.freeze\(\[([\s\S]*?)\]\);", proxy)
@@ -484,12 +685,11 @@ def _generated_frontend_assets() -> dict[Path, str]:
 
     after_swal_tokens = [
         "function safeAlertFire",
-        "window.APP_LOGO = window.APP_LOGO ||",
+        "window.APP_LOGO=window.APP_LOGO||",
         "__APP_ASSET_POLICY_CURRENT__",
-        "window.DEFAULT_LOGO = window.DEFAULT_LOGO ||",
+        "window.DEFAULT_LOGO=window.DEFAULT_LOGO||",
         "patchParliamentLogo",
-        "window.__APP_BOOTSTRAP__ =",
-        "__APP_PHASE5_UIUX_MODERNIZATION__",
+        "window.__APP_BOOTSTRAP__=",
     ]
     after_swal_blocks = []
     for token in after_swal_tokens:
@@ -593,6 +793,7 @@ def generate() -> dict:
     proxySynced = _sync_proxy_contract(methods)
     manifestSynced = _sync_manifest(methods)
     fallbackLogoSynced = _sync_fallback_logo()
+    staticIndexSynced = _staticize_index_from_canonical()
     staticLoginContractSynced = _sync_static_login_contract()
     outputs = _expected_outputs()
     STATIC_RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
@@ -627,6 +828,7 @@ def generate() -> dict:
         "proxyContractSynced": proxySynced,
         "manifestContractSynced": manifestSynced,
         "fallbackLogoSynced": fallbackLogoSynced,
+        "staticIndexSynced": staticIndexSynced,
         "staticLoginContractSynced": staticLoginContractSynced,
         "apiMethodCount": len(methods),
         "written": written,
