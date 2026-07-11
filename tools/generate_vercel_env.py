@@ -7,8 +7,13 @@ import hashlib
 import json
 import re
 import sys
+sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_JSON = ROOT / "package.json"
+ROUTER_SOURCE = ROOT / "gas-backend" / "Code_20_Router.gs"
+PROXY_COMMON = ROOT / "api" / "_gasProxyCommon.js"
+MANIFEST = ROOT / "TECH_DEBT_MANIFEST.json"
 CANONICAL_RUNTIME_DIR = ROOT / "gas-backend"
 STATIC_RUNTIME_DIR = ROOT / "github-pages" / "partials"
 ENV_OUT = ROOT / "github-pages" / "vercel-env.generated.js"
@@ -17,13 +22,205 @@ CRITICAL_RUNTIME = ROOT / "gas-backend" / "Scripts_Critical_Login_Runtime.html"
 GENERATED_FRONTEND_FILES = {
     "app-index-foundation-pre-vue.js",
     "app-index-foundation-after-vue.js",
+    "app-index-foundation-after-swal.js",
     "app-index-bootstrap.js",
     "critical-login-runtime.js",
 }
-RELEASE = "commission-v1.2-gas-hosted-production-2026-07-10-r30"
-ASSET = "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r30"
-VERSION = "1.2.0-production-current"
+def _package_metadata() -> dict:
+    data = json.loads(PACKAGE_JSON.read_text(encoding="utf-8"))
+    release = str(data.get("release") or data.get("releaseStamp") or "").strip()
+    asset = str(data.get("assetStamp") or "").strip()
+    version = str(data.get("version") or "").strip()
+    if not release or not asset or not version:
+        raise RuntimeError("PACKAGE_RELEASE_METADATA_MISSING")
+    return {"release": release, "asset": asset, "version": version}
+
+
+_PACKAGE = _package_metadata()
+RELEASE = _PACKAGE["release"]
+ASSET = _PACKAGE["asset"]
+VERSION = _PACKAGE["version"]
 MIRROR_HEADER = "<!-- GENERATED MIRROR: gas-backend/{name} -->\n"
+
+
+RELEASE_SYNC_FILES = [
+    ROOT / "TECH_DEBT_MANIFEST.json",
+    ROOT / "api" / "_gasProxyCommon.js",
+    ROOT / "gas-backend" / "Code_00_PlatformCore.gs",
+    ROOT / "gas-backend" / "Scripts_Critical_Login_Runtime.html",
+    ROOT / "gas-backend" / "Scripts_Page_Dashboard.html",
+    ROOT / "github-pages" / "app-config.js",
+    ROOT / "github-pages" / "diagnostic.html",
+    ROOT / "github-pages" / "github-gas-transport.js",
+    ROOT / "github-pages" / "index.html",
+    ROOT / "tools" / "phaseN_legacy_transport_gate.py",
+    ROOT / "vercel.json",
+]
+RELEASE_PATTERN = re.compile(r"commission-v1\.2-gas-hosted-production-\d{4}-\d{2}-\d{2}-r\d+")
+ASSET_PATTERN = re.compile(r"asset-manifest-commission-v1\.2-gas-hosted-production-\d{4}-\d{2}-\d{2}-r\d+")
+
+
+def _router_methods() -> list[str]:
+    text = ROUTER_SOURCE.read_text(encoding="utf-8")
+    start = text.find("function _routerCanonicalHandlerMap_")
+    end = text.find("function _routerResolveCanonicalHandler_", start)
+    if start < 0 or end <= start:
+        raise RuntimeError("ROUTER_CANONICAL_HANDLER_MAP_NOT_FOUND")
+    block = text[start:end]
+    methods = re.findall(r"^\s*(api[A-Za-z0-9_]+|getDeferredInclude)\s*:\s*typeof\s+", block, re.MULTILINE)
+    methods = list(dict.fromkeys(methods))
+    if len(methods) < 50:
+        raise RuntimeError(f"ROUTER_METHOD_COUNT_SUSPICIOUS:{len(methods)}")
+    return methods
+
+
+def _proxy_allowlist_text(methods: list[str]) -> str:
+    lines = ["// GENERATED from gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_.",
+             "const PROXY_ALLOWED_METHODS = Object.freeze(["]
+    lines.extend(f'  {json.dumps(method)},' for method in methods)
+    lines.append("]);" )
+    return "\n".join(lines)
+
+
+def _sync_release_metadata() -> list[str]:
+    changed = []
+    for path in RELEASE_SYNC_FILES:
+        if not path.exists():
+            raise RuntimeError(f"RELEASE_SYNC_FILE_MISSING:{path.relative_to(ROOT)}")
+        text = path.read_text(encoding="utf-8")
+        updated = RELEASE_PATTERN.sub(RELEASE, text)
+        updated = ASSET_PATTERN.sub(ASSET, updated)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+            changed.append(str(path.relative_to(ROOT)))
+    return changed
+
+
+def _sync_proxy_contract(methods: list[str]) -> bool:
+    text = PROXY_COMMON.read_text(encoding="utf-8")
+    pattern = re.compile(r"(?:\/\/ GENERATED from gas-backend/Code_20_Router\.gs::_routerCanonicalHandlerMap_\.\n)?const PROXY_ALLOWED_METHODS = Object\.freeze\(\[[\s\S]*?\]\);", re.MULTILINE)
+    updated, count = pattern.subn(_proxy_allowlist_text(methods), text, count=1)
+    if count != 1:
+        raise RuntimeError("PROXY_ALLOWLIST_BLOCK_NOT_FOUND")
+    if updated != text:
+        PROXY_COMMON.write_text(updated, encoding="utf-8")
+        return True
+    return False
+
+
+def _sync_manifest(methods: list[str]) -> bool:
+    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    data["release"] = RELEASE
+    data["releaseStamp"] = RELEASE
+    data["assetStamp"] = ASSET
+    data["apiContractOwner"] = "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_"
+    api = data.setdefault("apiContract", {})
+    api["routeCount"] = len(methods)
+    api["owner"] = "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_"
+    api["proxyOwner"] = "generated by tools/generate_vercel_env.py from canonical router handler map"
+    freeze = data.setdefault("contractFreeze", {})
+    freeze["routeCount"] = len(methods)
+    freeze["apiMethods"] = methods
+    data["p3ReleaseSecurity"] = {
+        "stamp": "production-release-security-discipline-r35",
+        "releaseOwner": "package.json::release",
+        "apiContractOwner": "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_",
+        "proxyAllowlistGenerated": True,
+        "manifestApiMethodsGenerated": True,
+        "diagnosticCredentialInputsRemoved": True,
+        "diagnosticNoIndex": True,
+        "diagnosticFrameDenied": True,
+        "vercelFrameSource": "none",
+        "productionBrowserGate": "npm run production:e2e",
+        "noNewApiRoutes": True,
+        "spreadsheetSchemaChanged": False,
+        "businessRulesChanged": False,
+        "uiStructureChanged": False,
+    }
+    build_contract = data.setdefault("buildContract", {})
+    build_contract["packageBuildCommand"] = json.loads(PACKAGE_JSON.read_text(encoding="utf-8"))["scripts"]["build"]
+    build_contract["sourceContractOwner"] = "tools/phaseN_legacy_transport_gate.py::check_build_contracts"
+    build_contract["sourceContractCommand"] = "npm run check:contracts"
+    build_contract["duplicateInlineGateOwnersRemoved"] = True
+
+    data["generatedMirror"] = "github-pages/{app-index-foundation-pre-vue.js,app-index-foundation-after-vue.js,app-index-foundation-after-swal.js,app-index-bootstrap.js,critical-login-runtime.js,vercel-env.generated.js,partials/Scripts_*.html}"
+    single = data.setdefault("singleSourceGeneration", {})
+    single.update({
+        "stamp": "production-current-index-runtime-single-source-r36",
+        "canonicalOwners": ["gas-backend/Index.html", "gas-backend/Scripts_*.html", "github-pages/app-config.js"],
+        "generator": "tools/generate_vercel_env.py",
+        "generatedRuntimeCount": 9,
+        "generatedFrontendCount": 5,
+        "generatedEnv": "github-pages/vercel-env.generated.js",
+        "sourcePackageExcludesGeneratedArtifacts": True,
+        "sourceFileCount": 38,
+        "buildOutputFileCount": 53,
+        "duplicateRuntimeBytesRemovedFromSourcePackage": 2022437,
+        "postSwalFoundationGenerated": True,
+        "uiModernizationRuntimeGenerated": True,
+        "externalVueRuntimeRemoved": True,
+        "pwaManifestMimeCorrected": True,
+        "newApiRoutes": 0,
+        "newSourceFiles": 0,
+        "uiStructureChanged": False,
+        "businessLogicChanged": False,
+        "spreadsheetSchemaChanged": False,
+    })
+    runtime = data.setdefault("runtimePolicies", {})
+    runtime["frontendTransportOwner"] = "host-aware: GAS Scripts_Critical_Login_Runtime AppTransport.run; Vercel github-pages/github-gas-transport.js AppTransport.run"
+    runtime["clientInFlightOwner"] = "host-aware AppTransport.inFlightOnly"
+    data["productionConsolidation"] = {
+        "stamp": "production-consolidated-single-owner-r36",
+        "releaseOwner": "package.json::release",
+        "apiContractOwner": "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_",
+        "runtimeSourceOwner": "gas-backend/Index.html + gas-backend/Scripts_*.html",
+        "postSwalGeneratedFromIndex": True,
+        "uiModernizationGeneratedFromIndex": True,
+        "buildContractOwner": "tools/phaseN_legacy_transport_gate.py::check_build_contracts",
+        "appConfigDeadPropertiesRemoved": 48,
+        "packageInlineGateOwnersRemoved": True,
+        "currentProductionGateOwner": "tools/phaseN_legacy_transport_gate.py::current_checks",
+        "historicalGateBytesBeforeConsolidation": 263260,
+        "currentProductionGateBytes": (ROOT / "tools" / "phaseN_legacy_transport_gate.py").stat().st_size,
+        "exactDuplicateFunctionGroupsOver300Bytes": 0,
+        "sourceFileCount": 38,
+        "buildOutputFileCount": 53,
+        "noNewApiRoutes": True,
+        "noNewSourceFiles": True,
+        "spreadsheetSchemaChanged": False,
+        "businessRulesChanged": False,
+        "uiStructureChanged": False,
+    }
+    rendered = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    current = MANIFEST.read_text(encoding="utf-8")
+    if rendered != current:
+        MANIFEST.write_text(rendered, encoding="utf-8")
+        return True
+    return False
+
+
+def _contract_drift_errors() -> list[str]:
+    errors = []
+    methods = _router_methods()
+    proxy = PROXY_COMMON.read_text(encoding="utf-8")
+    match = re.search(r"const PROXY_ALLOWED_METHODS = Object\.freeze\(\[([\s\S]*?)\]\);", proxy)
+    proxy_methods = re.findall(r'["\'](api[A-Za-z0-9_]+|getDeferredInclude)["\']', match.group(1) if match else "")
+    if proxy_methods != methods:
+        errors.append("PROXY_ALLOWLIST_NOT_GENERATED_FROM_ROUTER")
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    if manifest.get("contractFreeze", {}).get("apiMethods") != methods:
+        errors.append("MANIFEST_API_METHODS_NOT_GENERATED_FROM_ROUTER")
+    if manifest.get("release") != RELEASE or manifest.get("assetStamp") != ASSET:
+        errors.append("MANIFEST_RELEASE_NOT_PACKAGE_OWNED")
+    for path in RELEASE_SYNC_FILES:
+        text = path.read_text(encoding="utf-8")
+        releases = set(RELEASE_PATTERN.findall(text))
+        assets = set(ASSET_PATTERN.findall(text))
+        if releases and releases != {RELEASE}:
+            errors.append(f"RELEASE_DRIFT:{path.relative_to(ROOT)}:{sorted(releases)}")
+        if assets and assets != {ASSET}:
+            errors.append(f"ASSET_DRIFT:{path.relative_to(ROOT)}:{sorted(assets)}")
+    return errors
 
 
 def _runtime_sources() -> list[Path]:
@@ -95,6 +292,98 @@ def _vercelize_index_javascript(text: str) -> str:
     return text
 
 
+
+
+def _vercel_static_logo_expression() -> str:
+    return """(function(root) {
+  var cfg = root.APP_CONFIG || {};
+  var fallback = String(cfg.fallbackLogoUrl || cfg.logoUrl || "");
+  var active = String(cfg.logoUrl || fallback);
+  return {
+    svg: fallback,
+    png96: fallback,
+    png192: fallback,
+    png512: fallback,
+    inline: "",
+    active: active,
+    source: "github-static-app-config"
+  };
+})(window)"""
+
+
+def _vercel_static_bootstrap_expression() -> str:
+    pages = [
+        "/login", "/dashboard", "/meeting", "/search", "/track",
+        "/report", "/people", "/petitioner", "/budget", "/admin",
+    ]
+    pages_json = json.dumps(pages, ensure_ascii=False)
+    return f"""(function(root) {{
+  var cfg = root.APP_CONFIG || {{}};
+  var release = String(cfg.releaseStamp || "{RELEASE}");
+  var assetManifest = cfg.assetManifest || {{}};
+  return {{
+    ok: true,
+    page: "/dashboard",
+    requestedPage: "/dashboard",
+    session: null,
+    user: null,
+    source: "github-pages-static-bootstrap",
+    generatedAt: "build-time",
+    authenticated: false,
+    username: "",
+    displayName: "",
+    role: "",
+    csrfToken: "",
+    authBootstrapMode: "vercel-api-proxy",
+    sessionRestoreSupported: true,
+    sessionResumeMode: "sessionStorage-opaque-resume-handle",
+    loginRouteContract: "router-login-renders-form-current-critical-runtime",
+    criticalRuntimeContract: "critical-login-runtime-production-current",
+    runtimeAuthContract: "runtime-auth-production-current",
+    logoUrl: String(cfg.logoUrl || cfg.fallbackLogoUrl || ""),
+    defaultRoute: "/dashboard",
+    appStamp: "github-pages-static-" + release,
+    assetStamp: String(assetManifest.stamp || cfg.assetStamp || "{ASSET}"),
+    baseUrl: "",
+    uiMode: "vue3",
+    enabledVuePages: {pages_json},
+    terminology: cfg.terminology || {{}},
+    printStandard: cfg.printStandard || {{}}
+  }};
+}})(window)"""
+
+
+def _vercel_static_asset_manifest_expression() -> str:
+    return """(function(root) {
+  var cfg = root.APP_CONFIG || {};
+  return cfg.assetManifest || {
+    stamp: cfg.assetStamp || "",
+    bundles: {},
+    upfrontScripts: [],
+    chunks: {},
+    templates: {},
+    externalGroups: [],
+    externalAssets: {}
+  };
+})(window)"""
+
+
+def _vercelize_after_swal_javascript(text: str) -> str:
+    replacements = [
+        (r"<\?!=JSON\.stringify\(__logo\|\|\{\}\)\?>", _vercel_static_logo_expression()),
+        (r"<\?!=JSON\.stringify\(\(typeof serverLogoUrl[\s\S]*?\)\?serverLogoUrl:''\)\?>", 'String((window.APP_CONFIG || {}).logoUrl || "")'),
+        (r"<\?!=bootstrapJson\?>", _vercel_static_bootstrap_expression()),
+        (r"<\?!=\(typeof assetManifestJson[\s\S]*?\?>", _vercel_static_asset_manifest_expression()),
+    ]
+    for pattern, value in replacements:
+        text, count = re.subn(pattern, lambda _match, replacement=value: replacement, text, count=1)
+        if count != 1:
+            raise RuntimeError(f"AFTER_SWAL_TEMPLATE_REPLACEMENT_FAILED:{pattern}")
+    if "<?" in text:
+        raise RuntimeError("UNRESOLVED_GAS_TEMPLATE_IN_AFTER_SWAL")
+    return text
+
+
 def _generated_frontend_assets() -> dict[Path, str]:
     index_blocks = _script_blocks(GAS_INDEX)
     critical_blocks = _script_blocks(CRITICAL_RUNTIME)
@@ -107,6 +396,22 @@ def _generated_frontend_assets() -> dict[Path, str]:
     thai_date_blocks = [block for block in index_blocks if "Index.thai-date-early-adapter" in block["body"]]
     if len(thai_date_blocks) != 1:
         raise RuntimeError(f"THAI_DATE_ADAPTER_COUNT:{len(thai_date_blocks)}")
+
+    after_swal_tokens = [
+        "function safeAlertFire",
+        "window.APP_LOGO = window.APP_LOGO ||",
+        "__APP_ASSET_POLICY_CURRENT__",
+        "window.DEFAULT_LOGO = window.DEFAULT_LOGO ||",
+        "patchParliamentLogo",
+        "window.__APP_BOOTSTRAP__ =",
+        "__APP_PHASE5_UIUX_MODERNIZATION__",
+    ]
+    after_swal_blocks = []
+    for token in after_swal_tokens:
+        matches = [block for block in index_blocks if token in block["body"]]
+        if len(matches) != 1:
+            raise RuntimeError(f"AFTER_SWAL_BLOCK_COUNT:{token}:{len(matches)}")
+        after_swal_blocks.append(matches[0])
 
     async_index = next((i for i, block in enumerate(index_blocks) if block["id"] == "app-async-runtime-loader"), -1)
     if async_index < 0:
@@ -122,6 +427,7 @@ def _generated_frontend_assets() -> dict[Path, str]:
     return {
         ROOT / "github-pages" / "app-index-foundation-pre-vue.js": _join_javascript(pre_blocks, "gas-backend/Index.html foundation-pre"),
         ROOT / "github-pages" / "app-index-foundation-after-vue.js": _join_javascript(thai_date_blocks, "gas-backend/Index.html thai-date-adapter"),
+        ROOT / "github-pages" / "app-index-foundation-after-swal.js": _vercelize_after_swal_javascript(_join_javascript(after_swal_blocks, "gas-backend/Index.html post-swal-foundation")),
         ROOT / "github-pages" / "app-index-bootstrap.js": _vercelize_index_javascript(_join_javascript(bootstrap_blocks, "gas-backend/Index.html bootstrap")),
         ROOT / "github-pages" / "critical-login-runtime.js": _join_javascript(critical_blocks + [async_block], "gas-backend/Scripts_Critical_Login_Runtime.html + Index async loader"),
     }
@@ -197,6 +503,10 @@ def _sha256(text: str) -> str:
 
 
 def generate() -> dict:
+    releaseSynced = _sync_release_metadata()
+    methods = _router_methods()
+    proxySynced = _sync_proxy_contract(methods)
+    manifestSynced = _sync_manifest(methods)
     outputs = _expected_outputs()
     STATIC_RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -226,6 +536,10 @@ def generate() -> dict:
         "singleSourceOwner": "gas-backend/Index.html + gas-backend/Scripts_*.html",
         "generatedRuntimeCount": len(_runtime_sources()),
         "generatedFrontendCount": len(GENERATED_FRONTEND_FILES),
+        "releaseMetadataSynced": releaseSynced,
+        "proxyContractSynced": proxySynced,
+        "manifestContractSynced": manifestSynced,
+        "apiMethodCount": len(methods),
         "written": written,
         "unchanged": unchanged,
         "removedStale": removed,
@@ -238,7 +552,7 @@ def generate() -> dict:
 
 
 def check() -> dict:
-    errors = []
+    errors = _contract_drift_errors()
     hashes = {}
     outputs = _expected_outputs()
     for path, expected in outputs.items():

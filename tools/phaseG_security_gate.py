@@ -4,6 +4,7 @@ Fails if fast-login JSONP can still issue sessions or authenticated bridge reads
 """
 from pathlib import Path
 import re, sys, json, os
+sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[1]
 errors = []
@@ -111,6 +112,33 @@ ok(
     "old dashboard read-model gate stamp removed",
     "phaseF-techdebt-single-source-gate-2026-07-02-r1" not in (app + tr + be),
     "old release stamp must not remain in changed files",
+)
+
+vercel = json.loads(read("vercel.json") or "{}")
+diagnostic = read("github-pages/diagnostic.html")
+diag_headers = next((x.get("headers", []) for x in vercel.get("headers", []) if x.get("source") == "/diagnostic.html"), [])
+diag_map = {str(x.get("key", "")).lower(): str(x.get("value", "")) for x in diag_headers}
+global_headers = next((x.get("headers", []) for x in vercel.get("headers", []) if x.get("source") == "/(.*)"), [])
+global_map = {str(x.get("key", "")).lower(): str(x.get("value", "")) for x in global_headers}
+ok(
+    "production diagnostic is credential-free",
+    'type="password"' not in diagnostic and "apiLogin" not in diagnostic and "diagUser" not in diagnostic,
+    "public diagnostics must never collect or transmit user credentials",
+)
+ok(
+    "production diagnostic is not indexable or frameable",
+    "noindex" in diag_map.get("x-robots-tag", "").lower() and diag_map.get("x-frame-options", "").upper() == "DENY",
+    "diagnostic endpoint must be noindex and frame denied",
+)
+ok(
+    "legacy frame source disabled",
+    "frame-src 'none'" in global_map.get("content-security-policy", ""),
+    "Vercel proxy-only frontend must not permit legacy GAS iframe transport",
+)
+ok(
+    "cross-origin resource policy same-origin",
+    global_map.get("cross-origin-resource-policy", "") == "same-origin",
+    "static runtime assets should not be embedded cross-origin",
 )
 
 report = {"ok": not errors, "checks": checks, "errors": errors}
