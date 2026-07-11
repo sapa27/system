@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport"content="width=device-width,initial-scale=1">
-<title>P2 Runtime Stability Diagnostic</title>
+<title>P3 Production Runtime Diagnostic</title>
+<meta name="robots"content="noindex,nofollow,noarchive">
 <style>
 body{
   font-family:Sarabun,Arial,sans-serif;
@@ -59,7 +60,7 @@ input{
 </head>
 <body>
 <div class="card">
-<h1>ตรวจสอบ P2 Runtime Stability: Vercel Proxy → GAS</h1>
+<h1>ตรวจสอบ P3 Production Runtime: Vercel Proxy → GAS</h1>
 <p>หน้านี้ทดสอบว่า frontend เรียก GAS ผ่าน same-origin Vercel API proxy เท่านั้น โดยไม่ใช้browser JSONP,hidden GAS bridge หรือ login POST iframe</p>
 <p><strong>Proxy API:</strong><code id="apiUrl"></code></p>
 <p><strong>Login API:</strong><code id="loginUrl"></code></p>
@@ -67,17 +68,17 @@ input{
 <p><strong>Transport:</strong><code id="transportMode"></code></p>
 <p><strong>Release:</strong><code id="releaseStamp"></code></p>
 <p><strong>Hosting:</strong><code id="hostingTarget"></code></p>
-<p class="muted">ทดสอบ login/dashboard ต้องกรอกผู้ใช้จริงของระบบ ส่วนการตรวจ proxy/config/contract ไม่ต้องกรอก</p>
-<p><input id="diagUser"autocomplete="username"placeholder="username/email สำหรับทดสอบ login"><input id="diagPass"autocomplete="current-password"type="password"placeholder="password"><button id="runBtn">เริ่มตรวจสอบ</button></p>
+<p class="muted">หน้านี้เป็น read-only health check และไม่รับชื่อผู้ใช้ รหัสผ่าน token หรือข้อมูลลับ</p>
+<p><button id="runBtn"type="button">เริ่มตรวจสอบ</button></p>
 <pre id="out">รอกดปุ่มตรวจสอบ...</pre>
 </div>
-<script src="./vercel-env.generated.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r30">
+<script src="./vercel-env.generated.js?v=commission-v1.2-gas-hosted-production-2026-07-10-r36">
 
 </script>
-<script src="./app-config.js?transport=production-vercel-proxy-only&v=commission-v1.2-gas-hosted-production-2026-07-10-r30">
+<script src="./app-config.js?transport=production-vercel-proxy-only&v=commission-v1.2-gas-hosted-production-2026-07-10-r36">
 
 </script>
-<script src="./github-gas-transport.js?transport=production-vercel-proxy-only&v=commission-v1.2-gas-hosted-production-2026-07-10-r30">
+<script src="./github-gas-transport.js?transport=production-vercel-proxy-only&v=commission-v1.2-gas-hosted-production-2026-07-10-r36">
 
 </script>
 <script>
@@ -144,7 +145,7 @@ async function proxyCall(method, payload) {
     });
 }
 async function run() {
-  $('out').textContent = 'เริ่มตรวจสอบ P2 Runtime Stability...';
+  $('out').textContent = 'เริ่มตรวจสอบ P3 Production Runtime...';
   try {
     write('1) ตรวจ Runtime/Transport owner และ release coherence');
     const ownerHealth = window.AppTransport && window.AppTransport.runtimeOwnerStatus ? window.AppTransport.runtimeOwnerStatus(): { ok: false, errors: ['RUNTIME_OWNER_STATUS_MISSING'] };
@@ -189,45 +190,8 @@ async function run() {
       });
     write(JSON.stringify(phase2, null, 2).slice(0, 3000));
     if (!phase2 || phase2.ok === false)throw new Error('APPTRANSPORT_PROXY_FAILED');
-    const username = $('diagUser').value.trim();
-    const password = $('diagPass').value;
-    if (username && password) {
-      write('6) ทดสอบ /api/login ด้วยผู้ใช้จริง');
-      const login = await window.AppTransport.run('apiLogin', {
-          username,
-          password
-        });
-      write(JSON.stringify(redact(login), null, 2).slice(0, 3000));
-      if (!login || !login.ok)throw new Error('LOGIN_PROXY_FAILED: ' +(login &&(login.errorCode || login.error) || ''));
-      const data = login.data && typeof login.data === 'object' ? login.data: login;
-      const token = login.token || data.token || data.nextToken || '';
-      const csrfToken = login.csrfToken || data.csrfToken || '';
-      const user = login.user || data.user || {
-      };
-      const auth = {
-        token,
-        _token: token,
-        authToken: token,
-        csrfToken,
-        csrf: csrfToken,
-        _csrf: csrfToken,
-        githubUsername: user.username || user.email || username
-      };
-      write('7) ทดสอบ dashboard ผ่าน /api/gas หลัง login');
-      const dash = await window.AppTransport.run('apiGetDashboardBundle', Object.assign({
-            diagnostic: true,
-            productionCurrent: true,
-            includeBudget: false,
-            includeCases: false,
-            includeMeetingRows: false,
-            cacheTtlSeconds: 60
-          }, auth));
-      write(JSON.stringify(redact(dash), null, 2).slice(0, 3000));
-      if (!dash || dash.ok === false)throw new Error('DASHBOARD_PROXY_FAILED');
-    } else {
-      write('6) ข้าม login/dashboard เพราะไม่ได้กรอก username/password');
-    }
-    write('\nผลลัพธ์: OK - P2 runtime owner, release และ proxy พร้อมใช้งาน');
+    write('6) ข้าม authenticated tests: production diagnostic ไม่รับข้อมูลรับรองผู้ใช้');
+    write('\nผลลัพธ์: OK - P3 release, runtime owner และ proxy พร้อมใช้งาน');
   } catch (e) {
     write('\nผลลัพธ์: ERROR');
     write(String(e && e.message || e));

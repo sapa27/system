@@ -3,8 +3,8 @@
     var existing = root.APP_CONFIG || {
     }
     ,
-    APP_RELEASE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-10-r30",
-    APP_ASSET_STAMP = "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r30",
+    APP_RELEASE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-10-r36",
+    APP_ASSET_STAMP = "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-10-r36",
     APP_VERSION = "1.2.0-production-current",
     FALLBACK_LOGO = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22/%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22/%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C/text%3E%3C/svg%3E"; 
     function text(v) {
@@ -23,7 +23,6 @@
     VERCEL_GAS_WEB_APP_URL = cleanUrl(VERCEL_MIGRATION_CONFIG.gasWebAppUrl || VERCEL_MIGRATION_CONFIG.GAS_WEB_APP_URL || ""),
     VERCEL_LOGO_URL = cleanUrl(VERCEL_MIGRATION_CONFIG.logoUrl || VERCEL_MIGRATION_CONFIG.APP_LOGO_URL || ""),
     defaults = {
-      appVersion: "1.2.0-production-current",
       appTitle: "ระบบบริหารจัดการเรื่องพิจารณา",
       gasWebAppUrl: VERCEL_GAS_WEB_APP_URL || "",
       logoUrl: VERCEL_LOGO_URL && isSafeLogoUrl(VERCEL_LOGO_URL) ? VERCEL_LOGO_URL: FALLBACK_LOGO,
@@ -44,39 +43,25 @@
       vercelApiProxyTimeoutMs: 45e3,
       vercelLoginProxyTimeoutMs: 3e4,
       vercelPublicConfigProxyTimeoutMs: 8e3,
-      vercelProxyAttachCredentials: !0,
       proxyRejectGoogleHostedFrontend: !0,
       gasBackendUiDisabled: !0,
       gasBackendFrontendEntryProperty: "VERCEL_FRONTEND_URL",
-      vercelMigrationConfig: VERCEL_MIGRATION_CONFIG,
       dataLoadingPerformance: !0,
-      singleSourceRefactor: !0,
       canonicalPartialRoot: "gas-backend",
-      apiRouteAllowlistOwner: "Code_20_Router._apiRouteRegistry_",
+      apiRouteAllowlistOwner: "Code_20_Router._routerCanonicalHandlerMap_",
       apiDtoContractOwner: "AppBackendCore.API_DTO_CONTRACT_BY_METHOD",
       staticApiContractAllowlistDisabled: !0,
-      contractFreezeEnabled: !0,
-      contractFreezeStamp: "production-contract-freeze-current-2026-07-06",
-      frozenApiMethodCount: 108,
-      frozenWriteMethodCount: 27,
       canonicalEditableRoot: "gas-backend",
       generatedMirrorRoot: "github-pages/partials",
-      syncTool: "tools/phaseN_legacy_transport_gate.py",
+      syncTool: "tools/generate_vercel_env.py",
       contractGate: "tools/phaseN_legacy_transport_gate.py",
       runtimeSlimmingEnabled: !0,
       writeSchemaUnification: !0,
       writeSchemaGate: "tools/phaseN_legacy_transport_gate.py",
-      runtimeAssets: ["app-index-foundation-pre-vue.js",
-        "app-index-foundation-after-vue.js",
-        "app-index-foundation-after-swal.js",
-        "critical-login-runtime.js",
-        "app-index-bootstrap.js"],
       contractGateEnabled: !0,
       generatedMirrorPolicy: "edit-gas-backend-run-sync-do-not-edit-generated-mirrors",
-      dashboardFirstPaintEnabled: !0,
       dashboardLazyHydrationEnabled: !0,
       dashboardIdleHydrationEnabled: !0,
-      dashboardCoreLoginDeferEnabled: !0,
       dashboardInitialIncludeBudget: !1,
       dashboardInitialIncludeCases: !1,
       dashboardInitialIncludeMeetingRows: !1,
@@ -87,88 +72,37 @@
       dashboardLazyHydrationDelayMs: 650,
       dashboardBudgetHydrationEnabled: !0,
       dashboardBudgetHydrationDelayMs: 900,
-      dashboardBudgetHydrationCacheTtlSec: 300,
-      dashboardSessionCacheTtlSec: 300,
-      dashboardFirstPaintTargetMs: 1500,
-      dashboardLazyHydrationTargetMs: 6500,
-      apiPerformanceTimingEnabled: !0,
       inlinePartialsEnabled: !1,
-      bridgeReadyTimeoutMs: 1e4,
       bridgeLoadGraceMs: 0,
       requireBridgeReadyMessage: !0,
       allowAssumedBridgeReady: !1,
       securityHardening: !0,
       fastLoginJsonpDisabled: !0,
-      forceBridgeClientOnly: !1,
       apiTimeoutMs: 45e3,
-      bridgeNoMessageTimeoutMs: 45e3,
       publicConfigTimeoutMs: 4e3,
       fastLoginJsonp: !1,
       loginFormPost: !1,
-      loginPostTimeoutMs: 2e4,
       loginViaVercelProxy: !0,
-      loginBridgeFallback: !1,
-      fastLoginTimeoutMs: 0,
       readJsonpApi: !1,
-      readJsonpFallbackToBridge: !1,
-      writeFormPost: !1,
       clientApiCacheEnabled: !1,
       clientInFlightDedupe: !0,
-      clientSessionStorageReadCacheEnabled: !1,
       clientApiCacheOwner: "backend-router-cache",
       clientInFlightOwner: "github-pages/github-gas-transport.js::AppTransport.inFlightOnly",
-      clientReadResponseCacheEnabled: !1,
-      jsonpApiTimeoutMs: 25e3,
-      jsonpReadCircuitBreaker: !1,
-      jsonpReadCircuitBreakMs: 6e4,
-      productionStabilization: !0,
       releaseStamp: APP_RELEASE_STAMP,
-      requireGasWebAppUrl: !1,
-      forceAuthenticatedReadBridge: !1,
-      forceAuthenticatedReadVercelProxy: !0,
-      supersededTransportPolicyC: "superseded-by-production-vercel-proxy-only",
-      supersededTransportPolicyM: "superseded-by-production-vercel-proxy-only",
-      securityPolicy: "login-post-only-no-fast-login-jsonp-require-explicit-bridge-ready",
-      contractFinalCleanupPolicy: "route-registry-only-api-allowlist-dto-contract-separated",
-      writeSchemaPolicy: "single-write-schema-by-method-backend-client-gate",
       publicJsonpReadMethods: [],
-      clientApiCacheDefaultTtlSec: 0,
       cachePolicyOwner: "Code_20_Router._routerHotPathContractSpec_",
-      cachePolicyPhase3SingleOwner: !0,
-      cachePolicySourceOfTruth: "router-hot-path-contract",
-      clientApiCacheTtlSecMap: {
-        apiGetDashboardBundle: 240,
-        apiSearchCasesLite: 180,
-        apiGetTracking: 180,
-        apiBudgetGetSummary: 300,
-        apiBudgetGetTypeSummaryByFY: 600,
-        apiGetMasterDataBundle: 900,
-        apiGetPeoplePageBundle: 300,
-        apiGetRouteContract: 300,
-        apiGetClientDataContract: 300,
-        apiSessionCheck: 20,
-        apiSessionResume: 15
-      }
-      ,
-      strictBridgeOriginCheck: !0,
-      allowNullLoginPostOrigin: !0,
-      allowedBridgeOrigins: ["https://script.google.com"],
-      bridgeTargetOrigin: "",
       legacyTransportRemoved: !0,
-      transportPolicy: "browser-uses-vercel-api-proxy-only-no-jsonp-no-hidden-bridge-no-login-post-iframe",
       legacyJsonpTransportRemoved: !0,
       legacyGasBridgeTransportRemoved: !0,
       legacyLoginPostIframeRemoved: !0,
       frontendTransportSinglePathPhase2: !0,
       staticGasDirectDisabled: !0,
-      gasDirectFallbackDisabled: !0,
       releaseManifest: {
         stamp: APP_RELEASE_STAMP,
         githubCommitHash: "",
         gasDeploymentId: "",
         cacheBustVersion: APP_RELEASE_STAMP
-      }
-      ,
+      },
       assetManifest: {
         stamp: APP_ASSET_STAMP,
         bundles: {
@@ -257,9 +191,6 @@
     root.APP_CONFIG = Object.assign({}, defaults, existing || {});
 
     root.APP_CONFIG.clientApiCacheEnabled = false;
-    root.APP_CONFIG.clientReadResponseCacheEnabled = false;
-    root.APP_CONFIG.clientSessionStorageReadCacheEnabled = false;
-    root.APP_CONFIG.clientApiCacheDefaultTtlSec = 0;
     root.APP_CONFIG.clientApiCacheOwner = "backend-router-cache";
     root.APP_CONFIG.clientInFlightOwner = "github-pages/github-gas-transport.js::AppTransport.inFlightOnly";
     root.APP_CONFIG.fastLoginJsonp = false;
@@ -279,7 +210,7 @@
     root.APP_CONFIG.vercelPublicConfigProxyUrl = root.APP_CONFIG.vercelPublicConfigProxyUrl || "/api/public-config";
     root.APP_CONFIG.hostingTarget = "vercel-api-proxy";
     root.APP_CONFIG.releaseGate = "tools/phaseN_legacy_transport_gate.py";
-    root.APP_CONFIG.apiRouteAllowlistOwner = "Code_20_Router._apiRouteRegistry_";
+    root.APP_CONFIG.apiRouteAllowlistOwner = "Code_20_Router._routerCanonicalHandlerMap_";
     root.APP_CONFIG.apiDtoContractOwner = "AppBackendCore.API_DTO_CONTRACT_BY_METHOD";
     root.APP_CONFIG.staticApiContractAllowlistDisabled = true;
     root.APP_CONFIG.legacyTransportRemoved = true;
@@ -288,12 +219,10 @@
     root.APP_CONFIG.legacyLoginPostIframeRemoved = true;
     root.APP_CONFIG.frontendTransportSinglePathPhase2 = true;
     root.APP_CONFIG.staticGasDirectDisabled = true;
-    root.APP_CONFIG.gasDirectFallbackDisabled = true;
     root.APP_CONFIG.readJsonpApi = false;
     root.APP_CONFIG.publicJsonpReadMethods = [];
     root.APP_CONFIG.releaseStamp = APP_RELEASE_STAMP;
     root.APP_CONFIG.assetStamp = APP_ASSET_STAMP;
-    root.APP_CONFIG.appVersion = APP_VERSION;
     root.APP_CONFIG.releaseManifest = Object.assign({}, root.APP_CONFIG.releaseManifest || {}, {
       stamp: APP_RELEASE_STAMP,
       cacheBustVersion: APP_RELEASE_STAMP
