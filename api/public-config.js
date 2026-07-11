@@ -65,7 +65,14 @@ module.exports = async function(req, res) {
     result = result && typeof result === "object" ? result: {
     };
     result.transport = result.transport || "vercel-public-config-proxy";
-    result.releaseStamp = result.releaseStamp || RELEASE_STAMP;
+    const upstreamReleaseStamp = result.releaseStamp || result.stamp || "";
+    const upstreamAssetStamp = result.assetStamp || "";
+    if (upstreamReleaseStamp && !result.backendReleaseStamp) result.backendReleaseStamp = upstreamReleaseStamp;
+    if (upstreamAssetStamp && !result.backendAssetStamp) result.backendAssetStamp = upstreamAssetStamp;
+    result.upstreamReleaseStamp = result.upstreamReleaseStamp || upstreamReleaseStamp || "";
+    result.upstreamAssetStamp = result.upstreamAssetStamp || upstreamAssetStamp || "";
+    result.releaseStamp = RELEASE_STAMP;
+    result.assetStamp = result.assetStamp || result.upstreamAssetStamp || "";
     result.meta = Object.assign({
       }, result.meta && typeof result.meta === "object" && !Array.isArray(result.meta) ? result.meta: {
       }, {
