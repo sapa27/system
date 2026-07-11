@@ -861,37 +861,43 @@
       }
       ,
       assetStamp = text(manifestObj && manifestObj.stamp || cfg("assetStamp", PHASE_ASSET_STAMP)),
-      publicStamp = text(lastPublicConfig &&(lastPublicConfig.releaseStamp || lastPublicConfig.stamp) || ""),
-      backendAssetStamp = text(lastPublicConfig && lastPublicConfig.assetStamp || ""),
-      mismatch = []; 
-      return configStamp && configStamp !== PHASE_RELEASE_STAMP && mismatch.push({
+      publicStamp = text(lastPublicConfig &&(lastPublicConfig.backendReleaseStamp || lastPublicConfig.upstreamReleaseStamp || lastPublicConfig.releaseStamp || lastPublicConfig.stamp) || ""),
+      backendAssetStamp = text(lastPublicConfig &&(lastPublicConfig.backendAssetStamp || lastPublicConfig.upstreamAssetStamp || lastPublicConfig.assetStamp) || ""),
+      mismatch = [],
+      warnings = []; 
+      configStamp && configStamp !== PHASE_RELEASE_STAMP && mismatch.push({
           field: "client-config-releaseStamp",
           expected: PHASE_RELEASE_STAMP,
           actual: configStamp
         }
-      ),
-      publicStamp && publicStamp !== PHASE_RELEASE_STAMP && mismatch.push({
+      );
+      publicStamp && publicStamp !== PHASE_RELEASE_STAMP && warnings.push({
           field: "backend-public-releaseStamp",
           expected: PHASE_RELEASE_STAMP,
-          actual: publicStamp
+          actual: publicStamp,
+          severity: "warning",
+          reason: "frontend-and-gas-deployments-may-be-rolled-out-independently"
         }
-      ),
-      backendAssetStamp && assetStamp && backendAssetStamp !== assetStamp && mismatch.push({
-          field: "assetStamp",
+      );
+      backendAssetStamp && assetStamp && backendAssetStamp !== assetStamp && warnings.push({
+          field: "backend-assetStamp",
           expected: assetStamp,
-          actual: backendAssetStamp
+          actual: backendAssetStamp,
+          severity: "warning",
+          reason: "backend-public-config-asset-stamp-does-not-control-vercel-static-assets"
         }
-      ),
-      lastReleaseMismatch = mismatch.length ? mismatch: null,
-      {
+      );
+      lastReleaseMismatch = mismatch.length ? mismatch: null;
+      return {
         ok: !mismatch.length,
         expectedStamp: PHASE_RELEASE_STAMP,
         clientStamp: PHASE_RELEASE_STAMP,
-        configStamp,
-        assetStamp,
+        configStamp: configStamp,
+        assetStamp: assetStamp,
         backendReleaseStamp: publicStamp,
-        backendAssetStamp,
-        mismatch
+        backendAssetStamp: backendAssetStamp,
+        mismatch: mismatch,
+        warnings: warnings
       }
     }
     root.AppTransport = root.AppTransport || {
@@ -974,7 +980,7 @@
       root.AppTransport && root.AppTransport.__gasHostedDirect === !0 && errors.push("GAS_DIRECT_OWNER_ACTIVE_ON_VERCEL");
       /^production-vercel-proxy-only/.test(mode) || errors.push("VERCEL_PROXY_MODE_MISMATCH");
       isGoogleHostedFrontend() && errors.push("VERCEL_TRANSPORT_LOADED_ON_GOOGLE_HOST");
-      release.ok || errors.push("RELEASE_STAMP_MISMATCH");
+      if (!release.ok) errors.push("CLIENT_RELEASE_STAMP_MISMATCH");
       return {
         ok: !errors.length,
         host: text(root.location && root.location.hostname || ""),
