@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 RELEASE = str(PACKAGE.get("release") or PACKAGE.get("releaseStamp") or "")
 ASSET = str(PACKAGE.get("assetStamp") or "")
-CURRENT_STAMP = "production-consolidated-single-owner-r36"
+CURRENT_STAMP = "production-data-flow-single-owner-r37"
 CANONICAL_API_OWNER = "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_"
 CANONICAL_RUNTIME_OWNER = "gas-backend/Index.html + gas-backend/Scripts_*.html"
 
@@ -34,8 +34,8 @@ PROXY_SHA256 = "3ae9aa68719b1ea7925c7b1013b4e4396e9683e7476fa2cf625af1a7627227c4
 UI_TEMPLATE_SHA256 = "76dcadd48639fd1f7876a90ea9cf51d07cf5a8eb2709bbee34ab6a6b1773d518"
 UI_TEMPLATE_COUNT = 11
 PAGE_API_AGGREGATE_SHA256 = "85a63ccebf265999a76a3e48554c2ed870b0f659f2d28a356d2af6272a80d254"
-EXPECTED_SOURCE_FILES = 38
-EXPECTED_BUILD_FILES = 53
+EXPECTED_SOURCE_FILES = 37
+EXPECTED_BUILD_FILES = 52
 GENERATED_FRONTEND = [
     "github-pages/vercel-env.generated.js",
     "github-pages/app-index-foundation-pre-vue.js",
@@ -359,6 +359,10 @@ def current_checks(strict: bool = False):
     require("projected report cache owner","case_report_projection_r33_" in cases and "getDataRange().getValues()" not in projection and "allowFullMatrix: !0" not in projection,"projected MainData read")
     require("shared upload policy","window.AppUploadPolicy = window.AppUploadPolicy ||" in core and "root.AppUploadPolicy.pdfLimitBytes()" in dashboard and "root.AppUploadPolicy.pdfLimitBytes()" in meeting,"AppUploadPolicy")
     require("meeting/search/budget workflow guards","__APP_COMMITTEE_MEETING_BIND_READY__" in meeting and "meeting.editSeed" in report and 'showBudgetTab: "budget"' in critical,"workflow readiness")
+    require("meeting legacy read compatibility","_committeeMeetingLegacyBundle_" in cases and "MeetingLogs-compat-read" in cases and "readOnlyLegacy" in meeting,"legacy meetings remain visible read-only")
+    require("budget empty cache prohibited","cached.rows.length" in budget_backend and contains_code(budget_backend,"return rows.length ? $u(cacheKey"),"empty summary is never cached")
+    require("search edit waits and verifies","timeoutMs = 8000" in report and "ไม่สามารถเติมข้อมูลที่เลือกได้" in report,"single owner edit hydration")
+    require("datepicker single event owner","thai-datepicker-single-event-current" in core and 'doc[_$c](openEvent, delegated, !0)' in core and 'doc[_$c]("focusin", delegated' not in core,"pointer/keyboard single owner")
 
     collisions=gas_collision_errors(); require("GAS global namespace collision-free",not collisions," | ".join(collisions[:10]))
     drift=active_release_drift(); require("active runtime release coherent",not drift," | ".join(drift))
@@ -454,9 +458,18 @@ def run_p0_browser_smoke():
       var body={{}};try{{body=JSON.parse(init&&init.body||"{{}}");}}catch(_e){{}}
       var method=String(body.method||"");
       if(method==='apiSessionResume'||method==='apiSessionCheck')return jsonResponse({{ok:false,error:"NO_SESSION",errorCode:"NO_SESSION",method:method}});
+      var caseRow={{caseId:"CASE-001",id:"CASE-001",caseNum:"1/2569",recNo:"100/2569",recDate:"11/07/2569",title:"ชื่อเรื่องพิจารณาทดสอบ",caseTitle:"ชื่อเรื่องพิจารณาทดสอบ",considerationTitle:"ชื่อเรื่องพิจารณาทดสอบ",petitioners:"ผู้ร้องทดสอบ",status:"เรื่องเข้าใหม่",cat:"เรื่องร้องเรียน"}};
+      var agendaItem={{itemId:"ITEM-001",meetingId:"CMTG-001",agendaNo:"3",seq:1,title:"เรื่องทดสอบ",caseId:"CASE-001",caseNum:"1/2569",recNo:"100/2569",caseTitle:"ชื่อเรื่องพิจารณาทดสอบ",result:"เห็นชอบ"}};
+      var meetingRow={{meetingId:"CMTG-001",meetingNo:"1/2569",meetingDate:"11/07/2569",title:"การประชุมทดสอบ",meetingTitle:"การประชุมทดสอบ",items:[agendaItem]}};
+      var budgetRow={{fy:"2569",planGroup:"แผนงานยุทธศาสตร์ทดสอบ",category:"ค่าใช้จ่าย",item:"ค่าใช้จ่ายทดสอบ",label:"ค่าใช้จ่ายทดสอบ",name:"ค่าใช้จ่ายทดสอบ",budget:100000,spent:25000,expense:25000,remain:75000}};
       var payload=rowsData({{source:"p0-browser-smoke",summary:{{}},statusCounts:{{}},cards:[],byPlan:[],plans:[],fiscalYears:[2569],years:[2569],currentFy:"2569",defaultFy:"2569",user:{{id:"P0",role:"admin"}},routeContractDeferred:true,dataContractDeferred:true}});
       if(method==='apiGetRouteContract')payload={{methods:[],routes:[],writeMethods:[],publicMethods:[]}};
       if(method==='apiBootstrap')payload={{user:{{id:"P0",role:"admin"}},routeContractDeferred:true,dataContractDeferred:true}};
+      if(method==='apiListCommitteeMeetings')payload={{meetings:[meetingRow],items:[agendaItem],itemsByMeetingId:{{"CMTG-001":[agendaItem]}},total:1,loadOk:true,degraded:false}};
+      if(method==='apiGetCommitteeMeetingSystem')payload={{meeting:meetingRow,items:[agendaItem],loadOk:true,degraded:false}};
+      if(method==='apiBudgetGetSummary')payload={{rows:[budgetRow],items:[budgetRow],records:[budgetRow],total:1,totals:{{budget:100000,spent:25000,remain:75000}},grandTotals:{{budget:100000,spent:25000,remain:75000}},meta:{{fy:"2569"}},loadOk:true,degraded:false}};
+      if(method==='apiGetCanonicalCaseBundle'||method==='apiGetCaseContext')payload={{case:caseRow,rawCase:caseRow,item:caseRow,record:caseRow,relatedCases:[caseRow],petitioners:[],history:[],letters:[],loadOk:true,degraded:false}};
+      if(method==='apiGetCases'||method==='apiSearchCasesLite'||method==='apiSearch')payload={{rows:[caseRow],items:[caseRow],records:[caseRow],cases:[caseRow],total:1,totalRecords:1,loadOk:true,degraded:false}};
       return jsonResponse(Object.assign({{ok:true,method:method,data:payload}},payload));
     }}
     return Promise.resolve(new Response("",{{status:404}}));
@@ -533,9 +546,22 @@ def run_p0_browser_smoke():
                 parent.click(force=True)
                 page.wait_for_function("expected => document.querySelector('#caseMenu') && document.querySelector('#caseMenu').classList.contains('show') === expected", arg=initial_open, timeout=1500)
             route("search", "#p-search")
-            route("meeting", "#p-meeting")
+            page.wait_for_function("typeof window.searchEditCase === 'function'", timeout=5000)
+            page.evaluate("() => window.searchEditCase('CASE-001')")
+            page.wait_for_selector("#meeting-caseId", state="attached", timeout=8000)
+            page.wait_for_function("() => (document.querySelector('#meeting-caseId') || {}).value === 'CASE-001'", timeout=8000)
+            page.wait_for_function("() => /ชื่อเรื่องพิจารณาทดสอบ/.test((document.querySelector('#meeting-title') || {}).value || '')", timeout=8000)
+            date_input = page.locator("#meeting-recDate")
+            if date_input.count():
+                date_input.click(force=True)
+                page.wait_for_selector("#app-thai-date-lite-popover", state="attached", timeout=1500)
+                page.keyboard.press("Escape")
             route("committee-meeting", "#p-committee-meeting")
+            page.locator("#committee-meeting-tab-list").click(force=True)
+            page.wait_for_function("() => ((document.querySelector('#committee-meeting-list-tbody') || {}).innerText || '').includes('1/2569')", timeout=8000)
+            page.wait_for_function("() => /ชื่อเรื่องพิจารณาทดสอบ/.test((document.querySelector('#committee-meeting-list-tbody') || {}).innerText || '')", timeout=8000)
             route("budget", "#p-budget")
+            page.wait_for_function("() => /ค่าใช้จ่ายทดสอบ/.test((document.querySelector('#budget-summary-body') || {}).innerText || '')", timeout=8000)
             budget_tab = page.locator('#p-budget [data-action="showBudgetTab"]').first
             if budget_tab.count():
                 budget_tab.click(force=True)
@@ -556,7 +582,7 @@ def run_p0_browser_smoke():
                 raise RuntimeError("P2_BROWSER_LIFECYCLE_ERRORS:" + json.dumps(bad_states, ensure_ascii=False))
             return {
                 "ok": True,
-                "workflows": ["login", "dashboard", "submenu", "search", "meeting", "committee", "budget", "petitioner"],
+                "workflows": ["login", "dashboard", "submenu", "search-edit", "calendar", "committee-data", "budget-data", "petitioner"],
                 "engine": Path(chromium).name,
                 "pageErrors": errors,
                 "lifecycleSequence": lifecycle.get("sequence", 0),
