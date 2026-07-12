@@ -340,7 +340,21 @@ async function callGas({
   const controller = new AbortController();
   const effectiveTimeoutMs = normalizeTimeoutMs(timeoutMs || process.env.GAS_PROXY_TIMEOUT_MS, DEFAULT_PROXY_TIMEOUT_MS,
     MAX_PROXY_TIMEOUT_MS);
-  const timer = setTimeout(() => controller.abort(), effectiveTimeoutMs);
+  let proxyTimedOut = false;
+  let timeoutReject = null;
+  const timer = setTimeout(() => {
+    proxyTimedOut = true;
+    try {
+      controller.abort();
+    } catch (_) {
+    }
+    if (typeof timeoutReject === "function") {
+      const timeoutError = new Error("GAS API timeout ผ่าน Vercel proxy");
+      timeoutError.name = "AbortError";
+      timeoutError.code = "VERCEL_PROXY_GAS_TIMEOUT";
+      timeoutReject(timeoutError);
+    }
+  }, effectiveTimeoutMs);
   const safePayload = isPlainObject(payload) ? Object.assign({
     }, payload): {
   };
@@ -385,7 +399,7 @@ async function callGas({
     };
   }
   try {
-    const response = await fetch(url, {
+    const gasFetchPromise = fetch(url, {
         method: "POST",
         redirect: "follow",
         headers: {
@@ -397,8 +411,16 @@ async function callGas({
         },
         body: bodyText,
         signal: controller.signal,
+      }).then(async (response) => {
+        const raw = await response.text();
+        return { response, raw };
       });
-    const raw = await response.text();
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutReject = reject;
+    });
+    const gasResult = await Promise.race([gasFetchPromise, timeoutPromise]);
+    const response = gasResult.response;
+    const raw = gasResult.raw;
     const responseBodyBytes = jsonByteLength(raw);
     if (responseBodyBytes > MAX_RESPONSE_BODY_BYTES) {
       return {
@@ -488,7 +510,7 @@ async function callGas({
       body: result
     };
   } catch (err) {
-    const aborted = err && err.name === "AbortError";
+    const aborted = proxyTimedOut || (err && (err.name === "AbortError" || err.code === "VERCEL_PROXY_GAS_TIMEOUT"));
     return {
       status: aborted ? 504: 502,
       body: {
@@ -504,6 +526,8 @@ async function callGas({
           productionCurrent: true,
           durationMs: Date.now() - started,
           timeoutMs: effectiveTimeoutMs,
+          proxyHardTimeoutRace: true,
+          proxyTimedOut: !!proxyTimedOut,
           releaseStamp: RELEASE_STAMP,
         },
       },
