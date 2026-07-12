@@ -479,26 +479,24 @@ root.AppMeetingEventOwner&&typeof root.AppMeetingEventOwner.bind==="function"&&r
 
 <script id="committee-meeting-agenda-collapse-fallback-owner">
 (function(root,doc){"use strict";
-if(!root||!doc||root.__COMMITTEE_MEETING_AGENDA_COLLAPSE_FALLBACK_OWNER__)return;
-root.__COMMITTEE_MEETING_AGENDA_COLLAPSE_FALLBACK_OWNER__=true;
-var OWNER="Scripts_Page_Meeting:committee-meeting-agenda-collapse-r51-owner";
-function isFn(fn){return typeof fn==="function"}
-function observe(err,label){try{root.__appObserve&&root.__appObserve(err,OWNER+":"+(label||"warn"))}catch(_){}}
-function targetSelector(button){return button&&button.getAttribute&&(button.getAttribute("data-bs-target")||button.getAttribute("aria-controls")||"")||""}
-function targetPanel(button){var target=targetSelector(button);if(!target)return null;try{return target.charAt(0)==="#"?doc.querySelector(target):doc.getElementById(target)}catch(err){observe(err,"targetPanel");return null}}
-function setButtonState(button,willOpen){if(!button)return;button.classList&&button.classList.toggle("collapsed",!willOpen);button.setAttribute&&button.setAttribute("aria-expanded",willOpen?"true":"false")}
-function closeOtherPanels(panel,parent){if(!panel||!parent)return;Array.prototype.forEach.call(parent.querySelectorAll(".accordion-collapse.show"),function(el){if(el===panel)return;el.classList.remove("show");el.style&&el.style.removeProperty&&el.style.removeProperty("height");el.setAttribute&&el.setAttribute("aria-hidden","true");var b=el.id&&parent.querySelector('[data-bs-target="#'+el.id+'"],[aria-controls="'+el.id+'"]');setButtonState(b,false);});}
-function manualToggle(button,panel,willOpen){var parent=panel.closest&&panel.closest(".accordion");closeOtherPanels(panel,parent);panel.classList.toggle("show",willOpen);panel.style&&panel.style.removeProperty&&panel.style.removeProperty("height");panel.setAttribute&&panel.setAttribute("aria-hidden",willOpen?"false":"true");setButtonState(button,willOpen);return true}
-function bootstrapToggle(button,panel,willOpen){try{var Collapse=root.bootstrap&&root.bootstrap.Collapse;if(!Collapse||!isFn(Collapse.getOrCreateInstance))return false;var instance=Collapse.getOrCreateInstance(panel,{toggle:false});if(!instance)return false;willOpen&&isFn(instance.show)?instance.show():!willOpen&&isFn(instance.hide)?instance.hide():isFn(instance.toggle)&&instance.toggle();setButtonState(button,willOpen);return true}catch(err){observe(err,"bootstrapToggle");return false}}
-function toggle(button){var panel=targetPanel(button);if(!panel)return false;var willOpen=!panel.classList.contains("show");if(!bootstrapToggle(button,panel,willOpen))manualToggle(button,panel,willOpen);return true}
-function bindButtons(){Array.prototype.forEach.call(doc.querySelectorAll('#committee-agenda-accordion .accordion-button[data-bs-target^="#committee-agenda-"],#committee-agenda-accordion .accordion-button[aria-controls^="committee-agenda-"]'),function(btn){if(btn.dataset.committeeAgendaR51Bound==="1")return;btn.dataset.committeeAgendaR51Bound="1";btn.setAttribute("type","button");var panel=targetPanel(btn);panel&&setButtonState(btn,panel.classList.contains("show"));});}
-function onClick(ev){var btn=ev&&ev.target&&ev.target.closest&&ev.target.closest('#committee-agenda-accordion .accordion-button[data-bs-target^="#committee-agenda-"],#committee-agenda-accordion .accordion-button[aria-controls^="committee-agenda-"]');if(!btn)return;ev.preventDefault();ev.stopPropagation&&ev.stopPropagation();ev.stopImmediatePropagation&&ev.stopImmediatePropagation();toggle(btn);}
+if(!root||!doc)return;
+var OWNER="Scripts_Page_Meeting:committee-meeting-agenda-collapse-r52-manual-first-owner";
+root.__COMMITTEE_MEETING_AGENDA_COLLAPSE_FALLBACK_OWNER__=OWNER;
+function isAgendaButton(el){return !!(el&&el.matches&&el.matches('.accordion-button[data-bs-target^="#committee-agenda-"],.accordion-button[aria-controls^="committee-agenda-"]'))}
+function closestAgendaButton(target){return target&&target.closest?target.closest('.accordion-button[data-bs-target^="#committee-agenda-"],.accordion-button[aria-controls^="committee-agenda-"]'):null}
+function targetSelector(button){return button&&button.getAttribute&&(button.getAttribute('data-bs-target')||button.getAttribute('aria-controls')||'')||''}
+function byTarget(selector){if(!selector)return null;try{return selector.charAt(0)==='#'?doc.querySelector(selector):doc.getElementById(selector)}catch(_){return null}}
+function targetPanel(button){return byTarget(targetSelector(button))}
+function setButtonState(button,open){if(!button)return;button.classList&&button.classList.toggle('collapsed',!open);button.setAttribute&&button.setAttribute('aria-expanded',open?'true':'false')}
+function showPanel(panel,open){if(!panel)return;panel.classList&&panel.classList.toggle('show',!!open);panel.setAttribute&&panel.setAttribute('aria-hidden',open?'false':'true');if(panel.style){panel.style.height='';panel.style.transition='';panel.style.display=open?'block':''}}
+function closeSiblings(panel){var parent=panel&&panel.closest&&panel.closest('.accordion,#committee-agenda-accordion');if(!parent)return;Array.prototype.forEach.call(parent.querySelectorAll('.accordion-collapse[id^="committee-agenda-"]'),function(other){if(other===panel)return;showPanel(other,false);var b=other.id&&parent.querySelector('[data-bs-target="#'+other.id+'"],[aria-controls="'+other.id+'"]');setButtonState(b,false)})}
+function manualToggle(button,forceOpen){var panel=targetPanel(button);if(!panel)return false;var open=typeof forceOpen==='boolean'?forceOpen:!panel.classList.contains('show');if(open)closeSiblings(panel);showPanel(panel,open);setButtonState(button,open);return true}
+function handle(event){var button=closestAgendaButton(event&&event.target);if(!button)return;var panel=targetPanel(button);if(!panel)return;if(event){event.preventDefault&&event.preventDefault();event.stopPropagation&&event.stopPropagation();event.stopImmediatePropagation&&event.stopImmediatePropagation()}manualToggle(button);return false}
+function handleKey(event){var button=closestAgendaButton(event&&event.target);if(!button)return;if(event.key==='Enter'||event.key===' '||event.key==='Spacebar'){handle(event)}}
+function bindButtons(){Array.prototype.forEach.call(doc.querySelectorAll('.accordion-button[data-bs-target^="#committee-agenda-"],.accordion-button[aria-controls^="committee-agenda-"]'),function(button){button.type='button';button.removeAttribute('data-bs-toggle');var panel=targetPanel(button);if(panel){panel.classList.add('collapse');setButtonState(button,panel.classList.contains('show'));button.onclick=function(ev){return handle(ev)}}})}
 function boot(){bindButtons()}
-doc.addEventListener("click",onClick,true);
-doc.addEventListener("app:page:meeting:shown",boot,false);
-doc.addEventListener("app:route:meeting",boot,false);
-doc.addEventListener("app:page-scripts-loaded",boot,false);
-if(doc.readyState==="loading")doc.addEventListener("DOMContentLoaded",boot,{once:true});else root.setTimeout?root.setTimeout(boot,0):boot();
-root.CommitteeMeetingAgendaCollapseOwner={owner:OWNER,bind:boot,toggle:toggle,status:function(){return{ok:true,owner:OWNER,buttons:doc.querySelectorAll('#committee-agenda-accordion .accordion-button[data-bs-target^="#committee-agenda-"]').length}}};
+if(!root.__COMMITTEE_MEETING_AGENDA_R52_CAPTURE_BOUND__){root.__COMMITTEE_MEETING_AGENDA_R52_CAPTURE_BOUND__=true;doc.addEventListener('click',handle,true);doc.addEventListener('click',handle,false);doc.addEventListener('keydown',handleKey,true);doc.addEventListener('app:page:meeting:shown',boot,false);doc.addEventListener('app:route:meeting',boot,false);doc.addEventListener('app:page-scripts-loaded',boot,false);try{new MutationObserver(function(){boot()}).observe(doc.documentElement,{childList:true,subtree:true})}catch(_){}}
+if(doc.readyState==='loading')doc.addEventListener('DOMContentLoaded',boot,{once:true});else (root.setTimeout||setTimeout)(boot,0);
+root.CommitteeMeetingAgendaCollapseOwner={owner:OWNER,bind:boot,toggle:function(target,forceOpen){var button=target&&target.nodeType?target:byTarget(target);button=isAgendaButton(button)?button:closestAgendaButton(button);return button?manualToggle(button,forceOpen):false},status:function(){var buttons=doc.querySelectorAll('.accordion-button[data-bs-target^="#committee-agenda-"],.accordion-button[aria-controls^="committee-agenda-"]');return{ok:true,owner:OWNER,buttons:buttons.length,manualFirst:true}}};
 })(window,document);
 </script>
