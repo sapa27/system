@@ -994,12 +994,12 @@ return sum+(compact&&!/^(?:-|—|–|_|\.|…|null|undefined|n\/?a)$/i.test(comp
 return u("table-meeting-summary",'<tr class="modern-dash-layer-row"><td class="modern-dash-label">จำนวนการประชุมทั้งหมด</td><td class="modern-dash-value text-end fw-bold text-primary">'+r(n)+'</td></tr><tr class="modern-dash-layer-row"><td class="modern-dash-label">จำนวนเรื่องที่ประชุม</td><td class="modern-dash-value text-end fw-bold text-info">'+r(itemTotal)+" เรื่อง</td></tr>"),m("dash-meeting-updated","อัปเดตล่าสุด "+c(e.meta&&e.meta.generatedAt||new Date)),!0
 }
 function R62dashBudgetWorkflowSummary(a){
-a=o(a);var status=o(a.statusSummary||a.workflow||a.budgetWorkflow||a.workflowSummary||a.statusStats||a.status||{}),refund=o(status.refund||status.refundStatus||status.refundSummary||status.return||status.returns||a.refund||a.refundSummary||{}),report=o(status.report||status.reportStatus||status.reportSummary||status.expenseReport||status.reports||a.report||a.reportSummary||{});
+a=o(a);var workflowSection=o(a.workflowSection||a.segments&&a.segments.workflow||{}),workflowSummary=o(workflowSection.summary||{}),status=o(a.statusSummary||a.workflow||a.budgetWorkflow||a.workflowSummary||workflowSummary||a.statusStats||a.status||{}),refund=o(status.refund||status.refundStatus||status.refundSummary||status.return||status.returns||workflowSummary.refund||workflowSummary.refundSummary||a.refund||a.refundSummary||{}),report=o(status.report||status.reportStatus||status.reportSummary||status.expenseReport||status.reports||workflowSummary.report||workflowSummary.reportSummary||a.report||a.reportSummary||{});
 function pick(obj,keys){obj=o(obj);for(var i2=0;i2<keys.length;i2++){var k2=keys[i2];if(obj[k2]!=null&&obj[k2]!=="")return i(obj[k2])}return 0}
 refund.total=i(refund.total)||pick(status,["refundTotal","totalRefund","refundCount","returnTotal","คืนเงินทั้งหมด"]);refund.pending=i(refund.pending)||pick(status,["refundPending","pendingRefund","refundRemain","returnPending","คืนเงินคงค้าง","ยังไม่คืนเงิน"]);refund.completed=i(refund.completed)||pick(status,["refundCompleted","completedRefund","refundDone","returnCompleted","คืนเงินแล้ว"]);
 report.total=i(report.total)||pick(status,["reportTotal","totalReport","expenseReportTotal","reportCount","รายงานทั้งหมด"]);report.pending=i(report.pending)||pick(status,["reportPending","pendingReport","expenseReportPending","reportRemain","รายงานคงค้าง","ยังไม่รายงาน"]);report.completed=i(report.completed)||pick(status,["reportCompleted","completedReport","expenseReportDone","reportDone","รายงานแล้ว"]);
 function done(v,kind){var txt=String(v==null?"":v).replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g,"");if(!txt)return false;if(/ยังไม่|ไม่คืน|ไม่ส่ง|ค้าง|รอ|pending|notyet|none/i.test(txt))return false;return /(คืนเงินแล้ว|คืนแล้ว|ส่งแล้ว|รายงานแล้ว|แล้ว|เสร็จ|ครบ|completed|done|received)/i.test(txt)}
-var rows=d(a.workflowRows||a.statusRows||a.importRows||a.details||a.items||a.rows).filter(function(row){row=o(row);return row.refundStatus!=null||row.reportStatus!=null||row["สถานะคืนเงิน"]!=null||row["สถานะรายงาน"]!=null||row["รายงานค่าใช้จ่าย"]!=null||row["การคืนเงิน"]!=null});
+var rows=d(a.workflowRows||a.statusRows||workflowSection.rows||a.importRows||a.details||a.items||a.rows).filter(function(row){row=o(row);return row.refundStatus!=null||row.reportStatus!=null||row.returnStatus!=null||row.expenseReportStatus!=null||row["สถานะคืนเงิน"]!=null||row["สถานะการคืนเงิน"]!=null||row["สถานะรายงาน"]!=null||row["สถานะรายงานค่าใช้จ่าย"]!=null||row["รายงานค่าใช้จ่าย"]!=null||row["การคืนเงิน"]!=null});
 if(rows.length&&(!i(refund.total)||!i(report.total))){var rt=0,rp=0,rc=0,pt=0,pp=0,pc=0;rows.forEach(function(row){row=o(row);var rv=row.refundStatus||row["สถานะคืนเงิน"]||row["การคืนเงิน"]||row.returnStatus||"",pv=row.reportStatus||row["สถานะรายงาน"]||row["รายงานค่าใช้จ่าย"]||row.expenseReportStatus||"";rt++;pt++;done(rv,"refund")?rc++:rp++;done(pv,"report")?pc++:pp++});refund.total=i(refund.total)||rt;refund.pending=i(refund.pending)||rp;refund.completed=i(refund.completed)||rc;report.total=i(report.total)||pt;report.pending=i(report.pending)||pp;report.completed=i(report.completed)||pc}
 return{refund:refund,report:report}
 }
@@ -1043,16 +1043,19 @@ var a=function(t){
 var e=w(t).budgetStats||{
 };
 e&&e.data&&"object"==typeof e.data&&!Array.isArray(e.data)&&(e=e.data);
-var a=Array.isArray(e.byPlan)?e.byPlan:Array.isArray(e.plans)?e.plans:Array.isArray(e.rows)?e.rows:Array.isArray(e.details)?e.details:[];
+var overviewSection=o(e.overviewSection||e.segments&&e.segments.overview||{}),workflowSection=o(e.workflowSection||e.segments&&e.segments.workflow||{}),overviewTotals=o(overviewSection.totals||{}),overviewAll=o(overviewTotals.all||overviewTotals||{});
+if(workflowSection.rows&&Array.isArray(workflowSection.rows)&&!Array.isArray(e.workflowRows))e.workflowRows=workflowSection.rows;
+if(workflowSection.summary&&!e.statusSummary)e.statusSummary=workflowSection.summary;
+var a=Array.isArray(e.byPlan)?e.byPlan:Array.isArray(e.plans)?e.plans:Array.isArray(e.rows)?e.rows:Array.isArray(e.details)?e.details:Array.isArray(overviewSection.rows)?overviewSection.rows:[];
 a=a.map(function(t){
 return{
 label:(t=t||{
 }).label||t.item||t.plan||t.planGroup||t.category||"-",budget:i(null!=t.budget?t.budget:t.amount||t.total||0),spent:i(null!=t.spent?t.spent:t.totalPaid||t.expense||0),remain:i(null!=t.remain?t.remain:t.totalRemain||0),fy:t.fy||""
 }
 }),e.byPlan=a;
-var s=e.grandTotals&&e.grandTotals.all||e.totals&&e.totals.all||e.data&&e.data.grandTotals&&e.data.grandTotals.all||{
+var s=e.grandTotals&&e.grandTotals.all||e.totals&&e.totals.all||e.data&&e.data.grandTotals&&e.data.grandTotals.all||overviewAll||{
 };
-return e.totalBudget=i(null!=e.totalBudget?e.totalBudget:null!=s.budget?s.budget:null!=e.budgetTotal?e.budgetTotal:e.budget||0),e.totalPaid=i(null!=e.totalPaid?e.totalPaid:null!=s.spent?s.spent:null!=e.totalSpent?e.totalSpent:null!=e.spent?e.spent:e.expense||0),e.totalRemain=i(null!=e.totalRemain?e.totalRemain:null!=s.remain?s.remain:null!=e.remain?e.remain:null!=e.balance?e.balance:e.totalBudget-e.totalPaid),i(e.totalBudget)||i(e.totalPaid)||i(e.totalRemain)||!a.length||(e.totalBudget=a.reduce(function(t,e){
+return e.totalBudget=i(null!=e.totalBudget?e.totalBudget:null!=s.budget?s.budget:null!=s.totalBudget?s.totalBudget:null!=e.budgetTotal?e.budgetTotal:e.budget||0),e.totalPaid=i(null!=e.totalPaid?e.totalPaid:null!=s.spent?s.spent:null!=s.totalPaid?s.totalPaid:null!=e.totalSpent?e.totalSpent:null!=e.spent?e.spent:e.expense||0),e.totalRemain=i(null!=e.totalRemain?e.totalRemain:null!=s.remain?s.remain:null!=s.totalRemain?s.totalRemain:null!=e.remain?e.remain:null!=e.balance?e.balance:e.totalBudget-e.totalPaid),i(e.totalBudget)||i(e.totalPaid)||i(e.totalRemain)||!a.length||(e.totalBudget=a.reduce(function(t,e){
 return t+i(e.budget)
 },0),e.totalPaid=a.reduce(function(t,e){
 return t+i(e.spent)
