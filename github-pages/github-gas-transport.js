@@ -286,7 +286,7 @@
         }
         , function(err) {
           var code = err && err.name === "AbortError" ? "VERCEL_PROXY_TIMEOUT": "VERCEL_PROXY_FETCH_FAILED"; 
-          throw bridgeError((code === "VERCEL_PROXY_TIMEOUT" ? "Vercel API proxy timeout: client aborted before proxy returned. ตรวจว่า GAS write ช้าเกินกำหนดหรือไม่": "Vercel API proxy fetch failed") + ": " +(err && err.message || err),
+          throw bridgeError((code === "VERCEL_PROXY_TIMEOUT" ? "Vercel API proxy timeout: browser รอเกินกำหนดโดยไม่ได้รับผลจาก proxy กรุณาตรวจ network/proxy และ GAS write duration": "Vercel API proxy fetch failed") + ": " +(err && err.message || err),
             code, method)
         }
       ).then(function(data) {
@@ -309,13 +309,13 @@
     }
     function proxyClientTimeoutMs(method, options) {
       var isWrite = isWriteApiMethod(method),
-      fallback = isWrite ? cfg("vercelWriteProxyClientTimeoutMs", cfg("vercelApiProxyTimeoutMs", 70e3)): cfg("vercelReadProxyClientTimeoutMs", cfg("vercelApiProxyTimeoutMs", 65e3)),
-      raw = Number(options && (options.clientTimeoutMs || options.timeoutMs) || fallback || 65e3) || 65e3; 
-      return Math.max(10e3, Math.min(raw, 90e3))
+      fallback = isWrite ? cfg("vercelWriteProxyClientTimeoutMs", cfg("vercelApiProxyTimeoutMs", 110e3)): cfg("vercelReadProxyClientTimeoutMs", cfg("vercelApiProxyTimeoutMs", 80e3)),
+      raw = Number(options && (options.clientTimeoutMs || options.timeoutMs) || fallback || 80e3) || 80e3; 
+      return Math.max(10e3, Math.min(raw, 120e3))
     }
     function proxyServerTimeoutMs(method, options) {
       var isWrite = isWriteApiMethod(method),
-      fallback = isWrite ? cfg("vercelWriteProxyServerTimeoutMs", cfg("vercelProxyServerTimeoutMs", 54e3)): cfg("vercelReadProxyServerTimeoutMs", cfg("vercelProxyServerTimeoutMs", 52e3)),
+      fallback = isWrite ? cfg("vercelWriteProxyServerTimeoutMs", cfg("vercelProxyServerTimeoutMs", 50e3)): cfg("vercelReadProxyServerTimeoutMs", cfg("vercelProxyServerTimeoutMs", 45e3)),
       raw = Number(options && (options.proxyTimeoutMs || options.gasTimeoutMs || options.serverTimeoutMs) || fallback || 52e3) || 52e3; 
       return Math.max(5e3, Math.min(raw, 54e3))
     }
