@@ -40,7 +40,7 @@
       vercelApiProxyUrl: "/api/gas",
       vercelLoginProxyUrl: "/api/login",
       vercelPublicConfigProxyUrl: "/api/public-config",
-      vercelApiProxyTimeoutMs: 45e3,
+      vercelApiProxyTimeoutMs: 55e3,
       vercelLoginProxyTimeoutMs: 3e4,
       vercelPublicConfigProxyTimeoutMs: 8e3,
       proxyRejectGoogleHostedFrontend: !0,
@@ -78,13 +78,19 @@
       allowAssumedBridgeReady: !1,
       securityHardening: !0,
       fastLoginJsonpDisabled: !0,
-      apiTimeoutMs: 45e3,
+      apiTimeoutMs: 55e3,
       publicConfigTimeoutMs: 4e3,
       fastLoginJsonp: !1,
       loginFormPost: !1,
       loginViaVercelProxy: !0,
       readJsonpApi: !1,
-      clientApiCacheEnabled: !1,
+      clientApiCacheEnabled: !0,
+      clientReadResponseCacheEnabled: !0,
+      clientReadCacheTtlMs: 60000,
+      clientReadCacheMaxTtlMs: 120000,
+      clientReadStaleIfErrorMs: 600000,
+      clientReadRetryCount: 1,
+      clientReadRetryDelayMs: 350,
       clientInFlightDedupe: !0,
       clientApiCacheOwner: "backend-router-cache",
       clientInFlightOwner: "github-pages/github-gas-transport.js::AppTransport.inFlightOnly",
@@ -190,7 +196,13 @@
     ; 
     root.APP_CONFIG = Object.assign({}, defaults, existing || {});
 
-    root.APP_CONFIG.clientApiCacheEnabled = false;
+    root.APP_CONFIG.clientApiCacheEnabled = true;
+    root.APP_CONFIG.clientReadResponseCacheEnabled = true;
+    root.APP_CONFIG.clientReadCacheTtlMs = Number(root.APP_CONFIG.clientReadCacheTtlMs || 60000);
+    root.APP_CONFIG.clientReadCacheMaxTtlMs = Number(root.APP_CONFIG.clientReadCacheMaxTtlMs || 120000);
+    root.APP_CONFIG.clientReadStaleIfErrorMs = Number(root.APP_CONFIG.clientReadStaleIfErrorMs || 600000);
+    root.APP_CONFIG.clientReadRetryCount = Number(root.APP_CONFIG.clientReadRetryCount || 1);
+    root.APP_CONFIG.clientReadRetryDelayMs = Number(root.APP_CONFIG.clientReadRetryDelayMs || 350);
     root.APP_CONFIG.clientApiCacheOwner = "backend-router-cache";
     root.APP_CONFIG.clientInFlightOwner = "github-pages/github-gas-transport.js::AppTransport.inFlightOnly";
     root.APP_CONFIG.fastLoginJsonp = false;

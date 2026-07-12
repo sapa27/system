@@ -12,6 +12,7 @@
     assetInFlight = Object.create(null),
     publicConfigInFlight = null,
     apiInFlight = Object.create(null),
+    apiReadCache = Object.create(null),
     apiMetrics = {
       calls: 0,
       cacheHits: 0,
@@ -175,6 +176,7 @@
     function invalidateClientApiCache(reason, method) {
       try {
         apiInFlight = Object.create(null),
+        apiReadCache = Object.create(null),
         apiCacheEpoch += 1,
         root.__APP_CLIENT_API_CACHE_EPOCH__ = apiCacheEpoch,
         recordApiMetric({
@@ -471,48 +473,210 @@
         }
       )
     }
+    function cloneJson(value) {
+      try {
+        return value == null ? value: JSON.parse(JSON.stringify(value))
+      } 
+      catch (_) {
+        return value
+      }
+    }
+    function readCacheTtlMs(payload) {
+      var ttl = Number(payload && payload.cacheTtlSeconds);
+      if (isFinite(ttl) && ttl > 0)return Math.max(5000, Math.min(ttl * 1000, Number(cfg("clientReadCacheMaxTtlMs", 120000)) || 120000)); 
+      return Number(cfg("clientReadCacheTtlMs", 60000)) || 60000
+    }
+    function readStaleIfErrorMs(payload) {
+      var ttl = Number(cfg("clientReadStaleIfErrorMs", 600000)) || 600000;
+      return Math.max(0, Math.min(ttl, 1800000))
+    }
+    function readRetryCount(method, payload) {
+      if (payloadWantsFresh(payload))return 1; 
+      return Math.max(0, Math.min(Number(cfg("clientReadRetryCount", 1)) || 0, 2))
+    }
+    function isTransientCode(code) {
+      return /(?:TIMEOUT|FETCH|NETWORK|FAILED|ABORT|TEMPORARY|RESPONSE_NOT_JSON|RETURNED_HTML|HTTP_ERROR|502|503|504)/i.test(text(code))
+    }
+    function isTransientResult(result) {
+      if (!isObj(result) || result.ok !== !1)return !1; 
+      var code = text(result.errorCode || result.code || result.status || result.httpStatus || result.error || "");
+      return isTransientCode(code)
+    }
+    function isTransientError(err) {
+      var code = text(err && (err.errorCode || err.code || err.name || err.message) || err || "");
+      return isTransientCode(code)
+    }
+    function waitMs(ms) {
+      return new Promise(function(resolve) {
+        setTimeout(resolve, Math.max(0, Number(ms) || 0))
+      })
+    }
+    function runVercelApiProxyReadWithRetry(method, payload, options, retries) {
+      var attempt = 0;
+      function once() {
+        return runVercelApiProxy(method, payload || {
+          }
+          , options || {
+          }
+        ).then(function(result) {
+            if (attempt < retries && isTransientResult(result)) {
+              attempt += 1;
+              recordApiMetric({
+                  kind: "retry",
+                  method: method,
+                  transport: "vercel-api-proxy",
+                  attempt: attempt,
+                  errorCode: text(result.errorCode || result.code || result.error || "")
+                }
+              );
+              return waitMs(Number(cfg("clientReadRetryDelayMs", 350)) || 350).then(once)
+            }
+            return result
+          }
+          , function(err) {
+            if (attempt < retries && isTransientError(err)) {
+              attempt += 1;
+              recordApiMetric({
+                  kind: "retry",
+                  method: method,
+                  transport: "vercel-api-proxy",
+                  attempt: attempt,
+                  error: !0,
+                  message: err && err.message || String(err || "")
+                }
+              );
+              return waitMs(Number(cfg("clientReadRetryDelayMs", 350)) || 350).then(once)
+            }
+            throw err
+          }
+        )
+      }
+      return once()
+    }
     function runReadWithPolicy(method, payload, options) {
       method = text(method).trim(); 
+      payload = isObj(payload) ? payload: {
+      }
+      ;
+      options = options || {
+      }
+      ;
       var transport = "vercel-api-proxy",
+      wantsFresh = payloadWantsFresh(payload),
+      cacheAllowed = cfg("clientApiCacheEnabled", cfg("clientReadResponseCacheEnabled", !0)) !== !1 && isCacheSafeReadMethod(method),
+      canReadCache = cacheAllowed && !wantsFresh,
       dedupe = cfg("clientInFlightDedupe", !0) !== !1 && isCacheSafeReadMethod(method),
       key = stableKey(method, payload || {
         }
       ),
-      started = Date.now ? Date.now(): + new Date; 
+      cacheKey = apiCacheEpoch + "|" + key,
+      now = Date.now ? Date.now(): + new Date,
+      cached = apiReadCache[cacheKey] || null,
+      started = now; 
+      if (canReadCache && cached && cached.expiresAt > now) {
+        recordApiMetric({
+            kind: "cache",
+            method,
+            transport,
+            cacheHit: !0,
+            cacheEpoch: apiCacheEpoch
+          }
+        );
+        return Promise.resolve(annotateResult(cloneJson(cached.result), {
+              clientDurationMs: 0,
+              clientCacheHit: !0,
+              clientReadResponseCache: !0,
+              clientCacheEpoch: apiCacheEpoch,
+              transport,
+              releaseStamp: PHASE_RELEASE_STAMP
+            }
+          ))
+      }
       if (dedupe && apiInFlight[key])return recordApiMetric({
           kind: "dedupe",
           method,
           transport,
           dedupeHit: !0,
-          clientCacheDisabled: !0
+          clientReadResponseCache: cacheAllowed
         }
       ),
       apiInFlight[key].then(function(result) {
           return annotateResult(result, {
               clientDedupeHit: !0,
               clientInFlightOnly: !0,
-              clientCacheDisabled: !0,
+              clientReadResponseCache: cacheAllowed,
               transport,
               releaseStamp: PHASE_RELEASE_STAMP
             }
           )
         }
       ); 
-      var promise = runVercelApiProxy(method, payload || {
+      function useStale(failed, err) {
+        var t = Date.now ? Date.now(): + new Date;
+        if (cached && cached.staleUntil > t) {
+          recordApiMetric({
+              kind: "stale-if-error",
+              method,
+              transport,
+              cacheHit: !0,
+              error: !!err || !!(failed && failed.ok === !1),
+              message: err && err.message || failed && (failed.error || failed.errorCode) || "read failed"
+            }
+          );
+          return annotateResult(cloneJson(cached.result), {
+              clientCacheHit: !0,
+              clientStaleIfError: !0,
+              clientStaleAgeMs: Math.max(0, t - Number(cached.fetchedAt || t)),
+              originalErrorCode: err && (err.errorCode || err.code) || failed && (failed.errorCode || failed.code) || "",
+              originalError: err && err.message || failed && failed.error || "",
+              transport,
+              releaseStamp: PHASE_RELEASE_STAMP
+            }
+          )
+        }
+        if (err)throw err; 
+        return failed
+      }
+      var promise = runVercelApiProxyReadWithRetry(method, payload || {
         }
         , options || {
         }
-      ).then(function(result) {
+        , readRetryCount(method, payload)).then(function(result) {
           var durationMs = Math.max(0, (Date.now ? Date.now(): + new Date) - started),
+          annotated;
+          if (isTransientResult(result))return useStale(result, null); 
           annotated = annotateResult(result, {
               clientDurationMs: durationMs,
               clientCacheHit: !1,
-              clientCacheDisabled: !0,
+              clientReadResponseCache: cacheAllowed,
               clientInFlightOnly: !0,
               transport,
               releaseStamp: PHASE_RELEASE_STAMP
             }
-          ); 
+          );
+          if (cacheAllowed && result && result.ok !== !1) {
+            var writtenAt = Date.now ? Date.now(): + new Date,
+            ttlMs = readCacheTtlMs(payload),
+            staleMs = readStaleIfErrorMs(payload); 
+            apiReadCache[cacheKey] = {
+              result: cloneJson(annotated),
+              fetchedAt: writtenAt,
+              expiresAt: writtenAt + ttlMs,
+              staleUntil: writtenAt + ttlMs + staleMs,
+              method: method,
+              cacheEpoch: apiCacheEpoch
+            };
+            recordApiMetric({
+                kind: "cache-write",
+                method,
+                transport,
+                cacheWrite: !0,
+                ttlMs: ttlMs,
+                staleIfErrorMs: staleMs,
+                cacheEpoch: apiCacheEpoch
+              }
+            )
+          }
           return recordApiMetric({
               kind: "call",
               method,
@@ -523,6 +687,8 @@
           annotated
         }
         , function(err) {
+          var stale = useStale(null, err); 
+          if (stale)return stale; 
           throw recordApiMetric({
               kind: "call",
               method,
@@ -910,7 +1076,8 @@
     root.AppTransport.__singleTransportPathPhase2 = !0,
     root.AppTransport.__clientCacheSingleOwner = "backend-router-cache",
     root.AppTransport.__clientInFlightOwner = "AppTransport.inFlightOnly",
-    root.AppTransport.__clientReadResponseCacheDisabled = !0,
+    root.AppTransport.__clientReadResponseCacheDisabled = !1,
+    root.AppTransport.__clientReadResponseCacheEnabled = !0,
     root.AppTransport.__sessionStorageReadCacheDisabled = !0,
     root.AppTransport.transportMode = PHASE_TRANSPORT_MODE,
     root.AppTransport.bridgeClientState = function() {
@@ -951,12 +1118,14 @@
         syncTool: cfg("syncTool", "tools/phaseN_legacy_transport_gate.py"),
         singleSourceRoot: cfg("canonicalPartialRoot", "gas-backend"),
         generatedMirrorPolicy: cfg("generatedMirrorPolicy", "edit-gas-backend-run-sync-do-not-edit-generated-mirrors"),
-        clientApiCacheEnabled: !1,
+        clientApiCacheEnabled: cfg("clientApiCacheEnabled", !0) !== !1,
+        clientReadResponseCacheEnabled: !0,
+        clientReadCacheEntries: Object.keys(apiReadCache).length,
         clientInFlightDedupe: cfg("clientInFlightDedupe", !0) !== !1,
         clientCacheOwner: "backend-router-cache",
         clientInFlightOwner: "AppTransport.inFlightOnly",
         sessionStorageReadCache: !1,
-        cacheEntries: 0,
+        cacheEntries: Object.keys(apiReadCache).length,
         inFlight: Object.keys(apiInFlight).length,
         assetCacheEntries: Object.keys(cache).length,
         assetInFlight: Object.keys(assetInFlight).length,
@@ -1008,7 +1177,7 @@
         inFlightOwner: "AppTransport.inFlightOnly",
         readResponseCache: !1,
         sessionStorageReadCache: !1,
-        cacheEntries: 0,
+        cacheEntries: Object.keys(apiReadCache).length,
         inFlight: Object.keys(apiInFlight).length,
         cacheEpoch: apiCacheEpoch,
         metrics: Object.assign({
