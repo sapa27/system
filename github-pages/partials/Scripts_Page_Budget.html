@@ -2202,6 +2202,7 @@ function moneyNum(v){
 return w(v||0)
 }
 function budgetDirectValue(src,key){return src&&Object.prototype.hasOwnProperty.call(src,key)&&null!=src[key]&&""!==String(src[key]).trim()?src[key]:null}
+function direct(src,key){return budgetDirectValue(src,key)}
 function firstMoney(row,keys){
 row=row||{
 };
