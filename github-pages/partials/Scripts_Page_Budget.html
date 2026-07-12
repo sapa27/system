@@ -373,6 +373,43 @@ value:"",label:"-- เลือกตำบล/แขวง --"
 }
 ].concat(e.getThailandSubDistrictOptions?e.getThailandSubDistrictOptions(d.province,d.district):[]),"",d.subDistrict))
 })
+},t.__budgetSummaryReportRowsFromDto=function budgetSummaryReportRowsFromDto(dto){
+  dto=dto||{};
+  function arr(v){return Array.isArray(v)?v:[];}
+  var candidates=[
+    dto.rows,dto.data,dto.items,dto.records,dto.summaryRows,dto.reportRows,dto.budgetReportRows,dto.importRows,
+    dto.reportSection&&dto.reportSection.rows,
+    dto.segments&&dto.segments.report&&dto.segments.report.rows,
+    dto.overviewSection&&dto.overviewSection.rows,
+    dto.segments&&dto.segments.overview&&dto.segments.overview.rows
+  ];
+  for(var i=0;i<candidates.length;i++){
+    if(Array.isArray(candidates[i])&&candidates[i].length)return candidates[i].slice();
+  }
+  return [];
+},t.__budgetEnsureSummaryDesktopTableVisible=function budgetEnsureSummaryDesktopTableVisible(){
+  try{
+    var body=r("budget-summary-body"),table=body&&body.closest?body.closest("table"):null,wrap=table&&table.closest?table.closest(".app-table-scroll,.table-responsive,.app-table-shell,.app-mobile-scroll-owner"):null;
+    if(!body||!table)return !1;
+    table.setAttribute("data-app-pager","off");
+    table.setAttribute("data-app-local-dom-paging","off");
+    table.setAttribute("data-app-pager-disabled","budget-summary-r74-desktop-visible");
+    table.classList&&table.classList.add("no-app-pager","no-print-pager","budget-summary-desktop-visible-owner");
+    if(table.style){table.style.display="table";table.style.visibility="visible";table.style.opacity="1";table.style.width="100%";}
+    if(body.style){body.style.display="table-row-group";body.style.visibility="visible";body.style.opacity="1";}
+    Array.prototype.slice.call(body.querySelectorAll("tr")).forEach(function(tr){
+      if(!tr)return;
+      tr.hidden=false;
+      tr.removeAttribute&&tr.removeAttribute("hidden");
+      tr.removeAttribute&&tr.removeAttribute("aria-hidden");
+      tr.removeAttribute&&tr.removeAttribute("data-app-row-hidden");
+      tr.classList&&tr.classList.remove("app-row-paged-hidden","d-none","visually-hidden");
+      if(tr.style){tr.style.display="";tr.style.visibility="visible";tr.style.opacity="1";}
+    });
+    if(wrap&&wrap.style){wrap.style.display="block";wrap.style.width="100%";wrap.style.maxWidth="100%";wrap.style.overflowX="auto";wrap.style.overflowY="visible";}
+    try{document.dispatchEvent(new CustomEvent("app:data:rendered",{detail:{page:"budget",table:"budget-summary",owner:"budget-summary-desktop-visible-owner-r74"}}));}catch(_evtErr){}
+    return !0;
+  }catch(err){budgetWarn("budget.summary.desktopVisible",err);return !1;}
 },t.loadBudgetSummary=function(page,opts){
 opts=opts||{
 },page&&(m.summaryPage=Math.max(1,w(page))),U();
@@ -389,8 +426,10 @@ rows:m.summaryRows,cacheHit:!0,frontendCache:!0
 fy:fy,page:pageNo,limit:limit,fast:!0,noWait:!0,includeSpent:!0,includePersonnelCompensation:!0,preferCache:!force,forceFresh:force,forceRefresh:force,noCache:force,bypassCache:force,cacheTtlSeconds:force?0:300,source:"budget-summary-fast-cache-r6"
 }).then(function(resp){
 if(O(resp)){
-var data=H(resp),rows=Array.isArray(data.rows)?data.rows:Array.isArray(data.data)?data.data:[];
-return data.rows=rows,m._summaryNoWaitTried=!0,m._summaryCacheKey=requestKey,tt(data),budgetCURRENTBClearDirty("summary"),data
+var data=H(resp),rows=t.__budgetSummaryReportRowsFromDto(data);
+data.rows=rows;
+data.reportRows=Array.isArray(data.reportRows)&&data.reportRows.length?data.reportRows:rows;
+return m._summaryNoWaitTried=!0,m._summaryCacheKey=requestKey,tt(data),t.__budgetEnsureSummaryDesktopTableVisible(),setTimeout(t.__budgetEnsureSummaryDesktopTableVisible,60),setTimeout(t.__budgetEnsureSummaryDesktopTableVisible,180),budgetCURRENTBClearDirty("summary"),data
 }
 return b("budget-summary-body",'<tr><td colspan="4" class="text-center text-danger p-4">'+p(resp&&resp.msg||"โหลดข้อมูลไม่สำเร็จ")+"</td></tr>"),resp
 }).catch(function(err){
@@ -2174,7 +2213,7 @@ return-1!==e.indexOf("แผนงานบุคลากรภาครัฐ"
 function tt(n){
 n=n||{
 };
-var a=Array.isArray(n.rows)?n.rows.slice():Array.isArray(n.data)?n.data.slice():Array.isArray(n.items)?n.items.slice():[];
+var a=t.__budgetSummaryReportRowsFromDto(n);
 var personnelExpenseRow=n.personnelExpenseRow||n.personnelRow||n.staffExpenseRow||n.meta&&n.meta.personnelExpenseRow||null;
 if(personnelExpenseRow&&"object"===typeof personnelExpenseRow){
 var personnelSpent=w(personnelExpenseRow.personnelExpense||personnelExpenseRow.staffExpense||personnelExpenseRow.ytdExpense||personnelExpenseRow.spent||personnelExpenseRow.spentAmount||personnelExpenseRow.expense||personnelExpenseRow.expenseAmount||personnelExpenseRow.totalPaid||personnelExpenseRow.amount||0);
@@ -2325,7 +2364,7 @@ personnelRows.length&&(html+=groupRow(personnelPlan),html+=personnelRows.map(ite
 var strategyTotal=totals(strategyRows),allTotal=totals(a);
 return n.grandTotals={
 noPersonnel:strategyTotal,all:allTotal
-},n.totals=n.grandTotals,html+=totalRow("รวมทั้งสิ้น (ไม่รวมแผนงานบุคลากรภาครัฐ)",strategyTotal,"noPersonnel","budget-summary-subtotal"),html+=totalRow("รวมทั้งสิ้น",allTotal,"all","budget-summary-grandtotal"),b("budget-summary-body",a.length?html:'<tr><td colspan="4" class="text-center text-muted p-4">ไม่มีข้อมูล</td></tr>'+html),t.renderBudgetStandardFooter("budget-summary",0,1,1,""),a
+},n.totals=n.grandTotals,html+=totalRow("รวมทั้งสิ้น (ไม่รวมแผนงานบุคลากรภาครัฐ)",strategyTotal,"noPersonnel","budget-summary-subtotal"),html+=totalRow("รวมทั้งสิ้น",allTotal,"all","budget-summary-grandtotal"),b("budget-summary-body",a.length?html:'<tr><td colspan="4" class="text-center text-muted p-4">ไม่มีข้อมูล</td></tr>'+html),t.__budgetEnsureSummaryDesktopTableVisible(),setTimeout(t.__budgetEnsureSummaryDesktopTableVisible,60),setTimeout(t.__budgetEnsureSummaryDesktopTableVisible,180),t.renderBudgetStandardFooter("budget-summary",0,1,1,""),t.__budgetEnsureSummaryDesktopTableVisible(),a
 }
 function et(t){
 var e=String(t||"").trim();
