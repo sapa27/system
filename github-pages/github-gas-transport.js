@@ -286,7 +286,7 @@
         }
         , function(err) {
           var code = err && err.name === "AbortError" ? "VERCEL_PROXY_TIMEOUT": "VERCEL_PROXY_FETCH_FAILED"; 
-          throw bridgeError((code === "VERCEL_PROXY_TIMEOUT" ? "Vercel API proxy timeout": "Vercel API proxy fetch failed") + ": " +(err && err.message || err),
+          throw bridgeError((code === "VERCEL_PROXY_TIMEOUT" ? "Vercel API proxy timeout: client aborted before proxy returned. ตรวจว่า GAS write ช้าเกินกำหนดหรือไม่": "Vercel API proxy fetch failed") + ": " +(err && err.message || err),
             code, method)
         }
       ).then(function(data) {
@@ -307,17 +307,30 @@
         }
       )
     }
+    function proxyClientTimeoutMs(method, options) {
+      var isWrite = isWriteApiMethod(method),
+      fallback = isWrite ? cfg("vercelWriteProxyClientTimeoutMs", cfg("vercelApiProxyTimeoutMs", 70e3)): cfg("vercelReadProxyClientTimeoutMs", cfg("vercelApiProxyTimeoutMs", 65e3)),
+      raw = Number(options && (options.clientTimeoutMs || options.timeoutMs) || fallback || 65e3) || 65e3; 
+      return Math.max(10e3, Math.min(raw, 90e3))
+    }
+    function proxyServerTimeoutMs(method, options) {
+      var isWrite = isWriteApiMethod(method),
+      fallback = isWrite ? cfg("vercelWriteProxyServerTimeoutMs", cfg("vercelProxyServerTimeoutMs", 54e3)): cfg("vercelReadProxyServerTimeoutMs", cfg("vercelProxyServerTimeoutMs", 52e3)),
+      raw = Number(options && (options.proxyTimeoutMs || options.gasTimeoutMs || options.serverTimeoutMs) || fallback || 52e3) || 52e3; 
+      return Math.max(5e3, Math.min(raw, 54e3))
+    }
     function runVercelApiProxy(method, payload, options) {
       if (method = text(method).trim(), !method)return Promise.reject(bridgeError("method required",
           "METHOD_REQUIRED", method)); 
       var url = vercelApiProxyUrl(),
-      timeoutMs = Number(options && options.timeoutMs || cfg("vercelApiProxyTimeoutMs", cfg("apiTimeoutMs",
-            45e3))) || 45e3,
+      clientTimeoutMs = proxyClientTimeoutMs(method, options || {}),
+      serverTimeoutMs = proxyServerTimeoutMs(method, options || {}),
       body = {
         method,
         payload: payload == null ? {
         }
         : payload,
+        timeoutMs: serverTimeoutMs,
         releaseStamp: PHASE_RELEASE_STAMP,
         source: "vercel-client-proxy-phaseN"
       }
@@ -329,12 +342,14 @@
           headers: {
             "Content-Type": "application/json; charset=utf-8",
             Accept: "application/json",
-            "X-Production-Vercel-Proxy": PHASE_RELEASE_STAMP
+            "X-Production-Vercel-Proxy": PHASE_RELEASE_STAMP,
+            "X-Client-Proxy-Timeout-Ms": String(clientTimeoutMs),
+            "X-GAS-Proxy-Timeout-Ms": String(serverTimeoutMs)
           }
           ,
           body: JSON.stringify(body)
         }
-        , timeoutMs, method).then(function(result) {
+        , clientTimeoutMs, method).then(function(result) {
           return result = isObj(result) ? result: {
             ok: !1,
             error: "empty Vercel proxy response",
@@ -352,6 +367,8 @@
             , {
               clientVercelProxy: !0,
               productionCurrent: !0,
+              clientTimeoutMs: clientTimeoutMs,
+              proxyServerTimeoutMs: serverTimeoutMs,
               legacyTransportRemoved: !0,
               releaseStamp: PHASE_RELEASE_STAMP,
               transport: result.transport || "vercel-api-proxy"

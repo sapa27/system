@@ -40,7 +40,12 @@
       vercelApiProxyUrl: "/api/gas",
       vercelLoginProxyUrl: "/api/login",
       vercelPublicConfigProxyUrl: "/api/public-config",
-      vercelApiProxyTimeoutMs: 55e3,
+      vercelApiProxyTimeoutMs: 70e3,
+      vercelReadProxyClientTimeoutMs: 65e3,
+      vercelWriteProxyClientTimeoutMs: 70e3,
+      vercelProxyServerTimeoutMs: 54e3,
+      vercelReadProxyServerTimeoutMs: 52e3,
+      vercelWriteProxyServerTimeoutMs: 54e3,
       vercelLoginProxyTimeoutMs: 3e4,
       vercelPublicConfigProxyTimeoutMs: 8e3,
       proxyRejectGoogleHostedFrontend: !0,
@@ -78,7 +83,7 @@
       allowAssumedBridgeReady: !1,
       securityHardening: !0,
       fastLoginJsonpDisabled: !0,
-      apiTimeoutMs: 55e3,
+      apiTimeoutMs: 70e3,
       publicConfigTimeoutMs: 4e3,
       fastLoginJsonp: !1,
       loginFormPost: !1,
@@ -196,6 +201,14 @@
     ; 
     root.APP_CONFIG = Object.assign({}, defaults, existing || {});
 
+
+    root.APP_CONFIG.vercelApiProxyTimeoutMs = Number(root.APP_CONFIG.vercelApiProxyTimeoutMs || 70000);
+    root.APP_CONFIG.vercelReadProxyClientTimeoutMs = Number(root.APP_CONFIG.vercelReadProxyClientTimeoutMs || 65000);
+    root.APP_CONFIG.vercelWriteProxyClientTimeoutMs = Number(root.APP_CONFIG.vercelWriteProxyClientTimeoutMs || 70000);
+    root.APP_CONFIG.vercelProxyServerTimeoutMs = Number(root.APP_CONFIG.vercelProxyServerTimeoutMs || 54000);
+    root.APP_CONFIG.vercelReadProxyServerTimeoutMs = Number(root.APP_CONFIG.vercelReadProxyServerTimeoutMs || 52000);
+    root.APP_CONFIG.vercelWriteProxyServerTimeoutMs = Number(root.APP_CONFIG.vercelWriteProxyServerTimeoutMs || 54000);
+    root.APP_CONFIG.apiTimeoutMs = Number(root.APP_CONFIG.apiTimeoutMs || 70000);
     root.APP_CONFIG.clientApiCacheEnabled = true;
     root.APP_CONFIG.clientReadResponseCacheEnabled = true;
     root.APP_CONFIG.clientReadCacheTtlMs = Number(root.APP_CONFIG.clientReadCacheTtlMs || 60000);
