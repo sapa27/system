@@ -1884,6 +1884,8 @@ rows:e
 if(!e||"object"!=typeof e)return{
 };
 if(Array.isArray(e.rows))return e;
+if(e.reportSection&&Array.isArray(e.reportSection.rows))return Object.assign({},e,{rows:e.reportSection.rows});
+if(e.segments&&e.segments.report&&Array.isArray(e.segments.report.rows))return Object.assign({},e,{rows:e.segments.report.rows});
 if(e.data&&Array.isArray(e.data))return{
 rows:e.data
 };
