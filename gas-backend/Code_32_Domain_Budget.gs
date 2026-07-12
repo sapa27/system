@@ -456,7 +456,7 @@ function _dashboardBudgetStatusSummaryRows_(fy) {
   catch(_verErr) {
     cacheStamp = "1"
 }
-  var cacheKey = "dashboard_budget_status_current_r70_" + String(target || "all") + "_" + cacheStamp;
+  var cacheKey = "dashboard_budget_status_current_r72_" + String(target || "all") + "_" + cacheStamp;
   try {
     var cached = _AppScriptCache_().get(cacheKey);
     if(cached) {
@@ -539,7 +539,7 @@ function _budgetStatusDone_(status, kind) {
 function _dashboardBudgetCacheKey_(fy) {
   var cacheStamp = "na";
   return _appIsFnName_("_entityCacheStamp_") && (cacheStamp = [_entityCacheStamp_("budgetsummary"), _entityCacheStamp_("budgetyearsettingsitems"),
-  _entityCacheStamp_("budgetimports"), _entityCacheStamp_("salarysettings"), BUDGET_CACHE_POLICY_STAMP].join("_")), "dashboard_budget_current_r70_" + String(fy || "") + "_" + cacheStamp
+  _entityCacheStamp_("budgetimports"), _entityCacheStamp_("salarysettings"), BUDGET_CACHE_POLICY_STAMP].join("_")), "dashboard_budget_current_r72_" + String(fy || "") + "_" + cacheStamp
 }
 function _dashboardBudgetFromSummarySheet_(fy) {
   var rows = _budgetDataServiceRows_("BudgetSummary", _budgetProjectedFields_("BudgetSummary"), {
@@ -620,7 +620,7 @@ function getBudgetSummaryByFY(fy) {
   var payload = fy && typeof fy == "object" && ! Array.isArray(fy) ? fy:  {
     fy: fy
 }, dto = _budgetReadModelBuildSummaryDto_(payload, {
-    source: "BudgetReadModel.centralDTO.getBudgetSummaryByFY.r70", dataSource: "centralBudgetDTO", contractStamp: "budget-summary-central-dto-current-r70"
+    source: "BudgetReadModel.centralDTO.getBudgetSummaryByFY.r72", dataSource: "centralBudgetDTO", contractStamp: "budget-summary-central-dto-current-r72"
 });
   return ok_(dto, "โหลดสรุปงบประมาณสำเร็จ")
 }
@@ -1049,8 +1049,7 @@ function _budgetCostComponentsForRow_(row, extra, warnings) {
 })
 }
 function _budgetExplicitSummaryNeedles_(field) {
-  var map;
-  return {
+  var map = {
     meetingAllowance: ["ค่าเบี้ยประชุมกรรมาธิการ", "เบี้ยประชุมกรรมาธิการ"], travelCost: ["ค่าเบี้ยเลี้ยง ค่าเช่าที่พักและค่าพาหนะ", "เบี้ยเลี้ยง",
     "ค่าเช่าที่พัก", "ค่าพาหนะ"], foodCost: ["ค่าอาหารเลี้ยงรับรองคณะกรรมาธิการสภาผู้แทนราษฎร", "ค่าอาหารเลี้ยงรับรอง", "ค่าอาหาร"], supportCost: ["ค่าใช้จ่ายในการส่งเสริมและสนับสนุนการทำงานของคณะกรรมาธิการสภาผู้แทนราษฎร",
     "ส่งเสริมและสนับสนุน"], seminarCost: ["ค่าใช้จ่ายในการจัดสัมมนาของคณะกรรมาธิการสามัญสภาผู้แทนราษฎร", "จัดสัมมนา", "สัมมนา"], foreignGuestCost: ["ค่าใช้จ่ายเพื่อรับรองแขกต่างประเทศของคณะกรรมาธิการสภาผู้แทนราษฎร",
@@ -1058,8 +1057,8 @@ function _budgetExplicitSummaryNeedles_(field) {
     "ค่าใช้จ่ายในการเดินทางเพื่อปฏิบัติหน้าที่ภายในประเทศ", "เดินทางเพื่อปฏิบัติหน้าที่ภายในประเทศ", "เดินทางภายในประเทศ", "ปฏิบัติหน้าที่ภายในประเทศ",
     "ค่ารับรอง"], foreignTripCost: ["ค่าใช้จ่ายในการเดินทางไปศึกษาดูงานและเจรจาธุรกิจในต่างประเทศ", "ศึกษาดูงานและเจรจาธุรกิจในต่างประเทศ", "เดินทางไปศึกษาดูงาน",
     "ต่างประเทศ"]
-}
-  [field] || []
+  };
+  return map[field] || [];
 }
 function _budgetFindExplicitSummaryKey_(summaryMap, field) {
   var needles = _budgetExplicitSummaryNeedles_(field).map(function(v) {
@@ -1761,7 +1760,7 @@ function _budgetReadModelDataCompleteness_(dto) {
   var segments = _budgetReadModelSegments_(dto);
   return {
     overview: segments.overview.hasData, workflow: segments.workflow.hasData, report: segments.report.hasData, overviewRows: segments.overview.rows.length,
-    workflowRows: segments.workflow.rows.length, reportRows: segments.report.rows.length, owner: "BudgetReadModel.segmentCompleteness.r70"
+    workflowRows: segments.workflow.rows.length, reportRows: segments.report.rows.length, owner: "BudgetReadModel.segmentCompleteness.r72"
 }
 }
 function _budgetReadModelBuildSummaryDto_(payload, opts) {
@@ -1800,7 +1799,7 @@ function _budgetReadModelBuildSummaryDto_(payload, opts) {
     page: paged.page, limit: paged.limit, pageSize: paged.limit, grandTotals: grandTotals, totals: grandTotals, pageTotals: pageTotals, statusSummary: workflowSummary,
     workflow: workflowSummary, budgetWorkflow: workflowSummary, workflowSummary: workflowSummary, workflowRows: workflowRows, statusRows: workflowRows,
     personnelExpenseRow: personnelExpenseRow, includePersonnelCompensation: opts.includePersonnelCompensation !== !1, sourceOfTruth: opts.sourceOfTruth || "BudgetImports",
-    editSource: opts.editSource || "BudgetImports", loadOk: !0, contractStamp: opts.contractStamp || "budget-summary-central-dto-r70"
+    editSource: opts.editSource || "BudgetImports", loadOk: !0, contractStamp: opts.contractStamp || "budget-summary-central-dto-r72"
 };
   dto.segments = _budgetReadModelSegments_(dto);
   dto.overviewSection = dto.segments.overview;
@@ -1811,9 +1810,9 @@ function _budgetReadModelBuildSummaryDto_(payload, opts) {
   dto.meta = _b32O_({
 }, opts.meta || {
 }, {
-    fy: fy, requestedFy: requestedFy, resolvedFy: fy, fallbackFyUsed: dto.fallbackFyUsed, source: opts.source || "BudgetReadModel.centralDTO.r70",
+    fy: fy, requestedFy: requestedFy, resolvedFy: fy, fallbackFyUsed: dto.fallbackFyUsed, source: opts.source || "BudgetReadModel.centralDTO.r72",
     sourceOfTruth: dto.sourceOfTruth, dataSource: opts.dataSource || "centralBudgetDTO", readModelOwner: "Code_32_Domain_Budget.BudgetReadModel.centralDTO",
-    segmentOwner: "BudgetReadModel.overviewWorkflowReport.r70", fast: !0, cacheHit: !1, warnings: [], noWait: !0, personnelExpenseIncluded:  ! ! personnelExpenseRow,
+    segmentOwner: "BudgetReadModel.overviewWorkflowReport.r72", fast: !0, cacheHit: !1, warnings: [], noWait: !0, personnelExpenseIncluded:  ! ! personnelExpenseRow,
     personnelExpenseSource: personnelExpenseRow && personnelExpenseRow.__budgetPersonnelExpenseSource || "", overviewRows: completeness.overviewRows,
     workflowRows: workflowRows.length, reportRows: completeness.reportRows, dataCompleteness: completeness
 });
@@ -1841,7 +1840,7 @@ function _budgetReadModelDashboardPayload_(res, fy, startedAt, sourceMeta) {
 }, data.meta || {
 }, sourceMeta || {
 }, {
-      source: "BudgetReadModel.centralDTO.dashboardPayload.r70", readModelOwner: "Code_32_Domain_Budget.BudgetReadModel.centralDTO", dashboardBudgetOwner: "BudgetReadModel.centralDTO",
+      source: "BudgetReadModel.centralDTO.dashboardPayload.r72", readModelOwner: "Code_32_Domain_Budget.BudgetReadModel.centralDTO", dashboardBudgetOwner: "BudgetReadModel.centralDTO",
       phaseESeparateBudgetHydration: !0, cacheEmptySkipped:  ! plans.length && ! _b32N_(all.budget || all.spent || all.remain), durationMs: Math.max(0,
       Date.now() - Number(startedAt || Date.now()))
 })
@@ -1857,7 +1856,7 @@ function _budgetReadModelDashboardPayload_(res, fy, startedAt, sourceMeta) {
 }, data, {
     rows: plans, grandTotals: totals, statusSummary: workflowSummary, workflowRows: workflowRows
 }));
-  payload.meta.segmentOwner = "BudgetReadModel.dashboardPayload.overviewWorkflowReport.r70";
+  payload.meta.segmentOwner = "BudgetReadModel.dashboardPayload.overviewWorkflowReport.r72";
   return ! payload.totalRemain && (payload.totalBudget || payload.totalPaid) && (payload.totalRemain = payload.totalBudget - payload.totalPaid),
   _applyDashboardBudgetStatusSummary_(payload, payload.fy || fy || "")
 }
@@ -1896,7 +1895,7 @@ function _budgetGetDashboardSummaryForDashboardPhaseE_(payload) {
         if(_dashboardBudgetHasData_(parsed) && _budgetCachePolicyCanStoreSummary_(parsed, payload, "dashboard"))return parsed.meta = _budgetCachePolicyMeta_(_b32O_({
 }, parsed.meta || {
 }, {
-          cacheHit: !0, cacheStatus: "hit", dataSource: "dashboardBudgetCache.cachePolicy.r70", source: "BudgetDomain.getDashboardSummaryForDashboard.cachePolicy.r70.cache",
+          cacheHit: !0, cacheStatus: "hit", dataSource: "dashboardBudgetCache.cachePolicy.r72", source: "BudgetDomain.getDashboardSummaryForDashboard.cachePolicy.r72.cache",
           readModelOwner: "Code_32_Domain_Budget.BudgetDomain", phaseESeparateBudgetHydration: !0, durationMs: Math.max(0, Date.now() - startedAt),
           rowsRead: 0
 }), policy, {
@@ -1913,7 +1912,7 @@ function _budgetGetDashboardSummaryForDashboardPhaseE_(payload) {
 }, payload, {
       fy, fiscalYear: fy, year: fy, includeWorkflow: !0, limit: Math.max(100, Math.min(Number(payload.limit || payload.pageSize || 500) || 500,
       500)), pageSize: Math.max(100, Math.min(Number(payload.limit || payload.pageSize || 500) || 500, 500)), cacheTtlSeconds: policy.ttlSeconds,
-      source: String(payload.source || "dashboard-budget-hydration-cachePolicy-r70")
+      source: String(payload.source || "dashboard-budget-hydration-cachePolicy-r72")
 }), summaryRes = BudgetDomain && typeof 
 /* --------------------------------------------------------------------------
  * 8. BudgetDomain facade methods
@@ -1944,8 +1943,8 @@ BudgetDomain.getSummary == "function" ? BudgetDomain.getSummary(summaryPayload):
   return empty.generatedAt = new Date().toISOString(), empty.meta = _budgetCachePolicyMeta_(_b32O_({
 }, empty.meta || {
 }, {
-    dataSource: "dashboardBudgetEmpty.cachePolicy.r70", cacheHit: !1, cacheEmptySkipped: !0, rowsRead: 0, durationMs: Math.max(0, Date.now() - startedAt),
-    degraded: !1, source: "BudgetDomain.getDashboardSummaryForDashboard.cachePolicy.r70.empty", readModelOwner: "Code_32_Domain_Budget.BudgetDomain",
+    dataSource: "dashboardBudgetEmpty.cachePolicy.r72", cacheHit: !1, cacheEmptySkipped: !0, rowsRead: 0, durationMs: Math.max(0, Date.now() - startedAt),
+    degraded: !1, source: "BudgetDomain.getDashboardSummaryForDashboard.cachePolicy.r72.empty", readModelOwner: "Code_32_Domain_Budget.BudgetDomain",
     phaseESeparateBudgetHydration: !0
 }), policy, {
     status: "empty-not-cached"
@@ -2327,7 +2326,7 @@ function _budgetListImportRowsRobust_(options) {
   options = options || {
 };
   var bypass = _budgetCachePolicyBypass_(options) || options.forceFresh === !0 || options.noCache === !0 || options.bypassCache === !0 || options.bypassRequestCache === !0,
-  cacheStamp, cacheKey = "budgetimports:active:current:r70:" + (_appIsFnName_("_entityCacheStamp_") ? _entityCacheStamp_("budgetimports"): "1");
+  cacheStamp, cacheKey = "budgetimports:active:current:r72:" + (_appIsFnName_("_entityCacheStamp_") ? _entityCacheStamp_("budgetimports"): "1");
   if(! bypass)try {
     var hit = _AppScriptCache_().get(cacheKey);
     if(hit)return JSON.parse(hit) || []
@@ -3093,7 +3092,7 @@ function _budgetCanonicalSummaryRows_(fy, options) {
 };
   fy = _b32FY_(fy) || String(fy || "").replace(/[^0-9]/g, "") || _currentBudgetFyString_();
   var cacheBypass = _budgetCachePolicyBypass_(options) || options.forceFresh === !0 || options.noCache === !0 || options.bypassCache === !0 || options.bypassRequestCache === !0 || options.reload === !0,
-  cacheStamp = _budgetCanonicalEntityStamp_("budgetimports") + "|" + _budgetCanonicalEntityStamp_("budgetsummary") + "|" + _budgetCanonicalEntityStamp_("budgetyearsettingsitems") + "|" + _budgetCanonicalEntityStamp_("personnel_staff") + "|" + _budgetCanonicalEntityStamp_("salarypayments") + "|" + _budgetCanonicalEntityStamp_("salarysettings") + "|" + _budgetCanonicalEntityStamp_("budgetsalarysettings") + "|budget-personnel-summary-row-current-v13-r70",
+  cacheStamp = _budgetCanonicalEntityStamp_("budgetimports") + "|" + _budgetCanonicalEntityStamp_("budgetsummary") + "|" + _budgetCanonicalEntityStamp_("budgetyearsettingsitems") + "|" + _budgetCanonicalEntityStamp_("personnel_staff") + "|" + _budgetCanonicalEntityStamp_("salarypayments") + "|" + _budgetCanonicalEntityStamp_("salarysettings") + "|" + _budgetCanonicalEntityStamp_("budgetsalarysettings") + "|budget-personnel-summary-row-current-v13-r72",
   cacheKey = "budget:canonical:summary:personnel-summary-row-current-v12:" + fy + ":" + cacheStamp, cached = cacheBypass ? null: _budgetCanonicalCacheRead_(cacheKey);
   if(cached && Array.isArray(cached.rows))return _budgetNoWaitEnsurePersonnelRow_(cached.rows, fy);
   var rows = [];
@@ -3670,7 +3669,7 @@ function _budgetNoWaitEnsurePersonnelRow_(rows, fy) {
     expenseAmount: amount, totalPaid: amount, totalSpent: amount, personnelExpense: amount, staffExpense: amount, ytdExpense: amount, currentMonthlyExpense,
     monthlyRateTotal: maxPositive([model.monthlyRateTotal, detailed.monthlyRateTotal, currentMonthlyExpense]), annualCommitment, amount, totalAmount: amount,
     remain, balance: remain, isPersonnelCompensation: !0, synthetic: !0, readOnly: !0, canEdit: !1, canDelete: !1, __budgetPersonnelExpenseSource: source,
-    __budgetPersonnelExpenseContract: "budget-personnel-summary-row-current-v13-r70"
+    __budgetPersonnelExpenseContract: "budget-personnel-summary-row-current-v13-r72"
 });
   return nonPersonnelRows.unshift(row), nonPersonnelRows
 }
@@ -4281,8 +4280,8 @@ function apiBudgetDeleteImport(payload) {
   return BudgetDomain.deleteImport(payload || {
 })
 }
-var BUDGET_HOT_READ_MODEL_STAMP = "budget-summary-central-dto-r70";
-var BUDGET_CACHE_POLICY_STAMP = "budget-cache-policy-single-owner-r70";
+var BUDGET_HOT_READ_MODEL_STAMP = "budget-summary-central-dto-r72";
+var BUDGET_CACHE_POLICY_STAMP = "budget-cache-policy-single-owner-r72";
 
 /* --------------------------------------------------------------------------
  * 7. Single Budget cache policy
@@ -4324,7 +4323,7 @@ function _budgetCachePolicy_(payload, scope) {
   d.ttl, 15, d.max), snapshotTtl = _budgetCachePolicyNumber_(payload.snapshotTtlSeconds || payload.cacheTtlSeconds, d.ttl, 15, d.max), requireWorkflow = ! ! (d.requireWorkflow || payload.includeWorkflow === !0 || payload.__phaseEBudgetHydration === !0),
   requireReport = ! ! (d.requireReport || payload.includeReport === !0), requireOverview = ! ! d.requireOverview;
   return {
-    owner: "Code_32_Domain_Budget.BudgetCachePolicy.r70", stamp: BUDGET_CACHE_POLICY_STAMP, scope: String(scope || "summary"), manualRefresh: manual,
+    owner: "Code_32_Domain_Budget.BudgetCachePolicy.r72", stamp: BUDGET_CACHE_POLICY_STAMP, scope: String(scope || "summary"), manualRefresh: manual,
     allowRead:  ! manual, allowWrite:  ! manual, ttlSeconds: ttl, snapshotTtlSeconds: snapshotTtl, staleTtlSeconds: _budgetCachePolicyNumber_(payload.staleTtlSeconds,
     d.stale, 60, 900), requireWorkflow: requireWorkflow, requireReport: requireReport, requireOverview: requireOverview
 }
@@ -4361,7 +4360,7 @@ function _budgetCachePolicyMeta_(meta, policy, cacheInfo) {
   return _b32O_({
 }, meta || {
 }, {
-    cachePolicyOwner: policy && policy.owner || "Code_32_Domain_Budget.BudgetCachePolicy.r70", cachePolicyStamp: BUDGET_CACHE_POLICY_STAMP, cacheScope: policy && policy.scope || "summary",
+    cachePolicyOwner: policy && policy.owner || "Code_32_Domain_Budget.BudgetCachePolicy.r72", cachePolicyStamp: BUDGET_CACHE_POLICY_STAMP, cacheScope: policy && policy.scope || "summary",
     cacheTtlSeconds: policy && policy.ttlSeconds, cacheManualRefresh:  ! ! (policy && policy.manualRefresh), cacheStatus: cacheInfo && cacheInfo.status || meta && meta.cacheStatus || ""
 })
 }
@@ -4480,7 +4479,7 @@ function apiBudgetGetSummary(payload) {
     try {
       (p && p.__snapshotRefreshAfterInvalidation) !== !0 && _appIsFnName_("_performanceWriteSnapshot_") && res && res.ok !== !1 && _budgetCachePolicyCanStoreSummary_(res,
       p, "snapshot") && _performanceWriteSnapshot_("budgetsummary", fy || "default", res.data !== void 0 ? res.data: res, {
-        source: "apiBudgetGetSummary.direct-refresh.cachePolicy.r70", ttlSeconds: snapshotPolicy.snapshotTtlSeconds, phaseEEmptySnapshotGuard: _budgetCachePolicyCanStoreSummary_(res,
+        source: "apiBudgetGetSummary.direct-refresh.cachePolicy.r72", ttlSeconds: snapshotPolicy.snapshotTtlSeconds, phaseEEmptySnapshotGuard: _budgetCachePolicyCanStoreSummary_(res,
         p, "snapshot"), cachePolicyStamp: BUDGET_CACHE_POLICY_STAMP
 })
 }
@@ -4601,7 +4600,7 @@ function _budgetGetSummaryDomainOwnerPhase5_(payload) {
   payload = auth.payload || {
 };
   var dto = _budgetReadModelBuildSummaryDto_(payload, {
-    source: "BudgetReadModel.centralDTO.BudgetDomain.getSummary.r70", dataSource: "centralBudgetDTO+r70", contractStamp: "budget-summary-central-dto-current-r70",
+    source: "BudgetReadModel.centralDTO.BudgetDomain.getSummary.r72", dataSource: "centralBudgetDTO+r72", contractStamp: "budget-summary-central-dto-current-r72",
     includePersonnelCompensation: !0
 });
   return ok_(dto, "โหลดสรุปงบประมาณสำเร็จ")
