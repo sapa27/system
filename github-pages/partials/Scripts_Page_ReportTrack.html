@@ -1299,6 +1299,86 @@ return detailRow(p[0],p[1])
 function detailCard(title,body,key){
 return'<section class="case-official-card" data-case-section="'+esc(key||"")+'"><div class="case-official-title">'+esc(title)+"</div>"+body+"</section>"
 }
+function detailDateMs(value){
+try{
+if(value==null||value==="")return 864e15;
+if(Object.prototype.toString.call(value)==="[object Date]"&&!isNaN(value.getTime())){var dd=new Date(value.getFullYear(),value.getMonth(),value.getDate());return dd.getTime()}
+if(typeof value==="number"&&isFinite(value)&&value>2e4&&value<4e5){var serial=new Date(Math.round(864e5*(value-25569)));return new Date(serial.getUTCFullYear(),serial.getUTCMonth(),serial.getUTCDate()).getTime()}
+var raw=clean(value);
+if(!raw)return 864e15;
+if(/^\d+(?:\.0+)?$/.test(raw)){var n=Number(raw);if(isFinite(n)&&n>2e4&&n<4e5){var sd=new Date(Math.round(864e5*(n-25569)));return new Date(sd.getUTCFullYear(),sd.getUTCMonth(),sd.getUTCDate()).getTime()}}
+var iso=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s]|$)/);
+if(iso){var y=Number(iso[1]);y>2400&&(y-=543);return new Date(y,Number(iso[2])-1,Number(iso[3])).getTime()}
+var th=raw.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+if(th){var yy=Number(th[3]);yy<100&&(yy+=2500);yy>2400&&(yy-=543);return new Date(yy,Number(th[2])-1,Number(th[1])).getTime()}
+var parsed=new Date(raw.replace(/\s*\(.*?\)\s*/g," "));
+if(!isNaN(parsed.getTime()))return new Date(parsed.getFullYear(),parsed.getMonth(),parsed.getDate()).getTime();
+}catch(_detailDateErr){reportTrackWarn("reportTrack.detail.dateSort",_detailDateErr,{value:value})}
+return 864e15
+}
+function meetingHistoryDateValue(row){
+return pick(row,["meetingDate","date","dateRaw","meeting_date","วันที่ประชุม","วันประชุม"])||row&&row.meetingDate||row&&row.date||""
+}
+function sortMeetingHistoryRows(rows){
+return arr(rows).slice().sort(function(a,b){
+var ad=detailDateMs(meetingHistoryDateValue(a)),bd=detailDateMs(meetingHistoryDateValue(b));
+if(ad!==bd)return ad-bd;
+var ar=Number(clean(pick(a,["round","meetingRound","meetingNo","ครั้งที่","การประชุมครั้งที่"]).replace(/[^0-9.\-]/g,"")))||0;
+var br=Number(clean(pick(b,["round","meetingRound","meetingNo","ครั้งที่","การประชุมครั้งที่"]).replace(/[^0-9.\-]/g,"")))||0;
+return ar-br
+})
+}
+function parseDetailArray(value){
+if(Array.isArray(value))return value.filter(Boolean);
+if(!value||typeof value==="object")return[];
+try{var parsed=JSON.parse(String(value));return Array.isArray(parsed)?parsed.filter(Boolean):[]}catch(_jsonErr){return[]}
+}
+function pickDetailArray(row,keys){
+row=obj(row);
+for(var i=0;i<(keys||[]).length;i++){
+var k=keys[i],v=row[k];
+if(Array.isArray(v)&&v.length)return v.filter(Boolean);
+var parsed=parseDetailArray(v);
+if(parsed.length)return parsed
+}
+return[]
+}
+function letterReplyItems(row){
+row=obj(row);
+var list=pickDetailArray(row,["replies","replyRows","replyItems","replyList","repliesJSON","repliesJson","replyJSON","replyJson","ข้อมูลหนังสือตอบรับ"]);
+if(list.length)return list;
+var one={date:pick(row,["replyDate","receivedDate","receiveDate","วันที่รับ"]),bookNo:pick(row,["replyBookNo","replyLetterNo","replyNo","receiveNo","เลขที่หนังสือตอบรับ"]),title:pick(row,["replyTitle","replySubjectTitle","replySubject","เรื่องหนังสือตอบรับ"]),subject:pick(row,["replySummary","replyNote","summary","note","สาระตอบกลับ","หมายเหตุ"])};
+return isUseful(one.date)||isUseful(one.bookNo)||isUseful(one.title)||isUseful(one.subject)?[one]:[]
+}
+function letterExtensionItems(row){
+row=obj(row);
+var list=pickDetailArray(row,["extensions","extensionRows","extensionItems","extendItems","extensionList","extensionsJSON","extensionsJson","extensionJSON","extensionJson","กรณีขยายระยะเวลา"]);
+if(list.length)return list;
+var one={bookNo:pick(row,["extensionBookNo","extensionLetterNo","extensionNo","extendNo","เลขที่หนังสือขยายเวลา"]),date:pick(row,["extensionDate","extensionLetterDate","extendedDate","วันเดือนปีขยายเวลา"]),title:pick(row,["extensionTitle","extensionSubject","extendTitle","เรื่องขยายเวลา"]),dueDate:pick(row,["extendedDueDate","extensionDueDate","newDueDate","extendDate","วันครบกำหนดขยายเวลา"])};
+return isUseful(one.bookNo)||isUseful(one.date)||isUseful(one.title)||isUseful(one.dueDate)?[one]:[]
+}
+function formatLetterReplies(row){
+var rows=letterReplyItems(row);
+if(!rows.length)return"-";
+return rows.map(function(item,idx){
+item=obj(item);
+var parts=[];
+parts.push(String(idx+1)+". วันที่รับ: "+(thaiDate(pick(item,["date","replyDate","receivedDate","receiveDate","วันที่รับ"]))||"-"));
+parts.push("เลขที่หนังสือ: "+(pick(item,["bookNo","letterNo","replyBookNo","replyLetterNo","replyNo","เลขที่หนังสือ"])||"-"));
+parts.push("เรื่อง: "+(pick(item,["title","subjectTitle","replyTitle","replySubjectTitle","เรื่อง"])||pick(item,["subject","replySubject"])||"-"));
+var summary=pick(item,["summary","note","subject","replySummary","replyNote","สาระตอบกลับ","หมายเหตุ"]);
+summary&&parts.push("สาระตอบกลับ: "+summary);
+return parts.join("\n   ")
+}).join("\n")
+}
+function formatLetterExtensions(row){
+var rows=letterExtensionItems(row);
+if(!rows.length)return"-";
+return rows.map(function(item,idx){
+item=obj(item);
+return [String(idx+1)+". เลขที่หนังสือ: "+(pick(item,["bookNo","letterNo","extensionBookNo","extensionLetterNo","extensionNo","extendNo","เลขที่หนังสือ"])||"-"),"วันเดือนปี: "+(thaiDate(pick(item,["date","letterDate","extensionDate","extensionLetterDate","extendedDate","วันเดือนปี"]))||"-"),"เรื่อง: "+(pick(item,["title","subject","extensionTitle","extensionSubject","extendTitle","เรื่อง"])||"-"),"วันครบกำหนดขยายเวลา: "+(thaiDate(pick(item,["dueDate","extendedDueDate","extensionDueDate","newDueDate","extendDate","วันครบกำหนดขยายเวลา"]))||"-")].join("\n   ")
+}).join("\n")
+}
 function listCard(title,fields,rows,key){
 var body;
 return detailCard(title,(rows=arr(rows)).length?rows.map(function(row){
@@ -1340,6 +1420,7 @@ return pick(r,["phone","tel","mobile","เบอร์โทรศัพท์"]
 var statusPairs=[["สถานะเรื่อง",c.status]];
 "ส่งหน่วยงาน"===c.status&&c.sentAgency&&statusPairs.push(["ส่งให้หน่วยงาน",c.sentAgency]),"ยุติเรื่อง"===c.status&&statusPairs.push(["เหตุผลยุติเรื่อง",c.closedReason]),"ไม่รับเรื่อง"===c.status&&statusPairs.push(["เหตุผล (ไม่รับเรื่อง)",c.rejectionReason]),html+=detailCard("สถานะเรื่อง",detailGrid(statusPairs),"status")
 }
+var detailMeetingRows=sortMeetingHistoryRows(bundle&&bundle.history),detailLetterRows=arr(bundle&&bundle.letters);
 return selected.meetings&&(html+=listCard("ประวัติการประชุม",[{
 label:"ประเภทการประชุม",value:function(r){
 var type=pick(r,["meetingType","committeeType","type","meetingGroup","ประเภทการประชุม"]),sub=pick(r,["subcommitteeName","subcommittee","subCommitteeName","คณะอนุกรรมาธิการ"]);
@@ -1354,7 +1435,7 @@ return thaiDate(pick(r,["date","meetingDate","dateRaw","วันที่ปร
 },{
 label:"มติ/สรุปผล",keys:["note","summary","result","resolution","มติ","สรุปผล","มติ/สรุปผล"]
 }
-],arr(bundle&&bundle.history),"meetings")),selected.letters&&(html+=listCard("หนังสือติดตามมติ",[{
+],detailMeetingRows,"meetings")),selected.letters&&(html+=listCard("หนังสือติดตามมติ",[{
 label:"เลขที่หนังสือ",keys:["letterNo","bookNo","เลขที่หนังสือ"]
 },{
 label:"วันเดือนปี (ส่ง)",value:function(r){
@@ -1375,9 +1456,17 @@ label:"ขยายเวลา",value:function(r){
 return thaiDate(pick(r,["extendDate","extension","ขยายเวลา"]))
 }
 },{
+label:"กรณีขยายระยะเวลา",value:function(r){
+return formatLetterExtensions(r)
+}
+},{
+label:"ข้อมูลหนังสือตอบรับ",value:function(r){
+return formatLetterReplies(r)
+}
+},{
 label:"สถานะ",keys:["letterStatus","status","สถานะ"]
 }
-],arr(bundle&&bundle.letters),"letters")),html+"</div>"
+],detailLetterRows,"letters")),html+"</div>"
 }
 function defaultDetailSections(){
 var out={
