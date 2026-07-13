@@ -3817,35 +3817,22 @@ function _budgetRowsCacheKey_(payload, scope) {
     return"budget:core:" + String(scope || "typeRows") + ":" + fy + ":" + String(typeFilter || "all")
 }
 }
-function _budgetCacheReadRows_(key) {
-  try {
-    var hit = _appIsFnName_("_budgetCanonicalCacheRead_") ? _budgetCanonicalCacheRead_(key): _appIsFnName_("_AppCacheGetJson_") ? _AppCacheGetJson_(key): null,
-    rows = hit && Array.isArray(hit.rows) ? hit.rows: null;
-    return rows ? (rows.__budgetSource = String(hit.source || "core-hot-cache"), rows.__budgetScannedRows = Number(hit.scannedRows || rows.length) || rows.length,
-    rows.__budgetCacheHit = !0, rows.__budgetPerformanceCache = !0, rows): null
+function _budgetCacheReadRows_(key){
+  try{
+    var hit=_appIsFnName_("_budgetCanonicalCacheRead_")?_budgetCanonicalCacheRead_(key):_appIsFnName_("_AppCacheGetJson_")?_AppCacheGetJson_(key):null;
+    var cached=hit&&Array.isArray(hit.rows)?hit:null;
+    if(!cached||!cached.rows.length)return null;
+    var rows=cached.rows;rows.__budgetSource=String(cached.source||"core-hot-cache");rows.__budgetScannedRows=Number(cached.scannedRows||rows.length)||rows.length;rows.__budgetCacheHit=true;rows.__budgetPerformanceCache=true;return rows
+  }catch(error){_b32W_("budget.cache.rows.read",error,{file:"C32"});return null}
 }
-  catch(_e) {
-    return _b32W_("observed.catch", _e, {
-      file: "C32"
-}), null
-}
-}
-function _budgetCacheWriteRows_(key, rows, ttl, source) {
-  rows = _b32A_(rows);
-  try {
-    var policy = _budgetCachePolicy_({
-      cacheTtlSeconds: ttl
-}, "rows"), data = {
-      rows, source: String(source || "core-hot-cache-store"), scannedRows: Number(rows.__budgetScannedRows || rows.length) || rows.length, cachedAt: new Date().toISOString(),
-      corePerformance: !0, cachePolicyStamp: BUDGET_CACHE_POLICY_STAMP
-};
-    _appIsFnName_("_budgetCanonicalCacheWrite_") ? _budgetCanonicalCacheWrite_(key, data, policy.ttlSeconds): _appIsFnName_("_AppCachePutJson_") && _AppCachePutJson_(key,
-    data, policy.ttlSeconds)
-}
-  catch(_e) {
-    _b32W_("budget.obs.observed", _e)
-}
-  return rows.__budgetCacheHit = !1, rows.__budgetPerformanceCache = !0, rows
+function _budgetCacheWriteRows_(key,rows,ttl,source){
+  rows=_b32A_(rows);
+  if(!rows.length){rows.__budgetCacheHit=false;rows.__budgetPerformanceCache=true;return rows}
+  try{
+    var policy=_budgetCachePolicy_({cacheTtlSeconds:ttl},"rows"),data={rows:rows,source:String(source||"core-hot-cache-store"),scannedRows:Number(rows.__budgetScannedRows||rows.length)||rows.length,cachedAt:new Date().toISOString(),corePerformance:true,cachePolicyStamp:BUDGET_CACHE_POLICY_STAMP};
+    if(_appIsFnName_("_budgetCanonicalCacheWrite_"))_budgetCanonicalCacheWrite_(key,data,policy.ttlSeconds);else if(_appIsFnName_("_AppCachePutJson_"))_AppCachePutJson_(key,data,policy.ttlSeconds)
+  }catch(error){_b32W_("budget.cache.rows.write",error)}
+  rows.__budgetCacheHit=false;rows.__budgetPerformanceCache=true;return rows
 }
 function _budgetNoWaitTypeRows_(payload) {
   payload = payload || {
@@ -4472,37 +4459,14 @@ function _budgetHotAttachMeta_(res, payload, started, cacheInfo) {
 }, meta), res.readModel = BUDGET_HOT_READ_MODEL_STAMP, res.cacheHit = meta.cacheHit, res.cacheStatus = meta.cacheStatus, res.durationMs = meta.durationMs,
   res.rowsRead = meta.rowsRead, res.rowsReturned = meta.rowsReturned, res
 }
-function _budgetSummaryReadThrough_(payload, builder) {
-  payload = payload || {
-};
-  var started = Date.now(), policy = _budgetCachePolicy_(payload, "summary"), allowCache = policy.allowRead, key = _budgetHotSummaryCacheKey_(payload),
-  cacheInfo = {
-    key: key, status: allowCache ? "miss": "bypass", hit: !1, policy: BUDGET_CACHE_POLICY_STAMP, owner: policy.owner
-};
-  if(allowCache && _appIsFnName_("_cacheGetJson_"))try {
-    var hit = _cacheGetJson_(key);
-    if(hit && typeof hit == "object" && _budgetCachePolicyCanStoreSummary_(hit, payload, "summary"))return cacheInfo.status = "hit", cacheInfo.hit = !0,
-    _budgetHotAttachMeta_(hit, payload, started, cacheInfo);
-    hit && typeof hit == "object" && (cacheInfo.status = "skip-incomplete-hit")
-}
-  catch(cacheErr) {
-    cacheInfo.status = "read-error", _b32W_("budget.summary.cachePolicy.cacheGet", cacheErr)
-}
-  var res = _budgetHotAttachMeta_(builder(payload || {
-}), payload, started, cacheInfo);
-  try {
-    var data = res && res.data && typeof res.data == "object" ? res.data: res;
-    if(data && typeof data == "object")data.meta = _budgetCachePolicyMeta_(data.meta || res.meta || {
-}, policy, cacheInfo)
-}
-  catch(_policyMetaErr) {
-}
-  if(policy.allowWrite && res && res.ok !== !1 && _budgetCachePolicyCanStoreSummary_(res, payload, "summary") && _appIsFnName_("_cachePutJson_"))try {
-    _cachePutJson_(key, res, policy.ttlSeconds)
-}
-  catch(cachePutErr) {
-    _b32W_("budget.summary.cachePolicy.cachePut", cachePutErr)
-}
+function _budgetSummaryReadThrough_(payload,builder){
+  payload=payload||{};
+  var started=Date.now(),policy=_budgetCachePolicy_(payload,"summary"),allowCache=policy.allowRead,key=_budgetHotSummaryCacheKey_(payload),cacheInfo={key:key,status:allowCache?"miss":"bypass",hit:false,policy:BUDGET_CACHE_POLICY_STAMP,owner:policy.owner};
+  if(allowCache&&_appIsFnName_("_cacheGetJson_"))try{var hit=_cacheGetJson_(key);if(hit&&typeof hit==="object"&&_budgetCachePolicyCanStoreSummary_(hit,payload,"summary")){cacheInfo.status="hit";cacheInfo.hit=true;return _budgetHotAttachMeta_(hit,payload,started,cacheInfo)}if(hit&&typeof hit==="object")cacheInfo.status="skip-incomplete-hit"}catch(cacheError){cacheInfo.status="read-error";_b32W_("budget.summary.cachePolicy.cacheGet",cacheError)}
+  var res;
+  try{res=_budgetHotAttachMeta_(builder(payload||{}),payload,started,cacheInfo)}catch(error){_b32W_("budget.summary.read",error,{source:String(payload.source||"")});var explicit=new Error("อ่านข้อมูลงบประมาณไม่สำเร็จ: "+String(error&&error.message||error));explicit.code="BUDGET_READ_FAILED";throw explicit}
+  try{var data=res&&res.data&&typeof res.data==="object"?res.data:res;if(data&&typeof data==="object")data.meta=_budgetCachePolicyMeta_(data.meta||res.meta||{},policy,cacheInfo)}catch(_policyMetaErr){}
+  if(policy.allowWrite&&res&&res.ok!==false&&_budgetCachePolicyCanStoreSummary_(res,payload,"summary")&&_appIsFnName_("_cachePutJson_"))try{_cachePutJson_(key,res,policy.ttlSeconds)}catch(cachePutError){_b32W_("budget.summary.cachePolicy.cachePut",cachePutError)}
   return res
 }
 
