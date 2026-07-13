@@ -206,20 +206,20 @@ var __APP_GLOBAL__=typeof __APP_GLOBAL__!="undefined"&&__APP_GLOBAL__||typeof gl
       return _dashboardBundleWarnDASH2_("dashboard.bundle.auth.failure",authErr,{method:"apiGetDashboardBundle",requestId:payload&&payload.requestId||"",errorCode:authCode}),_dashboardBundleFailDASH2_(payload,authCode,authErr,"auth")
     }
     cacheTtlSeconds=_dashboardBundleTtlSeconds_(payload);
-    cacheKey="dash_bundle_phaseF_fast_r87_"+_dashboardBundleCacheKey_(payload,sess);
+    cacheKey="dash_bundle_phaseF_fast_r92_"+_dashboardBundleCacheKey_(payload,sess);
     if(payload.forceFresh!==!0&&payload.noCache!==!0&&payload.bypassCache!==!0)try{
       var cachedBundle=_cacheGetJson_(cacheKey);
       if(cachedBundle&&_dashboardStatsHasDashboardData_(cachedBundle.stats||cachedBundle.summaryStats||{})&&((payload&&payload.includeBudget)!==!0||budgetHasDataForDashboardR81_(cachedBundle))){
         cachedBundle.cached=!0;
         cachedBundle.cacheStatus="hit";
         cachedBundle.cacheKey=cacheKey;
-        cachedBundle.meta=_c30O_({},cachedBundle.meta||{},{cached:!0,cacheStatus:"hit",cacheHit:!0,cacheKey,durationMs:Math.max(0,Date.now()-bundleStartedAt),rowsRead:0,source:"dashboard-bundle-cache-r87",dashboardErrorCode:"",errorCode:""});
+        cachedBundle.meta=_c30O_({},cachedBundle.meta||{},{cached:!0,cacheStatus:"hit",cacheHit:!0,cacheKey,durationMs:Math.max(0,Date.now()-bundleStartedAt),rowsRead:0,source:"dashboard-bundle-cache-r92",dashboardErrorCode:"",errorCode:""});
         cachedBundle.dashboardDto?cachedBundle.dashboardDto.meta=_c30O_({},cachedBundle.dashboardDto.meta||{},cachedBundle.meta||{}):cachedBundle.dashboardDto=_dashboardCanonicalBundleDto_(cachedBundle.stats||cachedBundle.summaryStats||{},cachedBundle.budgetStats||cachedBundle.budget||{},cachedBundle.cases||{rows:cachedBundle.rows||[]},cachedBundle.meta);
         return ok_(cachedBundle,"โหลด dashboard bundle สำเร็จ")
       }
       if(cachedBundle&&payload.includeBudget===!0&&!budgetHasDataForDashboardR81_(cachedBundle)){
         payload.__dashboardBudgetCacheMissR81=!0;
-        _appIsFnName_("_recordWarning_")&&_recordWarning_("dashboard.bundle.cache.skipBudgetEmpty.r87",null,{cacheKey:cacheKey,requestId:payload.requestId||""})
+        _appIsFnName_("_recordWarning_")&&_recordWarning_("dashboard.bundle.cache.skipBudgetEmpty.r92",null,{cacheKey:cacheKey,requestId:payload.requestId||""})
       }
     }catch(cacheErr){
       var cacheCode=_dashboardBundleErrorCodeDASH2_(cacheErr,"cache-read");
@@ -243,7 +243,7 @@ var __APP_GLOBAL__=typeof __APP_GLOBAL__!="undefined"&&__APP_GLOBAL__||typeof gl
       var subCode=_dashboardBundleErrorCodeDASH2_(subErr,"subbundle-sheet-read");
       return _dashboardBundleWarnDASH2_("dashboard.bundle.subbundle.failure",subErr,{method:"apiGetDashboardBundle",requestId:payload&&payload.requestId||"",errorCode:subCode}),_dashboardBundleFailDASH2_(payload,subCode,subErr,"subbundle-sheet-read")
     }
-    var bundleMeta=_dashboardBundleMeta_(bundleStartedAt,cacheKey,"dashboard-bundle-request-scope-r87");
+    var bundleMeta=_dashboardBundleMeta_(bundleStartedAt,cacheKey,"dashboard-bundle-request-scope-r92");
     bundleMeta.includeBudget=payload.includeBudget===!0;
     bundleMeta.includeCases=payload.includeCases===!0;
     bundleMeta.hotPathMode=payload.hotPathMode||"dashboard-initial-single-bundle";
