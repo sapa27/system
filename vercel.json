@@ -54,7 +54,7 @@
         },
         {
           "key": "X-Production-Vercel-Proxy",
-          "value": "commission-v1.2-gas-hosted-production-2026-07-11-r40; contract-freeze=production-current-2026-07-06"
+          "value": "commission-v1.2-gas-hosted-production-2026-07-13-r76; contract-freeze=production-current-2026-07-06"
         }
       ]
     },
@@ -115,7 +115,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=300, stale-while-revalidate=3600"
+          "value": "no-cache, max-age=0, must-revalidate"
         }
       ]
     },
