@@ -10,16 +10,30 @@ var __APP_GLOBAL__=typeof __APP_GLOBAL__!="undefined"&&__APP_GLOBAL__||typeof gl
     var aliases=_safeResolveCaseIdentityAliases_(payload),idMap={};
     (aliases.ids||[]).forEach(function(id){id=_s_(id).trim();id&&(idMap[id]=!0)});
     function parseArray(value){
-      if(_c30A_(value))return value.slice();
+      if(_c30A_(value))return value.filter(function(item){return !!item});
       if(value&&typeof value==="object"){
-        if(_c30A_(value.rows))return value.rows.slice();
-        if(_c30A_(value.items))return value.items.slice();
-        if(_c30A_(value.data))return value.data.slice();
+        if(_c30A_(value.rows))return value.rows.filter(function(item){return !!item});
+        if(_c30A_(value.items))return value.items.filter(function(item){return !!item});
+        if(_c30A_(value.data))return value.data.filter(function(item){return !!item});
+        if(_c30A_(value.records))return value.records.filter(function(item){return !!item});
+        if(value.payload)return parseArray(value.payload);
+        if(value.result)return parseArray(value.result);
         return[]
       }
       var raw=_s_(value).replace(/^'+/,"").trim();
       if(!raw||raw==="-"||raw==="[]"||raw==="{}"||/^null|undefined$/i.test(raw))return[];
-      try{var parsed=JSON.parse(raw);return _c30A_(parsed)?parsed:parsed&&_c30A_(parsed.rows)?parsed.rows:parsed&&_c30A_(parsed.items)?parsed.items:parsed&&_c30A_(parsed.data)?parsed.data:[]}catch(_jsonErr){return[]}
+      try{var parsed=JSON.parse(raw);return parseArray(parsed)}catch(_jsonErr){return[]}
+    }
+    function firstParsedArray(row,normalized,keys){
+      row=row||{};normalized=normalized||{};keys=keys||[];
+      for(var i=0;i<keys.length;i++){
+        var k=keys[i],values=[row[k],normalized[k]];
+        for(var j=0;j<values.length;j++){
+          var parsed=parseArray(values[j]);
+          if(parsed.length)return parsed;
+        }
+      }
+      return[]
     }
     function pick(row,keys){row=row||{};for(var i=0;i<keys.length;i++){var k=keys[i];if(row[k]!==void 0&&row[k]!==null&&_s_(row[k]).trim()!=="")return row[k]}return""}
     function readFullLetterRows(){try{return sheetToObjects_(getSheet_("Letters"))||[]}catch(_fullErr){_recordWarning_("letters.fullRead.r91",_fullErr);return[]}}
@@ -38,22 +52,43 @@ var __APP_GLOBAL__=typeof __APP_GLOBAL__!="undefined"&&__APP_GLOBAL__||typeof gl
     }
     function identity(row){row=row||{};var id=_s_(row.letterId||row.id||row.recordId||row.rowId).trim();if(id)return"id:"+id;return["key",_s_(row.caseId),_s_(row.letterNo||row.bookNo),normalizeDateOutput_(row.letterDate||row.date||""),norm(row.subject||row.issue||""),norm(row.agency||"")].join("|")}
     function mergeRow(base,fresh){base=base||{};fresh=fresh||{};var out={};Object.keys(base).forEach(function(k){out[k]=base[k]});Object.keys(fresh).forEach(function(k){var v=fresh[k];if(_c30A_(v)?v.length:v!==void 0&&v!==null&&_s_(v).trim()!=="")out[k]=v;else if(!(k in out))out[k]=v});return out}
+    function normalizeReplyDetail(item){
+      item=item||{};
+      var date=normalizeDateOutput_(item.date||item.replyDate||item.receivedDate||item.receiveDate||item["วันที่รับ"]||"");
+      var bookNo=_normalizeLetterNumberDisplay_(item.bookNo||item.letterNo||item.replyBookNo||item.replyLetterNo||item.replyNo||item.receiveNo||item["เลขที่หนังสือ"]||item["เลขที่หนังสือตอบรับ"]||"");
+      var title=_s_(item.title||item.replyTitle||item.subjectTitle||item.replySubjectTitle||item["เรื่อง"]||item["เรื่องหนังสือตอบรับ"]||item["เรื่องตอบรับ"]||"");
+      var subject=_s_(item.subject||item.summary||item.note||item.replySubject||item.replySummary||item.replyNote||item["สาระตอบกลับ"]||item["หมายเหตุ"]||"");
+      return{date:date,replyDate:date,receivedDate:date,bookNo:bookNo,letterNo:bookNo,title:title,subject:subject,summary:subject,note:subject}
+    }
+    function normalizeExtensionDetail(item){
+      item=item||{};
+      var bookNo=_normalizeLetterNumberDisplay_(item.bookNo||item.letterNo||item.extensionBookNo||item.extensionLetterNo||item.extensionNo||item.extendNo||item["เลขที่หนังสือ"]||item["เลขที่หนังสือขยายเวลา"]||"");
+      var date=normalizeDateOutput_(item.date||item.letterDate||item.extensionDate||item.extensionLetterDate||item.extendedDate||item["วันเดือนปี"]||item["วันเดือนปีขยายเวลา"]||"");
+      var title=_s_(item.title||item.subject||item.extensionTitle||item.extensionSubject||item.extendTitle||item["เรื่อง"]||item["เรื่องขยายเวลา"]||"");
+      var dueDate=normalizeDateOutput_(item.dueDate||item.extendedDueDate||item.extensionDueDate||item.newDueDate||item["วันครบกำหนดขยายเวลา"]||"");
+      return{bookNo:bookNo,letterNo:bookNo,date:date,letterDate:date,extensionDate:date,title:title,subject:title,dueDate:dueDate,extendedDueDate:dueDate,newDueDate:dueDate}
+    }
     function normalizeDetailed(row){
-      var normalized=_normalizeLetterRow_(row||{});
-      var replies=parseArray(normalized.repliesJSON||row.repliesJSON||row.repliesJson||row.replyJSON||row.replyJson||row["ข้อมูลหนังสือตอบรับ"]);
-      var extensions=parseArray(normalized.extensionsJSON||row.extensionsJSON||row.extensionsJson||row.extensionJSON||row.extensionJson||row["กรณีขยายระยะเวลา"]);
+      row=row||{};
+      var normalized=_normalizeLetterRow_(row);
+      var replies=firstParsedArray(row,normalized,["replies","replyRows","replyItems","replyList","repliesJSON","repliesJson","replyJSON","replyJson","ข้อมูลหนังสือตอบรับ"]);
+      var extensions=firstParsedArray(row,normalized,["extensions","extensionRows","extensionItems","extendItems","extensionList","extensionsJSON","extensionsJson","extensionJSON","extensionJson","กรณีขยายระยะเวลา"]);
       if(!replies.length){
-        var replyOne={date:pick(row,["replyDate","receivedDate","receiveDate","วันที่รับ"]),bookNo:pick(row,["replyBookNo","replyLetterNo","replyNo","receiveNo","เลขที่หนังสือตอบรับ","เลขที่หนังสือ"]),title:pick(row,["replyTitle","replySubjectTitle","replySubject","เรื่องหนังสือตอบรับ","เรื่องตอบรับ"]),subject:pick(row,["replySummary","replyNote","summary","note","สาระตอบกลับ","หมายเหตุ"])};
+        var replyOne=normalizeReplyDetail({date:pick(row,["replyDate","receivedDate","receiveDate","วันที่รับ"]),bookNo:pick(row,["replyBookNo","replyLetterNo","replyNo","receiveNo","เลขที่หนังสือตอบรับ"]),title:pick(row,["replyTitle","replySubjectTitle","replySubject","เรื่องหนังสือตอบรับ","เรื่องตอบรับ"]),subject:pick(row,["replySummary","replyNote","สาระตอบกลับ","หมายเหตุ"])});
         _s_(replyOne.date||replyOne.bookNo||replyOne.title||replyOne.subject).trim()&&(replies=[replyOne])
-      }
+      }else replies=replies.map(normalizeReplyDetail).filter(function(item){return _s_(item.date||item.bookNo||item.title||item.subject).trim()!==""});
       if(!extensions.length){
-        var extOne={bookNo:pick(row,["extensionBookNo","extensionLetterNo","extensionNo","extendNo","เลขที่หนังสือขยายเวลา","เลขที่หนังสือ"]),date:pick(row,["extensionDate","extensionLetterDate","extendedDate","วันเดือนปีขยายเวลา","วันเดือนปี"]),title:pick(row,["extensionTitle","extensionSubject","extendTitle","เรื่องขยายเวลา","เรื่อง"]),dueDate:pick(row,["extendedDueDate","extensionDueDate","newDueDate","extendDate","วันครบกำหนดขยายเวลา"])};
+        var extOne=normalizeExtensionDetail({bookNo:pick(row,["extensionBookNo","extensionLetterNo","extensionNo","extendNo","เลขที่หนังสือขยายเวลา"]),date:pick(row,["extensionDate","extensionLetterDate","extendedDate","วันเดือนปีขยายเวลา"]),title:pick(row,["extensionTitle","extensionSubject","extendTitle","เรื่องขยายเวลา"]),dueDate:pick(row,["extendedDueDate","extensionDueDate","newDueDate","วันครบกำหนดขยายเวลา"])});
         _s_(extOne.bookNo||extOne.date||extOne.title||extOne.dueDate).trim()&&(extensions=[extOne])
-      }
+      }else extensions=extensions.map(normalizeExtensionDetail).filter(function(item){return _s_(item.bookNo||item.date||item.title||item.dueDate).trim()!==""});
       normalized.repliesJSON=_safeJsonStringify_(replies);
       normalized.extensionsJSON=_safeJsonStringify_(extensions);
       normalized.replies=replies;
+      normalized.replyRows=replies;
+      normalized.replyItems=replies;
       normalized.extensions=extensions;
+      normalized.extensionRows=extensions;
+      normalized.extensionItems=extensions;
       return normalized
     }
     var projectedRows=[];try{projectedRows=_trackingReadLettersRows_()||[]}catch(_projectedErr){_recordWarning_("letters.projectedRead.r91",_projectedErr);projectedRows=[]}
@@ -206,14 +241,14 @@ var __APP_GLOBAL__=typeof __APP_GLOBAL__!="undefined"&&__APP_GLOBAL__||typeof gl
       return _dashboardBundleWarnDASH2_("dashboard.bundle.auth.failure",authErr,{method:"apiGetDashboardBundle",requestId:payload&&payload.requestId||"",errorCode:authCode}),_dashboardBundleFailDASH2_(payload,authCode,authErr,"auth")
     }
     cacheTtlSeconds=_dashboardBundleTtlSeconds_(payload);
-    cacheKey="dash_bundle_phaseF_fast_r92_"+_dashboardBundleCacheKey_(payload,sess);
+    cacheKey="dash_bundle_phaseF_fast_r93_"+_dashboardBundleCacheKey_(payload,sess);
     if(payload.forceFresh!==!0&&payload.noCache!==!0&&payload.bypassCache!==!0)try{
       var cachedBundle=_cacheGetJson_(cacheKey);
       if(cachedBundle&&_dashboardStatsHasDashboardData_(cachedBundle.stats||cachedBundle.summaryStats||{})&&((payload&&payload.includeBudget)!==!0||budgetHasDataForDashboardR81_(cachedBundle))){
         cachedBundle.cached=!0;
         cachedBundle.cacheStatus="hit";
         cachedBundle.cacheKey=cacheKey;
-        cachedBundle.meta=_c30O_({},cachedBundle.meta||{},{cached:!0,cacheStatus:"hit",cacheHit:!0,cacheKey,durationMs:Math.max(0,Date.now()-bundleStartedAt),rowsRead:0,source:"dashboard-bundle-cache-r92",dashboardErrorCode:"",errorCode:""});
+        cachedBundle.meta=_c30O_({},cachedBundle.meta||{},{cached:!0,cacheStatus:"hit",cacheHit:!0,cacheKey,durationMs:Math.max(0,Date.now()-bundleStartedAt),rowsRead:0,source:"dashboard-bundle-cache-r93",dashboardErrorCode:"",errorCode:""});
         cachedBundle.dashboardDto?cachedBundle.dashboardDto.meta=_c30O_({},cachedBundle.dashboardDto.meta||{},cachedBundle.meta||{}):cachedBundle.dashboardDto=_dashboardCanonicalBundleDto_(cachedBundle.stats||cachedBundle.summaryStats||{},cachedBundle.budgetStats||cachedBundle.budget||{},cachedBundle.cases||{rows:cachedBundle.rows||[]},cachedBundle.meta);
         return ok_(cachedBundle,"โหลด dashboard bundle สำเร็จ")
       }
@@ -243,7 +278,7 @@ var __APP_GLOBAL__=typeof __APP_GLOBAL__!="undefined"&&__APP_GLOBAL__||typeof gl
       var subCode=_dashboardBundleErrorCodeDASH2_(subErr,"subbundle-sheet-read");
       return _dashboardBundleWarnDASH2_("dashboard.bundle.subbundle.failure",subErr,{method:"apiGetDashboardBundle",requestId:payload&&payload.requestId||"",errorCode:subCode}),_dashboardBundleFailDASH2_(payload,subCode,subErr,"subbundle-sheet-read")
     }
-    var bundleMeta=_dashboardBundleMeta_(bundleStartedAt,cacheKey,"dashboard-bundle-request-scope-r92");
+    var bundleMeta=_dashboardBundleMeta_(bundleStartedAt,cacheKey,"dashboard-bundle-request-scope-r93");
     bundleMeta.includeBudget=payload.includeBudget===!0;
     bundleMeta.includeCases=payload.includeCases===!0;
     bundleMeta.hotPathMode=payload.hotPathMode||"dashboard-initial-single-bundle";
