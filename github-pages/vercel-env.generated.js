@@ -5,8 +5,8 @@
   var cfg = {
     "releaseTrack": "production-current",
     "version": "1.2.0-production-current",
-    "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-11-r40",
-    "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-11-r40",
+    "releaseStamp": "commission-v1.2-gas-hosted-production-2026-07-13-r76",
+    "assetStamp": "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-13-r76",
     "hostingTarget": "vercel-api-proxy",
     "vercelStaticFrontendReady": true,
     "vercelApiProxyEnabled": true,
