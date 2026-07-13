@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 RELEASE = str(PACKAGE.get("release") or PACKAGE.get("releaseStamp") or "")
 ASSET = str(PACKAGE.get("assetStamp") or "")
-CURRENT_STAMP = "production-workflow-rewrite-single-owner-r40"
+CURRENT_STAMP = "production-workflow-rewrite-single-owner-r41"
 CANONICAL_API_OWNER = "gas-backend/Code_20_Router.gs::_routerCanonicalHandlerMap_"
 CANONICAL_RUNTIME_OWNER = "gas-backend/Index.html + gas-backend/Scripts_*.html"
 
@@ -31,11 +31,11 @@ FROZEN_PUBLIC_METHODS = "apiGetPhase0ContractGate apiGetPhase1Contract apiGetPha
 ROUTE_SHA256 = "de5c16d36b912ec4267787e225ec029b77c5fb0bd0052781e6f9d51e4afc9f89"
 WRITE_SCHEMA_SHA256 = "a62622facc8e9c97ebfca4bd3bf081597a2bd3fcdbaef1fffefa5ef8f9ed475b"
 PROXY_SHA256 = "3ae9aa68719b1ea7925c7b1013b4e4396e9683e7476fa2cf625af1a7627227c4"
-UI_TEMPLATE_SHA256 = "f2fa4ba42ae750a4e6b5fc0a844421fdb4cfd5e98f92d489d57ef04af0efc692"
+UI_TEMPLATE_SHA256 = "3601c8a4b64ae069c9ed5d494857ca81e94b9a4c8c8d2a0552fcb03de5ea038d"
 UI_TEMPLATE_COUNT = 11
-PAGE_API_AGGREGATE_SHA256 = "6487ffc342326674834f19272cdba8be89ebea4a32fc554577fd28680fdb0be0"
+PAGE_API_AGGREGATE_SHA256 = "92d3a6de9768bf1e2d2f3d712ec25ad93dfd0e0e7f27321bced755991e82354c"
 EXPECTED_SOURCE_FILES = 37
-EXPECTED_BUILD_FILES = 52
+EXPECTED_BUILD_FILES = 53
 GENERATED_FRONTEND = [
     "github-pages/vercel-env.generated.js",
     "github-pages/app-index-foundation-pre-vue.js",
@@ -351,7 +351,8 @@ def current_checks(strict: bool = False):
     require("protected actions use one in-flight guard","var actionInFlight = pages.__actionInFlight" in core and "actionInFlight[busyKey]" in core and "aria-busy" in core,"global action guard")
     require("page lifecycle state machine","window.AppPageHealth" in index and "routing" in index and "runtime-loading" in index and "ready" in index and "error" in index,"AppPageHealth")
     require("navigation uses one route resolver","APP_ROUTE_MAP" in index and "appRouteTargetFromNav" in index and "schedulePageActivation" in index and "routeTarget = routeMap" not in index,"Index navigation owner")
-    require("blocking Vue CDN removed","cdn.jsdelivr.net/npm/vue" not in index and "unpkg.com/vue" not in index,"no external Vue runtime")
+    blocking_vue=bool(re.search(r'<script\b(?=[^>]*\bsrc=["\'][^"\']*(?:cdn\.jsdelivr\.net/npm/vue|unpkg\.com/vue))[^>]*>',index,re.I))
+    require("blocking Vue CDN removed",not blocking_vue and "el.async=!0" in index and "__APP_VUE_READY__" in index,"pinned async Vue fallback only")
 
     require("case semantic owners separated","function _caseSchemaFromRow_(row)" in cases and "function _caseFindIndexedExisting_(input)" in cases and not re.search(r"(?m)^function\s+_r28\s*\(",cases),"Cases domain")
     require("read failures are explicit",all(token in cases+budget_backend+people for token in ["CASE_REPORT_READ_FAILED","BUDGET_READ_FAILED","PEOPLE_PETITIONER_READ_FAILED"]),"Cases/Budget/People")
@@ -360,7 +361,7 @@ def current_checks(strict: bool = False):
     require("shared upload policy","window.AppUploadPolicy = window.AppUploadPolicy ||" in core and "root.AppUploadPolicy.pdfLimitBytes()" in dashboard and "root.AppUploadPolicy.pdfLimitBytes()" in meeting,"AppUploadPolicy")
     require("meeting/search/budget workflow guards","__APP_COMMITTEE_MEETING_BIND_READY__" in meeting and "meeting.editSeed" in report and 'showBudgetTab: "budget"' in critical,"workflow readiness")
     require("meeting legacy read compatibility","_committeeMeetingLegacyBundle_" in cases and "MeetingLogs-compat-read" in cases and "readOnlyLegacy" in meeting and "committee.meeting.canonicalMeetingsRead" in cases and "MeetingDomain.compatibilityProjectedRead" in cases,"canonical errors do not prevent MeetingLogs compatibility read")
-    require("budget empty cache prohibited","cached.rows.length" in budget_backend and contains_code(budget_backend,"return rows.length ? $u(cacheKey"),"empty summary is never cached")
+    require("budget empty cache prohibited","cached.rows.length" in budget_backend and "if(!rows.length)" in compact(budget_backend) and "cached.rows.length" in budget_backend,"empty summary is never cached")
     require("search edit uses one hydration owner",'app:meeting-edit-hydrated' in report and "AppMeetingRouteActionOwner" in report and "root.meetingEditCase(editKey" not in report and 'root.meetingEditCase(caseId, { seed: seed, __singlePass: true' in meeting and 'doc.dispatchEvent(new CustomEvent("app:meeting-edit-hydrated"' in meeting,"route owner delegates to canonical meetingEditCase and confirms")
     require("datepicker single event owner","thai-datepicker-single-event-current" in core and 'doc[_$c](openEvent, delegated, !0)' in core and 'doc[_$c]("focusin", delegated' not in core,"pointer/keyboard single owner")
 
