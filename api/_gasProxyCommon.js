@@ -1,5 +1,5 @@
 "use strict";
-const RELEASE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-13-r95";
+const RELEASE_STAMP = "commission-v1.2-gas-hosted-production-2026-07-13-r96";
 const DEFAULT_MAX_BODY_BYTES = 1048576;
 const MAX_STREAM_BODY_BYTES = 4300000;
 const MAX_RESPONSE_BODY_BYTES = 4300000;
