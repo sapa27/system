@@ -1331,8 +1331,16 @@ return ar-br
 }
 function parseDetailArray(value){
 if(Array.isArray(value))return value.filter(Boolean);
-if(!value||typeof value==="object")return[];
-try{var parsed=JSON.parse(String(value));return Array.isArray(parsed)?parsed.filter(Boolean):[]}catch(_jsonErr){return[]}
+if(value&&typeof value==="object"){
+if(Array.isArray(value.rows))return value.rows.filter(Boolean);
+if(Array.isArray(value.items))return value.items.filter(Boolean);
+if(Array.isArray(value.data))return value.data.filter(Boolean);
+if(Array.isArray(value.records))return value.records.filter(Boolean);
+return[]
+}
+var raw=String(value==null?"":value).replace(/^'+/,"").trim();
+if(!raw||raw==="-"||raw==="[]"||raw==="{}"||/^null|undefined$/i.test(raw))return[];
+try{var parsed=JSON.parse(raw);return Array.isArray(parsed)?parsed.filter(Boolean):parsed&&Array.isArray(parsed.rows)?parsed.rows.filter(Boolean):parsed&&Array.isArray(parsed.items)?parsed.items.filter(Boolean):[]}catch(_jsonErr){return[]}
 }
 function pickDetailArray(row,keys){
 row=obj(row);
@@ -1382,10 +1390,11 @@ return merged
 }
 function enrichBundleLetterDetails(bundle,id,localCaseRow){
 bundle=bundle||{};var letters=arr(bundle.letters);
-if(letters.length&&letters.some(letterHasReplyOrExtensionDetails))return Promise.resolve(bundle);
+if(letters.length&&letters.every(letterHasReplyOrExtensionDetails))return Promise.resolve(bundle);
 var fc=bundle.case||normalizeCase(localCaseRow||{}),raw=bundle.rawCase||localCaseRow||{};
 var payload={caseId:clean(fc.id)||clean(raw.caseId)||id,id:clean(fc.id)||clean(raw.caseId)||id,caseNum:clean(fc.caseNum)||clean(raw.caseNum)||"",recNo:clean(fc.recNo)||clean(raw.recNo)||"",title:clean(fc.title||fc.considerationTitle)||clean(raw.title||raw.caseTitle)||"",caseTitle:clean(fc.considerationTitle||fc.title)||clean(raw.caseTitle||raw.title)||"",forceFresh:!0,noCache:!0,bypassCache:!0,cacheTtlSeconds:0,source:"search-detail-letter-subdetails-r85"};
 return api("apiGetLetters",payload).then(function(res){var data=unwrap(res),fresh=rowsFrom(data);
+if(!fresh.length)fresh=rowsFrom(res);
 if(fresh.length){bundle.letters=mergeLetterDetailRows(letters,fresh)}
 return bundle
 }).catch(function(err){reportTrackWarn("reportTrack.detail.letterDetails.r85",err,{caseId:id});return bundle})
