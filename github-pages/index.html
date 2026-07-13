@@ -102,7 +102,7 @@
       };
     }
     root.Vue={
-      version:"3.5.13-compat-shell-r94",
+      version:"3.5.13-compat-shell-r95",
       __appLocalCompat:true,
       reactive:reactive,
       shallowRef:shallowRef,
@@ -113,7 +113,7 @@
       h:h,
       createApp:createApp
     };
-    root.__APP_VUE_CDN_STATE__={ok:true,mode:"local-compat-shell",owner:"Index.vue-ready",stamp:"vue-cdn-independent-login-r94"};
+    root.__APP_VUE_CDN_STATE__={ok:true,mode:"local-compat-shell",owner:"Index.vue-ready",stamp:"vue-cdn-independent-login-r95"};
     try{doc.documentElement.setAttribute("data-vue-runtime","local-compat-shell") }catch(_e){}
     return true;
   }
@@ -149,7 +149,7 @@
       }).then(function(ok){return ok||loadAt(i+1)});
     }
     return loadAt(0);
-  }),{owner:"Index.vue-ready",fallback:"local-compat-shell-r94"});
+  }),{owner:"Index.vue-ready",fallback:"local-compat-shell-r95"});
 })(window,document);
 </script>
 <script defer data-app-asset-policy="pinned-primary"src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8"crossorigin="anonymous"referrerpolicy="no-referrer">
@@ -451,7 +451,47 @@ html.app-auth-resolving:not(.app-authenticated) #login-page{display:flex!importa
 <a class="app-skip-link"href="#main">ข้ามไปยังเนื้อหาหลัก</a>
 <div id="app-live-region"class="app-live-region app-sr-only"role="status"aria-live="polite"aria-atomic="true"></div>
 
-<div id="app"><div class="app-initial-shell"aria-live="polite"><div class="app-initial-card"><div class="app-initial-logo"></div><div class="app-initial-title">ระบบบริหารจัดการเรื่องพิจารณา</div><div class="app-initial-subtitle">กำลังเตรียมหน้าเข้าระบบ...</div></div></div></div>
+<div id="app" data-instant-shell="login-fallback"><div class="vue3-preserve-root app-static-login-fallback" data-static-login-shell="1">
+<div class="vue3-login-host app-static-login-host" data-static-login-host="1">
+<div id="login-page">
+<div class="lcurrentStamp2-card">
+<div class="lcurrentStamp2-logo-wrap"><span class="lcurrentStamp2-logo-placeholder" aria-hidden="true">รัฐสภา</span><img id="login-logo-img" src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22%2F%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22%2F%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%2F%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C%2Ftext%3E%3C%2Fsvg%3E"data-logo="parliament"decoding="sync"
+alt="ตราสัญลักษณ์รัฐสภาไทย"
+loading="eager">
+</div>
+<div class="lcurrentStamp2-title-main">ระบบบริหารจัดการเรื่องพิจารณา</div>
+<div class="lcurrentStamp2-title-sub">คณะกรรมาธิการการป้องกันและปราบปรามการทุจริตประพฤติมิชอบ</div>
+<div class="lcurrentStamp2-title-org">สภาผู้แทนราษฎร</div>
+<div class="lcurrentStamp2-form-block">
+<div class="lcurrentStamp2-form-label">เข้าสู่ระบบ</div>
+<form id="login-form"method="post"action="javascript:void(0)"onsubmit="return false"data-submit="preventDefault"autocomplete="off"data-password-manager="off">
+<div class="lcurrentStamp2-field">
+<i class="fas fa-user lcurrentStamp2-field-icon"></i>
+<input type="text"id="u_name"class="lcurrentStamp2-input"placeholder="ชื่อผู้ใช้งาน"
+autocomplete="off"autocapitalize="none"spellcheck="false"value=""
+data-keydown="login-next-password">
+</div>
+<div class="lcurrentStamp2-field">
+<i class="fas fa-lock lcurrentStamp2-field-icon"></i>
+<input type="password"id="u_pass"class="lcurrentStamp2-input"placeholder="รหัสผ่าน"
+autocomplete="off"value=""
+data-login-enter="1">
+</div>
+<div id="login-error-msg"class="lcurrentStamp2-error"style="display:none;"role="alert"aria-live="assertive"></div>
+<button id="btn-login-action"type="button"class="lcurrentStamp2-btn"data-login-button="1"data-default-text="เข้าสู่ระบบ">
+<i class="fas fa-sign-in-alt"></i>เข้าสู่ระบบ
+</button>
+</form>
+</div>
+<div class="lcurrentStamp2-footer">
+กลุ่มงานคณะกรรมาธิการการป้องกันและปราบปรามการทุจริตประพฤติมิชอบ<br>
+สำนักกรรมาธิการ 3·สำนักงานเลขาธิการสภาผู้แทนราษฎร
+</div>
+</div>
+</div>
+</div>
+
+</div></div>
 <div id="app-boot-status"class="app-boot-status"aria-live="polite">
 <div class="app-boot-note text-center small mt-3">กำลังเตรียมระบบ หากหน้านี้ค้างอยู่กรุณาโหลดหน้าใหม่</div>
 </div>
@@ -460,7 +500,8 @@ html.app-auth-resolving:not(.app-authenticated) #login-page{display:flex!importa
 <div class="vue3-login-host"v-show="!state.authenticated">
 <div id="login-page">
 <div class="lcurrentStamp2-card">
-<div class="lcurrentStamp2-logo-wrap"><span class="lcurrentStamp2-logo-placeholder" aria-hidden="true">รัฐสภา</span><img id="login-logo-img" src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22%2F%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22%2F%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%2F%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C%2Ftext%3E%3C%2Fsvg%3E"data-logo="parliament"decoding="sync"
+<div class="lcurrentStamp2-logo-wrap">
+<img id="login-logo-img"class="logo-loaded"src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22128%22%20height%3D%22128%22%20viewBox%3D%220%200%20128%20128%22%3E%3Crect%20width%3D%22128%22%20height%3D%22128%22%20rx%3D%2224%22%20fill%3D%22%23f8fafc%22%2F%3E%3Ccircle%20cx%3D%2264%22%20cy%3D%2248%22%20r%3D%2226%22%20fill%3D%22%23d4af37%22%2F%3E%3Cpath%20d%3D%22M28%20100h72M40%2088h48M48%2074h32%22%20stroke%3D%22%23334155%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%2F%3E%3Ctext%20x%3D%2264%22%20y%3D%2255%22%20text-anchor%3D%22middle%22%20font-family%3D%22Sarabun%2C%20Arial%22%20font-size%3D%2218%22%20fill%3D%22%23334155%22%3E%E0%B8%AA%E0%B8%A0%E0%B8%B2%3C%2Ftext%3E%3C%2Fsvg%3E"data-logo="parliament"decoding="sync"
 alt="ตราสัญลักษณ์รัฐสภาไทย"
 loading="eager">
 </div>
