@@ -1394,15 +1394,55 @@ freshRows.forEach(function(row){var key=letterDetailIdentity(row);if(key&&!used[
 return merged
 }
 function enrichBundleLetterDetails(bundle,id,localCaseRow){
-bundle=bundle||{};var letters=arr(bundle.letters);
-if(letters.length&&letters.every(letterHasStoredSubdetails))return Promise.resolve(bundle);
-var fc=bundle.case||normalizeCase(localCaseRow||{}),raw=bundle.rawCase||localCaseRow||{};
-var payload={caseId:clean(fc.id)||clean(raw.caseId)||id,id:clean(fc.id)||clean(raw.caseId)||id,caseNum:clean(fc.caseNum)||clean(raw.caseNum)||"",recNo:clean(fc.recNo)||clean(raw.recNo)||"",title:clean(fc.title||fc.considerationTitle)||clean(raw.title||raw.caseTitle)||"",caseTitle:clean(fc.considerationTitle||fc.title)||clean(raw.caseTitle||raw.title)||"",forceFresh:!0,noCache:!0,bypassCache:!0,cacheTtlSeconds:0,source:"search-detail-letter-subdetails-r85"};
-return api("apiGetLetters",payload).then(function(res){var data=unwrap(res),fresh=rowsFrom(data);
-if(!fresh.length)fresh=rowsFrom(res);
-if(fresh.length){bundle.letters=mergeLetterDetailRows(letters,fresh)}
-return bundle
-}).catch(function(err){reportTrackWarn("reportTrack.detail.letterDetails.r85",err,{caseId:id});return bundle})
+bundle=bundle||{};
+var letters=arr(bundle.letters),fc=bundle.case||normalizeCase(localCaseRow||{}),raw=bundle.rawCase||localCaseRow||{};
+function normKey(v){return clean(v).replace(/[\u00A0\u200B-\u200D\uFEFF]/g," ").replace(/\s+/g,"").toLowerCase()}
+function rowsDeep(res){
+  var out=[],queue=[res],seen=[];
+  while(queue.length&&seen.length<80){
+    var cur=queue.shift();
+    if(!cur||seen.indexOf(cur)>=0)continue;
+    seen.push(cur);
+    if(Array.isArray(cur)){out=out.concat(cur);continue}
+    if("object"!==typeof cur)continue;
+    ["rows","letters","letterRows","trackingLetters","followUps","items","records","data","result","payload","response","body"].forEach(function(k){
+      var v=cur[k];
+      if(Array.isArray(v))out=out.concat(v);else if(v&&"object"===typeof v)queue.push(v)
+    })
+  }
+  return out.filter(Boolean)
+}
+function identityPayload(){
+  var caseId=clean(fc.id||fc.caseId)||clean(raw.caseId||raw.id)||clean(id),caseNum=clean(fc.caseNum||fc.caseNo)||clean(raw.caseNum||raw.caseNo||raw.runningNo),recNo=clean(fc.recNo||fc.receiveNo)||clean(raw.recNo||raw.receiveNo),title=clean(fc.title||fc.caseTitle||fc.considerationTitle)||clean(raw.title||raw.caseTitle||raw.considerationTitle),caseTitle=clean(fc.considerationTitle||fc.caseTitle||fc.title)||clean(raw.caseTitle||raw.considerationTitle||raw.title);
+  return{caseId:caseId,id:caseId,caseNum:caseNum,caseNo:caseNum,recNo:recNo,receiveNo:recNo,title:title,caseTitle:caseTitle,petitioners:clean(fc.petitioners||raw.petitioners||raw.petitionerName),includeLetters:!0,forceFresh:!0,forceRefresh:!0,noCache:!0,bypassCache:!0,cacheTtlSeconds:0,limit:250,__meetingListMode:"caseLetters",source:"search-detail-letter-list-r94"}
+}
+function hasActualSubdetails(row){return pickDetailArray(row,["replies","replyRows","replyItems","replyList","repliesJSON","repliesJson","replyJSON","replyJson","ข้อมูลหนังสือตอบรับ"]).length>0||pickDetailArray(row,["extensions","extensionRows","extensionItems","extendItems","extensionList","extensionsJSON","extensionsJson","extensionJSON","extensionJson","กรณีขยายระยะเวลา"]).length>0}
+function rowIdentity(row){row=obj(row);return{caseId:clean(pick(row,["caseId","id","caseID"])),caseNum:clean(pick(row,["caseNum","caseNo","runningNo","ลำดับเรื่อง"])),recNo:clean(pick(row,["recNo","receiveNo","เลขรับเรื่อง"])),title:clean(pick(row,["caseTitle","title","considerationTitle","ชื่อเรื่อง","ชื่อเรื่องพิจารณา"]))}}
+function sameCase(row){
+  var p=identityPayload(),r=rowIdentity(row);
+  return !!((p.caseId&&r.caseId&&p.caseId===r.caseId)||(p.caseNum&&r.caseNum&&normKey(p.caseNum)===normKey(r.caseNum))||(p.recNo&&r.recNo&&normKey(p.recNo)===normKey(r.recNo))||(p.title&&r.title&&(normKey(p.title)===normKey(r.title)||normKey(r.title).indexOf(normKey(p.title))>-1||normKey(p.title).indexOf(normKey(r.title))>-1)));
+}
+function mergeFresh(freshRows){
+  freshRows=arr(freshRows).filter(Boolean);
+  if(!freshRows.length)return bundle;
+  var byId={},out=arr(bundle.letters).slice(),used={};
+  freshRows.forEach(function(row){var key=letterDetailIdentity(row);key&&(byId[key]=row)});
+  out=out.map(function(row){var key=letterDetailIdentity(row),fresh=key&&byId[key];fresh&&(used[key]=1);return fresh?mergeLetterDetailRow(row,fresh):row});
+  freshRows.forEach(function(row){var key=letterDetailIdentity(row);if(!key||!used[key])out.push(row)});
+  bundle.letters=out;
+  return bundle
+}
+var payload=identityPayload();
+var shouldRefresh=!letters.length||!letters.every(hasActualSubdetails);
+if(!shouldRefresh)return Promise.resolve(bundle);
+return api("apiGetLetters",payload).then(function(res){
+  var fresh=rowsDeep(res);
+  if(fresh.length)return mergeFresh(fresh);
+  return api("apiGetAllLettersWithCaseInfo",Object.assign({},payload,{source:"search-detail-letter-list-fallback-r94",fallbackFrom:"apiGetLetters"})).then(function(fallbackRes){
+    var rows=rowsDeep(fallbackRes).filter(sameCase);
+    return mergeFresh(rows)
+  }).catch(function(_fallbackErr){reportTrackWarn("reportTrack.detail.letterDetails.fallback.r94",_fallbackErr,{caseId:id});return bundle})
+}).catch(function(err){reportTrackWarn("reportTrack.detail.letterDetails.r94",err,{caseId:id});return bundle})
 }
 function formatLetterReplies(row){
 var rows=letterReplyItems(row);
