@@ -441,8 +441,8 @@ function readFileAsBase64(file){
 return new Promise(function(resolve,reject){
 if(!file)return reject("ไม่พบไฟล์");
 if(!/pdf$/i.test(String(file.type||""))&&!/\.pdf$/i.test(String(file.name||"")))return reject("รองรับเฉพาะไฟล์ PDF เท่านั้น");
-var maxBytes=root.AppUploadPolicy.pdfLimitBytes();
-if(file.size&&file.size>root.AppUploadPolicy.pdfLimitBytes())return reject("ไฟล์ PDF มีขนาดใหญ่เกิน 6 MB กรุณาลดขนาดไฟล์แล้วลองใหม่");
+var maxBytes=6291456;
+if(file.size&&file.size>6291456)return reject("ไฟล์ PDF มีขนาดใหญ่เกิน 6 MB กรุณาลดขนาดไฟล์แล้วลองใหม่");
 var reader=new FileReader;
 reader.onload=function(e){
 try{
