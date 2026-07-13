@@ -1100,18 +1100,41 @@ petId:String(_peopleFirstValue_(r,["petId","id","petitionerId"])||""),name:Strin
 }
 }
 function _Domain_getPetitioners(){
-  var rows=[],primaryError=null,fallbackError=null;
-  try{rows=_readPeopleSheetRowsDirect_("Petitioners").map(normalizePetitionerRow_)}catch(error){primaryError=error;rows=[]}
-  rows=(Array.isArray(rows)?rows:[]).filter(function(row){return row&&String(row.name||"").trim()&&!_peopleBoolDeleted_(row.isDeleted)});
-  if(rows.length)return rows;
-  try{
-    var main=_appIsFnName_("_listMainDataRows_")?_listMainDataRows_(false):[],map={};
-    (Array.isArray(main)?main:[]).forEach(function(row){row=row||{};var name=String(_peopleFirstValue_(row,["petitioners","petitionerName","petitioner","proposer","ผู้ร้อง","ผู้ร้องเรียน","ผู้เสนอญัตติ","ผู้เสนอ"])||"").trim();if(!name)return;var parts=name.split(/[;,、\n]+/).map(function(value){return String(value||"").trim()}).filter(Boolean);if(!parts.length)parts=[name];parts.forEach(function(value){var key=value.toLowerCase();if(!map[key])map[key]=normalizePetitionerRow_({petId:"AUTO-"+(Object.keys(map).length+1),name:value,phone:_peopleFirstValue_(row,["petitionerPhone","phone","tel","เบอร์โทรศัพท์"])||"",caseId:row.caseId||"",remark:"derived-from-maindata"})})});
-    rows=Object.keys(map).map(function(key){return map[key]});
-    if(rows.length||!primaryError)return rows
-  }catch(error){fallbackError=error}
-  if(primaryError||fallbackError){var explicit=new Error("อ่านข้อมูลผู้ร้องไม่สำเร็จ: "+String((fallbackError||primaryError)&&((fallbackError||primaryError).message)||(fallbackError||primaryError)));explicit.code="PEOPLE_PETITIONER_READ_FAILED";throw explicit}
-  return []
+var rows=[];
+try{
+rows=_readPeopleSheetRowsDirect_("Petitioners").map(normalizePetitionerRow_)
+}
+catch(e){
+rows=[]
+}
+if((rows=(Array.isArray(rows)?rows:[]).filter(function(r){
+return r&&String(r.name||"").trim()&&!_peopleBoolDeleted_(r.isDeleted)
+})).length)return rows;
+try{
+var main=_appIsFnName_("_listMainDataRows_")?_listMainDataRows_(!1):[],map={
+};
+return(Array.isArray(main)?main:[]).forEach(function(row,idx){
+row=row||{
+};
+var name=String(_peopleFirstValue_(row,["petitioners","petitionerName","petitioner","proposer","ผู้ร้อง","ผู้ร้องเรียน","ผู้เสนอญัตติ","ผู้เสนอ"])||"").trim();
+if(name){
+var parts=name.split(/[;,、\n]+/).map(function(x){
+return String(x||"").trim()
+}).filter(Boolean);
+parts.length||(parts=[name]),parts.forEach(function(n){
+var key=n.toLowerCase();
+map[key]||(map[key]=normalizePetitionerRow_({
+petId:"AUTO-"+(Object.keys(map).length+1),name:n,phone:_peopleFirstValue_(row,["petitionerPhone","phone","tel","เบอร์โทรศัพท์"])||"",caseId:row.caseId||"",remark:"derived-from-maindata"
+}))
+})
+}
+}),Object.keys(map).map(function(k){
+return map[k]
+})
+}
+catch(_directErr){
+return[]
+}
 }
 function _Domain_savePetitioner(p){
 return domainWrite_("savePetitioner",p,function(input){
