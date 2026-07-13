@@ -1375,6 +1375,12 @@ return ["key",clean(pick(row,["caseId","caseNo","caseNum","receiveNo","recNo"]))
 function letterHasReplyOrExtensionDetails(row){
 return letterReplyItems(row).length>0||letterExtensionItems(row).length>0
 }
+function letterHasStoredSubdetails(row){
+row=obj(row);
+if(pickDetailArray(row,["replies","replyRows","replyItems","replyList","repliesJSON","repliesJson","replyJSON","replyJson","ข้อมูลหนังสือตอบรับ"]).length)return!0;
+if(pickDetailArray(row,["extensions","extensionRows","extensionItems","extendItems","extensionList","extensionsJSON","extensionsJson","extensionJSON","extensionJson","กรณีขยายระยะเวลา"]).length)return!0;
+return!!clean(pick(row,["replyDate","receivedDate","receiveDate","replyBookNo","replyLetterNo","replyNo","receiveNo","replyTitle","replySubjectTitle","replySubject","replySummary","replyNote","วันที่รับ","เลขที่หนังสือตอบรับ","เรื่องหนังสือตอบรับ","สาระตอบกลับ"])||pick(row,["extensionBookNo","extensionLetterNo","extensionNo","extendNo","extensionDate","extensionLetterDate","extendedDate","extensionTitle","extensionSubject","extendTitle","extendedDueDate","extensionDueDate","newDueDate","เลขที่หนังสือขยายเวลา","วันเดือนปีขยายเวลา","เรื่องขยายเวลา","วันครบกำหนดขยายเวลา"]));
+}
 function mergeLetterDetailRow(base,fresh){
 base=obj(base);fresh=obj(fresh);var out={};
 Object.keys(base).forEach(function(k){out[k]=base[k]});
@@ -1390,7 +1396,7 @@ return merged
 }
 function enrichBundleLetterDetails(bundle,id,localCaseRow){
 bundle=bundle||{};var letters=arr(bundle.letters);
-if(letters.length&&letters.every(letterHasReplyOrExtensionDetails))return Promise.resolve(bundle);
+if(letters.length&&letters.every(letterHasStoredSubdetails))return Promise.resolve(bundle);
 var fc=bundle.case||normalizeCase(localCaseRow||{}),raw=bundle.rawCase||localCaseRow||{};
 var payload={caseId:clean(fc.id)||clean(raw.caseId)||id,id:clean(fc.id)||clean(raw.caseId)||id,caseNum:clean(fc.caseNum)||clean(raw.caseNum)||"",recNo:clean(fc.recNo)||clean(raw.recNo)||"",title:clean(fc.title||fc.considerationTitle)||clean(raw.title||raw.caseTitle)||"",caseTitle:clean(fc.considerationTitle||fc.title)||clean(raw.caseTitle||raw.title)||"",forceFresh:!0,noCache:!0,bypassCache:!0,cacheTtlSeconds:0,source:"search-detail-letter-subdetails-r85"};
 return api("apiGetLetters",payload).then(function(res){var data=unwrap(res),fresh=rowsFrom(data);
