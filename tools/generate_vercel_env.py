@@ -257,7 +257,7 @@ def _sync_static_login_contract() -> bool:
 .lcurrentStamp2-logo-wrap img{{visibility:visible!important}}
 .app-boot-status{{display:none;background:#fff;color:#1e293b}}
 html.app-auth-resolving #app-boot-status{{display:none!important}}
-html.app-auth-resolving:not(.app-authenticated) #login-page{{display:flex!important}}
+html.app-auth-resolving #login-page{{display:none!important}}
 {STATIC_LOGIN_CONTRACT_END}"""
     block_pattern = re.compile(re.escape(STATIC_LOGIN_CONTRACT_START) + r'[\s\S]*?' + re.escape(STATIC_LOGIN_CONTRACT_END))
     if block_pattern.search(updated):
