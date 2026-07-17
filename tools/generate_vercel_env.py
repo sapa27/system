@@ -214,7 +214,7 @@ def _staticize_index_from_canonical() -> bool:
 
     updated = script_pattern.sub(externalize_script, updated)
     transport_anchor = '<script src="app-index-foundation-pre-vue.js"></script>'
-    transport_block = '<script src="app-config.js"></script>\n<script src="github-gas-transport.js"></script>\n' + transport_anchor
+    transport_block = '<script src="vercel-env.generated.js"></script>\n<script src="app-config.js"></script>\n<script src="github-gas-transport.js"></script>\n' + transport_anchor
     if transport_anchor not in updated:
         raise RuntimeError("STATIC_INDEX_TRANSPORT_ANCHOR_MISSING")
     updated = updated.replace(transport_anchor, transport_block, 1)
