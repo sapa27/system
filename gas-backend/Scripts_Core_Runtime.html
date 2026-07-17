@@ -3,7 +3,7 @@
   "use strict";
   if (root.__APP_CASE_RELATION_SHARED_OWNER__) return;
   root.__APP_CASE_RELATION_SHARED_OWNER__ = true;
-  var OWNER = "Scripts_Core_Runtime:AppCaseRelation:r145";
+  var OWNER = "Scripts_Core_Runtime:AppCaseRelation:r146";
   var SEQUENCE_KEYS = Object.freeze([
     "caseNum", "caseNo", "runningNo", "ลำดับเรื่อง", "เลขลำดับเรื่อง",
     "ลำดับเรื่องพิจารณา", "เลขที่ลำดับเรื่อง", "หมายเลขลำดับเรื่อง",
@@ -13,7 +13,7 @@
   var CHILD_CASE_ID_KEYS = Object.freeze(["caseId", "caseID", "case_id"]);
   function text(value){ return value == null ? "" : String(value); }
   function normalizeSequence(value){
-    return text(value).replace(/[ ​-‍﻿]/g, "").replace(/\s+/g, " ").trim();
+    return text(value).replace(/[ ​-‍\uFEFF]/g, "").replace(/\s+/g, " ").trim();
   }
   function sequenceFrom(row){
     if (row == null) return "";
@@ -186,7 +186,7 @@ var pageKit=mark(obj("AppPageKit"),OWNER_MAP_helper,"thin-helper-facade",{__runt
   if (!root || root.__APP_MUTATION_REFRESH_POLICY_OWNER__) return;
   root.__APP_MUTATION_REFRESH_POLICY_OWNER__ = true;
 
-  var OWNER = "Scripts_Core_Runtime:app-mutation-refresh-policy-owner:r145";
+  var OWNER = "Scripts_Core_Runtime:app-mutation-refresh-policy-owner:r146";
 
   function isFn(fn) {
     return typeof fn === "function";
