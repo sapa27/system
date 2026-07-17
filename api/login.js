@@ -63,7 +63,7 @@ module.exports = async function loginProxyHandler(req, res) {
         method: "apiLogin",
         payload,
         req,
-        timeoutMs: body.timeoutMs || process.env.GAS_LOGIN_PROXY_TIMEOUT_MS || 30000,
+        timeoutMs: body.timeoutMs || process.env.GAS_LOGIN_PROXY_TIMEOUT_MS || 50000,
       });
     const out = result.body && typeof result.body === "object"
     ? result.body
