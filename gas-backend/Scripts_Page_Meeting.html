@@ -1088,6 +1088,10 @@
               }
               return !1;
             }
+            var rowCaseNum = A(row || {}),
+              rowCaseId = d(row.caseId || row.caseID || row.case_id || "").trim();
+            rowCaseNum && E("meeting-caseNum", rowCaseNum);
+            rowCaseId && E("meeting-caseId", rowCaseId);
             (E("meeting-letterId", row.letterId || id || ""),
               E("meeting-letterNo", row.letterNo || row.bookNo || ""),
               M("meeting-letterDate", row.letterDate || ""),
@@ -2265,9 +2269,14 @@
           forceFresh: !0,
           noCache: !0,
         };
+        payload.runningNo = caseNum;
+        payload["ลำดับเรื่อง"] = caseNum;
         payload.caseIdentity = {
           caseId: caseId,
           caseNum: caseNum,
+          caseNo: caseNum,
+          runningNo: caseNum,
+          ลำดับเรื่อง: caseNum,
           recNo: recNo,
           title: title,
           caseTitle: caseTitle,
@@ -2522,9 +2531,16 @@
         extensions.forEach(function (item) {
           item && item.dueDate && (lastExtendDate = item.dueDate);
         });
+        var selectedCaseNum =
+          normalizeMeetingManualNo(T("meeting-caseNum")) ||
+          A({ caseNum: T("meeting-caseNum") });
         var payload = {
           letterId: T("meeting-letterId"),
           caseId: T("meeting-caseId"),
+          caseNum: selectedCaseNum,
+          caseNo: selectedCaseNum,
+          runningNo: selectedCaseNum,
+          ลำดับเรื่อง: selectedCaseNum,
           letterNo: T("meeting-letterNo"),
           letterDate: P("meeting-letterDate"),
           agency: T("meeting-agency"),
@@ -2572,6 +2588,13 @@
         return He()
           .then(function (caseId) {
             payload.caseId = payload.caseId || caseId;
+            var resolvedCaseNum = A(payload) || A({ caseNum: T("meeting-caseNum") });
+            if (!resolvedCaseNum)
+              throw new Error("ไม่พบลำดับเรื่องสำหรับหนังสือติดตาม");
+            payload.caseNum = resolvedCaseNum;
+            payload.caseNo = resolvedCaseNum;
+            payload.runningNo = resolvedCaseNum;
+            payload["ลำดับเรื่อง"] = resolvedCaseNum;
             return s("apiSaveLetter", payload);
           })
           .then(function (res) {
@@ -2860,6 +2883,10 @@
                   logId: logId,
                   id: logId,
                   caseId: T("meeting-caseId"),
+                  caseNum: T("meeting-caseNum"),
+                  caseNo: T("meeting-caseNum"),
+                  runningNo: T("meeting-caseNum"),
+                  ลำดับเรื่อง: T("meeting-caseNum"),
                   actionMethod: "apiDeleteMeetingLog",
                   forceFresh: !0,
                   noCache: !0,
@@ -2867,8 +2894,14 @@
                   source: "meeting.deleteLog.legacy",
                 })
                   .then(function () {
-                    var caseId = T("meeting-caseId");
-                    return !caseId || Be(caseId);
+                    var caseNum = A({ caseNum: T("meeting-caseNum") });
+                    return !caseNum || Be({
+                      caseNum: caseNum,
+                      caseNo: caseNum,
+                      runningNo: caseNum,
+                      ลำดับเรื่อง: caseNum,
+                      caseId: T("meeting-caseId"),
+                    });
                   })
                   .then(function () {
                     return (oe("success", "ลบประวัติการประชุมแล้ว"), Fe(), !0);
@@ -5428,7 +5461,54 @@
         g("meeting-pagination-container", ""));
     }
     function Me(e) {
-      ((e = Array.isArray(e) ? e.slice() : []).sort(function (e, t) {
+      e = Array.isArray(e) ? e.slice() : [];
+      var historyByEvent = {}, historyOrder = [];
+      function historyEventKey(row) {
+        row = row || {};
+        var seq = A(row) || A({ caseNum: T("meeting-caseNum") }),
+          round = d(
+            row.round || row.meetingRound || row.meetingNo || row.relatedMeetingNo || row.ครั้งที่ || "",
+          ).replace(/^ครั้งที่\s*/i, "").replace(/\s+/g, "").trim(),
+          date = d(row.dateRaw || row.date || row.meetingDate || row.relatedMeetingDate || "").trim(),
+          type = d(row.committeeType || row.meetingType || row.meetingGroup || "คณะกรรมาธิการ").trim(),
+          sub = "คณะอนุกรรมาธิการ" === type
+            ? d(row.subcommitteeName || row.subcommittee || "").replace(/\s+/g, "").trim()
+            : "",
+          logId = d(row.logId || row.meetingLogId || row.id || "").trim();
+        return round || date
+          ? [seq, "event", round, date, type, sub].join("|")
+          : [seq, "log", logId].join("|");
+      }
+      function historyRowScore(row) {
+        var id = d((row && (row.logId || row.meetingLogId || row.id)) || "").trim(),
+          score = /^CMI-/i.test(id) ? 100 : id ? 1000 : 10;
+        d((row && (row.note || row.result || row.summary)) || "").trim() && (score += 20);
+        return score;
+      }
+      function mergeHistoryRow(preferred, fallback) {
+        var out = {};
+        [fallback || {}, preferred || {}].forEach(function (row) {
+          Object.keys(row).forEach(function (key) {
+            var value = row[key];
+            if (null != value && "" !== d(value).trim()) out[key] = value;
+            else Object.prototype.hasOwnProperty.call(out, key) || (out[key] = value);
+          });
+        });
+        return out;
+      }
+      e.forEach(function (row) {
+        var key = historyEventKey(row), current = historyByEvent[key];
+        if (!current) {
+          historyByEvent[key] = row;
+          historyOrder.push(key);
+          return;
+        }
+        historyByEvent[key] = historyRowScore(row) >= historyRowScore(current)
+          ? mergeHistoryRow(row, current)
+          : mergeHistoryRow(current, row);
+      });
+      e = historyOrder.map(function (key) { return historyByEvent[key]; });
+      (e.sort(function (e, t) {
         var n = Number((e && e.round) || 0),
           i = Number((t && t.round) || 0);
         return n !== i
@@ -5850,7 +5930,7 @@
               (sid && txt(r.letterId || r.id) === sid) ||
               (sno &&
                 txt(r.letterNo || r.bookNo) === sno &&
-                txt(r.caseId) === txt(savedRow.caseId || t.caseId))
+                sameSequenceRow(r, A(savedRow || t)))
             );
           });
         if (!exists && sameSequenceRow(savedRow, A(t))) rows.unshift(savedRow);
@@ -6286,20 +6366,41 @@
       return (t && p(t), e.meetingToggleReplySection(), Ie(), je(document), !0);
     }
     function He() {
-      var e = T("meeting-caseId") || F();
-      if (e) return Promise.resolve(String(e));
+      var caseId = T("meeting-caseId") || F(),
+        caseNum = A({ caseNum: T("meeting-caseNum") });
+      if (caseId && !caseNum) {
+        var matched = (H() || []).find(function (row) {
+          return d((row && (row.caseId || row.id)) || "").trim() === d(caseId).trim();
+        });
+        caseNum = A(matched || {});
+        caseNum && E("meeting-caseNum", caseNum);
+      }
+      if (caseId && caseNum) return Promise.resolve(String(caseId));
+      if (caseId && !caseNum)
+        return Promise.reject(
+          new Error("ไม่พบลำดับเรื่องของเรื่องที่เลือก กรุณาเลือกเรื่องใหม่ก่อนบันทึกหนังสือติดตาม"),
+        );
       var t = Ge();
+      caseNum = A(t || {});
+      if (!caseNum)
+        return Promise.reject(
+          new Error("กรุณาระบุลำดับเรื่องก่อนบันทึกหนังสือติดตาม"),
+        );
       return (
         (t.token = u("auth.token", "")),
         s("apiSaveCase", t).then(function (e) {
           var n = e && e.data && "object" == typeof e.data ? e.data : e;
           if (!n || !n.caseId) throw new Error("กรุณาบันทึกข้อมูลเรื่องก่อน");
+          var savedCaseNum = A(n || {}) || caseNum;
+          if (!savedCaseNum)
+            throw new Error("ระบบบันทึกเรื่องแล้วแต่ไม่พบลำดับเรื่อง กรุณาตรวจสอบข้อมูลหลัก");
           return (
             E("meeting-caseId", n.caseId),
+            E("meeting-caseNum", savedCaseNum),
             V(n.caseId),
             Te({
               caseId: n.caseId,
-              caseNum: n.caseNum || t.caseNum,
+              caseNum: savedCaseNum,
               title: n.title || t.title,
             }),
             String(n.caseId)

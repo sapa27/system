@@ -2555,6 +2555,7 @@ function _safeMeetingLogIdentityKey_(row) {
     caseId = _s_(row.caseId || row.caseID || row.case_id).trim(),
     caseKey = caseNum ? "seq:" + caseNum : caseId ? "id:" + caseId : "missing-sequence",
     logId = _s_(row.logId || row.meetingLogId || row.id).trim(),
+    meetingId = _s_(row.meetingId || row.committeeMeetingId).trim(),
     round = _s_(
       row.round ||
         row.meetingRound ||
@@ -2588,7 +2589,57 @@ function _safeMeetingLogIdentityKey_(row) {
               "",
           )
         : "";
-  return [caseKey, logId, round, date, meetingType, subcommitteeName].join("|");
+  if (round || date)
+    return [caseKey, "event", round, date, meetingType, subcommitteeName].join("|");
+  if (meetingId)
+    return [caseKey, "meeting", meetingId, meetingType, subcommitteeName].join("|");
+  return [caseKey, "log", logId || _rowFreshnessScore_(row)].join("|");
+}
+function _meetingHistoryRowPreferenceScore_(row) {
+  row = row || {};
+  var logId = _s_(row.logId || row.meetingLogId || row.id).trim(),
+    syntheticAgendaRow = /^CMI-/i.test(logId),
+    score = syntheticAgendaRow ? 100 : logId ? 1000 : 10;
+  _caseSequenceFrom_(row) && (score += 100);
+  _s_(row.round || row.meetingRound || row.meetingNo).trim() && (score += 20);
+  _s_(row.date || row.meetingDate || row.dateRaw).trim() && (score += 20);
+  _s_(row.note || row.result || row.summary).trim() && (score += 15);
+  _s_(row.subcommitteeName || row.subcommittee).trim() && (score += 5);
+  return score;
+}
+function _meetingHistoryMergePreferredRow_(preferred, fallback) {
+  var out = {}, source;
+  [fallback || {}, preferred || {}].forEach(function (row) {
+    Object.keys(row || {}).forEach(function (key) {
+      var value = row[key];
+      if (value !== void 0 && value !== null && String(value).trim() !== "")
+        out[key] = value;
+      else if (!Object.prototype.hasOwnProperty.call(out, key)) out[key] = value;
+    });
+  });
+  return out;
+}
+function _dedupeMeetingHistoryRows_(rows) {
+  var map = {}, order = [];
+  (_c30A_(rows) ? rows : []).forEach(function (row) {
+    if (!row) return;
+    var key = _safeMeetingLogIdentityKey_(row), current = map[key];
+    if (!current) {
+      map[key] = row;
+      order.push(key);
+      return;
+    }
+    var incomingScore = _meetingHistoryRowPreferenceScore_(row),
+      currentScore = _meetingHistoryRowPreferenceScore_(current),
+      incomingStamp = _s_(row.updatedAt || row.modifiedAt || row.createdAt),
+      currentStamp = _s_(current.updatedAt || current.modifiedAt || current.createdAt),
+      preferIncoming = incomingScore > currentScore ||
+        (incomingScore === currentScore && incomingStamp >= currentStamp);
+    map[key] = preferIncoming
+      ? _meetingHistoryMergePreferredRow_(row, current)
+      : _meetingHistoryMergePreferredRow_(current, row);
+  });
+  return order.map(function (key) { return map[key]; });
 }
 function _safeLetterIdentityKey_(row) {
   return (
@@ -4437,18 +4488,20 @@ function _Domain_getMeetingHistory(payload) {
   try {
     var relation = _caseResolvedRelationContext_(payload || {}),
       caseNum = relation.caseNum,
-      rows = (_meetingHistoryProjectedRows_() || []).filter(function (row) {
-        return _caseChildRowBelongsToResolvedCase_(row, relation);
-      });
-    return _safeDedupeLatestRowsBy_(rows, _safeMeetingLogIdentityKey_)
-      .map(function (row) {
-        return _normalizeMeetingLogRow_(
-          _caseStampResolvedRelation_(
+      rows = (_meetingHistoryProjectedRows_() || [])
+        .filter(function (row) {
+          return _caseChildRowBelongsToResolvedCase_(row, relation);
+        })
+        .map(function (row) {
+          return _caseStampResolvedRelation_(
             row,
             relation,
-            "meeting-history-case-sequence-or-caseid-resolved-r146",
-          ),
-        );
+            "meeting-history-case-sequence-primary-key-r148",
+          );
+        });
+    return _dedupeMeetingHistoryRows_(rows)
+      .map(function (row) {
+        return _normalizeMeetingLogRow_(row);
       })
       .sort(function (a, b) {
         var av = _s_(a.dateRaw),
@@ -4470,10 +4523,25 @@ function deleteLetter(payload) {
     "deleteLetter",
     payload && typeof payload == "object" ? payload : { letterId: payload },
     function (req) {
+      req = req && typeof req === "object" ? req : {};
       var letterId = String(
         _payloadValue_(req, ["letterId", "id"]) || "",
       ).trim();
       if (!letterId) throw new Error("ไม่พบรหัสหนังสือติดตามที่ต้องการลบ");
+      var relation = _safeResolveCaseIdentityAliases_(req),
+        caseNum = _caseSequenceNormalizeStrict_(relation && relation.caseNum || "");
+      if (!caseNum)
+        throw new Error("ไม่พบลำดับเรื่องสำหรับลบหนังสือติดตาม");
+      var targetLetter = (_meetingLettersRows_("Letters", !0) || []).filter(function (row) {
+          return _s_(row && (row.letterId || row.id || row.recordId || row.rowId)).trim() === letterId;
+        })[0] || null,
+        targetCaseNum = _caseSequenceFrom_(targetLetter || {});
+      if (!targetCaseNum && targetLetter && targetLetter.caseId) {
+        var targetRelation = _safeResolveCaseIdentityAliases_({ caseId: targetLetter.caseId });
+        targetCaseNum = _caseSequenceNormalizeStrict_(targetRelation && targetRelation.caseNum || "");
+      }
+      if (targetCaseNum && targetCaseNum !== caseNum)
+        throw new Error("หนังสือติดตามไม่ตรงกับลำดับเรื่องที่เลือก");
       var res = getCanonicalRepository_("letters.main").softDelete(letterId, {
           isDeleted: !0,
           deletedAt: new Date().toISOString(),
@@ -4483,7 +4551,13 @@ function deleteLetter(payload) {
           ? _invalidateLettersDerivedCaches_("deleteLetter")
           : {};
       return ok_(
-        { letterId, cacheInvalidation, result: res },
+        {
+          letterId: letterId,
+          primaryKey: "ลำดับเรื่อง",
+          caseNum: caseNum,
+          cacheInvalidation: cacheInvalidation,
+          result: res,
+        },
         "ลบหนังสือติดตามสำเร็จ",
       );
     },
@@ -5243,10 +5317,25 @@ function deleteMeetingLog(payload) {
     "deleteMeetingLog",
     payload && typeof payload == "object" ? payload : { logId: payload },
     function (req) {
+      req = req && typeof req === "object" ? req : {};
       var logId = String(
         _payloadValue_(req, ["logId", "id", "rowId", "meetingLogId"]) || "",
       ).trim();
       if (!logId) throw new Error("ไม่พบรหัสประวัติการประชุมที่ต้องการลบ");
+      var relation = _safeResolveCaseIdentityAliases_(req),
+        caseNum = _caseSequenceNormalizeStrict_(relation && relation.caseNum || "");
+      if (!caseNum)
+        throw new Error("ไม่พบลำดับเรื่องสำหรับลบประวัติการประชุม");
+      var targetLog = (_meetingLettersRows_("MeetingLogs", !0) || []).filter(function (row) {
+          return _s_(row && (row.logId || row.id || row.recordId || row.rowId)).trim() === logId;
+        })[0] || null,
+        targetCaseNum = _caseSequenceFrom_(targetLog || {});
+      if (!targetCaseNum && targetLog && targetLog.caseId) {
+        var targetRelation = _safeResolveCaseIdentityAliases_({ caseId: targetLog.caseId });
+        targetCaseNum = _caseSequenceNormalizeStrict_(targetRelation && targetRelation.caseNum || "");
+      }
+      if (targetCaseNum && targetCaseNum !== caseNum)
+        throw new Error("ประวัติการประชุมไม่ตรงกับลำดับเรื่องที่เลือก");
       var now = new Date().toISOString(),
         repo = getCanonicalRepository_("meeting.logs"),
         res = null;
@@ -5386,9 +5475,16 @@ function deleteMeetingLog(payload) {
 function saveLetter(p) {
   return domainWrite_("saveLetter", p, function (input) {
     input = input && typeof input === "object" ? input : {};
+    var hadInputCaseSequence = !!_caseSequenceFrom_(input);
     var startedAt = Date.now();
-    var caseNum = _caseSequenceFrom_(input);
-    if (!caseNum) return err_("ไม่พบลำดับเรื่องสำหรับหนังสือติดตาม");
+    var relation = _safeResolveCaseIdentityAliases_(input),
+      caseNum = _caseSequenceNormalizeStrict_(relation && relation.caseNum || "");
+    if (!caseNum)
+      return err_("ไม่พบลำดับเรื่องสำหรับหนังสือติดตาม", {
+        primaryKey: "ลำดับเรื่อง",
+        receivedCaseId: _s_(input.caseId || input.id).trim(),
+      });
+    _caseApplySequenceIdentity_(input, caseNum, false);
     var canonicalCase = _requireUniqueCaseBySequence_(_caseSequenceIdentityPayload_(caseNum));
     var caseId = _s_(
       canonicalCase && canonicalCase.row &&
@@ -5626,6 +5722,16 @@ function saveLetter(p) {
       serviceWrites = 0;
     var idCol = index.idx(["letterId", "id"]),
       caseCol = index.idx(["caseId"]),
+      caseNumCol = index.idx([
+        "caseNum",
+        "caseNo",
+        "runningNo",
+        "ลำดับเรื่อง",
+        "เลขลำดับเรื่อง",
+        "ลำดับเรื่องพิจารณา",
+        "เลขที่ลำดับเรื่อง",
+        "หมายเลขลำดับเรื่อง",
+      ]),
       letterNoCol = index.idx(["letterNo", "bookNo"]),
       bookNoCol = index.idx(["bookNo", "letterNo"]),
       agencyCol = index.idx(["agency", "หน่วยงาน"]),
@@ -5643,6 +5749,7 @@ function saveLetter(p) {
     }
     if (!rowNumber && lastRow > 1 && (normalizedLetterNo || normalizedBookNo)) {
       var caseVals = colValues(sh, caseCol, lastRow),
+        caseNumVals = colValues(sh, caseNumCol, lastRow),
         noVals = colValues(sh, letterNoCol, lastRow),
         bookVals =
           bookNoCol === letterNoCol
@@ -5653,6 +5760,7 @@ function saveLetter(p) {
         delAtVals = colValues(sh, deletedAtCol, lastRow);
       serviceReads +=
         1 +
+        (caseNumCol >= 0 ? 1 : 0) +
         (bookNoCol === letterNoCol ? 0 : 1) +
         (agencyCol >= 0 ? 1 : 0) +
         (deletedCol >= 0 ? 1 : 0) +
@@ -5663,7 +5771,11 @@ function saveLetter(p) {
             /^(true|1|yes|deleted|ลบ)$/i.test(clean(delVals[j]))) ||
           (deletedAtCol >= 0 && !!clean(delAtVals[j]));
         if (deleted) continue;
-        var sameCase = clean(caseVals[j]) === caseId;
+        var storedCaseNum = _caseSequenceNormalizeStrict_(caseNumVals[j] || ""),
+          storedCaseId = clean(caseVals[j]),
+          sameCase = storedCaseNum
+            ? storedCaseNum === caseNum
+            : !!(caseId && storedCaseId === caseId);
         var n1 = clean(noVals[j]),
           n2 = clean(bookVals[j]),
           sameNo =
@@ -5730,6 +5842,13 @@ function saveLetter(p) {
         extensions: extensions,
         cacheInvalidation: cacheInvalidation || {},
         mode: rowNumber <= lastRow ? "update" : "append",
+        primaryKey: "ลำดับเรื่อง",
+        caseNum: caseNum,
+        relationResolvedFrom: hadInputCaseSequence
+          ? "case-sequence"
+          : relation && relation.case
+            ? "case-id-compatibility-to-sequence"
+            : "case-sequence",
         perf: {
           owner: "saveLetter.fastDirectSheet.r90",
           durationMs: Date.now() - startedAt,
