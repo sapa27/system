@@ -18,7 +18,7 @@
 <script src="vercel-env.generated.js"></script>
 <script src="app-config.js"></script>
 <script src="github-gas-transport.js"></script>
-<script src="app-index-foundation-pre-vue.js?v=r152"></script>
+<script src="app-index-foundation-pre-vue.js?v=r153"></script>
 
 
 
@@ -27,7 +27,7 @@
 
 
 <!-- Vue is loaded by the non-blocking failover loader below. -->
-<script src="app-index-foundation-after-vue.js?v=r152"></script>
+<script src="app-index-foundation-after-vue.js?v=r153"></script>
 <script>
 (function(root,doc){"use strict";
 var Boot=root.AppBoot||null;
@@ -36,7 +36,7 @@ function bootGet(name,defaultValue){try{return Boot&&Boot.getFlag?Boot.getFlag(n
 bootSet("__APP_VUE_READY__",bootGet("__APP_VUE_READY__",function(){
   if(root.Vue)return Promise.resolve(true);
   var urls=[
-    "vendor/vue.global.prod.js?v=r152",
+    "vendor/vue.global.prod.js?v=r153",
     "https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js",
     "https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"
   ];
@@ -69,7 +69,7 @@ bootSet("__APP_VUE_READY__",bootGet("__APP_VUE_READY__",function(){
 <script defer data-app-asset-policy="pinned-primary"src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8"crossorigin="anonymous"referrerpolicy="no-referrer">
 
 </script>
-<script src="app-index-foundation-after-swal.js?v=r152"></script>
+<script src="app-index-foundation-after-swal.js?v=r153"></script>
 <meta name="theme-color"content="#001e3c">
 
 
@@ -637,24 +637,24 @@ border:1.5px solid rgba(197,160,40,.6);background:rgba(255,255,255,.1);padding:3
 </section>
 </div>
 </script>
-<script id="app-bootstrap-watchdog-r152">
+<script id="app-bootstrap-watchdog-r153">
 (function(root,doc){"use strict";
-  if(!root||!doc||root.__APP_BOOTSTRAP_WATCHDOG_R152__)return;
-  root.__APP_BOOTSTRAP_WATCHDOG_R152__=true;
+  if(!root||!doc||root.__APP_BOOTSTRAP_WATCHDOG_R153__)return;
+  root.__APP_BOOTSTRAP_WATCHDOG_R153__=true;
   var started=Date.now();
   function ready(){
     var app=doc.getElementById("app");
-    return !!(doc.body&&doc.body.classList.contains("app-ready")||app&&!app.querySelector(".app-initial-shell"));
+    return !!(doc.body&&doc.body.classList.contains("app-ready")||doc.getElementById("login-form")||doc.getElementById("main-container")||app&&!app.querySelector(".app-initial-shell"));
   }
   function recover(){
     if(ready())return;
     var app=doc.getElementById("app");
     if(!app)return;
-    var release=(root.__APP_RELEASE__||root.APP_RELEASE_STAMP||"r152");
-    app.innerHTML='<div class="app-initial-shell" aria-live="assertive"><div class="app-initial-card"><div class="app-initial-title">เปิดระบบไม่สำเร็จ</div><div class="app-initial-subtitle">ไฟล์เริ่มต้นของระบบโหลดไม่ครบ กรุณาลองเชื่อมต่อใหม่</div><button type="button" id="app-bootstrap-retry-r152" style="margin-top:18px;min-height:44px;padding:10px 22px;border:0;border-radius:12px;background:#0b3b75;color:#fff;font-weight:700">ลองใหม่</button><div style="margin-top:10px;font-size:12px;color:#64748b">Release: '+String(release)+'</div></div></div>';
-    var btn=doc.getElementById("app-bootstrap-retry-r152");
+    var release=(root.__APP_RELEASE__||root.APP_RELEASE_STAMP||"r153");
+    app.innerHTML='<div class="app-initial-shell" aria-live="assertive"><div class="app-initial-card"><div class="app-initial-title">เปิดระบบไม่สำเร็จ</div><div class="app-initial-subtitle">หน้าเข้าสู่ระบบไม่สามารถเริ่มทำงานได้ กรุณาลองใหม่</div><button type="button" id="app-bootstrap-retry-r153" style="margin-top:18px;min-height:44px;padding:10px 22px;border:0;border-radius:12px;background:#0b3b75;color:#fff;font-weight:700">ลองใหม่</button><div style="margin-top:10px;font-size:12px;color:#64748b">Release: '+String(release)+'</div></div></div>';
+    var btn=doc.getElementById("app-bootstrap-retry-r153");
     if(btn)btn.onclick=function(){
-      try{sessionStorage.setItem("app.bootstrap.retry.r152",String(Date.now()))}catch(_e){}
+      try{sessionStorage.setItem("app.bootstrap.retry.r153",String(Date.now()))}catch(_e){}
       var u=new URL(root.location.href);u.searchParams.set("_boot",String(Date.now()));root.location.replace(u.toString());
     };
     try{root.dispatchEvent(new CustomEvent("app:bootstrap-timeout",{detail:{release:release,elapsedMs:Date.now()-started}}))}catch(_e){}
@@ -2052,9 +2052,9 @@ border:1.5px solid rgba(197,160,40,.6);background:rgba(255,255,255,.1);padding:3
 </div></div>
 </script>
 
-<script src="critical-login-runtime.js?v=r152"></script>
+<script src="critical-login-runtime.js?v=r153"></script>
 
-<script src="app-index-bootstrap.js?v=r152"></script>
+<script src="app-index-bootstrap.js?v=r153"></script>
 
 
 
