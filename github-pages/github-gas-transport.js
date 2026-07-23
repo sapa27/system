@@ -2,8 +2,8 @@
   "use strict";
   if (!root || !doc) return;
 
-  var RELEASE_STAMP = String((root.APP_CONFIG || {}).releaseStamp || "commission-v1.2-gas-hosted-production-2026-07-23-r149");
-  var ASSET_STAMP = String((root.APP_CONFIG || {}).assetStamp || "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-23-r149");
+  var RELEASE_STAMP = String((root.APP_CONFIG || {}).releaseStamp || "commission-v1.2-gas-hosted-production-2026-07-23-r150");
+  var ASSET_STAMP = String((root.APP_CONFIG || {}).assetStamp || "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-23-r150");
   var OWNER = "github-pages/github-gas-transport.js::vercel-api-proxy-only";
   var MODE = "vercel-api-proxy-only";
   var assetCache = Object.create(null);
@@ -234,7 +234,8 @@
       timeoutMs: serverTimeoutFor(method)
     };
 
-    return fetch(endpointFor(method), {
+    var endpoint = endpointFor(method);
+    var requestOptions = {
       method: "POST",
       credentials: "same-origin",
       cache: "no-store",
@@ -247,7 +248,23 @@
       },
       body: JSON.stringify(body),
       signal: controller.signal
-    }).then(function (response) {
+    };
+
+    function fetchProxy(attempt) {
+      return fetch(endpoint, requestOptions).catch(function (err) {
+        var networkFailure = !err || err.name === "TypeError" || /failed to fetch|networkerror|load failed/i.test(text(err && err.message || err));
+        var loginRetryAllowed = /^apiLogin$/i.test(method) && networkFailure && attempt < 2 && (!root.navigator || root.navigator.onLine !== false);
+        if (!loginRetryAllowed) throw err;
+        recordMetric({ kind: "proxy-retry", method: method, attempt: attempt + 1, transport: MODE });
+        return new Promise(function (resolve) {
+          root.setTimeout(resolve, 650 * attempt);
+        }).then(function () {
+          return fetchProxy(attempt + 1);
+        });
+      });
+    }
+
+    return fetchProxy(1).then(function (response) {
       return response.text().then(function (raw) {
         return parseResponse(response, raw, method, id, started);
       });
@@ -261,11 +278,14 @@
         );
       }
       if (err && err.code) throw err;
+      var offline = root.navigator && root.navigator.onLine === false;
       throw transportError(
-        "เชื่อมต่อ Vercel proxy ไม่สำเร็จ: " + text(err && err.message || err),
-        "VERCEL_PROXY_FETCH_FAILED",
+        offline
+          ? "อุปกรณ์ไม่ได้เชื่อมต่ออินเทอร์เน็ต กรุณาตรวจสอบเครือข่ายแล้วลองใหม่"
+          : "เชื่อมต่อ Vercel proxy ไม่สำเร็จหลังลองใหม่: " + text(err && err.message || err),
+        offline ? "CLIENT_OFFLINE" : "VERCEL_PROXY_FETCH_FAILED",
         method,
-        { durationMs: Date.now() - started }
+        { durationMs: Date.now() - started, endpoint: endpoint, attempts: /^apiLogin$/i.test(method) ? 2 : 1 }
       );
     }).finally(function () {
       root.clearTimeout(timer);
