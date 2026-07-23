@@ -18,7 +18,7 @@
 <script src="vercel-env.generated.js"></script>
 <script src="app-config.js"></script>
 <script src="github-gas-transport.js"></script>
-<script src="app-index-foundation-pre-vue.js"></script>
+<script src="app-index-foundation-pre-vue.js?v=r152"></script>
 
 
 
@@ -27,7 +27,7 @@
 
 
 <!-- Vue is loaded by the non-blocking failover loader below. -->
-<script src="app-index-foundation-after-vue.js"></script>
+<script src="app-index-foundation-after-vue.js?v=r152"></script>
 <script>
 (function(root,doc){"use strict";
 var Boot=root.AppBoot||null;
@@ -36,6 +36,7 @@ function bootGet(name,defaultValue){try{return Boot&&Boot.getFlag?Boot.getFlag(n
 bootSet("__APP_VUE_READY__",bootGet("__APP_VUE_READY__",function(){
   if(root.Vue)return Promise.resolve(true);
   var urls=[
+    "vendor/vue.global.prod.js?v=r152",
     "https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js",
     "https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"
   ];
@@ -57,7 +58,7 @@ bootSet("__APP_VUE_READY__",bootGet("__APP_VUE_READY__",function(){
         }
         el.addEventListener("load",function(){finish(!!root.Vue)},{once:true});
         el.addEventListener("error",function(){finish(false)},{once:true});
-        timer=setTimeout(function(){try{el&&el.parentNode&&el.parentNode.removeChild(el)}catch(_rm){};finish(false)},3500);
+        timer=setTimeout(function(){try{el&&el.parentNode&&el.parentNode.removeChild(el)}catch(_rm){};finish(false)},i===0?2500:5000);
       }catch(e){try{typeof __appObserve==="function"&&__appObserve(e,"vue-loader")}catch(_o){};finish(false)}
     }).then(function(ok){return ok||loadAt(i+1)})
   }
@@ -68,7 +69,7 @@ bootSet("__APP_VUE_READY__",bootGet("__APP_VUE_READY__",function(){
 <script defer data-app-asset-policy="pinned-primary"src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8"crossorigin="anonymous"referrerpolicy="no-referrer">
 
 </script>
-<script src="app-index-foundation-after-swal.js"></script>
+<script src="app-index-foundation-after-swal.js?v=r152"></script>
 <meta name="theme-color"content="#001e3c">
 
 
@@ -636,10 +637,10 @@ border:1.5px solid rgba(197,160,40,.6);background:rgba(255,255,255,.1);padding:3
 </section>
 </div>
 </script>
-<script id="app-bootstrap-watchdog-r151">
+<script id="app-bootstrap-watchdog-r152">
 (function(root,doc){"use strict";
-  if(!root||!doc||root.__APP_BOOTSTRAP_WATCHDOG_R151__)return;
-  root.__APP_BOOTSTRAP_WATCHDOG_R151__=true;
+  if(!root||!doc||root.__APP_BOOTSTRAP_WATCHDOG_R152__)return;
+  root.__APP_BOOTSTRAP_WATCHDOG_R152__=true;
   var started=Date.now();
   function ready(){
     var app=doc.getElementById("app");
@@ -649,16 +650,16 @@ border:1.5px solid rgba(197,160,40,.6);background:rgba(255,255,255,.1);padding:3
     if(ready())return;
     var app=doc.getElementById("app");
     if(!app)return;
-    var release=(root.__APP_RELEASE__||root.APP_RELEASE_STAMP||"r151");
-    app.innerHTML='<div class="app-initial-shell" aria-live="assertive"><div class="app-initial-card"><div class="app-initial-title">เปิดระบบไม่สำเร็จ</div><div class="app-initial-subtitle">ไฟล์เริ่มต้นของระบบโหลดไม่ครบ กรุณาลองเชื่อมต่อใหม่</div><button type="button" id="app-bootstrap-retry-r151" style="margin-top:18px;min-height:44px;padding:10px 22px;border:0;border-radius:12px;background:#0b3b75;color:#fff;font-weight:700">ลองใหม่</button><div style="margin-top:10px;font-size:12px;color:#64748b">Release: '+String(release)+'</div></div></div>';
-    var btn=doc.getElementById("app-bootstrap-retry-r151");
+    var release=(root.__APP_RELEASE__||root.APP_RELEASE_STAMP||"r152");
+    app.innerHTML='<div class="app-initial-shell" aria-live="assertive"><div class="app-initial-card"><div class="app-initial-title">เปิดระบบไม่สำเร็จ</div><div class="app-initial-subtitle">ไฟล์เริ่มต้นของระบบโหลดไม่ครบ กรุณาลองเชื่อมต่อใหม่</div><button type="button" id="app-bootstrap-retry-r152" style="margin-top:18px;min-height:44px;padding:10px 22px;border:0;border-radius:12px;background:#0b3b75;color:#fff;font-weight:700">ลองใหม่</button><div style="margin-top:10px;font-size:12px;color:#64748b">Release: '+String(release)+'</div></div></div>';
+    var btn=doc.getElementById("app-bootstrap-retry-r152");
     if(btn)btn.onclick=function(){
-      try{sessionStorage.setItem("app.bootstrap.retry.r151",String(Date.now()))}catch(_e){}
+      try{sessionStorage.setItem("app.bootstrap.retry.r152",String(Date.now()))}catch(_e){}
       var u=new URL(root.location.href);u.searchParams.set("_boot",String(Date.now()));root.location.replace(u.toString());
     };
     try{root.dispatchEvent(new CustomEvent("app:bootstrap-timeout",{detail:{release:release,elapsedMs:Date.now()-started}}))}catch(_e){}
   }
-  root.setTimeout(recover,10000);
+  root.setTimeout(recover,22000);
 })(window,document);
 </script>
 
@@ -2051,9 +2052,9 @@ border:1.5px solid rgba(197,160,40,.6);background:rgba(255,255,255,.1);padding:3
 </div></div>
 </script>
 
-<script src="critical-login-runtime.js"></script>
+<script src="critical-login-runtime.js?v=r152"></script>
 
-<script src="app-index-bootstrap.js"></script>
+<script src="app-index-bootstrap.js?v=r152"></script>
 
 
 
