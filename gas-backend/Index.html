@@ -644,6 +644,31 @@ border:1.5px solid rgba(197,160,40,.6);background:rgba(255,255,255,.1);padding:3
 </section>
 </div>
 </script>
+<script id="app-bootstrap-watchdog-r151">
+(function(root,doc){"use strict";
+  if(!root||!doc||root.__APP_BOOTSTRAP_WATCHDOG_R151__)return;
+  root.__APP_BOOTSTRAP_WATCHDOG_R151__=true;
+  var started=Date.now();
+  function ready(){
+    var app=doc.getElementById("app");
+    return !!(doc.body&&doc.body.classList.contains("app-ready")||app&&!app.querySelector(".app-initial-shell"));
+  }
+  function recover(){
+    if(ready())return;
+    var app=doc.getElementById("app");
+    if(!app)return;
+    var release=(root.__APP_RELEASE__||root.APP_RELEASE_STAMP||"r151");
+    app.innerHTML='<div class="app-initial-shell" aria-live="assertive"><div class="app-initial-card"><div class="app-initial-title">เปิดระบบไม่สำเร็จ</div><div class="app-initial-subtitle">ไฟล์เริ่มต้นของระบบโหลดไม่ครบ กรุณาลองเชื่อมต่อใหม่</div><button type="button" id="app-bootstrap-retry-r151" style="margin-top:18px;min-height:44px;padding:10px 22px;border:0;border-radius:12px;background:#0b3b75;color:#fff;font-weight:700">ลองใหม่</button><div style="margin-top:10px;font-size:12px;color:#64748b">Release: '+String(release)+'</div></div></div>';
+    var btn=doc.getElementById("app-bootstrap-retry-r151");
+    if(btn)btn.onclick=function(){
+      try{sessionStorage.setItem("app.bootstrap.retry.r151",String(Date.now()))}catch(_e){}
+      var u=new URL(root.location.href);u.searchParams.set("_boot",String(Date.now()));root.location.replace(u.toString());
+    };
+    try{root.dispatchEvent(new CustomEvent("app:bootstrap-timeout",{detail:{release:release,elapsedMs:Date.now()-started}}))}catch(_e){}
+  }
+  root.setTimeout(recover,10000);
+})(window,document);
+</script>
 
 <script type="text/x-template"id="tpl-page-search">
 <div class="page"id="p-search">
