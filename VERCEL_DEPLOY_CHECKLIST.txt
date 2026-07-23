@@ -1,0 +1,10 @@
+V18 r153 Vercel deployment checklist
+
+1. Repository root must contain package.json and vercel.json directly.
+2. Vercel Root Directory must be blank or point to this exact directory.
+3. Install Command: npm install --no-audit --no-fund
+4. Build Command: npm run build
+5. Output Directory: github-pages
+6. Build log must contain LOCAL_VUE_VENDOR_OK and prepare-vendor success.
+7. Production environment must contain GAS_WEB_APP_URL ending in /exec.
+8. Redeploy with Clear Build Cache.
