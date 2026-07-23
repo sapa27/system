@@ -2,8 +2,8 @@
   "use strict";
   if (!root || !doc) return;
 
-  var RELEASE_STAMP = String((root.APP_CONFIG || {}).releaseStamp || "commission-v1.2-gas-hosted-production-2026-07-23-r151");
-  var ASSET_STAMP = String((root.APP_CONFIG || {}).assetStamp || "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-23-r151");
+  var RELEASE_STAMP = String((root.APP_CONFIG || {}).releaseStamp || "commission-v1.2-gas-hosted-production-2026-07-23-r152");
+  var ASSET_STAMP = String((root.APP_CONFIG || {}).assetStamp || "asset-manifest-commission-v1.2-gas-hosted-production-2026-07-23-r152");
   var OWNER = "github-pages/github-gas-transport.js::vercel-api-proxy-only";
   var MODE = "vercel-api-proxy-only";
   var assetCache = Object.create(null);
