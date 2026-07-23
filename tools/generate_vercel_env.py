@@ -117,7 +117,7 @@ def _staticize_index_from_canonical() -> bool:
         (r"<\?!=\(typeof assetManifestJson[\s\S]*?\?>", _vercel_static_asset_manifest_expression()),
         (
             r"<\?!=includeProductionBundle_\('appCritical'\)\?>",
-            '<script src="critical-login-runtime.js"></script>',
+            '<script src="critical-login-runtime.js?v=r152"></script>',
         ),
         (
             r"<\?!=\(typeof coreRuntimeFilesJson[\s\S]*?\?>",
@@ -201,19 +201,19 @@ def _staticize_index_from_canonical() -> bool:
             return match.group(0)
         script_index += 1
         if script_index in pre_indices:
-            return '<script src="app-index-foundation-pre-vue.js"></script>' if script_index == first_pre else ""
+            return '<script src="app-index-foundation-pre-vue.js?v=r152"></script>' if script_index == first_pre else ""
         if script_index in thai_indices:
-            return '<script src="app-index-foundation-after-vue.js"></script>' if script_index == first_thai else ""
+            return '<script src="app-index-foundation-after-vue.js?v=r152"></script>' if script_index == first_thai else ""
         if script_index in after_indices:
-            return '<script src="app-index-foundation-after-swal.js"></script>' if script_index == first_after else ""
+            return '<script src="app-index-foundation-after-swal.js?v=r152"></script>' if script_index == first_after else ""
         if script_index == async_index:
             return ""
         if script_index in bootstrap_indices:
-            return '<script src="app-index-bootstrap.js"></script>' if script_index == first_bootstrap else ""
+            return '<script src="app-index-bootstrap.js?v=r152"></script>' if script_index == first_bootstrap else ""
         return match.group(0)
 
     updated = script_pattern.sub(externalize_script, updated)
-    transport_anchor = '<script src="app-index-foundation-pre-vue.js"></script>'
+    transport_anchor = '<script src="app-index-foundation-pre-vue.js?v=r152"></script>'
     transport_block = '<script src="vercel-env.generated.js"></script>\n<script src="app-config.js"></script>\n<script src="github-gas-transport.js"></script>\n' + transport_anchor
     if transport_anchor not in updated:
         raise RuntimeError("STATIC_INDEX_TRANSPORT_ANCHOR_MISSING")
@@ -900,11 +900,24 @@ def clean_generated() -> dict:
     }
 
 
+
+def prepare_vendor_asset() -> dict:
+    source = ROOT / "node_modules" / "vue" / "dist" / "vue.global.prod.js"
+    target = ROOT / "github-pages" / "vendor" / "vue.global.prod.js"
+    if not source.is_file():
+        raise RuntimeError("VENDOR_SOURCE_MISSING:node_modules/vue/dist/vue.global.prod.js")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(source.read_bytes())
+    if target.stat().st_size < 50000:
+        raise RuntimeError("VENDOR_ASSET_INVALID:github-pages/vendor/vue.global.prod.js")
+    return {"ok": True, "mode": "prepare-vendor", "file": str(target.relative_to(ROOT)), "bytes": target.stat().st_size}
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate deterministic Vercel artifacts from canonical GAS sources.")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--check", action="store_true", help="Verify generated artifacts without modifying them.")
     group.add_argument("--clean-generated", action="store_true", help="Remove build-generated Vercel artifacts from the source package.")
+    group.add_argument("--prepare-vendor", action="store_true", help="Copy pinned Vue runtime into the Vercel output directory.")
     args = parser.parse_args()
 
     try:
@@ -912,6 +925,8 @@ def main() -> None:
             result = check()
         elif args.clean_generated:
             result = clean_generated()
+        elif args.prepare_vendor:
+            result = prepare_vendor_asset()
         else:
             result = generate()
         print(json.dumps(result, ensure_ascii=False, indent=2))
